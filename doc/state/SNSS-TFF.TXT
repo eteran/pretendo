@@ -1,0 +1,515 @@
+              ============================================
+                      Standardized NES Save State
+                     Tagged File Format (SNSS-TFF)
+
+                     Copyright $7D0 The SNSS Group
+
+                           v1.1 -- 02/09/2K
+
+              Official Site:  http://www.nofrendo.org/snss
+              ============================================
+
+   Sections
+   --------
+0. Changes
+1. Contact
+2. Basic Issues
+3. File Structure
+4. Block Structure
+5. Block Types
+6. MMCData Specifics
+7. Controller Types
+8. Credits
+
+       +----------+
+       |0. Changes|
+       +----------+
+
+Version 1.1:
+        * Added mapper 40 (Super Mario Brothers 2 Japanese - Lost Levels)
+
+Version 1.0:
+        * First official release
+
+
+       +----------+
+       |1. Contact|
+       +----------+
+
+Contact any member of the SNSS Group for more info:
+
+       Matthew Conte (matt@conte.com)
+       Darren Ranalli (dranalli@wpi.edu)
+       Mike Melanson (melanson@pcisys.net)
+
+
+       +---------------+
+       |2. Basic Issues|
+       +---------------+
+
+   To keep the NES hardware in sync, the state should *only* be loaded /
+saved at the beginning of the frame -- directly before scanline zero
+occurs.
+
+   Byte ordering is MSB-->LSB, to keep the state files as human-readable
+as possible.  For example, the number 4 would be represented by a 32 bit
+integer in the SNSS format as 00 00 00 04.
+
+   Blocks are *not* inherently padded to any kind of boundary other than
+8 bits, so take care in reading / writing the state files.
+
+   Since the purpose of the format is to be as standardized as possible,
+the state filename should be <romname>.SS?, where <romname> is the name
+of the ROM image minus the .NES extension, and ? represents a number from
+0 to 9.  Hence, even systems crippled by 8.3 filename conventions can
+still natively support 10 state slots.
+
+
+       +-----------------+
+       |3. File Structure|
+       +-----------------+
+
+Offset  Description
+----------------------------
+0-3     "SNSS"
+4-7     Total # of blocks in the file
+8-EOF   State Blocks
+
+
+       +------------------+
+       |4. Block Structure|
+       +------------------+
+
+Offset  Description
+----------------------------
+0-3     Block Signature (String)
+4-7     Block Version
+8-11    Size of Block Data (in bytes)
+12-EOB  Block Data (See section 5 for what all the blocks are)
+
+
+       +--------------+
+       |5. Block Types|
+       +--------------+
+
+Key:
+ +----+----------------------------------------------------------------+
+ |Sig |Description                                                     |
+ +---++----------------------------------------------------------------+
+ |Ver|                                                                 |
+ +---+-+-----+---------------------------------------------------------+
+ |From |Len  |Contains                                                 |
+ |From |Len  |Contains                                                 |
+ +-----+-----+---------------------------------------------------------+
+ |Other Info                                                           |
+ +---------------------------------------------------------------------+
+ | Sig = 4 character signature identifier string                       |
+ | Ver = Version                                                       |
+ | From/Len = Starting position and length of this block item (in Hex) |
+ +---------------------------------------------------------------------+
+
+ +----+----------------------------------------------------------------+
+ |BASR|Base Registers                                                  |
+ +---++----------------------------------------------------------------+
+ |1  |                                                                 |
+ +---+-+-----+---------------------------------------------------------+
+ |$0   |$1   |Accumulator                                              |
+ |$1   |$1   |X-Register                                               |
+ |$2   |$1   |Y-Register                                               |
+ |$3   |$1   |Processor Status Register                                |
+ |$4   |$1   |Stack Pointer                                            |
+ |$5   |$2   |Program Counter                                          |
+ |$7   |$1   |$2000 in CPU Memory (PPU Control Register #1)            |
+ |$8   |$1   |$2001 in CPU Memory (PPU Control Register #2)            |
+ |$9   |$800 |$0000-$07FF of CPU Memory (RAM)                          |
+ |$809 |$100 |SPR-RAM                                                  |
+ |$909 |$1000|PPU Name/Attribute Tables 0-3 - See Footnote A           |
+ |$1909|$20  |$3F00-$3F1F of PPU Memory (Palette)                      |
+ |$1929|$4   |Current Mirroring Setup - See Footnote B                 |
+ |$192D|$2   |VRAM Address                                             |
+ |$192F|$1   |OAM (SPR-RAM) Address                                    |
+ |$1930|$1   |Tile X offset (low 3 bits of pseudo-Scroll X)            |
+ +-----+-----+---------------------------------------------------------+
+ |This block is absolutely *required* for an SNSS state.  Removal of   |
+ |this block will ensure a non-functional state file.                  |
+ |                                                                     |
+ |A. Each Name/Attribute table is $400 bytes: $3C0 bytes of Name data  |
+ |   followed by $40 bytes of Attribute data.                          |
+ |   Note that some of the Name/Attribute tables might not be used;    |
+ |   for example, a game that uses horizontal or vertical mirroring    |
+ |   will only use tables 0 and 1. Unused tables (tables 2 and 3 in    |
+ |   this case) may be filled with anything.                           |
+ |                                                                     |
+ |B. Examples so you see how it works:                                 |
+ |      Horizontal: 0,0,1,1                                            |
+ |      Vertical:   0,1,0,1                                            |
+ |      4-Screen:   0,1,2,3                                            |
+ |      All $2000:  0,0,0,0                                            |
+ |      All $2400:  1,1,1,1                                            |
+ +---------------------------------------------------------------------+
+
+ +----+----------------------------------------------------------------+
+ |VRAM|VRAM                                                            |
+ +---++----------------------------------------------------------------+
+ |1  |                                                                 |
+ +---+-+-----+---------------------------------------------------------+
+ |$0   |$x000|VRAM                                                     |
+ +-----+-----+---------------------------------------------------------+
+ |The $x000 is because this block consists of an array of 8k VRAM      |
+ |blocks.  Most games only have 8k of VRAM, but some games like        |
+ |Videomation have 16k of VRAM.  Figure out how many blocks there are  |
+ |by reading the length portion of the header atom.                    |
+ |Only write this block to the file if there is VRAM present in the    |
+ |game.  If there is only VROM, do not write this block to the file.   |
+ +---------------------------------------------------------------------+
+
+ +----+----------------------------------------------------------------+
+ |SRAM|SRAM                                                            |
+ +---++----------------------------------------------------------------+
+ |1  |                                                                 |
+ +---+-+-----+---------------------------------------------------------+
+ |$0   |$1   |If SRAM is currently writeable (0=no, >0=yes)            |
+ |$1   |$x000|SRAM                                                     |
+ +-----+-----+---------------------------------------------------------+
+ |If SRAM/Expanded WRAM is present*, write this block, otherwise don't.|
+ |The $x000 is for paged SRAM.  You can figure out how many pages      |
+ |there are by looking at the length part of the header atom.          |
+ |                                                                     |
+ |*Note that some games (Super Mario Brothers 3, Metroid, Kid Icarus)  |
+ |contain SRAM at $6000-7FFF, but do not have battery backup.  The     |
+ |safest thing to do is to check to see if this region has been written|
+ |to, and if it has, dump the SRAM block to the state file.            |
+ +---------------------------------------------------------------------+
+
+ +----+----------------------------------------------------------------+
+ |MPRD|Mapper Data                                                     |
+ +---++----------------------------------------------------------------+
+ |1  |                                                                 |
+ +---+-+-----+---------------------------------------------------------+
+ |$0   |$8   |8k PRG Page numbers currently in $8/A/C/E000             |
+ |$8   |$10  |1k CHR Page numbers currently in $0/4/8/C/10/14/18/1C00  |
+ |$18  |$80  |Mapper-specific state data  - See section 6              |
+ +-----+-----+---------------------------------------------------------+
+ |Find the mapper-specific info for the $80 array in section 6.        |
+ |If the mapper is 0, don't write this block.  Otherwise write it.     |
+ |                                                                     |
+ |Note that the page numbers are each 16-bit numbers.                  |
+ +---------------------------------------------------------------------+
+
+ +----+----------------------------------------------------------------+
+ |CNTR|Controllers                                                     |
+ +---++----------------------------------------------------------------+
+ |1  |                                                                 |
+ +---+-+-----+---------------------------------------------------------+
+ |$0   |$1   |Controller 1 Type (see section 7)                        |
+ |$1   |$1   |Controller 2 Type                                        |
+ |$2   |$1   |Controller 1 Bit number next to be read                  |
+ |$3   |$1   |Controller 2 Bit number next to be read                  |
+ |$4   |$1   |Controller Strobe Bit                                    |
+ |$5   |$2   |VS System DIP Switches (4016/7 values)                   |
+ |$7   |$4   |Controller 1 data (see section 7)                        |
+ |$B   |$1   |Controller 1 data repeat count (# frames)                |
+ |$C   |$4   |Controller 2 data                                        |
+ |$10  |$1   |Controller 2 data repeat count (# frames)                |
+ |$11  |.... |(additional controller data)                             |
+ +-----+-----+---------------------------------------------------------+
+ |For normal states, set the repeat counts to 1.                       |
+ |For storing 'movies', continue adding controller data until the movie|
+ |is finished.  **yadda yadda.. say some more, include an example**    |
+ |                                                                     |
+ |If an emulator doesn't support movie playing, the extra controller   |
+ |data may be ignored.                                                 |
+ +---------------------------------------------------------------------+
+
+ +----+----------------------------------------------------------------+
+ |SOUN|Sound                                                           |
+ +---++----------------------------------------------------------------+
+ |1  |                                                                 |
+ +---+-+-----+---------------------------------------------------------+
+ |$0   |$16  |$4000-$4015 Sound Registers, and don't use $4014         |
+ +-----+-----+---------------------------------------------------------+
+ |This block is not required, but is recommended.                      |
+ +---------------------------------------------------------------------+
+
+       +--------------------+
+       |6. MMCData Specifics|
+       +--------------------+
+
+   This section needs to be far more complete.  For now it has the most
+basic mappers covered, enough so that games are functional.  Please contact
+the authors if you have additional information on new mappers, or mappers
+that already appear in this document.
+
+
+Mapper x
+--------
+  Byte(s)  What go in them
+
+  Additional Notes
+
+
+
+Mapper 0
+--------
+  [None used]
+
+Mapper 1
+--------
+  0-3   The last values written to each of the 4 registers
+  4     Latch register
+  5     Number of bits (0-4) that have been written to the current
+        unfinished register
+
+   The last two bytes are merely precautionary, but added for completeness.
+MMC1 registers are 5 bits wide, and are written 1 bit at a time.  Byte 5
+holds the number of bits that have been written only if a register has not
+been completed yet, otherwise it will reset to zero.  The latch register
+gets filled in from D0 to D4 -- it is written from the low bit to the high
+bit.
+
+Mapper 2
+--------
+None
+
+Mapper 3
+--------
+  [None used]
+
+Mapper 4
+--------
+  0     IRQ Counter
+  1     IRQ Latch Counter
+  2     (boolean) IRQ Counter Enabled
+  3     Last value written to $8000
+
+Mapper 5
+--------
+  0-1   Values last written to $5103-$5104
+
+[incomplete]
+
+Mapper 6
+--------
+  0     IRQ Counter
+  1     IRQ Latch Counter
+  2     (boolean) IRQ Counter Enabled
+  3     Value last written to $43FE
+  4     Value last written to $4500
+
+[incomplete]
+
+Mapper 7
+--------
+  [None used]
+
+Mapper 8
+--------
+  [None used]
+
+Mapper 9
+-------
+  0-1   The two latch registers
+  2-5   Last values written to the B/C/D/E000 registers
+
+Mapper 10
+---------
+  0-1   The two latch registers
+  2-5   Last values written to the B/C/D/E000 registers
+
+Mapper 11
+---------
+  [None used]
+
+Mapper 15
+---------
+  [None used]
+
+Mapper 16
+---------
+  0     Low byte of IRQ Counter
+  1     High byte of IRQ Counter
+  2     (boolean) IRQ Counter Enabled
+
+Mapper 17
+---------
+  0     Low byte of IRQ Counter
+  1     High byte of IRQ Counter
+  2     (boolean) IRQ Counter Enabled
+
+Mapper 18
+---------
+  0     Low byte of IRQ Counter
+  1     High byte of IRQ Counter
+  2     (boolean) IRQ Counter Enabled
+
+Mapper 19
+---------
+  0     Low byte of IRQ Counter
+  1     High byte of IRQ Counter
+  2     (boolean) IRQ Counter Enabled
+
+Mapper 21
+---------
+  0     IRQ Counter
+  1     (boolean) IRQ Counter Enabled
+
+Mapper 22
+---------
+  [None used]
+
+Mapper 23
+---------
+  [None used]
+
+Mapper 24
+---------
+  0     IRQ Counter
+  1     (boolean) IRQ Counter Enabled
+
+Mapper 32
+---------
+  [None used]
+
+Mapper 33
+---------
+  [None used]
+
+Mapper 34
+---------
+  [None used]
+
+Mapper 40
+---------
+  0     IRQ Counter
+  1     (boolean) IRQ Status
+
+Mapper 64
+---------
+  [None used]
+
+Mapper 65
+---------
+  [None used]
+
+Mapper 66
+---------
+  [None used]
+
+Mapper 68
+---------
+  [None used]
+
+Mapper 69
+---------
+  0     Low byte of IRQ Counter
+  1     High byte of IRQ Counter
+  2     (boolean) IRQ Counter Enabled
+
+Mapper 71
+---------
+  [None used]
+
+Mapper 78
+---------
+  [None used]
+
+Mapper 90
+---------
+  0     IRQ Counter
+  1     IRQ Latch Register
+  2     (boolean) IRQ Counter Enabled
+
+Mapper 91
+---------
+  [None used]
+
+Mapper 224
+----------
+  0     (boolean) CHR-RAM writeable
+
+Mapper 225
+----------
+  0     PRG Page Size
+  1-4   The four 4-bit registers
+
+Mapper 226
+----------
+  0     (boolean) CHR-RAM writeable
+
+Mapper 228
+----------
+  0     PRG Chip Selected
+
+Mapper 230
+----------
+  0     Number of Resets so far (MODed with 5)
+
+Mapper 231
+----------
+  [None used]
+
+       +-----------------------+
+       |7. Controller Specifics|
+       +-----------------------+
+
+Controller types
+----------------
+
+  0=Joypad
+  1=Paddle
+  2=Zapper
+  3=QuadJoypad (Controllers 1&2 must both be set to QuadJoypad)
+  4=ROB
+  5=PowerPad
+
+Controller data
+---------------
+
+Note: Unless otherwise specified, a zero value means NOT pressed,
+      and any non-zero value means pressed.
+
+  Joypad:      bit 0=A
+                   1=B
+                   2=select
+                   3=start
+                   4=up
+                   5=down
+                   6=left
+                   7=right
+
+  Paddle:      byte 0=paddle position
+               byte 1=button state
+
+  Zapper:      byte 0=X position
+               byte 1=Y position (set Y>239 to point offscreen)
+               byte 2=trigger state
+
+  QuadJoypad:  (1st controller)
+                   bytes 0,1=joypad 1,3
+               (2nd controller)
+                   bytes 0,1=joypad 2,4
+
+  ROB:          ?
+
+  PowerPad:    bit 0=button#2
+               bit 1=1
+               bit 2=5
+               bit 3=9
+               bit 4=6
+               bit 5=10
+               bit 6=11
+               bit 7=7
+               bit 8=4
+               bit 9=3
+               bit 10=12
+               bit 11=8
+
+        (buttons on pad numbered from left-right, top-bottom)
+
+       +----------+
+       |8. Credits|
+       +----------+
+
+David de Regt           First draft, most of the formatting
+Mark Knibbs             Positive feedback
+Neal Tew                Movie recording, many changes

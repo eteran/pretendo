@@ -1,0 +1,18 @@
+#ifndef TAY_20121206_H_
+#define TAY_20121206_H_
+
+//------------------------------------------------------------------------------
+// Name: opcode_tay
+// Desc: Transfer Accumulator to Y
+//------------------------------------------------------------------------------
+struct opcode_tay {
+	typedef operation_none memory_access;
+	
+	void operator()() const {
+		Y = A;
+		update_nz_flags(Y);
+	}
+};
+
+#endif
+

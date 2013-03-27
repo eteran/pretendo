@@ -1,0 +1,58 @@
+
+========================
+=  Mapper 072          =
+========================
+
+Example Games:
+--------------------------
+Pinball Quest (J)
+Moero!! Pro Tennis
+Moero!! Juudou Warriors
+
+
+Registers (**BUS CONFLICTS**):
+---------------------------
+
+  $8000-FFFF:  [MM.. PPPP]
+    P = Page number
+    M = Command
+
+
+Notes:
+---------------------------
+
+   Page numbers seem to pass through a latch.  Rather than writing to the regs directly, you write the
+desired page number and command to the latch, then send another command that copies the latch to the
+appropriate internal register.
+
+   Commands:
+     %00 = Copy latch to appropriate reg
+     %01 = Set CHR Page
+     %10 = Set PRG page
+     %11 = Nothing/invalid
+
+   Example:
+     If a game wanted to select CHR page 3, it would first write $43, then $03.  Presumably, the $43 fills
+the latch, then the $03 looks at the latch, sees that it wants to set the CHR page, then copies the page
+number to the CHR reg (actually performing the swap).
+
+   No idea if that's really how it works or not, but emulating it that way seems to work.
+
+
+CHR Setup:
+---------------------------
+
+      $0000   $0400   $0800   $0C00   $1000   $1400   $1800   $1C00 
+    +---------------------------------------------------------------+
+    |                            CHR Reg                            |
+    +---------------------------------------------------------------+
+
+
+PRG Setup:
+---------------------------
+
+      $8000   $A000   $C000   $E000  
+    +---------------+---------------+
+    |    PRG Reg    |     { -1}     |
+    +---------------+---------------+
+

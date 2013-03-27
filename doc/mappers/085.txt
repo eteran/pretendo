@@ -1,0 +1,127 @@
+
+========================
+=  Mapper 085          =
+========================
+
+aka
+--------------------------
+VRC7
+
+
+Example Games:
+--------------------------
+Lagrange Point
+Tiny Toon Adventures 2  (J)
+
+
+
+VRC7a vs. VRC7b
+--------------------------
+Lagrange Point ('VRC7a') and Tiny Toon Adventures 2 ('VRC7b') both operate exactly the same, but are wired a
+bit differently.  VRC7a uses $x010 for regs, and VRC7b uses $x008.  Registers below are listed as they exist
+on VRC7a.  For VRC7b, make the appropriate adjustments
+
+Also, only Lagrange Point seems to use the extra sound.  It's unknown whether or not the sound hardware
+exists on VRC7b, as Tiny Toon doesn't use it.
+
+
+CHR-RAM note:
+--------------------------
+Lagrange Point, for some reason I still don't understand, swaps its 8k CHR-RAM around.  How this offers any
+functionality is beyond me, but the game does it, so your emu must support it.
+
+
+
+Registers:
+--------------------------
+
+$8000:   PRG Reg 0  (8k @ $8000)
+$8010:   PRG Reg 1  (8k @ $A000)
+$9000:   PRG Reg 2  (8k @ $C000)
+
+$9010:   Sound Address Reg (see below)
+$9030:   Sound Data Port (see below)
+
+$A000-$D010:  CHR Regs
+
+$E000:   [.... ..MM]   Mirroring:
+       %00 = Vert
+       %01 = Horz
+       %10 = 1ScA
+       %11 = 1ScB
+
+$E010:   [IIII IIII]   IRQ Reload value
+$F000:   [.... .MEA]   IRQ Control
+$F010:   [.... ....]   IRQ Acknowledge
+
+
+PRG Setup:
+--------------------------
+
+      $8000   $A000   $C000   $E000  
+    +-------+-------+-------+-------+
+    | $8000 | $8010 | $9000 | { -1} |
+    +-------+-------+-------+-------+
+
+
+CHR Setup:
+--------------------------
+
+      $0000   $0400   $0800   $0C00   $1000   $1400   $1800   $1C00 
+    +-------+-------+-------+-------+-------+-------+-------+-------+
+    | $A000 | $A010 | $B000 | $B010 | $C000 | $C010 | $D000 | $D010 |
+    +-------+-------+-------+-------+-------+-------+-------+-------+
+
+
+IRQs:
+--------------------------
+
+VRC7 uses the "VRC IRQ" setup shared by several VRCs.  It uses the following registers:
+
+
+  $E010:   [IIII IIII]   IRQ Reload
+  $F000:   [.... .MEA]   IRQ Control
+  $F010:   [.... ....]   IRQ Acknowledge
+
+For info on how these IRQs work, see the "VRC IRQs" section in mapper 021
+
+
+
+Sound:
+--------------------------
+
+VRC7 has additional sound channels!  It is a slightly dumbed down version of the YM2413 (aka OPLL).  There
+are only 6 harmony channels and no rhythmic channels.  Note that some older docs claim it's an OPL2 -- but it
+is, in fact, OPLL.
+
+Due to the complexity of FM-synth ... details will not be covered here.  For details, refer to a YM2413 data
+sheet or technical doc.
+
+  $9010 is the address port
+  $9030 is the data port
+
+  They behave just like the address/data ports on the YM2413.  Though remember that there's no rhythm, and
+only 6 channels.
+
+Channels can choose from 16 instruments.  One is customizable by the game, the other 15 are fixed with the
+following values:
+
+{
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,  // custom instrument
+
+0x03,0x21,0x04,0x06,0x8D,0xF2,0x42,0x17,  // begin fixed instruments
+0x13,0x41,0x05,0x0E,0x99,0x96,0x63,0x12,
+0x31,0x11,0x10,0x0A,0xF0,0x9C,0x32,0x02,
+0x21,0x61,0x1D,0x07,0x9F,0x64,0x20,0x27,
+0x22,0x21,0x1E,0x06,0xF0,0x76,0x08,0x28,
+0x02,0x01,0x06,0x00,0xF0,0xF2,0x03,0x95,
+0x21,0x61,0x1C,0x07,0x82,0x81,0x16,0x07,
+0x23,0x21,0x1A,0x17,0xEF,0x82,0x25,0x15,
+0x25,0x11,0x1F,0x00,0x86,0x41,0x20,0x11,
+0x85,0x01,0x1F,0x0F,0xE4,0xA2,0x11,0x12,
+0x07,0xC1,0x2B,0x45,0xB4,0xF1,0x24,0xF4,
+0x61,0x23,0x11,0x06,0x96,0x96,0x13,0x16,
+0x01,0x02,0xD3,0x05,0x82,0xA2,0x31,0x51,
+0x61,0x22,0x0D,0x02,0xC3,0x7F,0x24,0x05,
+0x21,0x62,0x0E,0x00,0xA1,0xA0,0x44,0x17
+};

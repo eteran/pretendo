@@ -1,0 +1,65 @@
+
+========================
+=  Mapper 103          =
+========================
+
+aka
+--------------------------
+BTL 2708
+
+
+Example Games:
+--------------------------
+Doki Doki Panic (FDS Port)
+
+
+Notes:
+---------------------------
+This appears to be board custom designed to get Doki Doki Panic working on a cartridge.  Instead of doing
+normal PRG swapping, it instead maps in PRG-RAM in a very unusual way.
+
+This board as 16k PRG-RAM.  It is not swappable.  Instead, the ability to read it is toggled.
+
+
+Registers:
+---------------------------
+
+Range,Mask:   $8000-FFFF, $F000
+
+  $8000-8FFF:  [.... PPPP]    8k PRG ROM page for $6000 (see PRG setup)
+
+  $E000-EFFF:  [.... M...]    Mirroring:  0=Vert
+                                     1=Horz
+
+  $F000-FFFF:  [...R ....]    ROM mode:  1=ROM, 0=RAM   (see PRG setup)
+
+
+
+PRG Setup:
+---------------------------
+
+This mapper is very strange.  PRG is swapped into the $6000 area and then copied into RAM during load
+sequences.  The game then switches back to RAM mode for the actual game part.  This is difficult to
+illustrate in a normal swap chart, but I'll try anyway:
+
+
+                   $6000      $8000   $B800   $D800   $E000    <-- notice funky numbers
+              +-------------+-------------------------------+
+   R=0:       |   RAM {0}   |  ...  |    RAM {1}    |  ...  |
+              +-------------+-------------------------------+
+   R=1:       |  ROM $8000  |           ROM { -1}           |
+              +-------------+-------------------------------+
+
+
+
+The $8000-FFFF range is fixed at the last 32k of PRG-ROM, however when in RAM mode (O bit of $F000 = 1),
+the second 8k of PRG-RAM sits "on top of" the ROM in the $B800-D7FF range.  Outside of that range ($8000-B7FF
+and $D800-FFFF), the last 32k of PRG-ROM is always visible.
+
+Writing to $6000-7FFF or $B800-D7FF *ALWAYS* writes to PRG-RAM, even when in ROM mode.  The game will
+actually do something like this:
+
+   LDA $6000
+   STA $6000
+
+When in ROM mode, this will be copying data from ROM to RAM (the reads come from ROM, the writes go to RAM).

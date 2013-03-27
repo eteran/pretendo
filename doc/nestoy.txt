@@ -1,0 +1,2 @@
+DB format is:
+PRG+CHR_CRC;PRG_CRC;Name;ctrl1_base10;ctrl2_base10;PRG_Page_Count;CHR_Page_Count;Country Codes;Manufacturer

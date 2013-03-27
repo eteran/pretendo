@@ -1,0 +1,81 @@
+
+========================
+=  Mapper 234          =
+========================
+
+
+Example Game:
+--------------------------
+Maxi 15 (PAL)
+
+
+Notes:
+--------------------------
+Verrrry strange.  Registers seem to lie at $FF80-$FFFF... the kicker is that *reading* those addresses also
+trigger a register write (the value written is the value being read).
+
+Example:
+
+  LDA $FF80  ; where $FF80 contains $62
+
+would have the same effect on the mapper as:
+
+  LDA #$62
+  STA $FF80
+
+
+
+Registers:
+---------------------------
+
+Range,Mask:   $FF80-FFFF, $FFF8
+
+
+  $FF80, $FF88, $FF90, $FF98:  [MO.. BBBb]  Reg 0
+    M = Mirroring (0=Vert, 1=Horz)
+    O = Mode
+    B,b = Block selection
+
+  $FFC0, $FFC8, $FFD0, $FFD8:  [???? ????]  Reg 1
+
+
+  $FFE8, $FFF0:   [.cCC ...P]               Reg 2
+   C,c = CHR page
+   P = PRG page
+
+
+Once Reg 0 contains a non-zero value, it is locked and cannot be changed until the system is reset.
+
+?Same is true for Reg 1?
+
+Reg 2 is never locked.
+
+
+
+CHR Setup:
+---------------------------
+
+8k page @ $0000 selected by the following:
+
+    'O'     CHR page
+  ---------------------
+     0      %BB BbCC
+     1      %BB BcCC
+
+
+PRG Setup:
+---------------------------
+
+32k page @ $8000 selected by the following:
+
+    'O'     PRG page
+  ---------------------
+     0      %BBBb
+     1      %BBBP
+
+
+
+On Powerup/Reset:
+---------------------------
+
+Regs all filled with 0 and unlocked.

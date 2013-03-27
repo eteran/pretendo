@@ -1,0 +1,28 @@
+
+
+v0.6.1
+==================================
+- Fixed minor goof in 189
+- made 4x4 bit RAM more clear in 225,228
+- fixed various spelling goofs
+- added info about vertical scrolling in 005's split screen mode
+- added some info about a common noob error in the main readme
+- added technical correction in 005 about PRG-RAM chip select
+- fixed some mapper 034 stuff (BxROM and compatible)
+- fixed mapper 067 IRQ info.  Had first/second writes backwards.
+- fixed mapper 073 IRQ info.  Had modes backwards.
+- fixed 049 -- had PRG modes mixed up
+- fixed error in 090 -- had CHR block modes backwards
+- fixed 203
+- additional notes and crap for 233
+- alternative freq formula for N106 audio was wrong.  Fixed it.
+- clarified 230
+- changed D:# naming convention to R:# to avoid confusion
+     (d is often used for bit positions)
+
+Still 111 mapper numbers  (more coming, I swear!)
+
+
+v0.6
+==================================
+First real release (111 mapper numbers)
