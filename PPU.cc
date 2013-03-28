@@ -187,9 +187,8 @@ void PPU::reset(nes::RESET reset_type) {
 	background_pattern_table_ = 0x0000;
 	background_visible_       = false;
 	color_intensity_          = 0x00;
-	hpos_              = 0;
-	vpos_         = 0;
 	greyscale_                = false;
+	hpos_                     = 0;
 	latch_                    = 0x00;
 	nametable_                = 0x0000;
 	next_attribute_           = 0;
@@ -206,6 +205,7 @@ void PPU::reset(nes::RESET reset_type) {
 	register_2007_buffer_     = 0x00;
 	rendering_                = false;
 	sprite_address_           = 0x00;
+	sprite_buffer_            = 0xff;
 	sprite_clipping_          = false;
 	sprite_data_index_        = 0;
 	sprite_pattern_table_     = 0x0000;
@@ -215,8 +215,10 @@ void PPU::reset(nes::RESET reset_type) {
 	sprites_visible_          = false;
 	status_                   = 0x00;
 	tile_offset_              = 0x00;
+	vpos_                     = 0;
 	vram_address_             = 0x0000;
 	write_latch_              = false;
+	write_block_              = true;
 
 	std::cout << "[PPU::reset] reset complete" << std::endl;
 }
@@ -225,7 +227,12 @@ void PPU::reset(nes::RESET reset_type) {
 // Name: write2000
 //------------------------------------------------------------------------------
 void PPU::write2000(uint8_t value) {
+
 	latch_ = value;
+
+	if(write_block_) {
+		return;
+	}
 
 	register_2000_ = value;
 
@@ -256,6 +263,10 @@ void PPU::write2000(uint8_t value) {
 //------------------------------------------------------------------------------
 void PPU::write2001(uint8_t value) {
 	latch_ = value;
+
+	if(write_block_) {
+		return;
+	}
 
 	register_2001_ = value;
 
@@ -298,6 +309,10 @@ void PPU::write2004(uint8_t value) {
 void PPU::write2005(uint8_t value) {
 	latch_ = value;
 
+	if(write_block_) {
+		return;
+	}
+
 	write_latch_ = !write_latch_;
 
 	if(write_latch_) {
@@ -322,6 +337,10 @@ void PPU::write2005(uint8_t value) {
 //------------------------------------------------------------------------------
 void PPU::write2006(uint8_t value) {
 	latch_ = value;
+
+	if(write_block_) {
+		return;
+	}
 
 	write_latch_ = !write_latch_;
 
@@ -459,27 +478,29 @@ uint8_t PPU::read2006() {
 //------------------------------------------------------------------------------
 uint8_t PPU::read2007() {
 
-	const uint16_t temp_address = vram_address_ & 0x3fff;
+	if(!write_block_) {
+		const uint16_t temp_address = vram_address_ & 0x3fff;
 
-	if(rendering_ && screen_enabled()) {
-		if(address_increment_ == 32) {
-			clock_y();
+		if(rendering_ && screen_enabled()) {
+			if(address_increment_ == 32) {
+				clock_y();
+			} else {
+				clock_x();
+			}
 		} else {
-			clock_x();
+			vram_address_ += address_increment_;
 		}
-	} else {
-		vram_address_ += address_increment_;
-	}
 
-	nes::cart.mapper()->vram_change_hook(vram_address_);
+		nes::cart.mapper()->vram_change_hook(vram_address_);
 
-	latch_ = register_2007_buffer_;
-	register_2007_buffer_ = nes::cart.mapper()->read_vram(temp_address);
+		latch_ = register_2007_buffer_;
+		register_2007_buffer_ = nes::cart.mapper()->read_vram(temp_address);
 
-	if((temp_address & 0x3f00) == 0x3f00) {
-		latch_ = palette_[temp_address & 0x1f];
-		if(greyscale_) {
-			latch_ &= 0x30;
+		if((temp_address & 0x3f00) == 0x3f00) {
+			latch_ = palette_[temp_address & 0x1f];
+			if(greyscale_) {
+				latch_ &= 0x30;
+			}
 		}
 	}
 
@@ -609,7 +630,7 @@ uint16_t PPU::sprite_pattern_address(uint8_t index, uint8_t sprite_line) const {
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
 void PPU::open_sprite_pattern() {
-	SpriteEntry *const sprite_entry = &sprite_data_[(hpos_ >> 3) & 0x07];
+	SpriteEntry *const sprite_entry = &sprite_data_[((hpos_ - 1) >> 3) & 0x07];
 
 	if(sprite_entry->y() != 0xff) {
 		const uint8_t index = sprite_entry->index();
@@ -641,7 +662,7 @@ void PPU::open_sprite_pattern() {
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
 void PPU::read_sprite_pattern() {
-	SpriteEntry *const sprite_entry = &sprite_data_[(hpos_ >> 3) & 0x07];
+	SpriteEntry *const sprite_entry = &sprite_data_[((hpos_ - 1) >> 3) & 0x07];
 
 	sprite_entry->pattern[Pattern::index] = nes::cart.mapper()->read_vram(next_ppu_fetch_address_);
 
@@ -658,19 +679,53 @@ void PPU::read_sprite_pattern() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: evaluate_sprites_even
+//------------------------------------------------------------------------------
+void PPU::evaluate_sprites_even() {
+	// write cycle
+	if(hpos_ < 64) {
+//		uint8_t index = hpos_ >> 1;
+//		sprite_data_[(index >> 2) & 0x07].sprite_bytes[index & 0x03] = sprite_buffer_;
+//		printf("SETTING: S-OAM[%d][%d] = %02x\n", (index >> 2) & 0x07, index & 0x03, sprite_buffer_);
+	} else if(hpos_ == 256) {
+		// TODO: do this part incrementally during cycles 0-255 like the real thing
+		if(sprite_size_ == 16) {
+			evaluate_sprites<16>();
+		} else {
+			evaluate_sprites<8>();
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
+// Name: evaluate_sprites_odd
+//------------------------------------------------------------------------------
+void PPU::evaluate_sprites_odd() {
+
+	// read cycle
+	if(hpos_ < 64) {
+		sprite_buffer_ = 0xff;
+	} else {
+		//sprite_buffer_ = sprite_ram_[sprite_address_++];
+	}
+}
+
+//------------------------------------------------------------------------------
+// Name: evaluate_sprites
 //------------------------------------------------------------------------------
 template <int Size>
 void PPU::evaluate_sprites() {
 	sprite_data_index_      = 0;
 	sprite_zero_found_next_ = false;
-
+	
+#if 1
 	for(int i = 0; i < 8; ++i) {
 		sprite_data_[i].sprite_bytes[0] = 0xff; // y
 		sprite_data_[i].sprite_bytes[1] = 0xff; // index
 		sprite_data_[i].sprite_bytes[2] = 0xff; // attributes
 		sprite_data_[i].sprite_bytes[3] = 0xff; // x
 	}
+#endif
 	
 	const uint8_t start_address = 0x00; // sprite_address_
 
@@ -993,6 +1048,8 @@ void PPU::enter_vblank() {
 void PPU::exit_vblank() {
 	// clear all the relevant status bits
 	status_ &= 0x1f;
+	
+	write_block_ = false;
 }
 
 //------------------------------------------------------------------------------
@@ -1031,11 +1088,11 @@ bool PPU::nmi_on_vblank() const {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: render_pixel
 //------------------------------------------------------------------------------
 void PPU::render_pixel(uint8_t *dest_buffer) {
 
-	const uint8_t index = hpos_;
+	const uint8_t index = hpos_ - 1;
 	const uint8_t pixel = select_pixel(index);
 
 	if(greyscale_) {
@@ -1051,17 +1108,34 @@ void PPU::render_pixel(uint8_t *dest_buffer) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: update_shift_registers_idle
 //------------------------------------------------------------------------------
 void PPU::update_shift_registers_idle() {
-	pattern_queue_[0]   = ((pattern_queue_[0]   << 8) & 0xff00) | (next_pattern_[0] & 0x00ff);
-	pattern_queue_[1]   = ((pattern_queue_[1]   << 8) & 0xff00) | (next_pattern_[1] & 0x00ff);
-	attribute_queue_[0] = ((attribute_queue_[0] << 8) & 0xff00) | (((next_attribute_ >> 0) & 0x01) * 0xff);
-	attribute_queue_[1] = ((attribute_queue_[1] << 8) & 0xff00) | (((next_attribute_ >> 1) & 0x01) * 0xff);
+
+	pattern_queue_[0]   <<= 8;
+	pattern_queue_[1]   <<= 8;
+	attribute_queue_[0] <<= 8;
+	attribute_queue_[1] <<= 8;
+
+	pattern_queue_[0]   |= (next_pattern_[0] & 0x00ff);
+	pattern_queue_[1]   |= (next_pattern_[1] & 0x00ff);
+	attribute_queue_[0] |= (((next_attribute_ >> 0) & 0x01) * 0xff); // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+	attribute_queue_[1] |= (((next_attribute_ >> 1) & 0x01) * 0xff); // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: update_shift_registers_render
+//------------------------------------------------------------------------------
+void PPU::update_shift_registers_render() {
+
+	pattern_queue_[0]   |= (next_pattern_[0] & 0x00ff);
+	pattern_queue_[1]   |= (next_pattern_[1] & 0x00ff);
+	attribute_queue_[0] |= (((next_attribute_ >> 0) & 0x01) * 0xff); // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+	attribute_queue_[1] |= (((next_attribute_ >> 1) & 0x01) * 0xff); // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+}
+
+//------------------------------------------------------------------------------
+// Name: update_x_scroll
 // Note: occurs at cycle 257 of all rendering scanlines
 //------------------------------------------------------------------------------
 void PPU::update_x_scroll() {
@@ -1070,8 +1144,8 @@ void PPU::update_x_scroll() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
-// Note: occurs at cycle 257 - 320 of all rendering scanlines
+// Name: update_sprite_registers
+// Note: occurs at cycles 257 - 320 of all rendering scanlines
 //------------------------------------------------------------------------------
 void PPU::update_sprite_registers() {
 	// this gets set to $00 for each tick between 257 and 320
@@ -1080,13 +1154,15 @@ void PPU::update_sprite_registers() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
-// Note: occurs at cycle 279 - 304 of prerender if screen is enabled
+// Name: update_vram_address
+// Note: occurs at cycles 279 - 304 of prerender if screen is enabled
 //------------------------------------------------------------------------------
 void PPU::update_vram_address() {
 	// v=t
 	vram_address_ = (vram_address_ & ~0x7be0) | (nametable_ & 0x7be0);
 }
+
+
 
 //------------------------------------------------------------------------------
 // Name:
@@ -1098,9 +1174,12 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_prerender &) {
 	if(!screen_enabled()) {
 		switch(hpos_) {
 		case 0:
+			// idle
+			break;
+		case 1:
 			exit_vblank();
 			break;
-		case 1:   case 2:   case 3:   case 4:   case 5:   case 6:   case 7:
+		case 2:   case 3:   case 4:   case 5:   case 6:   case 7:
 		case 8:   case 9:   case 10:  case 11:  case 12:  case 13:  case 14:  case 15:
 		case 16:  case 17:  case 18:  case 19:  case 20:  case 21:  case 22:  case 23:
 		case 24:  case 25:  case 26:  case 27:  case 28:  case 29:  case 30:  case 31:
@@ -1149,406 +1228,397 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_prerender &) {
 			abort();
 			break;
 		}
-	} else {	
+	} else {
 		switch(hpos_) {
-		case 0: exit_vblank(); open_tile_index(); break;
-		case 1:                read_tile_index(); break;
-		case 2:                open_background_attribute(); break;
-		case 3:                read_background_attribute(); break;
-		case 4:                open_background_pattern<pattern_0>(); break;
-		case 5:                read_background_pattern<pattern_0>(); break;
-		case 6:                open_background_pattern<pattern_1>(); break;
-		case 7:                read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 8:  open_tile_index(); break;
-		case 9:  read_tile_index(); break;
-		case 10: open_background_attribute(); break;
-		case 11: read_background_attribute(); break;
-		case 12: open_background_pattern<pattern_0>(); break;
-		case 13: read_background_pattern<pattern_0>(); break;
-		case 14: open_background_pattern<pattern_1>(); break;
-		case 15: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 16: open_tile_index(); break;
-		case 17: read_tile_index(); break;
-		case 18: open_background_attribute(); break;
-		case 19: read_background_attribute(); break;
-		case 20: open_background_pattern<pattern_0>(); break;
-		case 21: read_background_pattern<pattern_0>(); break;
-		case 22: open_background_pattern<pattern_1>(); break;
-		case 23: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 24: open_tile_index(); break;
-		case 25: read_tile_index(); break;
-		case 26: open_background_attribute(); break;
-		case 27: read_background_attribute(); break;
-		case 28: open_background_pattern<pattern_0>(); break;
-		case 29: read_background_pattern<pattern_0>(); break;
-		case 30: open_background_pattern<pattern_1>(); break;
-		case 31: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 32: open_tile_index(); break;
-		case 33: read_tile_index(); break;
-		case 34: open_background_attribute(); break;
-		case 35: read_background_attribute(); break;
-		case 36: open_background_pattern<pattern_0>(); break;
-		case 37: read_background_pattern<pattern_0>(); break;
-		case 38: open_background_pattern<pattern_1>(); break;
-		case 39: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 40: open_tile_index(); break;
-		case 41: read_tile_index(); break;
-		case 42: open_background_attribute(); break;
-		case 43: read_background_attribute(); break;
-		case 44: open_background_pattern<pattern_0>(); break;
-		case 45: read_background_pattern<pattern_0>(); break;
-		case 46: open_background_pattern<pattern_1>(); break;
-		case 47: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 48: open_tile_index(); break;
-		case 49: read_tile_index(); break;
-		case 50: open_background_attribute(); break;
-		case 51: read_background_attribute(); break;
-		case 52: open_background_pattern<pattern_0>(); break;
-		case 53: read_background_pattern<pattern_0>(); break;
-		case 54: open_background_pattern<pattern_1>(); break;
-		case 55: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 56: open_tile_index(); break;
-		case 57: read_tile_index(); break;
-		case 58: open_background_attribute(); break;
-		case 59: read_background_attribute(); break;
-		case 60: open_background_pattern<pattern_0>(); break;
-		case 61: read_background_pattern<pattern_0>(); break;
-		case 62: open_background_pattern<pattern_1>(); break;
-		case 63: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 64: open_tile_index(); break;
-		case 65: read_tile_index(); break;
-		case 66: open_background_attribute(); break;
-		case 67: read_background_attribute(); break;
-		case 68: open_background_pattern<pattern_0>(); break;
-		case 69: read_background_pattern<pattern_0>(); break;
-		case 70: open_background_pattern<pattern_1>(); break;
-		case 71: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 72: open_tile_index(); break;
-		case 73: read_tile_index(); break;
-		case 74: open_background_attribute(); break;
-		case 75: read_background_attribute(); break;
-		case 76: open_background_pattern<pattern_0>(); break;
-		case 77: read_background_pattern<pattern_0>(); break;
-		case 78: open_background_pattern<pattern_1>(); break;
-		case 79: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 80: open_tile_index(); break;
-		case 81: read_tile_index(); break;
-		case 82: open_background_attribute(); break;
-		case 83: read_background_attribute(); break;
-		case 84: open_background_pattern<pattern_0>(); break;
-		case 85: read_background_pattern<pattern_0>(); break;
-		case 86: open_background_pattern<pattern_1>(); break;
-		case 87: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 88: open_tile_index(); break;
-		case 89: read_tile_index(); break;
-		case 90: open_background_attribute(); break;
-		case 91: read_background_attribute(); break;
-		case 92: open_background_pattern<pattern_0>(); break;
-		case 93: read_background_pattern<pattern_0>(); break;
-		case 94: open_background_pattern<pattern_1>(); break;
-		case 95: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 96:  open_tile_index(); break;
-		case 97:  read_tile_index(); break;
-		case 98:  open_background_attribute(); break;
-		case 99:  read_background_attribute(); break;
-		case 100: open_background_pattern<pattern_0>(); break;
-		case 101: read_background_pattern<pattern_0>(); break;
-		case 102: open_background_pattern<pattern_1>(); break;
-		case 103: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 104: open_tile_index(); break;
-		case 105: read_tile_index(); break;
-		case 106: open_background_attribute(); break;
-		case 107: read_background_attribute(); break;
-		case 108: open_background_pattern<pattern_0>(); break;
-		case 109: read_background_pattern<pattern_0>(); break;
-		case 110: open_background_pattern<pattern_1>(); break;
-		case 111: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 112: open_tile_index(); break;
-		case 113: read_tile_index(); break;
-		case 114: open_background_attribute(); break;
-		case 115: read_background_attribute(); break;
-		case 116: open_background_pattern<pattern_0>(); break;
-		case 117: read_background_pattern<pattern_0>(); break;
-		case 118: open_background_pattern<pattern_1>(); break;
-		case 119: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 120: open_tile_index(); break;
-		case 121: read_tile_index(); break;
-		case 122: open_background_attribute(); break;
-		case 123: read_background_attribute(); break;
-		case 124: open_background_pattern<pattern_0>(); break;
-		case 125: read_background_pattern<pattern_0>(); break;
-		case 126: open_background_pattern<pattern_1>(); break;
-		case 127: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 128: open_tile_index(); break;
-		case 129: read_tile_index(); break;
-		case 130: open_background_attribute(); break;
-		case 131: read_background_attribute(); break;
-		case 132: open_background_pattern<pattern_0>(); break;
-		case 133: read_background_pattern<pattern_0>(); break;
-		case 134: open_background_pattern<pattern_1>(); break;
-		case 135: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 136: open_tile_index(); break;
-		case 137: read_tile_index(); break;
-		case 138: open_background_attribute(); break;
-		case 139: read_background_attribute(); break;
-		case 140: open_background_pattern<pattern_0>(); break;
-		case 141: read_background_pattern<pattern_0>(); break;
-		case 142: open_background_pattern<pattern_1>(); break;
-		case 143: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 144: open_tile_index(); break;
-		case 145: read_tile_index(); break;
-		case 146: open_background_attribute(); break;
-		case 147: read_background_attribute(); break;
-		case 148: open_background_pattern<pattern_0>(); break;
-		case 149: read_background_pattern<pattern_0>(); break;
-		case 150: open_background_pattern<pattern_1>(); break;
-		case 151: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 152: open_tile_index(); break;
-		case 153: read_tile_index(); break;
-		case 154: open_background_attribute(); break;
-		case 155: read_background_attribute(); break;
-		case 156: open_background_pattern<pattern_0>(); break;
-		case 157: read_background_pattern<pattern_0>(); break;
-		case 158: open_background_pattern<pattern_1>(); break;
-		case 159: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 160: open_tile_index(); break;
-		case 161: read_tile_index(); break;
-		case 162: open_background_attribute(); break;
-		case 163: read_background_attribute(); break;
-		case 164: open_background_pattern<pattern_0>(); break;
-		case 165: read_background_pattern<pattern_0>(); break;
-		case 166: open_background_pattern<pattern_1>(); break;
-		case 167: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 168: open_tile_index(); break;
-		case 169: read_tile_index(); break;
-		case 170: open_background_attribute(); break;
-		case 171: read_background_attribute(); break;
-		case 172: open_background_pattern<pattern_0>(); break;
-		case 173: read_background_pattern<pattern_0>(); break;
-		case 174: open_background_pattern<pattern_1>(); break;
-		case 175: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 176: open_tile_index(); break;
-		case 177: read_tile_index(); break;
-		case 178: open_background_attribute(); break;
-		case 179: read_background_attribute(); break;
-		case 180: open_background_pattern<pattern_0>(); break;
-		case 181: read_background_pattern<pattern_0>(); break;
-		case 182: open_background_pattern<pattern_1>(); break;
-		case 183: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 184: open_tile_index(); break;
-		case 185: read_tile_index(); break;
-		case 186: open_background_attribute(); break;
-		case 187: read_background_attribute(); break;
-		case 188: open_background_pattern<pattern_0>(); break;
-		case 189: read_background_pattern<pattern_0>(); break;
-		case 190: open_background_pattern<pattern_1>(); break;
-		case 191: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 192: open_tile_index(); break;
-		case 193: read_tile_index(); break;
-		case 194: open_background_attribute(); break;
-		case 195: read_background_attribute(); break;
-		case 196: open_background_pattern<pattern_0>(); break;
-		case 197: read_background_pattern<pattern_0>(); break;
-		case 198: open_background_pattern<pattern_1>(); break;
-		case 199: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 200: open_tile_index(); break;
-		case 201: read_tile_index(); break;
-		case 202: open_background_attribute(); break;
-		case 203: read_background_attribute(); break;
-		case 204: open_background_pattern<pattern_0>(); break;
-		case 205: read_background_pattern<pattern_0>(); break;
-		case 206: open_background_pattern<pattern_1>(); break;
-		case 207: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 208: open_tile_index(); break;
-		case 209: read_tile_index(); break;
-		case 210: open_background_attribute(); break;
-		case 211: read_background_attribute(); break;
-		case 212: open_background_pattern<pattern_0>(); break;
-		case 213: read_background_pattern<pattern_0>(); break;
-		case 214: open_background_pattern<pattern_1>(); break;
-		case 215: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 216: open_tile_index(); break;
-		case 217: read_tile_index(); break;
-		case 218: open_background_attribute(); break;
-		case 219: read_background_attribute(); break;
-		case 220: open_background_pattern<pattern_0>(); break;
-		case 221: read_background_pattern<pattern_0>(); break;
-		case 222: open_background_pattern<pattern_1>(); break;
-		case 223: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 224: open_tile_index(); break;
-		case 225: read_tile_index(); break;
-		case 226: open_background_attribute(); break;
-		case 227: read_background_attribute(); break;
-		case 228: open_background_pattern<pattern_0>(); break;
-		case 229: read_background_pattern<pattern_0>(); break;
-		case 230: open_background_pattern<pattern_1>(); break;
-		case 231: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 232: open_tile_index(); break;
-		case 233: read_tile_index(); break;
-		case 234: open_background_attribute(); break;
-		case 235: read_background_attribute(); break;
-		case 236: open_background_pattern<pattern_0>(); break;
-		case 237: read_background_pattern<pattern_0>(); break;
-		case 238: open_background_pattern<pattern_1>(); break;
-		case 239: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 240: open_tile_index(); break;
-		case 241: read_tile_index(); break;
-		case 242: open_background_attribute(); break;
-		case 243: read_background_attribute(); break;
-		case 244: open_background_pattern<pattern_0>(); break;
-		case 245: read_background_pattern<pattern_0>(); break;
-		case 246: open_background_pattern<pattern_1>(); break;
-		case 247: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
-
-		case 248: open_tile_index(); break;
-		case 249: read_tile_index(); break;
-		case 250: open_background_attribute(); break;
-		case 251: read_background_attribute(); break;
-		case 252: open_background_pattern<pattern_0>(); break;
-		case 253: read_background_pattern<pattern_0>(); break;
-		case 254: open_background_pattern<pattern_1>(); break;
-		case 255: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x();
-			// TODO: do this part incrementally during cycles 0-255 like the real thing
-			if(sprite_size_ == 16) {
-				evaluate_sprites<16>();
-			} else {
-				evaluate_sprites<8>();
-			}
-
-			// If rendering is enabled, the PPU increments the vertical position in v.
-			// The effective Y scroll coordinate is incremented, which is a complex operation
-			// that will correctly skip the attribute table memory regions, and wrap to the
-			// next nametable appropriately
-			clock_y();
+		case 0:
+			// idle
 			break;
+		
+		case   1: exit_vblank(); evaluate_sprites_odd(); open_tile_index(); break;
+		case   2:				 evaluate_sprites_even();  read_tile_index(); break;
+		case   3:				 evaluate_sprites_odd(); open_background_attribute(); break;
+		case   4:				 evaluate_sprites_even();  read_background_attribute(); break;
+		case   5:				 evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case   6:				 evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case   7:				 evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case   8:				 evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
 
-		case 256: update_x_scroll(); update_sprite_registers(); open_tile_index(); break;           // open the bus for nametable fetch (garbage)
-		case 257:                    update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
-		case 258:                    update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-		case 259:                    update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-		case 260: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-		case 261: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-		case 262: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-		case 263: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		case   9: evaluate_sprites_odd(); open_tile_index(); break;
+		case  10: evaluate_sprites_even();  read_tile_index(); break;
+		case  11: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  12: evaluate_sprites_even();  read_background_attribute(); break;
+		case  13: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  14: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  15: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  16: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  17: evaluate_sprites_odd(); open_tile_index(); break;
+		case  18: evaluate_sprites_even();  read_tile_index(); break;
+		case  19: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  20: evaluate_sprites_even();  read_background_attribute(); break;
+		case  21: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  22: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  23: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  24: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  25: evaluate_sprites_odd(); open_tile_index(); break;
+		case  26: evaluate_sprites_even();  read_tile_index(); break;
+		case  27: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  28: evaluate_sprites_even();  read_background_attribute(); break;
+		case  29: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  30: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  31: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  32: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  33: evaluate_sprites_odd(); open_tile_index(); break;
+		case  34: evaluate_sprites_even();  read_tile_index(); break;
+		case  35: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  36: evaluate_sprites_even();  read_background_attribute(); break;
+		case  37: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  38: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  39: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  40: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  41: evaluate_sprites_odd(); open_tile_index(); break;
+		case  42: evaluate_sprites_even();  read_tile_index(); break;
+		case  43: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  44: evaluate_sprites_even();  read_background_attribute(); break;
+		case  45: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  46: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  47: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  48: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  49: evaluate_sprites_odd(); open_tile_index(); break;
+		case  50: evaluate_sprites_even();  read_tile_index(); break;
+		case  51: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  52: evaluate_sprites_even();  read_background_attribute(); break;
+		case  53: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  54: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  55: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  56: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  57: evaluate_sprites_odd(); open_tile_index(); break;
+		case  58: evaluate_sprites_even();  read_tile_index(); break;
+		case  59: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  60: evaluate_sprites_even();  read_background_attribute(); break;
+		case  61: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  62: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  63: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  64: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  65: evaluate_sprites_odd(); open_tile_index(); break;
+		case  66: evaluate_sprites_even();  read_tile_index(); break;
+		case  67: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  68: evaluate_sprites_even();  read_background_attribute(); break;
+		case  69: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  70: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  71: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  72: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  73: evaluate_sprites_odd(); open_tile_index(); break;
+		case  74: evaluate_sprites_even();  read_tile_index(); break;
+		case  75: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  76: evaluate_sprites_even();  read_background_attribute(); break;
+		case  77: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  78: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  79: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  80: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  81: evaluate_sprites_odd(); open_tile_index(); break;
+		case  82: evaluate_sprites_even();  read_tile_index(); break;
+		case  83: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  84: evaluate_sprites_even();  read_background_attribute(); break;
+		case  85: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  86: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  87: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  88: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  89: evaluate_sprites_odd(); open_tile_index(); break;
+		case  90: evaluate_sprites_even();  read_tile_index(); break;
+		case  91: evaluate_sprites_odd(); open_background_attribute(); break;
+		case  92: evaluate_sprites_even();  read_background_attribute(); break;
+		case  93: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  94: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  95: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  96: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case  97: evaluate_sprites_odd(); open_tile_index(); break;
+		case  98: evaluate_sprites_even();  read_tile_index(); break;
+		case  99: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 100: evaluate_sprites_even();  read_background_attribute(); break;
+		case 101: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 102: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 103: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 104: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 105: evaluate_sprites_odd(); open_tile_index(); break;
+		case 106: evaluate_sprites_even();  read_tile_index(); break;
+		case 107: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 108: evaluate_sprites_even();  read_background_attribute(); break;
+		case 109: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 110: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 111: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 112: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 113: evaluate_sprites_odd(); open_tile_index(); break;
+		case 114: evaluate_sprites_even();  read_tile_index(); break;
+		case 115: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 116: evaluate_sprites_even();  read_background_attribute(); break;
+		case 117: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 118: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 119: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 120: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 121: evaluate_sprites_odd(); open_tile_index(); break;
+		case 122: evaluate_sprites_even();  read_tile_index(); break;
+		case 123: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 124: evaluate_sprites_even();  read_background_attribute(); break;
+		case 125: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 126: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 127: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 128: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 129: evaluate_sprites_odd(); open_tile_index(); break;
+		case 130: evaluate_sprites_even();  read_tile_index(); break;
+		case 131: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 132: evaluate_sprites_even();  read_background_attribute(); break;
+		case 133: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 134: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 135: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 136: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 137: evaluate_sprites_odd(); open_tile_index(); break;
+		case 138: evaluate_sprites_even();  read_tile_index(); break;
+		case 139: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 140: evaluate_sprites_even();  read_background_attribute(); break;
+		case 141: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 142: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 143: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 144: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 145: evaluate_sprites_odd(); open_tile_index(); break;
+		case 146: evaluate_sprites_even();  read_tile_index(); break;
+		case 147: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 148: evaluate_sprites_even();  read_background_attribute(); break;
+		case 149: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 150: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 151: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 152: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 153: evaluate_sprites_odd(); open_tile_index(); break;
+		case 154: evaluate_sprites_even();  read_tile_index(); break;
+		case 155: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 156: evaluate_sprites_even();  read_background_attribute(); break;
+		case 157: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 158: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 159: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 160: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 161: evaluate_sprites_odd(); open_tile_index(); break;
+		case 162: evaluate_sprites_even();  read_tile_index(); break;
+		case 163: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 164: evaluate_sprites_even();  read_background_attribute(); break;
+		case 165: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 166: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 167: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 168: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 169: evaluate_sprites_odd(); open_tile_index(); break;
+		case 170: evaluate_sprites_even();  read_tile_index(); break;
+		case 171: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 172: evaluate_sprites_even();  read_background_attribute(); break;
+		case 173: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 174: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 175: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 176: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 177: evaluate_sprites_odd(); open_tile_index(); break;
+		case 178: evaluate_sprites_even();  read_tile_index(); break;
+		case 179: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 180: evaluate_sprites_even();  read_background_attribute(); break;
+		case 181: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 182: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 183: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 184: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 185: evaluate_sprites_odd(); open_tile_index(); break;
+		case 186: evaluate_sprites_even();  read_tile_index(); break;
+		case 187: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 188: evaluate_sprites_even();  read_background_attribute(); break;
+		case 189: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 190: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 191: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 192: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 193: evaluate_sprites_odd(); open_tile_index(); break;
+		case 194: evaluate_sprites_even();  read_tile_index(); break;
+		case 195: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 196: evaluate_sprites_even();  read_background_attribute(); break;
+		case 197: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 198: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 199: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 200: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 201: evaluate_sprites_odd(); open_tile_index(); break;
+		case 202: evaluate_sprites_even();  read_tile_index(); break;
+		case 203: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 204: evaluate_sprites_even();  read_background_attribute(); break;
+		case 205: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 206: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 207: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 208: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 209: evaluate_sprites_odd(); open_tile_index(); break;
+		case 210: evaluate_sprites_even();  read_tile_index(); break;
+		case 211: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 212: evaluate_sprites_even();  read_background_attribute(); break;
+		case 213: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 214: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 215: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 216: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 217: evaluate_sprites_odd(); open_tile_index(); break;
+		case 218: evaluate_sprites_even();  read_tile_index(); break;
+		case 219: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 220: evaluate_sprites_even();  read_background_attribute(); break;
+		case 221: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 222: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 223: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 224: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 225: evaluate_sprites_odd(); open_tile_index(); break;
+		case 226: evaluate_sprites_even();  read_tile_index(); break;
+		case 227: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 228: evaluate_sprites_even();  read_background_attribute(); break;
+		case 229: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 230: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 231: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 232: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 233: evaluate_sprites_odd(); open_tile_index(); break;
+		case 234: evaluate_sprites_even();  read_tile_index(); break;
+		case 235: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 236: evaluate_sprites_even();  read_background_attribute(); break;
+		case 237: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 238: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 239: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 240: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 241: evaluate_sprites_odd(); open_tile_index(); break;
+		case 242: evaluate_sprites_even();  read_tile_index(); break;
+		case 243: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 244: evaluate_sprites_even();  read_background_attribute(); break;
+		case 245: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 246: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 247: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 248: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+
+		case 249: evaluate_sprites_odd(); open_tile_index(); break;
+		case 250: evaluate_sprites_even();  read_tile_index(); break;
+		case 251: evaluate_sprites_odd(); open_background_attribute(); break;
+		case 252: evaluate_sprites_even();  read_background_attribute(); break;
+		case 253: evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 254: evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 255: evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 256: evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); clock_y(); break;
+
+		case 257: update_x_scroll(); update_sprite_registers(); open_tile_index(); break;			// open the bus for nametable fetch (garbage)
+		case 258:					 update_sprite_registers(); read_tile_index(); break;			// fetch the name table byte (garbage)
+		case 259:					 update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 260:					 update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 261: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 262: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 263: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 264: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 		
-		case 264: update_sprite_registers(); open_tile_index(); break; 		  // open the bus for nametable fetch (garbage)
-		case 265: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
-		case 266: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-		case 267: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-		case 268: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-		case 269: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-		case 270: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-		case 271: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		case 265: update_sprite_registers(); open_tile_index(); break;  	  // open the bus for nametable fetch (garbage)
+		case 266: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
+		case 267: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 268: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 269: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 270: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 271: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 272: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 		
-		case 272: update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
-		case 273: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
-		case 274: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-		case 275: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-		case 276: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-		case 277: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-		case 278: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-		case 279: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		case 273: update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
+		case 274: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
+		case 275: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 276: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 277: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 278: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 279: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 280: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 		
-		case 280: update_vram_address(); update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
-		case 281: update_vram_address(); update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
-		case 282: update_vram_address(); update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-		case 283: update_vram_address(); update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-		case 284: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-		case 285: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-		case 286: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-		case 287: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		case 281: update_vram_address(); update_sprite_registers(); open_tile_index(); break;		 // open the bus for nametable fetch (garbage)
+		case 282: update_vram_address(); update_sprite_registers(); read_tile_index(); break;		 // fetch the name table byte (garbage)
+		case 283: update_vram_address(); update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 284: update_vram_address(); update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 285: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 286: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 287: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 288: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 		
-		case 288: update_vram_address(); update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
-		case 289: update_vram_address(); update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
-		case 290: update_vram_address(); update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-		case 291: update_vram_address(); update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-		case 292: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-		case 293: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-		case 294: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-		case 295: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		case 289: update_vram_address(); update_sprite_registers(); open_tile_index(); break;		 // open the bus for nametable fetch (garbage)
+		case 290: update_vram_address(); update_sprite_registers(); read_tile_index(); break;		 // fetch the name table byte (garbage)
+		case 291: update_vram_address(); update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 292: update_vram_address(); update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 293: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 294: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 295: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 296: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 		
-		case 296: update_vram_address(); update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
-		case 297: update_vram_address(); update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
-		case 298: update_vram_address(); update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-		case 299: update_vram_address(); update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-		case 300: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-		case 301: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-		case 302: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-		case 303: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		case 297: update_vram_address(); update_sprite_registers(); open_tile_index(); break;		 // open the bus for nametable fetch (garbage)
+		case 298: update_vram_address(); update_sprite_registers(); read_tile_index(); break;		 // fetch the name table byte (garbage)
+		case 299: update_vram_address(); update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 300: update_vram_address(); update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 301: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 302: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 303: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 304: update_vram_address(); update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 		
-		case 304: update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
-		case 305: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
-		case 306: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-		case 307: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-		case 308: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-		case 309: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-		case 310: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-		case 311: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		case 305: update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
+		case 306: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
+		case 307: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 308: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 309: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 310: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 311: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 312: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 		
-		case 312: update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
-		case 313: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
-		case 314: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-		case 315: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-		case 316: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-		case 317: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-		case 318: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-		case 319: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		case 313: update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
+		case 314: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
+		case 315: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 316: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 317: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 318: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 319: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 320: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 		
 		// fetch first 2 tiles of NEXT scanline
-		case 320: open_tile_index(); break;           // open the bus for nametable fetch
-		case 321: read_tile_index(); break;           // fetch the name table byte
-		case 322: open_background_attribute(); break; // open the bus for the attribute fetch
-		case 323: read_background_attribute(); break; // fetch the attributes		
-		case 324: open_background_pattern<pattern_0>(); break; // open the bus for pattern A fetch
-		case 325: read_background_pattern<pattern_0>(); break; // read 1st pattern byte from 000PTTTTTTTT0YYY
-		case 326: open_background_pattern<pattern_1>(); break; // open the bus for pattern B fetch
-		case 327: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
+		case 321: open_tile_index(); break;           // open the bus for nametable fetch
+		case 322: read_tile_index(); break;           // fetch the name table byte
+		case 323: open_background_attribute(); break; // open the bus for the attribute fetch
+		case 324: read_background_attribute(); break; // fetch the attributes		
+		case 325: open_background_pattern<pattern_0>(); break; // open the bus for pattern A fetch
+		case 326: read_background_pattern<pattern_0>(); break; // read 1st pattern byte from 000PTTTTTTTT0YYY
+		case 327: open_background_pattern<pattern_1>(); break; // open the bus for pattern B fetch
+		case 328: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
 		
-		case 328: open_tile_index(); break;           // open the bus for nametable fetch
-		case 329: read_tile_index(); break;           // fetch the name table byte
-		case 330: open_background_attribute(); break; // open the bus for the attribute fetch
-		case 331: read_background_attribute(); break; // fetch the attributes		
-		case 332: open_background_pattern<pattern_0>(); break; // open the bus for pattern A fetch
-		case 333: read_background_pattern<pattern_0>(); break; // read 1st pattern byte from 000PTTTTTTTT0YYY
-		case 334: open_background_pattern<pattern_1>(); break; // open the bus for pattern B fetch
-		case 335: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
+		case 329: open_tile_index(); break;           // open the bus for nametable fetch
+		case 330: read_tile_index(); break;           // fetch the name table byte
+		case 331: open_background_attribute(); break; // open the bus for the attribute fetch
+		case 332: read_background_attribute(); break; // fetch the attributes		
+		case 333: open_background_pattern<pattern_0>(); break; // open the bus for pattern A fetch
+		case 334: read_background_pattern<pattern_0>(); break; // read 1st pattern byte from 000PTTTTTTTT0YYY
+		case 335: open_background_pattern<pattern_1>(); break; // open the bus for pattern B fetch
+		case 336: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
 		
 		// dummy fetches
-		case 336: open_tile_index(); break;
-		case 337: read_tile_index(); break;
-		case 338: open_tile_index(); break;
-		case 339: read_tile_index(); if(odd_frame_) { ++hpos_; } break;
-		case 340:
+		case 337: open_tile_index(); break;
+		case 338: read_tile_index(); break;
+		case 339: open_tile_index(); break;
+		case 340: read_tile_index(); break;
+		case 341:
 			// idle
 			break;
 		default:
@@ -1563,222 +1633,469 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_prerender &) {
 void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 
 	if(!screen_enabled()) {
-		if(hpos_ < 256) {
-			const uint8_t pixel = select_blank_pixel();
-			if(greyscale_) {
-				dest_buffer[hpos_] = palette_[pixel] & 0x30;
-			} else {
-				dest_buffer[hpos_] = palette_[pixel];
+		switch(hpos_) {
+		case 0:   
+			// idle
+			break;
+		case 1:   case 2:   case 3:   case 4:   case 5:   case 6:   case 7:   case 8:   
+		case 9:   case 10:  case 11:  case 12:  case 13:  case 14:  case 15:  case 16:  
+		case 17:  case 18:  case 19:  case 20:  case 21:  case 22:  case 23:  case 24:  
+		case 25:  case 26:  case 27:  case 28:  case 29:  case 30:  case 31:  case 32: 
+		case 33:  case 34:  case 35:  case 36:  case 37:  case 38:  case 39:  case 40:
+		case 41:  case 42:  case 43:  case 44:  case 45:  case 46:  case 47:  case 48:
+		case 49:  case 50:  case 51:  case 52:  case 53:  case 54:  case 55:  case 56:
+		case 57:  case 58:  case 59:  case 60:  case 61:  case 62:  case 63:  case 64:
+		case 65:  case 66:  case 67:  case 68:  case 69:  case 70:  case 71:  case 72:
+		case 73:  case 74:  case 75:  case 76:  case 77:  case 78:  case 79:  case 80:
+		case 81:  case 82:  case 83:  case 84:  case 85:  case 86:  case 87:  case 88:
+		case 89:  case 90:  case 91:  case 92:  case 93:  case 94:  case 95:  case 96:
+		case 97:  case 98:  case 99:  case 100: case 101: case 102: case 103: case 104:
+		case 105: case 106: case 107: case 108: case 109: case 110: case 111: case 112:
+		case 113: case 114: case 115: case 116: case 117: case 118: case 119: case 120:
+		case 121: case 122: case 123: case 124: case 125: case 126: case 127: case 128:
+		case 129: case 130: case 131: case 132: case 133: case 134: case 135: case 136:
+		case 137: case 138: case 139: case 140: case 141: case 142: case 143: case 144:
+		case 145: case 146: case 147: case 148: case 149: case 150: case 151: case 152:
+		case 153: case 154: case 155: case 156: case 157: case 158: case 159: case 160:
+		case 161: case 162: case 163: case 164: case 165: case 166: case 167: case 168:
+		case 169: case 170: case 171: case 172: case 173: case 174: case 175: case 176:
+		case 177: case 178: case 179: case 180: case 181: case 182: case 183: case 184:
+		case 185: case 186: case 187: case 188: case 189: case 190: case 191: case 192:
+		case 193: case 194: case 195: case 196: case 197: case 198: case 199: case 200:
+		case 201: case 202: case 203: case 204: case 205: case 206: case 207: case 208:
+		case 209: case 210: case 211: case 212: case 213: case 214: case 215: case 216:
+		case 217: case 218: case 219: case 220: case 221: case 222: case 223: case 224:
+		case 225: case 226: case 227: case 228: case 229: case 230: case 231: case 232:
+		case 233: case 234: case 235: case 236: case 237: case 238: case 239: case 240:
+		case 241: case 242: case 243: case 244: case 245: case 246: case 247: case 248:
+		case 249: case 250: case 251: case 252: case 253: case 254: case 255: case 256:
+			{
+				const uint8_t pixel = select_blank_pixel();
+				if(greyscale_) {
+					dest_buffer[hpos_ - 1] = palette_[pixel] & 0x30;
+				} else {
+					dest_buffer[hpos_ - 1] = palette_[pixel];
+				}
 			}
-		} else {
-			// idle time
+			break;
+		case 257: case 258: case 259: case 260: case 261: case 262: case 263: case 264:
+		case 265: case 266: case 267: case 268: case 269: case 270: case 271: case 272:
+		case 273: case 274: case 275: case 276: case 277: case 278: case 279: case 280:
+		case 281: case 282: case 283: case 284: case 285: case 286: case 287: case 288:
+		case 289: case 290: case 291: case 292: case 293: case 294: case 295: case 296:
+		case 297: case 298: case 299: case 300: case 301: case 302: case 303: case 304:
+		case 305: case 306: case 307: case 308: case 309: case 310: case 311: case 312:
+		case 313: case 314: case 315: case 316: case 317: case 318: case 319: case 320:
+		case 321: case 322: case 323: case 324: case 325: case 326: case 327: case 328:
+		case 329: case 330: case 331: case 332: case 333: case 334: case 335: case 336:
+		case 337: case 338: case 339: case 340:
+			// idle
+			break;
+		default:
+			abort();
+			break;
 		}
 	} else {
-		if(hpos_ < 256) {
-			switch(hpos_ & 0x07) {
-			case 0:
-				// draw the pixel..
-				render_pixel(dest_buffer);
+	
+		if(odd_frame_ && vpos_ == 1 && hpos_ == 0) {
+			++hpos_;
+		}
+	
+		switch(hpos_) {
+		case   0:
+			// idle may be skiped
+			break;
 
-				// open the bus for nametable fetch
-				open_tile_index();
-				break;
-			case 1:
-				// draw the pixel..
-				render_pixel(dest_buffer);
+		case   1: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case   2: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case   3: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case   4: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case   5: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case   6: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case   7: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case   8: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				// fetch the name table byte
-				read_tile_index();
-				break;
-			case 2:
-				// draw the pixel..
-				render_pixel(dest_buffer);
+		case   9: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  10: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  11: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  12: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  13: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  14: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  15: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  16: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				// open the bus for the attribute fetch
-				open_background_attribute();
-				break;
-			case 3:
-				// draw the pixel..
-				render_pixel(dest_buffer);
+		case  17: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  18: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  19: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  20: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  21: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  22: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  23: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  24: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				// fetch the attributes
-				read_background_attribute();
-				break;
-			case 4:
-				// draw the pixel..
-				render_pixel(dest_buffer);
+		case  25: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  26: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  27: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  28: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  29: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  30: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  31: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  32: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				// open the bus for pattern A fetch
-				open_background_pattern<pattern_0>();
-				break;
-			case 5:
-				// draw the pixel..
-				render_pixel(dest_buffer);
+		case  33: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  34: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  35: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  36: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  37: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  38: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  39: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  40: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				// read the 1st pattern byte from 000PTTTTTTTT0YYY
-				read_background_pattern<pattern_0>();
-				break;
-			case 6:
-				// draw the pixel..
-				render_pixel(dest_buffer);
+		case  41: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  42: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  43: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  44: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  45: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  46: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  47: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  48: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				// open the bus for pattern B fetch
-				open_background_pattern<pattern_1>();
-				break;
-			case 7:
-				// draw the pixel..
-				render_pixel(dest_buffer);
+		case  49: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  50: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  51: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  52: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  53: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  54: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  55: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  56: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				// read 2nd pattern byte from 000PTTTTTTTT1YYY
-				read_background_pattern<pattern_1>();
+		case  57: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  58: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  59: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  60: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  61: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  62: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  63: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  64: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				// update shift registers
-				pattern_queue_[0]   |= (next_pattern_[0] & 0x00ff);
-				pattern_queue_[1]   |= (next_pattern_[1] & 0x00ff);
-				attribute_queue_[0] |= (((next_attribute_ >> 0) & 0x01) * 0xff); // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
-				attribute_queue_[1] |= (((next_attribute_ >> 1) & 0x01) * 0xff); // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+		case  65: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  66: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  67: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  68: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  69: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  70: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  71: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  72: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				clock_x();
-				if(hpos_ == 255) {
+		case  73: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  74: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  75: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  76: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  77: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  78: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  79: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  80: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-					// TODO: do this part incrementally during cycles 0-255 like the real thing
-					if(sprite_size_ == 16) {
-						evaluate_sprites<16>();
-					} else {
-						evaluate_sprites<8>();
-					}
+		case  81: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  82: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  83: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  84: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  85: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  86: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  87: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  88: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-					// If rendering is enabled, the PPU increments the vertical position in v.
-					// The effective Y scroll coordinate is incremented, which is a complex operation
-					// that will correctly skip the attribute table memory regions, and wrap to the
-					// next nametable appropriately
-					clock_y();
-				}
-				break;
-			}
-		} else if(hpos_ < 320) {
+		case  89: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  90: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  91: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case  92: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case  93: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case  94: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case  95: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case  96: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-			// fetch sprite data phase
-			switch(hpos_ & 0x07) {
-			case 0:
-				if(hpos_ == 256) {
-					update_x_scroll();
-				}
+		case  97: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case  98: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case  99: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 100: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 101: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 102: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 103: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 104: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				// open the bus for nametable fetch
-				open_tile_index();
-				break;
-			case 1:
-				// fetch the name table byte (garbage)
-				read_tile_index();
-				break;
-			case 2:
-				// open the bus for the attribute fetch
-				open_background_attribute();
-				break;
-			case 3:
-				// fetch the attributes (garbage)
-				read_background_attribute();
-				break;
-			case 4:
-				// open the bus for sprite pattern A fetch
-				if(sprite_size_ == 16) {
-					open_sprite_pattern<16, pattern_0>();
-				} else {
-					open_sprite_pattern<8, pattern_0>();
-				}
-				break;
-			case 5:
-				if(sprite_size_ == 16) {
-					read_sprite_pattern<16, pattern_0>();
-				} else {
-					read_sprite_pattern<8, pattern_0>();
-				}
-				break;
-			case 6:
-				// open the bus for sprite pattern B fetch
-				if(sprite_size_ == 16) {
-					open_sprite_pattern<16, pattern_1>();
-				} else {
-					open_sprite_pattern<8, pattern_1>();
-				}
-				break;
-			case 7:
-				if(sprite_size_ == 16) {
-					read_sprite_pattern<16, pattern_1>();
-				} else {
-					read_sprite_pattern<8, pattern_1>();
-				}
-				break;
-			}
+		case 105: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 106: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 107: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 108: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 109: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 110: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 111: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 112: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-			update_sprite_registers();
+		case 113: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 114: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 115: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 116: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 117: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 118: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 119: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 120: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-		} else if(hpos_ < 336)  {
+		case 121: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 122: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 123: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 124: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 125: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 126: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 127: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 128: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-			// fetch first 2 tiles of NEXT scanline
-			switch(hpos_ & 0x07) {
-			case 0:
-				// open the bus for nametable fetch
-				open_tile_index();
-				break;
-			case 1:
-				// fetch the name table byte
-				read_tile_index();
-				break;
-			case 2:
-				// open the bus for the attribute fetch
-				open_background_attribute();
-				break;
-			case 3:
-				// fetch the attributes
-				read_background_attribute();
-				break;
-			case 4:
-				// open the bus for pattern A fetch
-				open_background_pattern<pattern_0>();
-				break;
-			case 5:
-				// read 1st pattern byte from 000PTTTTTTTT0YYY
-				read_background_pattern<pattern_0>();
-				break;
-			case 6:
-				// open the bus for pattern B fetch
-				open_background_pattern<pattern_1>();
-				break;
-			case 7:
-				// read 2nd pattern byte from 000PTTTTTTTT1YYY
-				read_background_pattern<pattern_1>();
+		case 129: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 130: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 131: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 132: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 133: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 134: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 135: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 136: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				// update shift registers
-				update_shift_registers_idle();
+		case 137: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 138: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 139: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 140: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 141: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 142: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 143: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 144: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-				clock_x();
-				break;
-			}
-		} else if(hpos_ < 340)  {
+		case 145: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 146: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 147: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 148: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 149: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 150: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 151: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 152: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-			// dummy fetches
-			switch(hpos_) {
-			case 336:
-			case 338:
-				// open the bus for redundant tile 3 fetch for next scanline
-				open_tile_index();
-				break;
+		case 153: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 154: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 155: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 156: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 157: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 158: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 159: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 160: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 
-			case 337:
-			case 339:
-				// redundantly fetch nametable byte of tile 3
-				read_tile_index();
-				break;
-			}
-		} else {
-			// idle time
+		case 161: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 162: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 163: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 164: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 165: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 166: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 167: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 168: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 169: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 170: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 171: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 172: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 173: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 174: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 175: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 176: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 177: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 178: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 179: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 180: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 181: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 182: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 183: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 184: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 185: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 186: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 187: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 188: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 189: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 190: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 191: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 192: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 193: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 194: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 195: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 196: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 197: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 198: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 199: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 200: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 201: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 202: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 203: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 204: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 205: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 206: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 207: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 208: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 209: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 210: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 211: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 212: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 213: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 214: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 215: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 216: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 217: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 218: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 219: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 220: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 221: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 222: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 223: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 224: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 225: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 226: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 227: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 228: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 229: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 230: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 231: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 232: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 233: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 234: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 235: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 236: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 237: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 238: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 239: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 240: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 241: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 242: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 243: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 244: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 245: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 246: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 247: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 248: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+
+		case 249: render_pixel(dest_buffer); evaluate_sprites_odd(); open_tile_index(); break;
+		case 250: render_pixel(dest_buffer); evaluate_sprites_even();  read_tile_index(); break;
+		case 251: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_attribute(); break;
+		case 252: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_attribute(); break;
+		case 253: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_0>(); break;
+		case 254: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_0>(); break;
+		case 255: render_pixel(dest_buffer); evaluate_sprites_odd(); open_background_pattern<pattern_1>(); break;
+		case 256: render_pixel(dest_buffer); evaluate_sprites_even();  read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); clock_y(); break;
+
+		case 257: update_x_scroll(); update_sprite_registers(); open_tile_index(); break;			// open the bus for nametable fetch (garbage)
+		case 258:					 update_sprite_registers(); read_tile_index(); break;			// fetch the name table byte (garbage)
+		case 259:					 update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 260:					 update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 261: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 262: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 263: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 264: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		
+		case 265: update_sprite_registers(); open_tile_index(); break;  	  // open the bus for nametable fetch (garbage)
+		case 266: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
+		case 267: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 268: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 269: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 270: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 271: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 272: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		
+		case 273: update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
+		case 274: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
+		case 275: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 276: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 277: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 278: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 279: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 280: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		
+		case 281: update_sprite_registers(); open_tile_index(); break;  	  // open the bus for nametable fetch (garbage)
+		case 282: update_sprite_registers(); read_tile_index(); break;  	  // fetch the name table byte (garbage)
+		case 283: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 284: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 285: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 286: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 287: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 288: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		
+		case 289: update_sprite_registers(); open_tile_index(); break;  	  // open the bus for nametable fetch (garbage)
+		case 290: update_sprite_registers(); read_tile_index(); break;  	  // fetch the name table byte (garbage)
+		case 291: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 292: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 293: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 294: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 295: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 296: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		
+		case 297: update_sprite_registers(); open_tile_index(); break;  	  // open the bus for nametable fetch (garbage)
+		case 298: update_sprite_registers(); read_tile_index(); break;  	  // fetch the name table byte (garbage)
+		case 299: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 300: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 301: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 302: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 303: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 304: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		
+		case 305: update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
+		case 306: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
+		case 307: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 308: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 309: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 310: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 311: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 312: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		
+		case 313: update_sprite_registers(); open_tile_index(); break;  		 // open the bus for nametable fetch (garbage)
+		case 314: update_sprite_registers(); read_tile_index(); break;  		 // fetch the name table byte (garbage)
+		case 315: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+		case 316: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
+		case 317: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+		case 318: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+		case 319: update_sprite_registers(); if(sprite_size_ == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+		case 320: update_sprite_registers(); if(sprite_size_ == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+		
+		// fetch first 2 tiles of NEXT scanline
+		case 321: open_tile_index(); break;           // open the bus for nametable fetch
+		case 322: read_tile_index(); break;           // fetch the name table byte
+		case 323: open_background_attribute(); break; // open the bus for the attribute fetch
+		case 324: read_background_attribute(); break; // fetch the attributes		
+		case 325: open_background_pattern<pattern_0>(); break; // open the bus for pattern A fetch
+		case 326: read_background_pattern<pattern_0>(); break; // read 1st pattern byte from 000PTTTTTTTT0YYY
+		case 327: open_background_pattern<pattern_1>(); break; // open the bus for pattern B fetch
+		case 328: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
+		
+		case 329: open_tile_index(); break;           // open the bus for nametable fetch
+		case 330: read_tile_index(); break;           // fetch the name table byte
+		case 331: open_background_attribute(); break; // open the bus for the attribute fetch
+		case 332: read_background_attribute(); break; // fetch the attributes		
+		case 333: open_background_pattern<pattern_0>(); break; // open the bus for pattern A fetch
+		case 334: read_background_pattern<pattern_0>(); break; // read 1st pattern byte from 000PTTTTTTTT0YYY
+		case 335: open_background_pattern<pattern_1>(); break; // open the bus for pattern B fetch
+		case 336: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
+		
+		// dummy fetches
+		case 337: open_tile_index(); break;
+		case 338: read_tile_index(); break;
+		case 339: open_tile_index(); break;
+		case 340: read_tile_index(); break;
+		default:
+			abort();
+
 		}
 	}
 }
-
-
 
 //------------------------------------------------------------------------------
 // Name: execute_scanline
@@ -1797,7 +2114,7 @@ void PPU::execute_scanline(int line, const scanline_vblank &) {
 	int cycles = 0;
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_) {
 
-		if(line == 0 && i == 0) {
+		if(line == 0 && hpos_ == 1) {
 			enter_vblank();
 		}
 
@@ -1811,7 +2128,7 @@ void PPU::execute_scanline(int line, const scanline_vblank &) {
 #else
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_) {
 
-		if(line == 0 && hpos_ == 0) {
+		if(line == 0 && hpos_ == 1) {
 			enter_vblank();
 		}
 

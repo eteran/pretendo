@@ -95,12 +95,13 @@ void execute_scanline_261() {
 void nes::run_frame(VideoInterface *video) {
 
 	// ppu
-	execute_scanline_0_19();
+	
 	nes::ppu.start_frame();
 	execute_scanline_20();
 	execute_scanline_21_260(video);
 	nes::ppu.end_frame();
 	execute_scanline_261();
+	execute_scanline_0_19();
 
 	// sound
 #if 0

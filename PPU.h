@@ -113,9 +113,12 @@ private:
 	void read_tile_index();
 	void render_pixel(uint8_t *dest_buffer);
 	void update_shift_registers_idle();
+	void update_shift_registers_render();
 	void update_x_scroll();
 	void update_sprite_registers();
 	void update_vram_address();
+	void evaluate_sprites_even();
+	void evaluate_sprites_odd();
 
 private:
 	template <int Size>
@@ -173,6 +176,7 @@ private:
 	uint8_t      sprite_size_;
 	uint8_t      status_;
 	uint8_t      tile_offset_;           // loopy's "x"
+	uint8_t      sprite_buffer_;
 	bool         background_clipping_;
 	bool         background_visible_;
 	bool         greyscale_;
@@ -185,6 +189,7 @@ private:
 	bool         sprite_zero_found_curr_;
 	bool         sprites_visible_;
 	bool         write_latch_;
+	bool         write_block_;
 
 public:
 	bool         show_sprites_;
