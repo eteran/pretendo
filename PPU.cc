@@ -1031,11 +1031,14 @@ void PPU::clock_y() {
 //------------------------------------------------------------------------------
 void PPU::enter_vblank() {
 
-	// Reading 1 PPU clock before VBL should suppress setting
+	// Reading one PPU clock before reads it as clear and never sets the flag 
+	// or generates NMI for that frame.
 	if(ppu_cycle_ != (ppu_read_2002_cycle_ + 1)) {
 
 		status_ |= 0x80;
 
+		// Reading on the same PPU clock or one later reads it as set, 
+		// clears it, and suppresses the NMI for that frame.
 		if(nmi_on_vblank()) {
 			nes::cpu.nmi();
 		}
