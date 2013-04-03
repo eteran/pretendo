@@ -31,7 +31,7 @@ INCLUDES := -I. -Ilibunif -Ip6502 -isystem boost
 ASMFLAGS :=
 CXXFLAGS := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
 CFLAGS   := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
-LDFLAGS  := -g
+LDFLAGS  := -g -lbe
 
 ASM_FILES   :=
 
@@ -54,6 +54,7 @@ H_FILES     := \
 	Mapper002.h \
 	Mapper003.h \
 	Mapper004.h \
+	
 	Mapper005.h \
 	Mapper007.h \
 	Mapper009.h \
@@ -128,7 +129,8 @@ H_FILES     := \
 	VRC6.h \
 	VideoInterface.h \
 	glext.h \
-	revbits.h
+	revbits.h \
+	PretendoApp.h
 
 CXX_FILES   := \
 	APU.cc \
@@ -215,7 +217,9 @@ CXX_FILES   := \
 	VRC4.cc \
 	VRC6.cc \
 	p6502/CPU.cc \
-	p6502/P6502.cc
+	p6502/P6502.cc \
+	PretendoApp.cc \
+	HaikuMain.cc
 
 C_FILES     := \
 	libunif/ines_convert.c \
