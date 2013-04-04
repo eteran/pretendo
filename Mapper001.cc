@@ -11,7 +11,7 @@ enum {
 	REG_8000_9FFF = 0x00,
 	REG_A000_BFFF = 0x01,
 	REG_C000_DFFF = 0x02,
-	REG_E000_FFFF = 0x03,
+	REG_E000_FFFF = 0x03
 };
 
 }
