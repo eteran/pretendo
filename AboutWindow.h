@@ -21,7 +21,7 @@ class AboutView : public BView
 	
 	private:
 	BBitmap *fIcon;
-	BBitmap *fBanner;
+	BBitmap *fLogo;
 };
 
 

@@ -16,13 +16,7 @@ AboutView::AboutView(BRect frame)
 	: BView (frame, "_about_view", B_FOLLOW_ALL, B_WILL_DRAW)
 {
 	fIcon = BTranslationUtils::GetBitmap('bits', "About Icon");
-
-	// FIXME: we don't know why this does not work
-	//fBanner = BTranslationUtils::GetBitmap('bits', "About Banner");
-	//fBanner = BTranslationUtils::GetBitmap('bits', 3);
-	
-	
-	
+	fLogo = BTranslationUtils::GetBitmap('bits', "Pretendo Logo");
 }
 
 
@@ -43,11 +37,9 @@ AboutView::AttachedToWindow (void)
 	button->MakeDefault(true);
 	
 	r = Bounds();
-	button->MoveTo ((r.Width() - button->Frame().Width()) / 2 , 
-					(r.bottom - button->Frame().Height() - 12)
-	);
+	button->MoveTo ((r.Width() - button->Frame().Width()) / 2 , 210);
 	
-	r.Set(53, 50, r.right - 10, r.bottom - 50);
+	r.Set(53, 50, r.right - 10, r.bottom - 80);
 	BTextView *textview = new BTextView (r, "_textview", 
 		BRect(3, 3, r.Width() - 3, r.Height() - 3), 
 		B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW);
@@ -56,6 +48,8 @@ AboutView::AttachedToWindow (void)
 	f.SetSize(11.0f);
 	textview->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	textview->SetFontAndColor(&f);	
+	textview->MakeEditable(false);
+	textview->MakeSelectable(false);
 	
 	char const *text = "A freeware, portable Nintendo NES emulator\n\n"
 	"Version:\t000000\n"
@@ -80,12 +74,7 @@ AboutView::Draw (BRect updateRect)
   	FillRect (r); 
     SetDrawingMode(B_OP_OVER); 
     DrawBitmap (fIcon, BPoint(18, 6));
-    r = Bounds();
-    r.left = 53.0;
-    r.right = Bounds().right;
-    DrawBitmap (fBanner, BPoint( (r.Width() - 53) / 2, 11));
-    
-    SetDrawingMode(B_OP_COPY); 
+    DrawBitmap(fLogo, BPoint((Bounds().Width() - 196) / 2, 11));
 }
 
 
