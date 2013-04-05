@@ -16,13 +16,15 @@ SHELL = /bin/sh
 .asm.o:
 	@echo compiling $< ...
 	@$(ASM) $(ASMFLAGS) $(DEFINES) -c $< -o $@ 1>/dev/null
-
+	
+	
 ASM    := nasm -f elf
 CXX    := g++ -march=native -ansi
 CC     := gcc -march=native -ansi
 LD     := g++
 RM     := rm -f
 ED     := ed
+RES	   := xres
 
 APPNAME := pretendo
 
@@ -230,6 +232,9 @@ C_FILES     := \
 	libunif/load_unif.c \
 	libunif/std_func.c \
 	libunif/unif_crc32.c
+	
+RES_FILES	:=  \
+	pretendo.rsrc
 
 O_FILES     := $(CXX_FILES:.cc=.o) $(ASM_FILES:.asm=.o) $(C_FILES:.c=.o)
 SOURCEFILES := $(H_FILES) $(CXX_FILES) $(ASM_FILES)
@@ -242,6 +247,7 @@ all: $(APPNAME)
 $(APPNAME): $(O_FILES)
 	@echo linking $@ ...
 	@$(LD) $(LDFLAGS) $(O_FILES) -o $@ 1>/dev/null
+	xres -o $@ pretendo.rsrc
 
 mrproper: clean
 	$(RM) makedep
