@@ -320,7 +320,7 @@ void op_brk() {
 		set_pc_lo(read_byte(vector_address + 0));
 		STAGE_END;
 	case 6:
-		//LAST_CYCLE;
+		LAST_CYCLE;
 		// fetch PCH
 		set_pc_hi(read_byte(vector_address + 1));
 		OPCODE_COMPLETE;
@@ -329,7 +329,7 @@ void op_brk() {
 	}
 	
 	if(nmi_pending) {
-		if(current_cycle < 5) {
+		if(current_cycle < 4) {
 			printf("BRK/NMI CONFLICT! %d [OVERRIDE]\n", current_cycle);
 			vector_address = NMI_VECTOR_ADDRESS;
 			nmi_pending = false;
@@ -419,7 +419,7 @@ void do_irq() {
 		abort();
 	}
 	
-	if(nmi_pending && current_cycle < 5) {
+	if(nmi_pending && current_cycle < 4) {
 		vector_address = NMI_VECTOR_ADDRESS;
 		nmi_pending = false;
 	}
@@ -771,6 +771,7 @@ void clock() {
 	if(current_cycle == 0) {
 
 		// first cycle is always instruction fetch
+		// or do we force an interrupt?
 		if(rst_executing) {
 			instruction = 0x100;
 		} else if(nmi_executing) {
@@ -780,9 +781,6 @@ void clock() {
 		} else {
 			instruction = read_byte(PC++);
 		}
-		
-		//TRACE;
-		
 	} else {
 		// execute the current part of the instruction
 		execute_opcode();
@@ -800,12 +798,7 @@ void clock() {
 void run(int cycles) {
 
 	while(cycles-- > 0) {
-	
-		//TRACE;
-		//if(executed_cycle_count == 90000) {
-		//	abort();
-		//}
-	
+		
 		if(burn_count != 0) {
 			assert(burn_count >= 0);
 			--burn_count;
