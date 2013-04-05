@@ -16,7 +16,7 @@
 namespace {
 
 const int cycles_per_scanline = 341;
-const int cpu_alignment       = 1;
+const int cpu_alignment       = 0;
 
 enum {
 	SPRITE_VFLIP    = 0x80,

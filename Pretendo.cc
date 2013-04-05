@@ -21,8 +21,8 @@
 
 namespace {
 
-const int timer_interval = 1000. / 60;
-//const int timer_interval = 0;
+//const int timer_interval = 1000. / 60;
+const int timer_interval = 0;
 
 }
 
@@ -317,7 +317,13 @@ void Pretendo::showEvent(QShowEvent *event) {
 	Q_UNUSED(event);
 	
 	if(qApp->arguments().size() == 2) {
-		const QString rom = qApp->arguments()[1];		
+		const QString rom = qApp->arguments()[1];
+		
+		// make the ROM viewer default to the location of the run ROM
+		const QFileInfo info(rom);
+		const QModelIndex root_model_index = filesystem_model_->setRootPath(info.absolutePath());
+		ui_.listView->setRootIndex(filter_model_->mapFromSource(root_model_index));
+			
 		nes::cart.load(qPrintable(rom));
 		on_action_Run_triggered();
 	}

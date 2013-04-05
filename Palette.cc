@@ -104,6 +104,9 @@ rgb_color_t make_rgb_color(uint16_t pixel) {
 //------------------------------------------------------------------------------
 rgb_color_t *Palette::NTSCPalette(double hue, double tint) {
 
+	(void)hue;
+	(void)tint;
+
 	static rgb_color_t color_list[64];
 	(void)hue;
 	(void)tint;
