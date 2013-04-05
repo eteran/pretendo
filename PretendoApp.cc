@@ -1,5 +1,6 @@
 
 #include "PretendoApp.h"
+#include "AboutWindow.h"
 
 #include <Path.h>
 
@@ -9,6 +10,9 @@ PretendoApp::PretendoApp()
 { 	
 	//fWindow = new PretendoWindow;
 	//fWindow->Show();
+	
+	AboutWindow *aw = new AboutWindow;
+	aw->Show();
 }
 
 
@@ -45,5 +49,5 @@ void PretendoApp::ReadyToRun() {
 
 
 void PretendoApp::AboutRequested() {
-     //(new AboutWindow)->Show();
+     (new AboutWindow)->Show();
 }

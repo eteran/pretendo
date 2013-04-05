@@ -33,7 +33,7 @@ INCLUDES := -I. -Ilibunif -Ip6502 -isystem boost
 ASMFLAGS :=
 CXXFLAGS := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
 CFLAGS   := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
-LDFLAGS  := -g -lbe
+LDFLAGS  := -g -lbe -ltranslation
 
 ASM_FILES   :=
 
@@ -132,7 +132,8 @@ H_FILES     := \
 	glext.h \
 	revbits.h \
 	PretendoApp.h \
-	ConfigManager.h
+	ConfigManager.h \
+	AboutWindow.h
 
 CXX_FILES   := \
 	APU.cc \
@@ -222,7 +223,8 @@ CXX_FILES   := \
 	p6502/P6502.cc \
 	PretendoApp.cc \
 	HaikuMain.cc \
-	ConfigManager.cc
+	ConfigManager.cc \
+	AboutWindow.cc
 
 C_FILES     := \
 	libunif/ines_convert.c \
