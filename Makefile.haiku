@@ -224,7 +224,7 @@ CXX_FILES   := \
 	PretendoApp.cc \
 	HaikuMain.cc \
 	ConfigManager.cc \
-	AboutWindow.cc
+	AboutWindow.cc 
 
 C_FILES     := \
 	libunif/ines_convert.c \
