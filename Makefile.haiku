@@ -33,7 +33,7 @@ INCLUDES := -I. -Ilibunif -Ip6502 -isystem boost
 ASMFLAGS :=
 CXXFLAGS := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
 CFLAGS   := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
-LDFLAGS  := -g -lbe -lroot -ltranslation
+LDFLAGS  := -g -lbe -lroot -ltranslation -ltracker -lmedia
 
 ASM_FILES   :=
 
@@ -133,7 +133,9 @@ H_FILES     := \
 	revbits.h \
 	PretendoApp.h \
 	ConfigManager.h \
-	AboutWindow.h
+	AboutWindow.h \
+	ROMFilePanel.h \
+	AudioStream.h
 
 CXX_FILES   := \
 	APU.cc \
@@ -224,7 +226,9 @@ CXX_FILES   := \
 	PretendoApp.cc \
 	HaikuMain.cc \
 	ConfigManager.cc \
-	AboutWindow.cc 
+	AboutWindow.cc \
+	ROMFilePanel.cc \
+	AudioStream.cc
 
 C_FILES     := \
 	libunif/ines_convert.c \
