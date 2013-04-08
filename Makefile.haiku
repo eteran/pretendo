@@ -43,6 +43,7 @@ H_FILES     := \
 	BNROM.h \
 	Bandai.h \
 	Cart.h \
+	ConfigManager.h \
 	Controller.h \
 	DMC.h \
 	Fixed.h \
@@ -130,13 +131,12 @@ H_FILES     := \
 	VRC6.h \
 	VideoInterface.h \
 	glext.h \
-	revbits.h \
-	PretendoApp.h \
-	ConfigManager.h \
-	AboutWindow.h \
-	ROMFilePanel.h \
-	AudioStream.h \
-	LinkView.h
+	haiku/AboutWindow.h \
+	haiku/AudioStream.h \
+	haiku/LinkView.h \
+	haiku/PretendoApp.h \
+	haiku/ROMFilePanel.h \
+	revbits.h
 
 CXX_FILES   := \
 	APU.cc \
@@ -224,13 +224,13 @@ CXX_FILES   := \
 	VRC6.cc \
 	p6502/CPU.cc \
 	p6502/P6502.cc \
-	PretendoApp.cc \
-	HaikuMain.cc \
 	ConfigManager.cc \
-	AboutWindow.cc \
-	ROMFilePanel.cc \
-	AudioStream.cc \
-	LinkView.cc
+	haiku/AboutWindow.cc \
+	haiku/AudioStream.cc \
+	haiku/HaikuMain.cc \
+	haiku/LinkView.cc \
+	haiku/PretendoApp.cc \
+	haiku/ROMFilePanel.cc
 
 C_FILES     := \
 	libunif/ines_convert.c \
