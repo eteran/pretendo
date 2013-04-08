@@ -6,13 +6,14 @@
 #include <Path.h>
 #include <Roster.h>
 
+#include "AboutWindow.h"
+
 /*
 #include "PretendoWindow.h"
-#include "AboutWindow.h"
 #include "misc.h"
 */
 
-#define MSG_ROM_LOADED 'load'
+#define MSG_ROM_LOADED 'load'	// temporary
 
 class PretendoApp : public BApplication {
 	public:
