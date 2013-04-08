@@ -47,6 +47,12 @@ void Input::write4016(uint8_t value) {
 // Name: read4016
 //------------------------------------------------------------------------------
 uint8_t Input::read4016() {
+	// The ouput looks like this for NES:
+	// OOOxxxxD
+	// Where:
+	// O = open bus
+	// x = zero
+	// D = data
 	return controller1_.read() | 0x40;
 }
 
@@ -54,6 +60,12 @@ uint8_t Input::read4016() {
 // Name: read4017
 //------------------------------------------------------------------------------
 uint8_t Input::read4017() {
+	// The ouput looks like this for NES:
+	// OOOxxxxD
+	// Where:
+	// O = open bus
+	// x = zero
+	// D = data
 	return 0x40;
 }
 
