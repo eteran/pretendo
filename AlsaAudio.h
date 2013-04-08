@@ -2,13 +2,12 @@
 #ifndef ALSA_AUDIO_20130124_H_
 #define ALSA_AUDIO_20130124_H_
 
-#include "Audio.h"
 #include <alsa/asoundlib.h>
 
-class AlsaAudio : public Audio {
+class AlsaAudio {
 public:
 	AlsaAudio();
-	virtual ~AlsaAudio();
+	~AlsaAudio();
 
 public:
 	void write(const void *p, size_t n);

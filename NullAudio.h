@@ -2,12 +2,12 @@
 #ifndef NULL_AUDIO_20130124_H_
 #define NULL_AUDIO_20130124_H_
 
-#include "Audio.h"
+#include <cstddef>
 
-class NullAudio : public Audio {
+class NullAudio {
 public:
 	NullAudio();
-	virtual ~NullAudio();
+	~NullAudio();
 
 public:
 	void write(const void *p, size_t n);

@@ -6,7 +6,6 @@ QT      += opengl
 # Input
 HEADERS += \
 		APU.h \
-		Audio.h \
 		BNROM.h \
 		Bandai.h \
 		Cart.h \

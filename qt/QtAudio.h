@@ -2,13 +2,12 @@
 #ifndef QT_AUDIO_20130124_H_
 #define QT_AUDIO_20130124_H_
 
-#include "Audio.h"
 #include <QObject>
 
 class AudioBuffer;
 class QAudioOutput;
 
-class QtAudio : public QObject, public Audio {
+class QtAudio : public QObject {
 	Q_OBJECT
 
 public:

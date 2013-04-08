@@ -11,7 +11,14 @@ class QFileSystemModel;
 class QLabel;
 class QSortFilterProxyModel;
 class QTimer;
-class Audio;
+
+#if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
+	class QtAudio;
+#elif defined(ENABLE_SOUND)
+	class AlsaAudio;
+#else
+	class NullAudio;
+#endif
 
 class Pretendo : public QMainWindow {
 	Q_OBJECT
@@ -46,7 +53,13 @@ private:
 	QTime                  time_;
 	quint64                framecount_;
 	bool                   paused_;
-	Audio                 *audio_;
+#if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
+	QtAudio *audio_;
+#elif defined(ENABLE_SOUND)
+	AlsaAudio *audio_;
+#else
+	NullAudio *audio_;
+#endif
 };
 
 #endif
