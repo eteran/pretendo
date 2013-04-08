@@ -1,19 +1,14 @@
 
-#include "AboutWindow.h"
 
+#include <Application.h>
 #include <Roster.h>
 #include <TranslationUtils.h>
 #include <View.h>
-#include <Resources.h>
-#include <Entry.h>
-#include <Path.h>
 #include <TextView.h>
-#include <cstdio>
-#include <cstring>
 
+#include "AboutWindow.h"
 #include "LinkView.h"
 
-#include <Application.h>
 
 AboutView::AboutView(BRect frame)
 	: BView (frame, "_about_view", B_FOLLOW_ALL, B_WILL_DRAW)
