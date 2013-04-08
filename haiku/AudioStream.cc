@@ -142,6 +142,8 @@ void
 AudioStream::sync_hook (void *cookie, void *buffer, size_t size, 
 	const media_raw_audio_format &format)
 {
+	(void)format;
+	
 	AudioStream *object = reinterpret_cast<AudioStream *>(cookie);
 	object->InternalSync (buffer, size);
 	

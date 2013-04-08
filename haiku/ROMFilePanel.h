@@ -30,8 +30,12 @@ class ROMFilePanel : public BFilePanel
 class ROMFilter : public BRefFilter
 {
 	public:
-	virtual bool Filter (const entry_ref *ref, BNode *node, struct  stat_beos *st, const char *filetype)
+	virtual bool Filter (const entry_ref *ref, BNode *node, struct  stat_beos *st, 
+		const char *filetype)
 	{
+		(void)node;
+		(void)st;
+		
 		BString	tempFileName (ref->name);
 		BString tempFileType (filetype);
 		int32 pos;
