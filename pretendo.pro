@@ -196,7 +196,7 @@ SOURCES += \
 		libunif/load_unif.c \
 		libunif/std_func.c \
 		libunif/unif_crc32.c \
-		main.cc \
+		qt/main.cc \
 		qt/NullAudio.cc \
 		qt/Pretendo.cc \
 		qt/QtVideo.cc \
