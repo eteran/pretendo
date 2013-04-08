@@ -108,7 +108,6 @@ AboutWindow::AboutWindow()
 
 AboutWindow::~AboutWindow()
 {
-	
 }
 
 
