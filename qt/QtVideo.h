@@ -8,11 +8,11 @@
 
 class Mediator;
 
-class QGLVideo : public QGLWidget, public VideoInterface {
+class QtVideo : public QGLWidget, public VideoInterface {
 	Q_OBJECT
 public:
-	QGLVideo(QWidget *parent = 0, const QGLWidget *shareWidget = 0, Qt::WindowFlags f = 0);
-	virtual ~QGLVideo();
+	QtVideo(QWidget *parent = 0, const QGLWidget *shareWidget = 0, Qt::WindowFlags f = 0);
+	virtual ~QtVideo();
 
 public:
 	// required functions

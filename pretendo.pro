@@ -102,7 +102,7 @@ HEADERS += \
 		libunif/unif_crc32.h \
 		libunif/unif_types.h \
 		qt/Pretendo.h \
-		qt/QGLVideo.h
+		qt/QtVideo.h
 
 FORMS += qt/Pretendo.ui
 
@@ -201,7 +201,7 @@ SOURCES += \
 		libunif/unif_crc32.c \
 		main.cc \
 		qt/Pretendo.cc \
-		qt/QGLVideo.cc
+		qt/QtVideo.cc
 
 RESOURCES += pretendo.qrc
 
