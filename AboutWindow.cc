@@ -11,6 +11,9 @@
 #include <cstdio>
 #include <cstring>
 
+#include "LinkView.h"
+
+#include <Application.h>
 
 AboutView::AboutView(BRect frame)
 	: BView (frame, "_about_view", B_FOLLOW_ALL, B_WILL_DRAW)
@@ -32,14 +35,14 @@ AboutView::AttachedToWindow (void)
 	
 	
 	BRect r (0, 0, 0, 0);
-	BButton *button = new BButton (r, "_okay", "Okay ", new BMessage (0x6532));
+	BButton *button = new BButton (r, "_okay", "Okay ", new BMessage ('OKAY'));
 	button->ResizeToPreferred();
 	button->MakeDefault(true);
 	
 	r = Bounds();
-	button->MoveTo ((r.Width() - button->Frame().Width()) / 2 , 210);
+	button->MoveTo ((r.Width() - button->Frame().Width()) / 2 , 270);
 	
-	r.Set(53, 50, r.right - 10, r.bottom - 80);
+	r.Set(53, 50, r.right - 10, r.bottom - 100);
 	BTextView *textview = new BTextView (r, "_textview", 
 		BRect(3, 3, r.Width() - 3, r.Height() - 3), 
 		B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW);
@@ -52,22 +55,26 @@ AboutView::AttachedToWindow (void)
 	textview->MakeSelectable(false);
 	
 	char const *text = "A freeware, portable Nintendo NES emulator\n\n"
-	"Version:\t000000\n"
-	"Built:\t" __DATE__ " " __TIME__
-	"\n\nWritten by: Eli Dayan and Evan Teran\n\n"
+	"Version:\t\t000000\n"
+	"Built on:\t\t" __DATE__ " " __TIME__
+	"\nWritten by: \tEli Dayan and Evan Teran\n\n"
 	"\"Nintendo\" and \"Nintendo Entertainment System\" are registered trademarks of "
 	"Nintendo Co., Ltd";
-	textview->SetText(text, strlen(text));
+	textview->SetText(text);
+	textview->ResizeToPreferred();
 	
 	AddChild(textview);
+	textview->ResizeBy(0,-20);
+	button->MoveBy(0, -10);
 	AddChild(button);
+	
+	BView::AttachedToWindow();
 }
 
 
 void
 AboutView::Draw (BRect updateRect)
 {
-	(void)updateRect;
 	BRect r = Bounds(); 
     r.right = 30;
     SetHighColor(tint_color(ViewColor(), B_DARKEN_1_TINT)); 
@@ -75,6 +82,8 @@ AboutView::Draw (BRect updateRect)
     SetDrawingMode(B_OP_OVER); 
     DrawBitmap (fIcon, BPoint(18, 6));
     DrawBitmap(fLogo, BPoint((Bounds().Width() - 196) / 2, 11));
+    
+    BView::Draw(updateRect);
 }
 
 
@@ -82,12 +91,23 @@ AboutWindow::AboutWindow()
 	: BWindow (BRect (0,0,0,0), "About Window", B_MODAL_WINDOW, 
 		B_NOT_CLOSABLE | B_NOT_RESIZABLE)
 {
-	ResizeTo (340, 280);
+	ResizeTo (340, 300);
 	MoveTo ((BScreen().Frame().Width() - Frame().Width()) / 2,
 		     (BScreen().Frame().Height() - Frame().Height()) / 2);
 	
 	fAboutView = new AboutView(Bounds());
 	AddChild(fAboutView);
+	
+	BRect r;
+	r.Set(53, 185, 194, 200);
+	fAboutView->AddChild(new LinkView(r, const_cast<char *>("Pretendo on google code"), const_cast<char *>("http://code.google.com/p/pretendo/")));
+	
+	r.Set(53, 205, 124, 220);
+	fAboutView->AddChild(new LinkView(r, const_cast<char *>("Eli's website"), const_cast<char *>("http://shell.reverse.net/~eli")));
+	
+	r.Set(53, 225, 140, 240);
+	fAboutView->AddChild(new LinkView(r, const_cast<char *>("Evan's website"), const_cast<char *>("http://www.codef00.com")));
+	
 }
 
 
@@ -106,10 +126,10 @@ AboutWindow::QuitRequested (void)
 void
 AboutWindow::MessageReceived (BMessage *message)
 {
-	if (message->what == 0x6532) {
-		PostMessage(B_QUIT_REQUESTED);
-	} else {
-		BWindow::MessageReceived (message);
+	if (message->what == 'OKAY') {
+		be_app->PostMessage(B_QUIT_REQUESTED);
 	}
+	
+	BWindow::MessageReceived (message);
 }
 

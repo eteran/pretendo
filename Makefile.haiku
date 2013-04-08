@@ -14,7 +14,7 @@ SHELL = /bin/sh
 	@$(CC) $(CFLAGS) $(DEFINES) -c $< -o $@ 1>/dev/null
 	
 .asm.o:
-	@echo compiling $< ...
+	@echo assembling $< ...
 	@$(ASM) $(ASMFLAGS) $(DEFINES) -c $< -o $@ 1>/dev/null
 	
 	
@@ -135,7 +135,8 @@ H_FILES     := \
 	ConfigManager.h \
 	AboutWindow.h \
 	ROMFilePanel.h \
-	AudioStream.h
+	AudioStream.h \
+	LinkView.h
 
 CXX_FILES   := \
 	APU.cc \
@@ -228,7 +229,8 @@ CXX_FILES   := \
 	ConfigManager.cc \
 	AboutWindow.cc \
 	ROMFilePanel.cc \
-	AudioStream.cc
+	AudioStream.cc \
+	LinkView.cc
 
 C_FILES     := \
 	libunif/ines_convert.c \
