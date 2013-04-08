@@ -32,7 +32,7 @@ PretendoApp::RefsReceived(BMessage *message)
 
                  BMessage *msg = new BMessage (MSG_ROM_LOADED);
                  msg->AddString ("path", path.Path());
-                 //fWindow->PostMessage (msg);
+                 fWindow->PostMessage (msg);
                  delete msg;
              }
          }
