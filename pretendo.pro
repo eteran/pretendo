@@ -81,7 +81,6 @@ HEADERS += \
 		NINA-001.h \
 		NTSC.h \
 		Noise.h \
-		NullAudio.h \
 		PPU.h \
 		Palette.h \
 		Sprite.h \
@@ -99,6 +98,7 @@ HEADERS += \
 		libunif/std_func.h \
 		libunif/unif_crc32.h \
 		libunif/unif_types.h \
+		qt/NullAudio.h \
 		qt/Pretendo.h \
 		qt/QtVideo.h \
 		qt/SortFilterProxyModel.h
@@ -182,7 +182,6 @@ SOURCES += \
 		NINA-001.cc \
 		NTSC.cc \
 		Noise.cc \
-		NullAudio.cc \
 		PPU.cc \
 		Palette.cc \
 		Square.cc \
@@ -198,6 +197,7 @@ SOURCES += \
 		libunif/std_func.c \
 		libunif/unif_crc32.c \
 		main.cc \
+		qt/NullAudio.cc \
 		qt/Pretendo.cc \
 		qt/QtVideo.cc \
 		qt/SortFilterProxyModel.cc
@@ -333,8 +333,8 @@ bender {
 asound {
 	DEFINES += ENABLE_SOUND 
 	
-	SOURCES += AlsaAudio.cc
-	HEADERS += AlsaAudio.h
+	SOURCES += qt/AlsaAudio.cc
+	HEADERS += qt/AlsaAudio.h
 	
 	LIBS    += -lasound
 }
@@ -343,8 +343,8 @@ qsound {
 	QT      += multimedia
 	DEFINES += ENABLE_SOUND USE_QAUDIO
 	
-	SOURCES += qt/QtAudio.cc AudioBuffer.cc
-	HEADERS += qt/QtAudio.h  AudioBuffer.h
+	SOURCES += qt/QtAudio.cc qt/AudioBuffer.cc
+	HEADERS += qt/QtAudio.h  qt/AudioBuffer.h
 }
 
 

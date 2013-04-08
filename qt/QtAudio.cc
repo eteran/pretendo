@@ -3,6 +3,7 @@
 #include "AudioBuffer.h"
 #include <QtMultimedia/QAudioOutput>
 #include <iostream>
+#include <QtDebug>
 
 //------------------------------------------------------------------------------
 // Name: QtAudio
