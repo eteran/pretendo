@@ -1,8 +1,8 @@
 
+#include <Path.h>
+
 #include "PretendoApp.h"
 #include "AboutWindow.h"
-
-#include <Path.h>
 
 
 PretendoApp::PretendoApp()
@@ -44,10 +44,14 @@ PretendoApp::RefsReceived(BMessage *message)
 }
 
 
-void PretendoApp::ReadyToRun() {
+void
+PretendoApp::ReadyToRun()
+{
 }
 
 
-void PretendoApp::AboutRequested() {
+void 
+PretendoApp::AboutRequested()
+{
      (new AboutWindow)->Show();
 }

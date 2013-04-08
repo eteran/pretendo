@@ -3,7 +3,6 @@
 #define _PRETENDO_APP_
 
 #include <Application.h>
-#include <Path.h>
 #include <Roster.h>
 
 #include "AboutWindow.h"
