@@ -84,7 +84,6 @@ HEADERS += \
 		NullAudio.h \
 		PPU.h \
 		Palette.h \
-		SortFilterProxyModel.h \
 		Sprite.h \
 		Square.h \
 		Triangle.h \
@@ -101,7 +100,8 @@ HEADERS += \
 		libunif/unif_crc32.h \
 		libunif/unif_types.h \
 		qt/Pretendo.h \
-		qt/QtVideo.h
+		qt/QtVideo.h \
+		qt/SortFilterProxyModel.h
 
 FORMS += qt/Pretendo.ui
 
@@ -185,7 +185,6 @@ SOURCES += \
 		NullAudio.cc \
 		PPU.cc \
 		Palette.cc \
-		SortFilterProxyModel.cc \
 		Square.cc \
 		Triangle.cc \
 		VRC2.cc \
@@ -200,7 +199,8 @@ SOURCES += \
 		libunif/unif_crc32.c \
 		main.cc \
 		qt/Pretendo.cc \
-		qt/QtVideo.cc
+		qt/QtVideo.cc \
+		qt/SortFilterProxyModel.cc
 
 RESOURCES += pretendo.qrc
 
