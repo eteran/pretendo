@@ -212,7 +212,6 @@ CXX_FILES   := \
 	NINA-001.cc \
 	NTSC.cc \
 	Noise.cc \
-	NullAudio.cc \
 	PPU.cc \
 	Palette.cc \
 	Square.cc \
