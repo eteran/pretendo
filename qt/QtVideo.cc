@@ -1,5 +1,5 @@
 
-#include "QGLVideo.h"
+#include "QtVideo.h"
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -27,9 +27,9 @@ const int HEIGHT = 240;
 }
 
 //------------------------------------------------------------------------------
-// Name: QGLVideo
+// Name: QtVideo
 //------------------------------------------------------------------------------
-QGLVideo::QGLVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f) : QGLWidget(parent, shareWidget, f), buffer_(0), texture_(0) {
+QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f) : QGLWidget(parent, shareWidget, f), buffer_(0), texture_(0) {
 
 	buffer_ = new uint32_t[WIDTH * HEIGHT]();
 	for(int i = 0; i < 240; ++i) {
@@ -44,20 +44,20 @@ QGLVideo::QGLVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlag
 
 	connect(this, SIGNAL(render_frame()), this, SLOT(updateGL()));
 
-	std::cout << "[QGLVideo::QGLVideo]" << std::endl;
+	std::cout << "[QtVideo::QtVideo]" << std::endl;
 }
 
 //------------------------------------------------------------------------------
-// Name: ~QGLVideo
+// Name: ~QtVideo
 //------------------------------------------------------------------------------
-QGLVideo::~QGLVideo() {
+QtVideo::~QtVideo() {
 	delete [] buffer_;
 }
 
 //------------------------------------------------------------------------------
 // Name: resizeGL
 //------------------------------------------------------------------------------
-void QGLVideo::resizeGL(int width, int height) {
+void QtVideo::resizeGL(int width, int height) {
 	Q_UNUSED(width);
 	Q_UNUSED(height);
 }
@@ -65,7 +65,7 @@ void QGLVideo::resizeGL(int width, int height) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void QGLVideo::initializeGL() {
+void QtVideo::initializeGL() {
 
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
@@ -87,7 +87,7 @@ void QGLVideo::initializeGL() {
 //------------------------------------------------------------------------------
 // Name: submit_scanline
 //------------------------------------------------------------------------------
-void QGLVideo::submit_scanline(int scanline, int intensity, const uint8_t *source) {
+void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source) {
 	uint32_t *const s = scanlines_[scanline];
 	std::transform(source, source + 256, s, palette_entry(palette_[intensity]));
 }
@@ -95,7 +95,7 @@ void QGLVideo::submit_scanline(int scanline, int intensity, const uint8_t *sourc
 //------------------------------------------------------------------------------
 // Name: set_palette
 //------------------------------------------------------------------------------
-void QGLVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal) {
+void QtVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal) {
 	assert(pal != 0);
 	assert(intensity != 0);
 
@@ -114,20 +114,20 @@ void QGLVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t 
 //------------------------------------------------------------------------------
 // Name: start_frame
 //------------------------------------------------------------------------------
-void QGLVideo::start_frame() {
+void QtVideo::start_frame() {
 }
 
 //------------------------------------------------------------------------------
 // Name: end_frame
 //------------------------------------------------------------------------------
-void QGLVideo::end_frame() {
+void QtVideo::end_frame() {
 	emit render_frame();
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void QGLVideo::paintGL() {
+void QtVideo::paintGL() {
 
 	const unsigned output_width  = width();
 	const unsigned output_height = height();

@@ -6,11 +6,14 @@ QT      += opengl
 # Input
 HEADERS += \
 		APU.h \
+		Audio.h \
 		BNROM.h \
+		Bandai.h \
 		Cart.h \
 		Controller.h \
 		DMC.h \
 		Input.h \
+		LengthCounter.h \
 		MMC3.h \
 		Mapper.h \
 		Mapper000.h \
@@ -75,26 +78,21 @@ HEADERS += \
 		Mapper242.h \
 		Mapper243.h \
 		Mapper245.h \
-		VRC6.h \
-		VRC4.h \
-		VRC2.h \
-		Bandai.h \
 		NES.h \
 		NINA-001.h \
 		NTSC.h \
 		Noise.h \
+		NullAudio.h \
 		PPU.h \
 		Palette.h \
-		Pretendo.h \
-		QGLVideo.h \
 		SortFilterProxyModel.h \
-		LengthCounter.h \
 		Sprite.h \
 		Square.h \
 		Triangle.h \
 		VRAMBank.h \
-		NullAudio.h \
-		Audio.h \
+		VRC2.h \
+		VRC4.h \
+		VRC6.h \
 		libunif/ines_convert.h \
 		libunif/lib_ines.h \
 		libunif/lib_unif.h \
@@ -102,17 +100,21 @@ HEADERS += \
 		libunif/load_unif.h \
 		libunif/std_func.h \
 		libunif/unif_crc32.h \
-		libunif/unif_types.h
+		libunif/unif_types.h \
+		qt/Pretendo.h \
+		qt/QtVideo.h
 
-FORMS += Pretendo.ui
+FORMS += qt/Pretendo.ui
 
 SOURCES += \
 		APU.cc \
 		BNROM.cc \
+		Bandai.cc \
 		Cart.cc \
 		Controller.cc \
 		DMC.cc \
 		Input.cc \
+		LengthCounter.cc \
 		MMC3.cc \
 		Mapper.cc \
 		Mapper000.cc \
@@ -177,23 +179,19 @@ SOURCES += \
 		Mapper242.cc \
 		Mapper243.cc \
 		Mapper245.cc \
-		VRC6.cc \
-		VRC4.cc \
-		VRC2.cc \
-		Bandai.cc \
 		NES.cc \
 		NINA-001.cc \
-		NullAudio.cc \
 		NTSC.cc \
 		Noise.cc \
+		NullAudio.cc \
 		PPU.cc \
 		Palette.cc \
-		Pretendo.cc \
-		QGLVideo.cc \
 		SortFilterProxyModel.cc \
-		LengthCounter.cc \
 		Square.cc \
 		Triangle.cc \
+		VRC2.cc \
+		VRC4.cc \
+		VRC6.cc \
 		libunif/ines_convert.c \
 		libunif/lib_ines.c \
 		libunif/lib_unif.c \
@@ -201,7 +199,9 @@ SOURCES += \
 		libunif/load_unif.c \
 		libunif/std_func.c \
 		libunif/unif_crc32.c \
-		main.cc 
+		main.cc \
+		qt/Pretendo.cc \
+		qt/QtVideo.cc
 
 RESOURCES += pretendo.qrc
 
@@ -344,13 +344,14 @@ qsound {
 	QT      += multimedia
 	DEFINES += ENABLE_SOUND USE_QAUDIO
 	
-	SOURCES += QtAudio.cc AudioBuffer.cc
-	HEADERS += QtAudio.h  AudioBuffer.h
+	SOURCES += qt/QtAudio.cc AudioBuffer.cc
+	HEADERS += qt/QtAudio.h  AudioBuffer.h
 }
 
 
 linux-* {
 	DEFINES += Linux
+	INCLUDEPATH += qt
 	#INCLUDEPATH += /usr/include/QtMultimediaKit
 	#INCLUDEPATH += /usr/include/QtMobility
 }

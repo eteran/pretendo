@@ -47,7 +47,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QGLVideo" name="video" native="true">
+         <widget class="QtVideo" name="video" native="true">
           <property name="minimumSize">
            <size>
             <width>512</width>
@@ -219,9 +219,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QGLVideo</class>
+   <class>QtVideo</class>
    <extends>QWidget</extends>
-   <header>QGLVideo.h</header>
+   <header>QtVideo.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
