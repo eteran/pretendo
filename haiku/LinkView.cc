@@ -47,7 +47,7 @@ LinkView::MouseUp (BPoint point)
 {
 	be_roster->Launch("text/html", 1, &fLink);
 	
-	SetHighColor(0, 0, 255);
+	SetHighColor(0x55, 0x1a, 0x8b);
 	BRect frame(Frame());
 	frame.OffsetTo(B_ORIGIN);
 	BStringView::Draw(frame);
