@@ -17,10 +17,8 @@ class LinkView : public BStringView
 	virtual void AttachedToWindow (void);
 	virtual void Draw (BRect updateRect);
 	virtual void MouseUp (BPoint point);
+	virtual void MouseDown (BPoint point);
 	virtual void MouseMoved (BPoint point, uint32 transit, const BMessage *message);
-	
-	private:
-	BRect GetTextRect (void);
 	
 	private:
 	char *fText;
