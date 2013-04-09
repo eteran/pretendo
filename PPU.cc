@@ -1165,10 +1165,8 @@ void PPU::update_vram_address() {
 	vram_address_ = (vram_address_ & ~0x7be0) | (nametable_ & 0x7be0);
 }
 
-
-
 //------------------------------------------------------------------------------
-// Name:
+// Name: execute_cycle
 //------------------------------------------------------------------------------
 void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_prerender &) {
 
@@ -1261,7 +1259,7 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_prerender &) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: execute_cycle
 //------------------------------------------------------------------------------
 void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 
@@ -1341,7 +1339,6 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 			case 340: read_tile_index(); break;
 			default:
 				abort();
-
 			}
 		}
 	}
