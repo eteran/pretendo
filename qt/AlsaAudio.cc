@@ -15,11 +15,11 @@ AlsaAudio::AlsaAudio() {
 	snd_pcm_sw_params_t * swparams;
 	snd_pcm_status_t *    status;
 
-	const unsigned int pchannels	= 1;
-	unsigned int pspeed				= 44100;
-	const snd_pcm_format_t format	= SND_PCM_FORMAT_U8;
-	unsigned int buffer_time		= 4000;
-	unsigned int period_time		= buffer_time / 4;
+	const unsigned int pchannels  = 1;
+	unsigned int pspeed           = 44100;
+	const snd_pcm_format_t format = SND_PCM_FORMAT_U8;
+	unsigned int buffer_time      = 4000;
+	unsigned int period_time      = buffer_time / 4;
 
 	snd_pcm_sw_params_alloca(&swparams);
 
