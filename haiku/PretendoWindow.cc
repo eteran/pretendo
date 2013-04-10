@@ -22,13 +22,13 @@ PretendoWindow::PretendoWindow()
 		fOverlayBits(NULL),
 		fBitsArea(B_ERROR),
 		fDirtyArea(B_ERROR),
-//		fVideoScreen(NULL),
+		fVideoScreen(NULL),
 		fAudioStream(NULL)
 {
 	BRect bounds (Bounds());
 	bounds.OffsetTo (B_ORIGIN);
 	AddMenu();
-	bounds.top = 18.0f; // HACK: fMenuHeight;
+	bounds.top = fMenuHeight;
 	
 	fView = new BView (bounds, "main_view", B_FOLLOW_ALL, 0);
 	AddChild (fView);
@@ -110,7 +110,6 @@ PretendoWindow::PretendoWindow()
 		ChangeFramework(DIRECTWINDOW_FRAMEWORK);
 	}
 
-	
 	// other things we need
 	fOpenPanel = new ROMFilePanel;
 	fAudioStream = new AudioStream ("Pretendo", 44100.0, 8, 1, 44100.0 / 60);	
@@ -195,7 +194,7 @@ PretendoWindow::DirectConnected (direct_buffer_info *info)
 	
 	fMainLocker.Unlock();
 	
-	BDirectWindow::DirectConnected(info);
+	//BDirectWindow::DirectConnected(info);
 }
 
 
@@ -208,9 +207,9 @@ PretendoWindow::MessageReceived (BMessage *message)
 				(VIDEO_FRAMEWORK)fVideoMenu->IndexOf(fVideoMenu->FindMarked()));
 			break;
 		
-		//case MSG_LEAVE_FULLSCREEN:
-		//	ChangeFramework (fPrevFramework);
-		// 	break;
+		case MSG_LEAVE_FULLSCREEN:
+			ChangeFramework (fPrevFramework);
+		 	break;
 			
 		case MSG_ROM_LOADED:
 			OnLoadCart(message);
@@ -345,7 +344,7 @@ PretendoWindow::QuitRequested()
 void
 PretendoWindow::ResizeTo (float width, float height)
 {
-	height += 18.0f + 1;// HACK fMenuHeight + 1;
+	height += fMenuHeight + 1;
 	BDirectWindow::ResizeTo (width, height);
 }
 
@@ -380,7 +379,7 @@ PretendoWindow::Zoom (BPoint origin, float width, float height)
 	Hide();
 	Show();
 	
-	BDirectWindow::Zoom(origin, width, height);
+	//BDirectWindow::Zoom(origin, width, height);
 }
 
 
@@ -714,9 +713,9 @@ PretendoWindow::ChangeFramework (VIDEO_FRAMEWORK fw)
 		case WINDOWSCREEN_FRAMEWORK:
 			fVideoLocker.Unlock();
 			
-			//if (fVideoScreen->Lock()) {
-			//	fVideoScreen->Quit();
-			//}
+			if (fVideoScreen->Lock()) {
+				fVideoScreen->Quit();
+			}
 			
 			fVideoLocker.Lock();
 			break;
@@ -755,13 +754,13 @@ PretendoWindow::ChangeFramework (VIDEO_FRAMEWORK fw)
 			break;
 			
 		case WINDOWSCREEN_FRAMEWORK:
-		//	fVideoLocker.Unlock();
-		//	fVideoScreen = new VideoScreen (this);
-		//	fVideoScreen->Show();
-		//	fVideoLocker.Lock();
-		//	snooze (1000000); 	// extent of my current creative side
-		//	SetFrontBuffer (fVideoScreen->Bits(), B_CMAP8, 1, fVideoScreen->RowBytes());
-		//	fFullScreen = true;
+			fVideoLocker.Unlock();
+			fVideoScreen = new VideoScreen (this);
+			fVideoScreen->Show();
+			fVideoLocker.Lock();
+			snooze (1000000); 	// extent of my current creative side
+			SetFrontBuffer (fVideoScreen->Bits(), B_CMAP8, 1, fVideoScreen->RowBytes());
+			fFullScreen = true;
 			break;
 	}
 	
@@ -950,9 +949,14 @@ PretendoWindow::BlitScreen (void)
 }
 
 
-#if 0
 void
-PretendoWindow::setPalette (const color_emphasis_t *intensity, const rgb_color_t *pal)
+PretendoWindow::submit_scanline(int scanline, int intensity, const uint8_t *source)
+{
+	(this->*LineRenderer)(fLineOffsets[scanline], source, intensity);
+}
+
+void 
+PretendoWindow::set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal)
 {
 	int32 i, j;
 	rgb_color c;
@@ -974,7 +978,7 @@ PretendoWindow::setPalette (const color_emphasis_t *intensity, const rgb_color_t
 			fPalette16[i][j] |= ((c.green & 0xfc) << 3);  
 			fPalette16[i][j] |= ((c.blue & 0xf8) >> 3);
 			
-			fPalette32[i][j] = (c.red << 16) | (c.green << 8) | c.blue & 0xff;
+			fPalette32[i][j] = (c.red << 16) | (c.green << 8) | (c.blue & 0xff);
 		}
 	}
 	
@@ -1010,9 +1014,8 @@ PretendoWindow::setPalette (const color_emphasis_t *intensity, const rgb_color_t
 }
 
 
-
-void
-PretendoWindow::startFrame (void)
+void 
+PretendoWindow::start_frame()
 {
 	fMainLocker.Lock();
 	
@@ -1024,32 +1027,8 @@ PretendoWindow::startFrame (void)
 
 
 void
-PretendoWindow::endFrame (void)
+PretendoWindow::end_frame()
 {
 	BlitScreen();
 	fMainLocker.Unlock();
-}
-#endif
-
-void
-PretendoWindow::submit_scanline(int scanline, int intensity, const uint8_t *source)
-{
-}
-
-
-void 
-PretendoWindow::set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal)
-{
-}
-
-
-void 
-PretendoWindow::start_frame()
-{
-}
-
-
-void
-PretendoWindow::end_frame()
-{
 }
