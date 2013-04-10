@@ -1,8 +1,6 @@
-/* $Header: /var/cvsroot/pretendo/os/beos/blitters.h,v 1.3 2005/05/27 18:34:18 eteran Exp $ */
-// optimised blitters for BeOS
 
-#ifndef _BE_BLITTERS_H_
-#define _BE_BLITTERS_H_
+#ifndef _OPTIMISED_BLITTERS_H_
+#define _OPTIMISED_BLITTERS_H_
 
 extern "C" {
 void blit_windowed_dirty_mmx (uint8 *src, 
@@ -26,8 +24,11 @@ void blit_2x_windowed_dirty_mmx(uint8 *src,
 								int32 bpp, 
 								int32 rowbytes);
 
-void blit_overlay (uint8 *dest, uint8 *source, size_t size, uint32 *y, uint32 *ycbcr);	
+void blit_overlay (uint8 *dest, 
+				   uint8 *source, 
+				   size_t size, 
+				   uint32 *y, 
+				   uint32 *ycbcr);	
+}
 
-};
-
-#endif // _BE_BLITTERS_H_
+#endif // _OPTIMISED_BLITTERS_H_

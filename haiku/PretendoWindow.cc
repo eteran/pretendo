@@ -2,7 +2,7 @@
 
 #include <malloc.h>
 #include "PretendoWindow.h"
-
+#include "blitters.h"
 
 PretendoWindow::PretendoWindow()
 	: BDirectWindow (BRect (0, 0, 0, 0), "Pretendo", B_TITLED_WINDOW, B_NOT_RESIZABLE, 0),
@@ -792,8 +792,7 @@ PretendoWindow::DrawDirect (void)
 			size = w * fPixelWidth;
 		
 			while (h > 0) {
-/* FIXME: this doesn't work for now */
-//				blit_windowed_dirty_mmx (source, dirty, dest, size, fPixelWidth);
+				blit_windowed_dirty_mmx (source, dirty, dest, size, fPixelWidth);
 				source += fBackBuffer.row_bytes;
 				dirty += fBackBuffer.row_bytes;
 				dest += fFrontBuffer.row_bytes;
@@ -816,8 +815,8 @@ PretendoWindow::DrawDirect (void)
 					dest = fFrontBuffer.bits + y * fFrontBuffer.row_bytes + clip->left 
 						* fPixelWidth;
 					size = w * fPixelWidth;						
-/* FIXME: this doesn't work for now */					
-					//blit_2x_windowed_dirty_mmx (source, dirty, dest, size, 									//		fPixelWidth, fFrontBuffer.row_bytes);
+					
+					blit_2x_windowed_dirty_mmx (source, dirty, dest, size, fPixelWidth, fFrontBuffer.row_bytes);									//		fPixelWidth, fFrontBuffer.row_bytes);
 				}
 			}
 		}
@@ -907,6 +906,8 @@ PretendoWindow::BlitScreen (void)
 				  		  	  "a"((uint32 *)fPaletteY), "d" ((uint32 *)fPaletteYCbCr)
 				  		  	  : "%ebx", "%ebp"
 				);
+				
+				
 			
 				source += fBackBuffer.row_bytes;
 				dest += fOverlayBitmap->BytesPerRow();
@@ -935,8 +936,7 @@ PretendoWindow::BlitScreen (void)
 				uint32 sx = fBackBuffer.row_bytes;
 			
 				for (int32 y = 0; y < PretendoWindow::SCREEN_HEIGHT; y++) {
-/* FIXME: this doesn't work for now */
-				//	blit_2x_dirty_mmx(dest, source, dirty, dx, SCREEN_WIDTH);
+					blit_2x_dirty_mmx(dest, source, dirty, dx, SCREEN_WIDTH);
 					dest += (dx * 2);
 					source += sx;
 					dirty += sx;

@@ -15,10 +15,10 @@ SHELL = /bin/sh
 	
 .asm.o:
 	@echo assembling $< ...
-	@$(ASM) $(ASMFLAGS) $(DEFINES) -c $< -o $@ 1>/dev/null
+	@$(ASM) $(ASMFLAGS) $(DEFINES) $< -o $@ 1>/dev/null
 	
 	
-ASM    := nasm -f elf
+ASM    := yasm -f elf
 CXX    := g++ -march=native -ansi
 CC     := gcc -march=native -ansi
 LD     := g++
@@ -35,7 +35,10 @@ CXXFLAGS := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
 CFLAGS   := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
 LDFLAGS  := -g -lbe -lroot -ltranslation -ltracker -lmedia -lgame
 
-ASM_FILES   :=
+ASM_FILES   := \
+	haiku/blitters.asm \
+	haiku/copies.asm
+				
 
 H_FILES     := \
 	APU.h \
@@ -134,7 +137,10 @@ H_FILES     := \
 	haiku/LinkView.h \
 	haiku/PretendoApp.h \
 	haiku/ROMFilePanel.h \
-	haiku/PretendoWindow.h
+	haiku/PretendoWindow.h \
+	haiku/VideoScreen.h \
+	haiku/blitters.h \
+	haiku/copies.h
 	
 
 CXX_FILES   := \
@@ -229,7 +235,8 @@ CXX_FILES   := \
 	haiku/LinkView.cc \
 	haiku/PretendoApp.cc \
 	haiku/ROMFilePanel.cc \
-	haiku/PretendoWindow.cc
+	haiku/PretendoWindow.cc \
+	haiku/VideoScreen.cc
 
 C_FILES     := \
 	libunif/ines_convert.c \
