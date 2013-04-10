@@ -33,7 +33,7 @@ INCLUDES := -I. -Ilibunif -Ip6502 -isystem boost
 ASMFLAGS :=
 CXXFLAGS := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
 CFLAGS   := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
-LDFLAGS  := -g -lbe -lroot -ltranslation -ltracker -lmedia
+LDFLAGS  := -g -lbe -lroot -ltranslation -ltracker -lmedia -lgame
 
 ASM_FILES   :=
 
@@ -134,7 +134,8 @@ H_FILES     := \
 	haiku/LinkView.h \
 	haiku/PretendoApp.h \
 	haiku/ROMFilePanel.h \
-	revbits.h
+	haiku/PretendoWindow.h
+	
 
 CXX_FILES   := \
 	APU.cc \
@@ -227,7 +228,8 @@ CXX_FILES   := \
 	haiku/HaikuMain.cc \
 	haiku/LinkView.cc \
 	haiku/PretendoApp.cc \
-	haiku/ROMFilePanel.cc
+	haiku/ROMFilePanel.cc \
+	haiku/PretendoWindow.cc
 
 C_FILES     := \
 	libunif/ines_convert.c \
@@ -252,7 +254,7 @@ all: $(APPNAME)
 $(APPNAME): $(O_FILES)
 	@echo linking $@ ...
 	@$(LD) $(LDFLAGS) $(O_FILES) -o $@ 1>/dev/null
-	xres -o $@ pretendo.rsrc
+	xres -o $@ $(RES_FILES)
 
 mrproper: clean
 	$(RM) makedep
