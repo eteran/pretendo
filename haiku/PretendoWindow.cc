@@ -482,6 +482,7 @@ PretendoWindow::OnQuit (void)
 void
 PretendoWindow::OnRun (void)
 {
+	set_palette(Palette::intensity, Palette::NTSCPalette(355.00, 0.50));
 	resume_thread(fThread);
 }
 
@@ -548,10 +549,6 @@ PretendoWindow::RenderLine8 (uint8 *dest, const uint8 *source, int intensity)
 		*(dest+2) = palette[*source++];
 		*(dest+3) = palette[*source++];
 		dest += 4 * sizeof(uint8);
-		
-		if (palette[*source] == 0x0) {
-			std::cout << "black" << std::endl;
-		}
 		
 		
 	}	
@@ -977,9 +974,9 @@ PretendoWindow::set_palette(const color_emphasis_t *intensity, const rgb_color_t
 	// rgb palettes
 	for (i = 0; i < 8; i++) {
 		for (j = 0; j < 64; j++) {
-			c.red   = static_cast<uint32>(pal[j].r * intensity[i].r);
-			c.green = static_cast<uint32>(pal[j].g * intensity[i].g);
-			c.blue  = static_cast<uint32>(pal[j].b * intensity[i].b);
+			c.red   = (pal[j].r * intensity[i].r);
+			c.green = (pal[j].g * intensity[i].g);
+			c.blue  = (pal[j].b * intensity[i].b);
 			
 			fPalette8[i][j] = BScreen().IndexForColor (c.red, c.green, c.blue);
 			
