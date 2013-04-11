@@ -1366,16 +1366,17 @@ void PPU::execute_scanline(int line, const scanline_vblank &) {
 		if(line == 0 && hpos_ == 1) {
 			enter_vblank();
 		}
+		
+		if(line == 0 && hpos_ == 3) {
+			if(nmi_on_vblank() && status_ & 0x80) {
+				nes::cpu.nmi();
+			}
+		}
 
 		if((ppu_cycle_ % 3) == cpu_alignment) {
 			++cycles;
 		}
 
-		if(line == 0 && hpos_ == 2) {
-			if(nmi_on_vblank() && status_ & 0x80) {
-				nes::cpu.nmi();
-			}
-		}
 		++ppu_cycle_;
 	}
 	nes::cpu.exec(cycles);
@@ -1386,15 +1387,15 @@ void PPU::execute_scanline(int line, const scanline_vblank &) {
 		if(line == 0 && hpos_ == 1) {
 			enter_vblank();
 		}
-
-		if((ppu_cycle_ % 3) == cpu_alignment) {
-			nes::cpu.exec(1);
-		}
-
-		if(line == 0 && hpos_ == 2) {
+		
+		if(line == 0 && hpos_ == 3) {
 			if(nmi_on_vblank() && status_ & 0x80) {
 				nes::cpu.nmi();
 			}
+		}
+
+		if((ppu_cycle_ % 3) == cpu_alignment) {
+			nes::cpu.exec(1);
 		}
 
 		++ppu_cycle_;
