@@ -32,7 +32,7 @@ const int HEIGHT = 240;
 QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f) : QGLWidget(parent, shareWidget, f), buffer_(0), texture_(0) {
 
 	buffer_ = new uint32_t[WIDTH * HEIGHT]();
-	for(int i = 0; i < 240; ++i) {
+	for(int i = 0; i < HEIGHT; ++i) {
 		scanlines_[i] = &buffer_[i * WIDTH];
 	}
 
@@ -89,7 +89,7 @@ void QtVideo::initializeGL() {
 //------------------------------------------------------------------------------
 void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source) {
 	uint32_t *const s = scanlines_[scanline];
-	std::transform(source, source + 256, s, palette_entry(palette_[intensity]));
+	std::transform(source, source + WIDTH, s, palette_entry(palette_[intensity]));
 }
 
 //------------------------------------------------------------------------------
