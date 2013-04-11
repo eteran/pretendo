@@ -328,7 +328,7 @@ void op_brk() {
 	}
 	
 	if(nmi_pending) {
-		if(current_cycle < 4) {
+		if(current_cycle < 5) {
 			printf("BRK/NMI CONFLICT! %d [OVERRIDE]\n", current_cycle);
 			vector_address = NMI_VECTOR_ADDRESS;
 			nmi_pending = false;

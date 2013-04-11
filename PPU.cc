@@ -1031,17 +1031,19 @@ void PPU::clock_y() {
 //------------------------------------------------------------------------------
 void PPU::enter_vblank() {
 
-	// Reading one PPU clock before reads it as clear and never sets the flag 
+	// Reading one PPU clock before reads it as clear and never sets the flag
 	// or generates NMI for that frame.
 	if(ppu_cycle_ != (ppu_read_2002_cycle_ + 1)) {
 
 		status_ |= 0x80;
 
-		// Reading on the same PPU clock or one later reads it as set, 
+#if 0
+		// Reading on the same PPU clock or one later reads it as set,
 		// clears it, and suppresses the NMI for that frame.
 		if(nmi_on_vblank()) {
 			nes::cpu.nmi();
 		}
+#endif
 	}
 }
 
@@ -1190,16 +1192,16 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_prerender &) {
 			case 7: evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
 			case 0: evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
 			}
-			
+
 			if(hpos_ == 256) {
 				clock_y();
 			}
 		} else if(hpos_ < 281) {
-		
+
 			if(hpos_ == 257) {
 				update_x_scroll();
 			}
-		
+
 			switch(hpos_ & 0x07) {
 			case 1: update_sprite_registers(); open_tile_index(); break;           // open the bus for nametable fetch (garbage)
 			case 2: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
@@ -1264,7 +1266,7 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_prerender &) {
 void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 
 	if(!screen_enabled()) {
-	
+
 		if(hpos_ < 1) {
 			// idle
 		} else if(hpos_ < 257) {
@@ -1283,7 +1285,7 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 		if(odd_frame_ && vpos_ == 1 && hpos_ == 0) {
 			++hpos_;
 		}
-		
+
 		if(hpos_ < 1) {
 			// idle
 		} else if(hpos_ < 257) {
@@ -1297,16 +1299,16 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 			case 7: render_pixel(dest_buffer); evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
 			case 0: render_pixel(dest_buffer); evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 			}
-			
+
 			if(hpos_ == 256) {
 				clock_y();
 			}
 		} else if(hpos_ < 321) {
-		
+
 			if(hpos_ == 257) {
 				update_x_scroll();
 			}
-		
+
 			switch(hpos_ & 0x07) {
 			case 1: update_sprite_registers(); open_tile_index(); break;           // open the bus for nametable fetch (garbage)
 			case 2: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
@@ -1320,7 +1322,7 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 		} else if(hpos_ < 337) {
 
 			// fetch first 2 tiles of NEXT scanline
-			switch(hpos_ & 0x07) {			
+			switch(hpos_ & 0x07) {
 			case 1: open_tile_index(); break;			// open the bus for nametable fetch
 			case 2: read_tile_index(); break;			// fetch the name table byte
 			case 3: open_background_attribute(); break; // open the bus for the attribute fetch
@@ -1330,7 +1332,7 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 			case 7: open_background_pattern<pattern_1>(); break; // open the bus for pattern B fetch
 			case 0: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
 			}
-		} else {	
+		} else {
 			switch(hpos_) {
 			// dummy fetches
 			case 337: open_tile_index(); break;
@@ -1368,6 +1370,12 @@ void PPU::execute_scanline(int line, const scanline_vblank &) {
 		if((ppu_cycle_ % 3) == cpu_alignment) {
 			++cycles;
 		}
+
+		if(line == 0 && hpos_ == 2) {
+			if(nmi_on_vblank() && status_ & 0x80) {
+				nes::cpu.nmi();
+			}
+		}
 		++ppu_cycle_;
 	}
 	nes::cpu.exec(cycles);
@@ -1382,6 +1390,13 @@ void PPU::execute_scanline(int line, const scanline_vblank &) {
 		if((ppu_cycle_ % 3) == cpu_alignment) {
 			nes::cpu.exec(1);
 		}
+
+		if(line == 0 && hpos_ == 2) {
+			if(nmi_on_vblank() && status_ & 0x80) {
+				nes::cpu.nmi();
+			}
+		}
+
 		++ppu_cycle_;
 	}
 #endif
