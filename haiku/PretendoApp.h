@@ -4,15 +4,15 @@
 
 #include <Application.h>
 #include "PretendoWindow.h"
-
+#include "AboutWindow.h"
 
 class PretendoApp : public BApplication {
 	public:
 	PretendoApp();
 	
 	public:
-
 	virtual void ReadyToRun();
+	virtual void AboutRequested (void);
 	
 	public:
 	PretendoWindow *Window (void) { return fWindow; };

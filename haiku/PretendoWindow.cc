@@ -1,8 +1,7 @@
 
-
-#include <malloc.h>
 #include "PretendoWindow.h"
 
+#include <iostream>
 
 PretendoWindow::PretendoWindow()
 	: BDirectWindow (BRect (0, 0, 0, 0), "Pretendo", B_TITLED_WINDOW, B_NOT_RESIZABLE, 0),
@@ -119,6 +118,12 @@ PretendoWindow::PretendoWindow()
 	
 	fPaused = 
 	fReallyPaused = false;
+	
+	if ((fThread = spawn_thread(threadFunc, "pretendo_thread", B_NORMAL_PRIORITY, reinterpret_cast<void *>(this))) < B_OK) {
+			std::cout << "failed to spawn thread" << std::endl;
+	} else {
+		suspend_thread(fThread);;
+	}
 }
 
 
@@ -478,7 +483,7 @@ PretendoWindow::OnQuit (void)
 void
 PretendoWindow::OnRun (void)
 {
-//	fMediator->start();
+	resume_thread(fThread);
 }
 
 
@@ -486,6 +491,8 @@ void
 PretendoWindow::OnStop (void)
 {	
 //	fMediator->stop();
+	
+	suspend_thread(fThread);
 	
 	if (fFramework == OVERLAY_FRAMEWORK) {
 		ClearBitmap (true);
@@ -792,8 +799,7 @@ PretendoWindow::DrawDirect (void)
 			size = w * fPixelWidth;
 		
 			while (h > 0) {
-/* FIXME: this doesn't work for now */
-//				blit_windowed_dirty_mmx (source, dirty, dest, size, fPixelWidth);
+				blit_windowed_dirty_mmx (source, dirty, dest, size, fPixelWidth);
 				source += fBackBuffer.row_bytes;
 				dirty += fBackBuffer.row_bytes;
 				dest += fFrontBuffer.row_bytes;
@@ -816,8 +822,8 @@ PretendoWindow::DrawDirect (void)
 					dest = fFrontBuffer.bits + y * fFrontBuffer.row_bytes + clip->left 
 						* fPixelWidth;
 					size = w * fPixelWidth;						
-/* FIXME: this doesn't work for now */					
-					//blit_2x_windowed_dirty_mmx (source, dirty, dest, size, 									//		fPixelWidth, fFrontBuffer.row_bytes);
+					
+					blit_2x_windowed_dirty_mmx (source, dirty, dest, size, fPixelWidth, fFrontBuffer.row_bytes);									//		fPixelWidth, fFrontBuffer.row_bytes);
 				}
 			}
 		}
@@ -907,6 +913,8 @@ PretendoWindow::BlitScreen (void)
 				  		  	  "a"((uint32 *)fPaletteY), "d" ((uint32 *)fPaletteYCbCr)
 				  		  	  : "%ebx", "%ebp"
 				);
+				
+				
 			
 				source += fBackBuffer.row_bytes;
 				dest += fOverlayBitmap->BytesPerRow();
@@ -935,8 +943,7 @@ PretendoWindow::BlitScreen (void)
 				uint32 sx = fBackBuffer.row_bytes;
 			
 				for (int32 y = 0; y < PretendoWindow::SCREEN_HEIGHT; y++) {
-/* FIXME: this doesn't work for now */
-				//	blit_2x_dirty_mmx(dest, source, dirty, dx, SCREEN_WIDTH);
+					blit_2x_dirty_mmx(dest, source, dirty, dx, SCREEN_WIDTH);
 					dest += (dx * 2);
 					source += sx;
 					dirty += sx;
@@ -1031,4 +1038,15 @@ PretendoWindow::end_frame()
 {
 	BlitScreen();
 	fMainLocker.Unlock();
+}
+
+
+status_t
+PretendoWindow::threadFunc (void *data)
+{
+	while (true) {
+		std::cout << "this is how we thread the needle!" << std::endl;
+	}
+	
+	return 0;
 }

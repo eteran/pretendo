@@ -13,16 +13,19 @@
 #include <Screen.h>
 #include <RecentItems.h>
 #include <Locker.h>
+#include <OS.h>
+
+#include <malloc.h>
 
 #include "ROMFilePanel.h"
 #include "VideoInterface.h"
 #include "AudioStream.h"
 
-//#include "VideoScreen.h"
+#include "VideoScreen.h"
 //#include "InputWindow.h"
 //#include "PaletteWindow.h"
 
-//#include "blitters.h"
+#include "blitters.h"
 
 #define MSG_ROM_LOADED 	'LOAD'
 #define MSG_SHOW_OPEN	'OPEN'
@@ -45,7 +48,7 @@
 #define MSG_ADJ_PALETTE 'ADJP'
 
 
-//class VideoScreen;
+class VideoScreen;
 
 
 class PretendoWindow : public BDirectWindow, public VideoInterface
@@ -123,17 +126,6 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	// video interface
 	public:
-//	virtual void submitScanline (uint32 scanline, 
-//										int intensity, 
-//										const uint8 *source)
-//	{
-//		(this->*LineRenderer)(fLineOffsets[scanline], source, intensity);
-//	}
-//
-//	virtual void setPalette (const color_emphasis_t *intensity, const rgb_color_t *pal);
-//	virtual void startFrame (void);
-//	virtual void endFrame (void);
-
 	virtual void submit_scanline(int scanline, int intensity, const uint8_t *source);
 	virtual void set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal);
 	virtual void start_frame();
@@ -148,7 +140,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	BMenu *fVideoMenu;
 	BMenu *RenderMenu;
 	ROMFilePanel *fOpenPanel;
-	uint32 fMenuHeight;
+	int32 fMenuHeight;
 	
 	private:
 //	InputWindow *fInputWindow;
@@ -180,7 +172,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	video_buffer_t fFrontBuffer;
 	video_buffer_t fDirtyBuffer;
 	clipping_info_t fClipInfo;
-//	VideoScreen *fVideoScreen;
+	VideoScreen *fVideoScreen;
 	bool fFullScreen;
 	volatile bool fDirectConnected;
 	bool fFrameworkChanging;
@@ -193,6 +185,10 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	AudioStream *fAudioStream;
+	
+	private:
+	thread_id fThread;
+	static status_t threadFunc (void *data);
 };
 				
 #endif // _PRETENDO_WINDOW_H_
