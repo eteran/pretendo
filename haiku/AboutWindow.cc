@@ -122,7 +122,8 @@ void
 AboutWindow::MessageReceived (BMessage *message)
 {
 	if (message->what == 'OKAY') {
-		be_app->PostMessage(B_QUIT_REQUESTED);
+		//be_app->PostMessage(B_QUIT_REQUESTED);
+		Quit();
 	}
 	
 	BWindow::MessageReceived (message);

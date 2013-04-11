@@ -106,7 +106,8 @@ PretendoWindow::PretendoWindow()
 	if (overlayOK) {
 		ChangeFramework (OVERLAY_FRAMEWORK);
 	} else {
-		ChangeFramework(DIRECTWINDOW_FRAMEWORK);
+		//ChangeFramework(DIRECTWINDOW_FRAMEWORK);
+		ChangeFramework(BITMAP_FRAMEWORK);
 	}
 
 	// other things we need
@@ -119,10 +120,10 @@ PretendoWindow::PretendoWindow()
 	fPaused = 
 	fReallyPaused = false;
 	
-	if ((fThread = spawn_thread(threadFunc, "pretendo_thread", B_NORMAL_PRIORITY, reinterpret_cast<void *>(this))) < B_OK) {
+	if ((fThread = spawn_thread(threadFunc, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
 			std::cout << "failed to spawn thread" << std::endl;
 	} else {
-		suspend_thread(fThread);;
+		suspend_thread(fThread);
 	}
 }
 
