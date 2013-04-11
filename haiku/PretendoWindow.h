@@ -13,6 +13,9 @@
 #include <Screen.h>
 #include <RecentItems.h>
 #include <Locker.h>
+#include <OS.h>
+
+#include <malloc.h>
 
 #include "ROMFilePanel.h"
 #include "VideoInterface.h"
@@ -22,7 +25,7 @@
 //#include "InputWindow.h"
 //#include "PaletteWindow.h"
 
-//#include "blitters.h"
+#include "blitters.h"
 
 #define MSG_ROM_LOADED 	'LOAD'
 #define MSG_SHOW_OPEN	'OPEN'
@@ -182,6 +185,10 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	AudioStream *fAudioStream;
+	
+	private:
+	thread_id fThread;
+	static status_t threadFunc (void *data);
 };
 				
 #endif // _PRETENDO_WINDOW_H_

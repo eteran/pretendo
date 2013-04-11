@@ -15,4 +15,10 @@ PretendoApp::ReadyToRun()
 	fWindow->Show();
 }
 
+void
+PretendoApp::AboutRequested (void)
+{
+	(new AboutWindow)->Show();
+}
+
 

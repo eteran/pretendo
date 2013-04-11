@@ -1,8 +1,7 @@
 
-
-#include <malloc.h>
 #include "PretendoWindow.h"
-#include "blitters.h"
+
+#include <iostream>
 
 PretendoWindow::PretendoWindow()
 	: BDirectWindow (BRect (0, 0, 0, 0), "Pretendo", B_TITLED_WINDOW, B_NOT_RESIZABLE, 0),
@@ -119,6 +118,12 @@ PretendoWindow::PretendoWindow()
 	
 	fPaused = 
 	fReallyPaused = false;
+	
+	if ((fThread = spawn_thread(threadFunc, "pretendo_thread", B_NORMAL_PRIORITY, reinterpret_cast<void *>(this))) < B_OK) {
+			std::cout << "failed to spawn thread" << std::endl;
+	} else {
+		suspend_thread(fThread);;
+	}
 }
 
 
@@ -478,7 +483,7 @@ PretendoWindow::OnQuit (void)
 void
 PretendoWindow::OnRun (void)
 {
-//	fMediator->start();
+	resume_thread(fThread);
 }
 
 
@@ -486,6 +491,8 @@ void
 PretendoWindow::OnStop (void)
 {	
 //	fMediator->stop();
+	
+	suspend_thread(fThread);
 	
 	if (fFramework == OVERLAY_FRAMEWORK) {
 		ClearBitmap (true);
@@ -1031,4 +1038,15 @@ PretendoWindow::end_frame()
 {
 	BlitScreen();
 	fMainLocker.Unlock();
+}
+
+
+status_t
+PretendoWindow::threadFunc (void *data)
+{
+	while (true) {
+		std::cout << "this is how we thread the needle!" << std::endl;
+	}
+	
+	return 0;
 }
