@@ -14,7 +14,7 @@ struct palette_entry {
 	}
 
 	uint32_t operator()(uint8_t index) const {
-		return palette_[index & 0x3f];
+		return palette_[index];
 	}
 
 private:
