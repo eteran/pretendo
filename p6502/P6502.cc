@@ -333,7 +333,7 @@ void op_brk() {
 			vector_address = NMI_VECTOR_ADDRESS;
 			nmi_pending = false;
 		} else {
-			printf("BRK/NMI CONFLICT! %d [NMI CANCEL]\n", current_cycle);
+			//printf("BRK/NMI CONFLICT! %d [NMI CANCEL]\n", current_cycle);
 			//nmi_pending = false;			
 		}
 	}
