@@ -293,7 +293,7 @@ void Pretendo::on_actionShow_Sprites_toggled(bool value) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: on_action_Hard_Reset_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Hard_Reset_triggered() {
 	if(timer_->isActive()) {
@@ -302,7 +302,7 @@ void Pretendo::on_action_Hard_Reset_triggered() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: on_actionReset_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_actionReset_triggered() {
 	if(timer_->isActive()) {
@@ -311,7 +311,7 @@ void Pretendo::on_actionReset_triggered() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: showEvent
 //------------------------------------------------------------------------------
 void Pretendo::showEvent(QShowEvent *event) {
 	Q_UNUSED(event);
