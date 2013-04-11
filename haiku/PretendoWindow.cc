@@ -1,7 +1,9 @@
 
+#include <iostream>
+#include "Mapper.h"
+#include "NES.h"
 #include "PretendoWindow.h"
 
-#include <iostream>
 
 PretendoWindow::PretendoWindow()
 	: BDirectWindow (BRect (0, 0, 0, 0), "Pretendo", B_TITLED_WINDOW, B_NOT_RESIZABLE, 0),
@@ -34,11 +36,7 @@ PretendoWindow::PretendoWindow()
 	
 	
 	ResizeTo (SCREEN_WIDTH-1, SCREEN_HEIGHT-1);
-	BScreen *screen = new BScreen(this);
-	float newX = (screen->Frame().Width() - Frame().Width()) / 2;
-	float newY = (screen->Frame().Height() - Frame().Height()) / 2;
-	MoveTo (newX, newY);
-	delete screen;	
+	CenterOnScreen();
 	
 	fBitmap = new BBitmap (BRect (0, 0, SCREEN_WIDTH-1, SCREEN_HEIGHT-1), B_CMAP8);
 	if (! fBitmap || ! fBitmap->IsValid()) {
@@ -443,7 +441,7 @@ PretendoWindow::OnLoadCart (BMessage *message)
 {
 	BString path;
 	if (message->FindString ("path", &path) == B_OK) {
-		//fMediator->load (path.String());
+		nes::cart.load(path.String());
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
 			ClearBitmap (true);
@@ -550,6 +548,12 @@ PretendoWindow::RenderLine8 (uint8 *dest, const uint8 *source, int intensity)
 		*(dest+2) = palette[*source++];
 		*(dest+3) = palette[*source++];
 		dest += 4 * sizeof(uint8);
+		
+		if (palette[*source] == 0x0) {
+			std::cout << "black" << std::endl;
+		}
+		
+		
 	}	
 }
 
@@ -824,7 +828,8 @@ PretendoWindow::DrawDirect (void)
 						* fPixelWidth;
 					size = w * fPixelWidth;						
 					
-					blit_2x_windowed_dirty_mmx (source, dirty, dest, size, fPixelWidth, fFrontBuffer.row_bytes);									//		fPixelWidth, fFrontBuffer.row_bytes);
+					blit_2x_windowed_dirty_mmx (source, dirty, dest, size, 
+						fPixelWidth, fFrontBuffer.row_bytes);									
 				}
 			}
 		}
@@ -1041,12 +1046,25 @@ PretendoWindow::end_frame()
 	fMainLocker.Unlock();
 }
 
+#include <String.h>
 
 status_t
 PretendoWindow::threadFunc (void *data)
 {
-	while (true) {
-		std::cout << "this is how we thread the needle!" << std::endl;
+	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);
+		
+	
+	if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
+		
+		while (true) {
+			w->start_frame();
+			nes::run_frame(w);
+			w->end_frame();
+		}
+		
+	} else {
+		(new BAlert(0, "you fail!", "damn"))->Go();
+	
 	}
 	
 	return 0;

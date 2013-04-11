@@ -13,6 +13,7 @@ class PretendoApp : public BApplication {
 	public:
 	virtual void ReadyToRun();
 	virtual void AboutRequested (void);
+	virtual void RefsReceived (BMessage *message);
 	
 	public:
 	PretendoWindow *Window (void) { return fWindow; };
