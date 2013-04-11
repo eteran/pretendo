@@ -18,7 +18,7 @@ private:
 		case 1:
 			// fetch address, increment PC
 			effective_address_ = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			LAST_CYCLE;
 			// read from effective address
@@ -36,17 +36,17 @@ private:
 		case 1:
 			// fetch address, increment PC
 			effective_address_ = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// read from effective address
 			data_ = read_byte_zp(effective_address_);
-			STAGE_END;
+			break;
 		case 3:
 			//  write the value back to effective address,
 			// and do the operation on it
 			write_byte_zp(effective_address_, data_);
 			op(data_);
-			STAGE_END;
+			break;
 		case 4:
 			LAST_CYCLE;
 			// write the new value to effective address
@@ -64,7 +64,7 @@ private:
 		case 1:
 			// fetch address, increment PC
 			effective_address_ = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			LAST_CYCLE;
 			// write register to effective address

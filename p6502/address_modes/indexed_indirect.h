@@ -18,19 +18,19 @@ private:
 		case 1:
 			// fetch pointer address, increment PC
 			effective_address_ = PC++;
-			STAGE_END;
+			break;
 		case 2:
 			// read from the address, add X to it
 			data_ = read_byte(effective_address_) + X;
-			STAGE_END;
+			break;
 		case 3:
 			// fetch effective address low
 			effective_address_ = read_byte_zp(data_);
-			STAGE_END;
+			break;
 		case 4:
 			// fetch effective address high
 			effective_address_ |= (read_byte_zp(data_ + 1) << 8);
-			STAGE_END;
+			break;
 		case 5:
 			LAST_CYCLE;
 			// read from effective address
@@ -49,29 +49,29 @@ private:
 		case 1:
 			// fetch pointer address, increment PC
 			effective_address_ = PC++;
-			STAGE_END;
+			break;
 		case 2:
 			// read from the address, add X to it
 			data_ = read_byte(effective_address_) + X;
-			STAGE_END;
+			break;
 		case 3:
 			// fetch effective address low
 			effective_address_ = read_byte_zp(data_);
-			STAGE_END;
+			break;
 		case 4:
 			// fetch effective address high
 			effective_address_ |= (read_byte_zp(data_ + 1) << 8);
-			STAGE_END;
+			break;
 		case 5:
 			// read from effective address
 			data_ = read_byte(effective_address_);
-			STAGE_END;
+			break;
 		case 6:
 			// write the value back to effective address,
 			// and do the operation on it
 			write_byte(effective_address_, data_);
 			op(data_);
-			STAGE_END;
+			break;
 		case 7:
 			LAST_CYCLE;
 			// write the new value to effective address
@@ -89,19 +89,19 @@ private:
 		case 1:
 			// fetch pointer address, increment PC
 			effective_address_ = PC++;
-			STAGE_END;
+			break;
 		case 2:
 			// read from the address, add X to it
 			data_ = read_byte(effective_address_) + X;
-			STAGE_END;
+			break;
 		case 3:
 			// fetch effective address low
 			effective_address_ = read_byte_zp(data_);
-			STAGE_END;
+			break;
 		case 4:
 			// fetch effective address high
 			effective_address_ |= (read_byte_zp(data_ + 1) << 8);
-			STAGE_END;
+			break;
 		case 5:
 			LAST_CYCLE;
 			// write to effective address

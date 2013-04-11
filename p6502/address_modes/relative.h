@@ -23,7 +23,7 @@ private:
 		case 1:
 			// fetch operand, increment PC
 			data = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			{
 				// Fetch opcode of next instruction,
@@ -44,7 +44,7 @@ private:
 					old_pc = PC;
 					new_pc = (PC + static_cast<int8_t>(data));
 					set_pc_lo(new_pc & 0xff);
-					STAGE_END;
+					break;
 				} else {
 					LAST_CYCLE;
 					if(rst_executing || nmi_executing || irq_executing) {
@@ -55,7 +55,7 @@ private:
 					++PC;
 					current_cycle = 0;
 					//TRACE;
-					STAGE_END;
+					break;
 				}
 			}
 		case 3:
@@ -79,7 +79,7 @@ private:
 					++PC;
 					current_cycle = 0;
 					//TRACE;
-					STAGE_END;
+					break;
 				}
 			}
 		default:

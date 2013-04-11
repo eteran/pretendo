@@ -18,11 +18,11 @@ private:
 		case 1:
 			// read next instruction byte (and throw it away)
 			read_byte(PC);
-			STAGE_END;
+			break;
 		case 2:
 			// increment S
 			++S;
-			STAGE_END;
+			break;
 		case 3:
 			LAST_CYCLE;
 			// pull register from stack
@@ -40,7 +40,7 @@ private:
 		case 1:
 			// read next instruction byte (and throw it away)
 			read_byte(PC);
-			STAGE_END;
+			break;
 		case 2:
 			LAST_CYCLE;
 			// push register on stack, decrement S

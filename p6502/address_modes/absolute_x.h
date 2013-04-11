@@ -18,14 +18,14 @@ private:
 		case 1:
 			// fetch low byte of address, increment PC
 			effective_address_lo = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// fetch high byte of address,
 			// add index register to low address byte,
 			// increment PC
 			effective_address_ = (read_byte(PC++) << 8);
 			effective_address_lo += X;
-			STAGE_END;
+			break;
 		case 3:
 
 			// read from effective address,
@@ -35,7 +35,7 @@ private:
 
 			if(effective_address_lo > 0xff) {
 				effective_address_ += 0x100;
-				STAGE_END;
+				break;
 			} else {
 				op(data_);
 				OPCODE_COMPLETE;
@@ -57,14 +57,14 @@ private:
 		case 1:
 			// fetch low byte of address, increment PC
 			effective_address_lo = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// fetch high byte of address,
 			// add index register to low address byte,
 			// increment PC
 			effective_address_ = (read_byte(PC++) << 8);
 			effective_address_lo += X;
-			STAGE_END;
+			break;
 		case 3:
 			// read from effective address,
 			// fix the high byte of effective address
@@ -74,17 +74,17 @@ private:
 			if(effective_address_lo > 0xff) {
 				effective_address_ += 0x100;
 			}
-			STAGE_END;
+			break;
 		case 4:
 			// re-read from effective address
 			data_ = read_byte(effective_address_);
-			STAGE_END;
+			break;
 		case 5:
 			// write the value back to effective address,
 			// and do the operation on it
 			write_byte(effective_address_, data_);
 			op(data_);
-			STAGE_END;
+			break;
 		case 6:
 			LAST_CYCLE;
 			// write the new value to effective address
@@ -102,14 +102,14 @@ private:
 		case 1:
 			// fetch low byte of address, increment PC
 			effective_address_lo = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// fetch high byte of address,
 			// add index register to low address byte,
 			// increment PC
 			effective_address_ = (read_byte(PC++) << 8);
 			effective_address_lo += X;
-			STAGE_END;
+			break;
 		case 3:
 			// read from effective address,
 			// fix the high byte of effective address
@@ -119,7 +119,7 @@ private:
 			if(effective_address_lo > 0xff) {
 				effective_address_ += 0x100;
 			}
-			STAGE_END;
+			break;
 		case 4:
 			LAST_CYCLE;
 			// write to effective address

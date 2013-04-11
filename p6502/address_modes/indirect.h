@@ -17,15 +17,15 @@ private:
 		case 1:
 			// fetch pointer address low, increment PC
 			effective_address_lo_ = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// fetch pointer address high, increment PC
 			effective_address_hi_ =  read_byte(PC++);
-			STAGE_END;
+			break;
 		case 3:
 			// fetch low address byte, increment PC
 			effective_address2_ = (effective_address2_ & 0xff00) | read_byte((effective_address_hi_ << 8) | effective_address_lo_);
-			STAGE_END;
+			break;
 		case 4:
 			LAST_CYCLE;
 			// fetch PCH, copy latch to PCL

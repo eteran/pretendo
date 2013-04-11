@@ -17,7 +17,7 @@ private:
 		case 1:
 			// fetch low address byte, increment PC
 			effective_address_ = (effective_address_ & 0xff00) | read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			LAST_CYCLE;
 			// copy low address byte to PCL, fetch high address
@@ -38,11 +38,11 @@ private:
 		case 1:
 			// fetch low byte of address, increment PC
 			effective_address_ = (effective_address_ & 0xff00) | read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// fetch high byte of address, increment PC
 			effective_address_ = (effective_address_ & 0x00ff) | (read_byte(PC++) << 8);
-			STAGE_END;
+			break;
 		case 3:
 			LAST_CYCLE;
 			// read from effective address
@@ -60,21 +60,21 @@ private:
 		case 1:
 			// fetch low byte of address, increment PC
 			effective_address_ = (effective_address_ & 0xff00) | read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// fetch high byte of address, increment PC
 			effective_address_ = (effective_address_ & 0x00ff) | (read_byte(PC++) << 8);
-			STAGE_END;
+			break;
 		case 3:
 			// read from effective address
 			data_ = read_byte(effective_address_);
-			STAGE_END;
+			break;
 		case 4:
 			// write the value back to effective address,
 			// and do the operation on it
 			write_byte(effective_address_, data_);
 			op(data_);
-			STAGE_END;
+			break;
 		case 5:
 			LAST_CYCLE;
 			// write the new value to effective address
@@ -92,11 +92,11 @@ private:
 		case 1:
 			// fetch low byte of address, increment PC
 			effective_address_ = (effective_address_ & 0xff00) | read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// fetch high byte of address, increment PC
 			effective_address_ = (effective_address_ & 0x00ff) | (read_byte(PC++) << 8);
-			STAGE_END;
+			break;
 		case 3:
 			LAST_CYCLE;
 			// write to effective address

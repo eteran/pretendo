@@ -80,7 +80,6 @@ do {                                                \
 } while(0)
 
 #define OPCODE_COMPLETE do { current_cycle = -1; return; } while(0)
-#define STAGE_END       break
 #if 1
 #define TRACE           do { printf("%04X  [%02X] A:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%3lu [%u]\n", (PC - 1) & 0xffff, instruction & 0xff, A, X, Y, P, S, executed_cycle_count, current_cycle); } while(0)
 #else
@@ -197,18 +196,18 @@ void op_jsr() {
 	case 1:
 		// fetch low address byte, increment PC
 		effective_address = (effective_address & 0xff00) | read_byte(PC++);
-		STAGE_END;
+		break;
 	case 2:
 		// internal operation (predecrement S?)
-		STAGE_END;
+		break;
 	case 3:
 		// push PCH on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, pc_hi());
-		STAGE_END;
+		break;
 	case 4:
 		// push PCL on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, pc_lo());
-		STAGE_END;
+		break;
 	case 5:
 		LAST_CYCLE;
 		// fetch high address byte to PCH
@@ -231,19 +230,19 @@ void op_rti() {
 	case 1:
 		// read next instruction byte (and throw it away)
 		read_byte(PC);
-		STAGE_END;
+		break;
 	case 2:
 		// increment S
 		++S;
-		STAGE_END;
+		break;
 	case 3:
 		// pull P from stack, increment S
 		P = (read_byte(S++ + STACK_ADDRESS) & ~B_MASK) | R_MASK;
-		STAGE_END;
+		break;
 	case 4:
 		// pull PCL from stack, increment S
 		set_pc_lo(read_byte(S++ + STACK_ADDRESS));
-		STAGE_END;
+		break;
 	case 5:
 		LAST_CYCLE;
 		// pull PCH from stack
@@ -264,19 +263,19 @@ void op_rts() {
 	case 1:
 		// read next instruction byte (and throw it away)
 		read_byte(PC);
-		STAGE_END;
+		break;
 	case 2:
 		// increment S
 		++S;
-		STAGE_END;
+		break;
 	case 3:
 		// pull PCL from stack, increment S
 		set_pc_lo(read_byte(S++ + STACK_ADDRESS));
-		STAGE_END;
+		break;
 	case 4:
 		// pull PCH from stack
 		set_pc_hi(read_byte(S + STACK_ADDRESS));
-		STAGE_END;
+		break;
 	case 5:
 		LAST_CYCLE;
 		 // increment PC
@@ -301,24 +300,24 @@ void op_brk() {
 		// increment PC
 		vector_address = IRQ_VECTOR_ADDRESS;
 		read_byte(PC++);
-		STAGE_END;
+		break;
 	case 2:
 		// push PCH on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, pc_hi());
-		STAGE_END;
+		break;
 	case 3:
 		// push PCL on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, pc_lo());
-		STAGE_END;
+		break;
 	case 4:
 		// push P on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, P | B_MASK);
 		set_flag<I_MASK>();
-		STAGE_END;
+		break;
 	case 5:
 		// fetch PCL
 		set_pc_lo(read_byte(vector_address + 0));
-		STAGE_END;
+		break;
 	case 6:
 		LAST_CYCLE;
 		// fetch PCH
@@ -351,24 +350,24 @@ void execute_interrupt() {
 	switch(current_cycle) {
 	case 1:
 		read_byte(PC);
-		STAGE_END;
+		break;
 	case 2:
 		// push PCH on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, pc_hi());
-		STAGE_END;
+		break;
 	case 3:
 		// push PCL on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, pc_lo());
-		STAGE_END;
+		break;
 	case 4:
 		// push P on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, P);
 		set_flag<I_MASK>();
-		STAGE_END;
+		break;
 	case 5:
 		// fetch PCL
 		set_pc_lo(read_byte(Vector + 0));
-		STAGE_END;
+		break;
 	case 6:
 		LAST_CYCLE;
 		// fetch PCH
@@ -392,24 +391,24 @@ void do_irq() {
 		// increment PC
 		vector_address = IRQ_VECTOR_ADDRESS;
 		read_byte(PC);
-		STAGE_END;
+		break;
 	case 2:
 		// push PCH on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, pc_hi());
-		STAGE_END;
+		break;
 	case 3:
 		// push PCL on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, pc_lo());
-		STAGE_END;
+		break;
 	case 4:
 		// push P on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, P);
 		set_flag<I_MASK>();
-		STAGE_END;
+		break;
 	case 5:
 		// fetch PCL
 		set_pc_lo(read_byte(vector_address + 0));
-		STAGE_END;
+		break;
 	case 6:
 		LAST_CYCLE;
 		// fetch PCH
@@ -443,24 +442,24 @@ void do_reset() {
 	case 1:
 		// read from current PC 
 		read_byte(PC);
-		STAGE_END;
+		break;
 	case 2:
 		// push PCH on stack, decrement S (fake)
 		read_byte(S-- + STACK_ADDRESS);
-		STAGE_END;
+		break;
 	case 3:
 		// push PCL on stack, decrement S (fake)
 		read_byte(S-- + STACK_ADDRESS);
-		STAGE_END;
+		break;
 	case 4:
 		// push P on stack, decrement S (fake)
 		read_byte(S-- + STACK_ADDRESS);
 		set_flag<I_MASK>();
-		STAGE_END;
+		break;
 	case 5:
 		// fetch PCL
 		set_pc_lo(read_byte(RST_VECTOR_ADDRESS + 0));
-		STAGE_END;
+		break;
 	case 6:
 		// fetch PCH
 		LAST_CYCLE;

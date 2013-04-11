@@ -18,17 +18,17 @@ private:
 		case 1:
 			// fetch pointer address, increment PC
 			data_ = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// fetch effective address low
 			effective_address_lo = read_byte_zp(data_ + 0);
-			STAGE_END;
+			break;
 		case 3:
 			// fetch effective address high,
 			// add Y to low byte of effective address
 			effective_address_ = (read_byte_zp(data_ + 1) << 8);
 			effective_address_lo += Y;
-			STAGE_END;
+			break;
 		case 4:
 
 			// read from effective address,
@@ -37,7 +37,7 @@ private:
 			data_ = read_byte(effective_address_);
 			if(effective_address_lo > 0xff) {
 				effective_address_ += 0x100;
-				STAGE_END;
+				break;
 			} else {
 				LAST_CYCLE;
 				op(data_);
@@ -60,17 +60,17 @@ private:
 		case 1:
 			// fetch pointer address, increment PC
 			data_ = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// fetch effective address low
 			effective_address_lo = read_byte_zp(data_ + 0);
-			STAGE_END;
+			break;
 		case 3:
 			// fetch effective address high,
 			// add Y to low byte of effective address
 			effective_address_ = (read_byte_zp(data_ + 1) << 8);
 			effective_address_lo += Y;
-			STAGE_END;
+			break;
 		case 4:
 
 			// read from effective address,
@@ -80,17 +80,17 @@ private:
 			if(effective_address_lo > 0xff) {
 				effective_address_ += 0x100;
 			}
-			STAGE_END;
+			break;
 		case 5:
 			// read from effective address
 			data_ = read_byte(effective_address_);
-			STAGE_END;
+			break;
 		case 6:
 			// write the value back to effective address,
 			// and do the operation on it
 			write_byte(effective_address_, data_);
 			op(data_);
-			STAGE_END;
+			break;
 		case 7:
 			LAST_CYCLE;
 			// write the new value to effective address
@@ -108,17 +108,17 @@ private:
 		case 1:
 			// fetch pointer address, increment PC
 			data_ = read_byte(PC++);
-			STAGE_END;
+			break;
 		case 2:
 			// fetch effective address low
 			effective_address_lo = read_byte_zp(data_ + 0);
-			STAGE_END;
+			break;
 		case 3:
 			// fetch effective address high,
 			// add Y to low byte of effective address
 			effective_address_ = (read_byte_zp(data_ + 1) << 8);
 			effective_address_lo += Y;
-			STAGE_END;
+			break;
 		case 4:
 
 			// read from effective address,
@@ -128,7 +128,7 @@ private:
 			if(effective_address_lo > 0xff) {
 				effective_address_ += 0x100;
 			}
-			STAGE_END;
+			break;
 		case 5:
 			LAST_CYCLE;
 			// write to effective address

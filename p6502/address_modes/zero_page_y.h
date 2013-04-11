@@ -18,11 +18,11 @@ private:
 		case 1:
 			// fetch address, increment PC
 			effective_address_ = PC++;
-			STAGE_END;
+			break;
 		case 2:
 			// read from address, add index register to it
 			effective_address_ = read_byte(effective_address_) + Y;
-			STAGE_END;
+			break;
 		case 3:
 			LAST_CYCLE;
 			// read from effective address
@@ -40,11 +40,11 @@ private:
 		case 1:
 			// fetch address, increment PC
 			effective_address_ = PC++;
-			STAGE_END;
+			break;
 		case 2:
 			// read from address, add index register to it
 			effective_address_ = read_byte(effective_address_) + Y;
-			STAGE_END;
+			break;
 		case 3:
 			LAST_CYCLE;
 			// write to effective address
