@@ -24,7 +24,8 @@ PretendoWindow::PretendoWindow()
 		fBitsArea(B_ERROR),
 		fDirtyArea(B_ERROR),
 		fVideoScreen(NULL),
-		fAudioStream(NULL)
+		fAudioStream(NULL),
+		fRunning(false)
 {
 	BRect bounds (Bounds());
 	bounds.OffsetTo (B_ORIGIN);
@@ -337,10 +338,16 @@ PretendoWindow::MenusEnded (void)
 bool
 PretendoWindow::QuitRequested()
 {	
-	Hide();
-	Sync();
+	status_t ret;
 	
-	be_app->PostMessage (B_QUIT_REQUESTED);
+	if (fRunning) {
+		fRunning = false;
+		suspend_thread(fThread);
+		wait_for_thread(fThread, &ret);
+	}
+	
+	be_app->PostMessage(B_QUIT_REQUESTED);
+	
 	return true;
 }
 
@@ -473,7 +480,15 @@ PretendoWindow::OnFreeCart (void)
 void
 PretendoWindow::OnQuit (void)
 {
-	QuitRequested();
+	status_t ret;
+	
+	if (fRunning) {
+		fRunning = false;
+		suspend_thread(fThread);
+		wait_for_thread(fThread, &ret);
+	}
+	
+	be_app->PostMessage(B_QUIT_REQUESTED);
 }
 
 
@@ -481,45 +496,55 @@ void
 PretendoWindow::OnRun (void)
 {
 	set_palette(Palette::intensity, Palette::NTSCPalette(355.00, 0.50));
-	resume_thread(fThread);
+	
+	if (! fRunning) {
+		resume_thread(fThread);
+		fRunning = true;
+	}
 }
 
 
 void
 PretendoWindow::OnStop (void)
 {		
-	suspend_thread(fThread);
-	
-	if (fFramework == OVERLAY_FRAMEWORK) {
-		ClearBitmap (true);
-	} else {
-		fView->SetViewColor (0, 0, 0);
-		fView->Invalidate();
+	if (fRunning) {
+		suspend_thread(fThread);
+		
+		if (fFramework == OVERLAY_FRAMEWORK) {
+			ClearBitmap (true);
+		} else {
+			fView->SetViewColor (0, 0, 0);
+			fView->Invalidate();
+		}
+		
+		fRunning = false;
 	}
 	
-	fPaused = 
-	fReallyPaused = false;
-	fEmuMenu->ItemAt(1)->SetMarked(false);
+//	fPaused = 
+//	fReallyPaused = false;
+//	fEmuMenu->ItemAt(1)->SetMarked(false);
 }
 
 
 void
 PretendoWindow::OnPause (void)
 {
-	fPaused = !fReallyPaused;
-	fEmuMenu->ItemAt(1)->SetMarked(fPaused);
+//	fPaused = !fReallyPaused;
+//	fEmuMenu->ItemAt(1)->SetMarked(fPaused);
 }
 
 
 void
 PretendoWindow::OnSoftReset (void)
 {
+	reset(nes::SOFT_RESET);
 }
 
 
 void
 PretendoWindow::OnHardReset (void)
 {
+	reset(nes::HARD_RESET);
 }
 
 
@@ -615,6 +640,7 @@ void
 PretendoWindow::SetRenderer (color_space cs)
 {
 	switch (cs) {
+		default:
 		case B_CMAP8:
 			for (int32 i = 0; i < 8; i++) {
 				fMappedPalette[i] = reinterpret_cast<uint8 *>(&fPalette8[i]);
@@ -646,9 +672,6 @@ PretendoWindow::SetRenderer (color_space cs)
 			
 			LineRenderer = &PretendoWindow::RenderLine32;
 			break;
-			
-		default:
-			;
 	}
 }
 
@@ -1036,21 +1059,15 @@ PretendoWindow::end_frame()
 status_t
 PretendoWindow::threadFunc (void *data)
 {
-	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);
-		
+	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
 	if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 		
-		while (true) {
+		while (w->Running()) {
 			w->start_frame();
 			nes::run_frame(w);
 			w->end_frame();
-		}
-		
-	} else {
-		(new BAlert(0, "you fail!", "damn"))->Go();
-	
+		}	
 	}
-	
 	return 0;
 }

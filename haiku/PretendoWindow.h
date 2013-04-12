@@ -190,6 +190,10 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	private:
 	thread_id fThread;
 	static status_t threadFunc (void *data);
+	bool fRunning;
+	
+	private:
+	bool Running (void) { return fRunning; }
 };
 				
 #endif // _PRETENDO_WINDOW_H_
