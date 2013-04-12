@@ -9,6 +9,7 @@
 #include <Path.h>
 #include <String.h>
 
+#include <iostream>
 
 class ROMFilePanel : public BFilePanel
 {
@@ -39,6 +40,9 @@ class ROMFilter : public BRefFilter
 		BString	tempFileName (ref->name);
 		BString tempFileType (filetype);
 		int32 pos;
+		
+		std::cout << tempFileName << std::endl;
+	
 	
 		// first check the file type.
 		// we don't want to filter out directories, symlinks, or volumes.
