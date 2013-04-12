@@ -25,6 +25,7 @@ PretendoWindow::PretendoWindow()
 		fDirtyArea(B_ERROR),
 		fVideoScreen(NULL),
 		fAudioStream(NULL),
+		fPaused(false),
 		fRunning(false)
 {
 	BRect bounds (Bounds());
@@ -34,7 +35,6 @@ PretendoWindow::PretendoWindow()
 	
 	fView = new BView (bounds, "main_view", B_FOLLOW_ALL, 0);
 	AddChild (fView);
-	
 	
 	ResizeTo (SCREEN_WIDTH-1, SCREEN_HEIGHT-1);
 	CenterOnScreen();
@@ -116,14 +116,13 @@ PretendoWindow::PretendoWindow()
 	fDoubled = false;
 	fClear = 0;
 	
-	fPaused = 
-	fReallyPaused = false;
-	
 	if ((fThread = spawn_thread(threadFunc, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
 			std::cout << "failed to spawn thread" << std::endl;
 	} else {
 		suspend_thread(fThread);
 	}
+	
+	fMutex = create_sem(1, "pretendo_mutex");
 }
 
 
@@ -321,15 +320,7 @@ PretendoWindow::MenusBeginning (void)
 
 void
 PretendoWindow::MenusEnded (void)
-{
-	#if 0
-	fReallyPaused = fPaused;
-	
-	if (fReallyPaused == false) {
-		fMediator->pauseOff();	
-	}
-	#endif
-	
+{	
 	fFileMenu->RemoveItem(0L);
 	BDirectWindow::MenusEnded();
 }
@@ -339,6 +330,8 @@ bool
 PretendoWindow::QuitRequested()
 {	
 	status_t ret;
+	
+	delete_sem(fMutex);
 	
 	if (fRunning) {
 		fRunning = false;
@@ -471,8 +464,7 @@ PretendoWindow::OnFreeCart (void)
 		fView->Invalidate();
 	}
 	
-	fPaused = 
-	fReallyPaused = false;
+	fPaused = false;
 	fEmuMenu->ItemAt(1)->SetMarked(false);
 }
 
@@ -520,17 +512,23 @@ PretendoWindow::OnStop (void)
 		fRunning = false;
 	}
 	
-//	fPaused = 
-//	fReallyPaused = false;
-//	fEmuMenu->ItemAt(1)->SetMarked(false);
+	fPaused = false; 
+	fEmuMenu->ItemAt(1)->SetMarked(false);
 }
 
 
 void
 PretendoWindow::OnPause (void)
-{
-//	fPaused = !fReallyPaused;
-//	fEmuMenu->ItemAt(1)->SetMarked(fPaused);
+{	
+	if (fPaused) {
+		release_sem(fMutex);
+		fEmuMenu->ItemAt(1)->SetMarked(false);
+	} else {
+		acquire_sem(fMutex);
+		fEmuMenu->ItemAt(1)->SetMarked(true);
+	}
+	
+	fPaused = !fPaused;
 }
 
 
@@ -1062,11 +1060,17 @@ PretendoWindow::threadFunc (void *data)
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
 	if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
-		
-		while (w->Running()) {
+		for (;;) {
 			w->start_frame();
 			nes::run_frame(w);
 			w->end_frame();
+			if (acquire_sem(w->Mutex()) == B_BAD_SEM_ID) {
+				break;
+			}
+			
+			release_sem(w->Mutex());
+			
+			
 		}	
 	}
 	return 0;

@@ -181,11 +181,11 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	int32 fClear;
 	
 	private:
-	bool fPaused;
-	bool fReallyPaused;
+	AudioStream *fAudioStream;
 	
 	private:
-	AudioStream *fAudioStream;
+	bool fPaused;
+	sem_id fMutex;
 	
 	private:
 	thread_id fThread;
@@ -194,6 +194,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	bool Running (void) { return fRunning; }
+	sem_id Mutex (void) { return fMutex; }
 };
 				
 #endif // _PRETENDO_WINDOW_H_
