@@ -198,7 +198,7 @@ PretendoWindow::DirectConnected (direct_buffer_info *info)
 	
 	fMainLocker.Unlock();
 	
-	//BDirectWindow::DirectConnected(info);
+	BDirectWindow::DirectConnected(info);
 }
 
 
@@ -456,9 +456,7 @@ PretendoWindow::OnLoadCart (BMessage *message)
 
 void
 PretendoWindow::OnFreeCart (void)
-{
-	//fMediator->free();
-	
+{	
 	if (fFramework == OVERLAY_FRAMEWORK) {
 		ClearBitmap (true);
 	} else {
@@ -489,9 +487,7 @@ PretendoWindow::OnRun (void)
 
 void
 PretendoWindow::OnStop (void)
-{	
-//	fMediator->stop();
-	
+{		
 	suspend_thread(fThread);
 	
 	if (fFramework == OVERLAY_FRAMEWORK) {
@@ -518,16 +514,12 @@ PretendoWindow::OnPause (void)
 void
 PretendoWindow::OnSoftReset (void)
 {
-//	fMediator->reset();
 }
 
 
 void
 PretendoWindow::OnHardReset (void)
 {
-//	fMediator->hardReset();
-	
-//	mInputWindow = new InputWindow;
 }
 
 
@@ -549,8 +541,6 @@ PretendoWindow::RenderLine8 (uint8 *dest, const uint8 *source, int intensity)
 		*(dest+2) = palette[*source++];
 		*(dest+3) = palette[*source++];
 		dest += 4 * sizeof(uint8);
-		
-		
 	}	
 }
 
@@ -857,8 +847,7 @@ PretendoWindow::BlitScreen (void)
 			size = PretendoWindow::SCREEN_WIDTH;
 		
 			for (int32 y = 0; y < SCREEN_HEIGHT; y++) {
-				memcpy(dest,source,size);
-				//blit_sse (dest, source, size);
+				sse_copy (dest, source, size);
 				source += fBackBuffer.row_bytes;
 				dest += fBitmap->BytesPerRow();
 			}
@@ -882,11 +871,11 @@ PretendoWindow::BlitScreen (void)
 				  			  "pushl %%ebx\n"
 				  			  "pushl %%ebp\n"
 				  	
-				  			  "movl %0, %%edi\n"
-				 	 		  "movl %1, %%esi\n"
-				  			  "movl %2, %%ecx\n"
-				  			  "movl %3, %%eax\n"
-					  		  "movl %4, %%edx\n"
+				  			  "movl %0, %%edi\n"	//dest
+				 	 		  "movl %1, %%esi\n"	//src
+				  			  "movl %2, %%ecx\n"	//size
+				  			  "movl %3, %%eax\n"	//Y
+					  		  "movl %4, %%edx\n"	//YCbCr
 					  
 				  		  	  "1:\n"
 				  		  	  "movl (%%esi), %%ebx\n"
@@ -1043,7 +1032,6 @@ PretendoWindow::end_frame()
 	fMainLocker.Unlock();
 }
 
-#include <String.h>
 
 status_t
 PretendoWindow::threadFunc (void *data)
