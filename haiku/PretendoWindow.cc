@@ -127,7 +127,7 @@ PretendoWindow::PretendoWindow()
 
 
 PretendoWindow::~PretendoWindow()
-{
+{	
 	if (fOpenPanel->Window()) {
 		fOpenPanel->Window()->LockLooper();
 		fOpenPanel->Window()->Quit();
@@ -148,6 +148,10 @@ PretendoWindow::~PretendoWindow()
 	delete_area (fDirtyArea);
 	
 	delete fAudioStream;
+	
+	fRunning = fDirectConnected = 0;
+	fMutex = B_BAD_SEM_ID;
+	fThread = B_BAD_THREAD_ID;
 	
 	Hide();
 	Sync();	
@@ -277,6 +281,10 @@ PretendoWindow::MessageReceived (BMessage *message)
 			
 			break;
 			
+		case B_QUIT_REQUESTED:
+			std::cout << "quit requested" << std::endl;
+			break;
+			
 		default:
 			BDirectWindow::MessageReceived (message);
 	}
@@ -329,16 +337,15 @@ PretendoWindow::MenusEnded (void)
 bool
 PretendoWindow::QuitRequested()
 {	
+	// do not touch this code.
+	// do not even look at it.
+	// do not even breathe on it.
+	
 	status_t ret;
 	
 	delete_sem(fMutex);
-	
-	if (fRunning) {
-		fRunning = false;
-		suspend_thread(fThread);
-		wait_for_thread(fThread, &ret);
-	}
-	
+	wait_for_thread(fThread, &ret);
+		
 	be_app->PostMessage(B_QUIT_REQUESTED);
 	
 	return true;
@@ -472,15 +479,7 @@ PretendoWindow::OnFreeCart (void)
 void
 PretendoWindow::OnQuit (void)
 {
-	status_t ret;
-	
-	if (fRunning) {
-		fRunning = false;
-		suspend_thread(fThread);
-		wait_for_thread(fThread, &ret);
-	}
-	
-	be_app->PostMessage(B_QUIT_REQUESTED);
+	QuitRequested();
 }
 
 
@@ -500,6 +499,8 @@ void
 PretendoWindow::OnStop (void)
 {		
 	if (fRunning) {
+		fRunning = false;
+		
 		suspend_thread(fThread);
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
@@ -1060,17 +1061,16 @@ PretendoWindow::threadFunc (void *data)
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
 	if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
-		for (;;) {
-			w->start_frame();
-			nes::run_frame(w);
-			w->end_frame();
-			if (acquire_sem(w->Mutex()) == B_BAD_SEM_ID) {
+		while (1) {
+			if (acquire_sem(w->Mutex()) != B_NO_ERROR) {
 				break;
 			}
 			
+			w->start_frame();
+			nes::run_frame(w);
+			w->end_frame();
+			
 			release_sem(w->Mutex());
-			
-			
 		}	
 	}
 	return 0;
