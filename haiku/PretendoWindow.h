@@ -199,6 +199,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	private:
 	key_info fKeyStates;
 	bool ReadKey (uint8 keycode);
+	void CheckInput (void);
 };
 				
 #endif // _PRETENDO_WINDOW_H_
