@@ -1068,10 +1068,44 @@ PretendoWindow::threadFunc (void *data)
 			
 			w->start_frame();
 			nes::run_frame(w);
-			w->end_frame();
+			w->end_frame();	
 			
 			release_sem(w->Mutex());
+			
+			if (w->ReadKey(0x57)) {
+		nes::input.controller1().keystate_[Controller::INDEX_UP] = true;
+	} else if (w->ReadKey(0x62)) {
+		nes::input.controller1().keystate_[Controller::INDEX_DOWN] = true;
+	} else if (w->ReadKey(0x61)) {
+		nes::input.controller1().keystate_[Controller::INDEX_LEFT] = true;
+	} else if (w->ReadKey(0x63)) {
+		nes::input.controller1().keystate_[Controller::INDEX_RIGHT] = true;
+	} else if (w->ReadKey(0x3c)) {
+		nes::input.controller1().keystate_[Controller::INDEX_SELECT] = true;
+	} else if (w->ReadKey(0x3d)) {
+		nes::input.controller1().keystate_[Controller::INDEX_START] = true;
+	} else if (w->ReadKey(0x4c)) {
+		nes::input.controller1().keystate_[Controller::INDEX_B] = true;
+	} else if (w->ReadKey(0x4d)) {
+		nes::input.controller1().keystate_[Controller::INDEX_A] = true;
+	}
 		}	
 	}
+	
 	return 0;
+}
+
+
+bool
+PretendoWindow::ReadKey (uint8 keycode)
+{
+	get_key_info(&fKeyStates);
+	return fKeyStates.key_states[keycode >> 3] & (1 << (7 - (keycode % 8)));
+}
+
+void
+CheckInput (void)
+{
+	
+	
 }
