@@ -4,7 +4,7 @@
 ROMFilePanel::ROMFilePanel ()
 	: BFilePanel (B_OPEN_PANEL, NULL, NULL, 0, false, NULL, NULL, true, true)
 {
-	Window()->Lock();
+	//Window()->Lock();
 	
 	SetRefFilter (new ROMFilter);
 	
@@ -15,7 +15,7 @@ ROMFilePanel::ROMFilePanel ()
 	
 	Customize();
 	
-	Window()->Unlock();
+	//Window()->Unlock();
 }
 
 

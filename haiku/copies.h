@@ -6,7 +6,7 @@ extern "C" {
 	void mmx2_copy (uint8 *dest, uint8 *src, size_t size);
 	void mmx2_copy (uint8 *dest, uint8 *src, size_t size);
 	void sse_copy (uint8 *dest, uint8 *src, size_t size);
-};
+}
 
 
 #endif // _OPTIMISED_COPIES_

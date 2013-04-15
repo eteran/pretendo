@@ -24,7 +24,9 @@ PretendoWindow::PretendoWindow()
 		fBitsArea(B_ERROR),
 		fDirtyArea(B_ERROR),
 		fVideoScreen(NULL),
-		fAudioStream(NULL)
+		fAudioStream(NULL),
+		fPaused(false),
+		fRunning(false)
 {
 	BRect bounds (Bounds());
 	bounds.OffsetTo (B_ORIGIN);
@@ -33,7 +35,6 @@ PretendoWindow::PretendoWindow()
 	
 	fView = new BView (bounds, "main_view", B_FOLLOW_ALL, 0);
 	AddChild (fView);
-	
 	
 	ResizeTo (SCREEN_WIDTH-1, SCREEN_HEIGHT-1);
 	CenterOnScreen();
@@ -115,19 +116,18 @@ PretendoWindow::PretendoWindow()
 	fDoubled = false;
 	fClear = 0;
 	
-	fPaused = 
-	fReallyPaused = false;
-	
 	if ((fThread = spawn_thread(threadFunc, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
 			std::cout << "failed to spawn thread" << std::endl;
 	} else {
 		suspend_thread(fThread);
 	}
+	
+	fMutex = create_sem(1, "pretendo_mutex");
 }
 
 
 PretendoWindow::~PretendoWindow()
-{
+{	
 	if (fOpenPanel->Window()) {
 		fOpenPanel->Window()->LockLooper();
 		fOpenPanel->Window()->Quit();
@@ -148,6 +148,10 @@ PretendoWindow::~PretendoWindow()
 	delete_area (fDirtyArea);
 	
 	delete fAudioStream;
+	
+	fRunning = fDirectConnected = 0;
+	fMutex = B_BAD_SEM_ID;
+	fThread = B_BAD_THREAD_ID;
 	
 	Hide();
 	Sync();	
@@ -198,7 +202,7 @@ PretendoWindow::DirectConnected (direct_buffer_info *info)
 	
 	fMainLocker.Unlock();
 	
-	//BDirectWindow::DirectConnected(info);
+	BDirectWindow::DirectConnected(info);
 }
 
 
@@ -277,6 +281,10 @@ PretendoWindow::MessageReceived (BMessage *message)
 			
 			break;
 			
+		case B_QUIT_REQUESTED:
+			std::cout << "quit requested" << std::endl;
+			break;
+			
 		default:
 			BDirectWindow::MessageReceived (message);
 	}
@@ -320,15 +328,7 @@ PretendoWindow::MenusBeginning (void)
 
 void
 PretendoWindow::MenusEnded (void)
-{
-	#if 0
-	fReallyPaused = fPaused;
-	
-	if (fReallyPaused == false) {
-		fMediator->pauseOff();	
-	}
-	#endif
-	
+{	
 	fFileMenu->RemoveItem(0L);
 	BDirectWindow::MenusEnded();
 }
@@ -337,10 +337,17 @@ PretendoWindow::MenusEnded (void)
 bool
 PretendoWindow::QuitRequested()
 {	
-	Hide();
-	Sync();
+	// do not touch this code.
+	// do not even look at it.
+	// do not even breathe on it.
 	
-	be_app->PostMessage (B_QUIT_REQUESTED);
+	status_t ret;
+	
+	delete_sem(fMutex);
+	wait_for_thread(fThread, &ret);
+		
+	be_app->PostMessage(B_QUIT_REQUESTED);
+	
 	return true;
 }
 
@@ -456,9 +463,7 @@ PretendoWindow::OnLoadCart (BMessage *message)
 
 void
 PretendoWindow::OnFreeCart (void)
-{
-	//fMediator->free();
-	
+{	
 	if (fFramework == OVERLAY_FRAMEWORK) {
 		ClearBitmap (true);
 	} else {
@@ -466,8 +471,7 @@ PretendoWindow::OnFreeCart (void)
 		fView->Invalidate();
 	}
 	
-	fPaused = 
-	fReallyPaused = false;
+	fPaused = false;
 	fEmuMenu->ItemAt(1)->SetMarked(false);
 }
 
@@ -483,51 +487,63 @@ void
 PretendoWindow::OnRun (void)
 {
 	set_palette(Palette::intensity, Palette::NTSCPalette(355.00, 0.50));
-	resume_thread(fThread);
+	
+	if (! fRunning) {
+		resume_thread(fThread);
+		fRunning = true;
+	}
 }
 
 
 void
 PretendoWindow::OnStop (void)
-{	
-//	fMediator->stop();
-	
-	suspend_thread(fThread);
-	
-	if (fFramework == OVERLAY_FRAMEWORK) {
-		ClearBitmap (true);
-	} else {
-		fView->SetViewColor (0, 0, 0);
-		fView->Invalidate();
+{		
+	if (fRunning) {
+		fRunning = false;
+		
+		suspend_thread(fThread);
+		
+		if (fFramework == OVERLAY_FRAMEWORK) {
+			ClearBitmap (true);
+		} else {
+			fView->SetViewColor (0, 0, 0);
+			fView->Invalidate();
+		}
+		
+		fRunning = false;
 	}
 	
-	fPaused = 
-	fReallyPaused = false;
+	fPaused = false; 
 	fEmuMenu->ItemAt(1)->SetMarked(false);
 }
 
 
 void
 PretendoWindow::OnPause (void)
-{
-	fPaused = !fReallyPaused;
-	fEmuMenu->ItemAt(1)->SetMarked(fPaused);
+{	
+	if (fPaused) {
+		release_sem(fMutex);
+		fEmuMenu->ItemAt(1)->SetMarked(false);
+	} else {
+		acquire_sem(fMutex);
+		fEmuMenu->ItemAt(1)->SetMarked(true);
+	}
+	
+	fPaused = !fPaused;
 }
 
 
 void
 PretendoWindow::OnSoftReset (void)
 {
-//	fMediator->reset();
+	reset(nes::SOFT_RESET);
 }
 
 
 void
 PretendoWindow::OnHardReset (void)
 {
-//	fMediator->hardReset();
-	
-//	mInputWindow = new InputWindow;
+	reset(nes::HARD_RESET);
 }
 
 
@@ -549,8 +565,6 @@ PretendoWindow::RenderLine8 (uint8 *dest, const uint8 *source, int intensity)
 		*(dest+2) = palette[*source++];
 		*(dest+3) = palette[*source++];
 		dest += 4 * sizeof(uint8);
-		
-		
 	}	
 }
 
@@ -625,6 +639,7 @@ void
 PretendoWindow::SetRenderer (color_space cs)
 {
 	switch (cs) {
+		default:
 		case B_CMAP8:
 			for (int32 i = 0; i < 8; i++) {
 				fMappedPalette[i] = reinterpret_cast<uint8 *>(&fPalette8[i]);
@@ -656,9 +671,6 @@ PretendoWindow::SetRenderer (color_space cs)
 			
 			LineRenderer = &PretendoWindow::RenderLine32;
 			break;
-			
-		default:
-			;
 	}
 }
 
@@ -857,8 +869,7 @@ PretendoWindow::BlitScreen (void)
 			size = PretendoWindow::SCREEN_WIDTH;
 		
 			for (int32 y = 0; y < SCREEN_HEIGHT; y++) {
-				memcpy(dest,source,size);
-				//blit_sse (dest, source, size);
+				sse_copy (dest, source, size);
 				source += fBackBuffer.row_bytes;
 				dest += fBitmap->BytesPerRow();
 			}
@@ -882,11 +893,11 @@ PretendoWindow::BlitScreen (void)
 				  			  "pushl %%ebx\n"
 				  			  "pushl %%ebp\n"
 				  	
-				  			  "movl %0, %%edi\n"
-				 	 		  "movl %1, %%esi\n"
-				  			  "movl %2, %%ecx\n"
-				  			  "movl %3, %%eax\n"
-					  		  "movl %4, %%edx\n"
+				  			  "movl %0, %%edi\n"	//dest
+				 	 		  "movl %1, %%esi\n"	//src
+				  			  "movl %2, %%ecx\n"	//size
+				  			  "movl %3, %%eax\n"	//Y
+					  		  "movl %4, %%edx\n"	//YCbCr
 					  
 				  		  	  "1:\n"
 				  		  	  "movl (%%esi), %%ebx\n"
@@ -1043,26 +1054,24 @@ PretendoWindow::end_frame()
 	fMainLocker.Unlock();
 }
 
-#include <String.h>
 
 status_t
 PretendoWindow::threadFunc (void *data)
 {
-	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);
-		
+	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
 	if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
-		
-		while (true) {
+		while (1) {
+			if (acquire_sem(w->Mutex()) != B_NO_ERROR) {
+				break;
+			}
+			
 			w->start_frame();
 			nes::run_frame(w);
 			w->end_frame();
-		}
-		
-	} else {
-		(new BAlert(0, "you fail!", "damn"))->Go();
-	
+			
+			release_sem(w->Mutex());
+		}	
 	}
-	
 	return 0;
 }

@@ -26,6 +26,7 @@
 //#include "PaletteWindow.h"
 
 #include "blitters.h"
+#include "copies.h"
 
 #define MSG_ROM_LOADED 	'LOAD'
 #define MSG_SHOW_OPEN	'OPEN'
@@ -180,15 +181,20 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	int32 fClear;
 	
 	private:
-	bool fPaused;
-	bool fReallyPaused;
+	AudioStream *fAudioStream;
 	
 	private:
-	AudioStream *fAudioStream;
+	bool fPaused;
+	sem_id fMutex;
 	
 	private:
 	thread_id fThread;
 	static status_t threadFunc (void *data);
+	bool fRunning;
+	
+	private:
+	bool Running (void) { return fRunning; }
+	sem_id Mutex (void) { return fMutex; }
 };
 				
 #endif // _PRETENDO_WINDOW_H_
