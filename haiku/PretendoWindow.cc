@@ -36,7 +36,7 @@ PretendoWindow::PretendoWindow()
 	fView = new BView (bounds, "main_view", B_FOLLOW_ALL, 0);
 	AddChild (fView);
 	
-	ResizeTo (SCREEN_WIDTH-1, SCREEN_HEIGHT-1);
+	ResizeTo (SCREEN_WIDTH, SCREEN_HEIGHT);
 	CenterOnScreen();
 	
 	fBitmap = new BBitmap (BRect (0, 0, SCREEN_WIDTH-1, SCREEN_HEIGHT-1), B_CMAP8);
@@ -116,7 +116,7 @@ PretendoWindow::PretendoWindow()
 	fDoubled = false;
 	fClear = 0;
 	
-	if ((fThread = spawn_thread(threadFunc, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
+	if ((fThread = spawn_thread(thread_func, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
 			std::cout << "failed to spawn thread" << std::endl;
 	} else {
 		suspend_thread(fThread);
@@ -149,7 +149,7 @@ PretendoWindow::~PretendoWindow()
 	
 	delete fAudioStream;
 	
-	fRunning = fDirectConnected = 0;
+	fRunning = fDirectConnected = false;
 	fMutex = B_BAD_SEM_ID;
 	fThread = B_BAD_THREAD_ID;
 	
@@ -281,10 +281,6 @@ PretendoWindow::MessageReceived (BMessage *message)
 			
 			break;
 			
-		case B_QUIT_REQUESTED:
-			std::cout << "quit requested" << std::endl;
-			break;
-			
 		default:
 			BDirectWindow::MessageReceived (message);
 	}
@@ -345,6 +341,9 @@ PretendoWindow::QuitRequested()
 	
 	delete_sem(fMutex);
 	wait_for_thread(fThread, &ret);
+	
+	fRunning = 
+	fDirectConnected = false;
 		
 	be_app->PostMessage(B_QUIT_REQUESTED);
 	
@@ -356,6 +355,7 @@ void
 PretendoWindow::ResizeTo (float width, float height)
 {
 	height += fMenuHeight + 1;
+	width++;
 	BDirectWindow::ResizeTo (width, height);
 }
 
@@ -464,15 +464,8 @@ PretendoWindow::OnLoadCart (BMessage *message)
 void
 PretendoWindow::OnFreeCart (void)
 {	
-	if (fFramework == OVERLAY_FRAMEWORK) {
-		ClearBitmap (true);
-	} else {
-		fView->SetViewColor (0, 0, 0);
-		fView->Invalidate();
-	}
-	
-	fPaused = false;
-	fEmuMenu->ItemAt(1)->SetMarked(false);
+	OnStop();
+	reset(nes::HARD_RESET);
 }
 
 
@@ -509,8 +502,6 @@ PretendoWindow::OnStop (void)
 			fView->SetViewColor (0, 0, 0);
 			fView->Invalidate();
 		}
-		
-		fRunning = false;
 	}
 	
 	fPaused = false; 
@@ -1056,36 +1047,20 @@ PretendoWindow::end_frame()
 
 
 status_t
-PretendoWindow::threadFunc (void *data)
+PretendoWindow::thread_func (void *data)
 {
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
 	if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 		while (1) {
-			if (acquire_sem(w->Mutex()) != B_NO_ERROR) {
+			if ((acquire_sem(w->Mutex()) != B_NO_ERROR) || ! w->Running()) {
 				break;
 			}
 			
 			w->start_frame();
 			nes::run_frame(w);
-			w->end_frame();	
-			
-			nes::input.controller1().keystate_[Controller::INDEX_UP] = 
-				w->ReadKey(0x57);
-			nes::input.controller1().keystate_[Controller::INDEX_DOWN] = 
-				w->ReadKey(0x62);
-			nes::input.controller1().keystate_[Controller::INDEX_LEFT] = 
-				w->ReadKey(0x61);
-			nes::input.controller1().keystate_[Controller::INDEX_RIGHT] = 
-				w->ReadKey(0x63);
-			nes::input.controller1().keystate_[Controller::INDEX_SELECT] = 
-				w->ReadKey(0x3c);
-			nes::input.controller1().keystate_[Controller::INDEX_START] = 
-				w->ReadKey(0x3d);
-			nes::input.controller1().keystate_[Controller::INDEX_B] = 
-				w->ReadKey(0x4c);
-			nes::input.controller1().keystate_[Controller::INDEX_A] = 
-				w->ReadKey(0x4d);
+			w->end_frame();
+			w->ReadKeyStates();
 			
 			release_sem(w->Mutex());
 		}	
@@ -1095,16 +1070,32 @@ PretendoWindow::threadFunc (void *data)
 }
 
 
-bool
-PretendoWindow::ReadKey (uint8 keycode)
+void
+PretendoWindow::ReadKeyStates (void)
 {
 	get_key_info(&fKeyStates);
-	return fKeyStates.key_states[keycode >> 3] & (1 << (7 - (keycode % 8)));
-}
-
-void
-CheckInput (void)
-{
 	
+	nes::input.controller1().keystate_[Controller::INDEX_UP] = 
+		fKeyStates.key_states[kKeyUp >> 3] & (1 << (7 - (kKeyUp % 8)));
+		
+	nes::input.controller1().keystate_[Controller::INDEX_DOWN] =
+		fKeyStates.key_states[kKeyDown >> 3] & (1 << (7 - (kKeyDown % 8)));
+		
+	nes::input.controller1().keystate_[Controller::INDEX_LEFT] =
+		fKeyStates.key_states[kKeyLeft >> 3] & (1 << (7 - (kKeyLeft % 8)));
 	
+	nes::input.controller1().keystate_[Controller::INDEX_RIGHT] =
+		fKeyStates.key_states[kKeyRight >> 3] & (1 << (7 - (kKeyRight % 8)));
+		
+	nes::input.controller1().keystate_[Controller::INDEX_SELECT] =
+		fKeyStates.key_states[kKeySelect >> 3] & (1 << (7 - (kKeySelect % 8)));
+		
+	nes::input.controller1().keystate_[Controller::INDEX_START] =
+		fKeyStates.key_states[kKeyStart >> 3] & (1 << (7 - (kKeyStart % 8)));	
+		
+	nes::input.controller1().keystate_[Controller::INDEX_B] =
+		fKeyStates.key_states[kKeyB >> 3] & (1 << (7 - (kKeyB % 8)));
+		
+	nes::input.controller1().keystate_[Controller::INDEX_A] =
+		fKeyStates.key_states[kKeyA >> 3] & (1 << (7 - (kKeyA % 8)));
 }

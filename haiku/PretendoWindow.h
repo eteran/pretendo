@@ -54,6 +54,18 @@ class VideoScreen;
 
 class PretendoWindow : public BDirectWindow, public VideoInterface
 {
+	private:
+	enum {
+		kKeyUp = 0x57,
+		kKeyDown = 0x62,
+		kKeyLeft = 0x61,
+		kKeyRight = 0x63,
+		kKeySelect = 0x3c,
+		kKeyStart = 0x3d,
+		kKeyB = 0x4c,
+		kKeyA = 0x4d
+	};
+	
 	public:
 	enum {
 		SCREEN_WIDTH = 256,
@@ -189,7 +201,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	thread_id fThread;
-	static status_t threadFunc (void *data);
+	static status_t thread_func (void *data);
 	bool fRunning;
 	
 	private:
@@ -198,8 +210,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	key_info fKeyStates;
-	bool ReadKey (uint8 keycode);
-	void CheckInput (void);
+	void ReadKeyStates (void);
 };
 				
 #endif // _PRETENDO_WINDOW_H_
