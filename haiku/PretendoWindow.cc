@@ -1070,25 +1070,9 @@ PretendoWindow::threadFunc (void *data)
 			nes::run_frame(w);
 			w->end_frame();	
 			
-			release_sem(w->Mutex());
+			nes::input.controller1().keystate_[Controller::INDEX_START] = w->ReadKey(0x3d);
 			
-			if (w->ReadKey(0x57)) {
-		nes::input.controller1().keystate_[Controller::INDEX_UP] = true;
-	} else if (w->ReadKey(0x62)) {
-		nes::input.controller1().keystate_[Controller::INDEX_DOWN] = true;
-	} else if (w->ReadKey(0x61)) {
-		nes::input.controller1().keystate_[Controller::INDEX_LEFT] = true;
-	} else if (w->ReadKey(0x63)) {
-		nes::input.controller1().keystate_[Controller::INDEX_RIGHT] = true;
-	} else if (w->ReadKey(0x3c)) {
-		nes::input.controller1().keystate_[Controller::INDEX_SELECT] = true;
-	} else if (w->ReadKey(0x3d)) {
-		nes::input.controller1().keystate_[Controller::INDEX_START] = true;
-	} else if (w->ReadKey(0x4c)) {
-		nes::input.controller1().keystate_[Controller::INDEX_B] = true;
-	} else if (w->ReadKey(0x4d)) {
-		nes::input.controller1().keystate_[Controller::INDEX_A] = true;
-	}
+			release_sem(w->Mutex());
 		}	
 	}
 	
