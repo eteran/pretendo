@@ -133,7 +133,7 @@
   <action name="action_Load_ROM">
    <property name="icon">
     <iconset resource="pretendo.qrc">
-     <normaloff>:/pretendo/graphics/pretendo_eject.png</normaloff>:/pretendo/graphics/pretendo_eject.png</iconset>
+     <normaloff>:/pretendo/graphics/glyphicons_179_eject.png</normaloff>:/pretendo/graphics/glyphicons_179_eject.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Load ROM</string>
@@ -147,7 +147,7 @@
   <action name="action_Run">
    <property name="icon">
     <iconset resource="pretendo.qrc">
-     <normaloff>:/pretendo/graphics/pretendo_play.png</normaloff>:/pretendo/graphics/pretendo_play.png</iconset>
+     <normaloff>:/pretendo/graphics/glyphicons_173_play.png</normaloff>:/pretendo/graphics/glyphicons_173_play.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Run</string>
@@ -156,7 +156,7 @@
   <action name="action_Stop">
    <property name="icon">
     <iconset resource="pretendo.qrc">
-     <normaloff>:/pretendo/graphics/pretendo_stop.png</normaloff>:/pretendo/graphics/pretendo_stop.png</iconset>
+     <normaloff>:/pretendo/graphics/glyphicons_175_stop.png</normaloff>:/pretendo/graphics/glyphicons_175_stop.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Stop</string>
@@ -168,7 +168,7 @@
    </property>
    <property name="icon">
     <iconset resource="pretendo.qrc">
-     <normaloff>:/pretendo/graphics/pretendo_pause.png</normaloff>:/pretendo/graphics/pretendo_pause.png</iconset>
+     <normaloff>:/pretendo/graphics/glyphicons_174_pause.png</normaloff>:/pretendo/graphics/glyphicons_174_pause.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Pause</string>
