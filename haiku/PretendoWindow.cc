@@ -294,7 +294,7 @@ PretendoWindow::MessageReceived (BMessage *message)
 void
 PretendoWindow::WindowActivated (bool flag)
 {
-	//BDirectWindow::WindowActivated (flag);	
+	BDirectWindow::WindowActivated (flag);	
 }
 
 
@@ -478,12 +478,12 @@ PretendoWindow::OnRun (void)
 	set_palette(Palette::intensity, Palette::NTSCPalette(355.00, 0.50));
 	
 	if (! fRunning) {
-		
-		//resume_thread(fThread);
-		reset(nes::HARD_RESET);
-		release_sem(fMutex);
-		
-		fRunning = true;
+		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
+			//resume_thread(fThread);
+			reset(nes::HARD_RESET);
+			release_sem(fMutex);
+			fRunning = true;
+		}
 	}
 }
 
@@ -1054,10 +1054,6 @@ PretendoWindow::thread_func (void *data)
 {
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
-	if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
-		
-		std::cout << "THIS IS HOW WE THREAD THE NEEDLE" << std::endl;
-		
 		while (1) {
 			if ((acquire_sem(w->Mutex()) != B_NO_ERROR) || ! w->Running()) {
 				break;
@@ -1070,7 +1066,6 @@ PretendoWindow::thread_func (void *data)
 			
 			release_sem(w->Mutex());
 		}	
-	}
 	
 	return 0;
 }
