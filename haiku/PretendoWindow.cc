@@ -105,6 +105,7 @@ PretendoWindow::PretendoWindow()
 	if (overlayOK) {
 		ChangeFramework (OVERLAY_FRAMEWORK);
 	} else {
+		// wait till we get a hardware cursor...
 		//ChangeFramework(DIRECTWINDOW_FRAMEWORK);
 		ChangeFramework(BITMAP_FRAMEWORK);
 	}
@@ -119,10 +120,12 @@ PretendoWindow::PretendoWindow()
 	if ((fThread = spawn_thread(thread_func, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
 			std::cout << "failed to spawn thread" << std::endl;
 	} else {
-		suspend_thread(fThread);
+		fRunning = false;
 	}
 	
 	fMutex = create_sem(1, "pretendo_mutex");
+	acquire_sem(fMutex);
+	resume_thread(fThread);
 }
 
 
@@ -183,7 +186,8 @@ PretendoWindow::DirectConnected (direct_buffer_info *info)
 			fClipInfo.clip_count = info->clip_list_count;
 			fClipInfo.clip_list = 
 				reinterpret_cast<clipping_rect *>(realloc(fClipInfo.clip_list, 								fClipInfo.clip_count * sizeof(clipping_rect)));
-			memcpy (fClipInfo.clip_list, info->clip_list,
+			sse_copy (reinterpret_cast<uint8 *>(fClipInfo.clip_list), 
+				reinterpret_cast<uint8 *>(info->clip_list),
 				fClipInfo.clip_count * sizeof(clipping_rect));
 			
 			for (int32 i = 0; i < fClipInfo.clip_count; i++) {
@@ -289,17 +293,8 @@ PretendoWindow::MessageReceived (BMessage *message)
 
 void
 PretendoWindow::WindowActivated (bool flag)
-{	
-	#if 0
-	if (fPaused == false && fFramework != WINDOWSCREEN_FRAMEWORK) {
-		if (flag == false) {
-			fMediator->pauseOn();
-		} else {
-			fMediator->pauseOff();
-		}
-	}
-	#endif
-	BDirectWindow::WindowActivated (flag);	
+{
+	//BDirectWindow::WindowActivated (flag);	
 }
 
 
@@ -457,6 +452,7 @@ PretendoWindow::OnLoadCart (BMessage *message)
 			fView->Invalidate();
 		}
 		
+		reset(nes::HARD_RESET);
 	}
 }
 
@@ -482,7 +478,11 @@ PretendoWindow::OnRun (void)
 	set_palette(Palette::intensity, Palette::NTSCPalette(355.00, 0.50));
 	
 	if (! fRunning) {
-		resume_thread(fThread);
+		
+		//resume_thread(fThread);
+		reset(nes::HARD_RESET);
+		release_sem(fMutex);
+		
 		fRunning = true;
 	}
 }
@@ -494,7 +494,8 @@ PretendoWindow::OnStop (void)
 	if (fRunning) {
 		fRunning = false;
 		
-		suspend_thread(fThread);
+//		suspend_thread(fThread);
+		acquire_sem(fMutex);
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
 			ClearBitmap (true);
@@ -506,6 +507,8 @@ PretendoWindow::OnStop (void)
 	
 	fPaused = false; 
 	fEmuMenu->ItemAt(1)->SetMarked(false);
+	
+	
 }
 
 
@@ -513,10 +516,10 @@ void
 PretendoWindow::OnPause (void)
 {	
 	if (fPaused) {
-		release_sem(fMutex);
+		//release_sem(fMutex);
 		fEmuMenu->ItemAt(1)->SetMarked(false);
 	} else {
-		acquire_sem(fMutex);
+		//acquire_sem(fMutex);
 		fEmuMenu->ItemAt(1)->SetMarked(true);
 	}
 	
@@ -1052,6 +1055,9 @@ PretendoWindow::thread_func (void *data)
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
 	if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
+		
+		std::cout << "THIS IS HOW WE THREAD THE NEEDLE" << std::endl;
+		
 		while (1) {
 			if ((acquire_sem(w->Mutex()) != B_NO_ERROR) || ! w->Running()) {
 				break;
