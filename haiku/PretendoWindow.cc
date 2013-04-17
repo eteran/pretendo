@@ -348,8 +348,7 @@ PretendoWindow::QuitRequested()
 void
 PretendoWindow::ResizeTo (float width, float height)
 {
-	height += fMenuHeight + 1;
-	width++;
+	height += fMenuHeight;
 	BDirectWindow::ResizeTo (width, height);
 }
 
@@ -361,30 +360,21 @@ PretendoWindow::Zoom (BPoint origin, float width, float height)
 	(void)width;
 	(void)height;
 	
-	float w = Frame().right - Frame().left;
-	
-	if (w <= SCREEN_WIDTH) {
-		if (fFramework == DIRECTWINDOW_FRAMEWORK) {
-			ResizeTo ((SCREEN_WIDTH*2), (SCREEN_HEIGHT*2));
-		} else {
-			ResizeTo ((SCREEN_WIDTH*2) - 1, (SCREEN_HEIGHT*2) - 1);
-		}
+	float w = Bounds().right - Bounds().left;	
 		
+	if (w == SCREEN_WIDTH) {
+		ResizeTo ((SCREEN_WIDTH*2), (SCREEN_HEIGHT*2));
 		fDoubled = true;
 	} else {
-		if (fFramework == DIRECTWINDOW_FRAMEWORK) {
+		if (w == SCREEN_WIDTH*2) {
 			ResizeTo (SCREEN_WIDTH, SCREEN_HEIGHT);
-		} else {
-			ResizeTo (SCREEN_WIDTH-1, SCREEN_HEIGHT-1);
-		}
+		} 
 		
 		fDoubled = false;
 	}
 	
 	Hide();
 	Show();
-	
-	//BDirectWindow::Zoom(origin, width, height);
 }
 
 
