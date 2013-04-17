@@ -286,101 +286,6 @@ void op_rts() {
 }
 
 //------------------------------------------------------------------------------
-// Name: op_brk
-// Desc: Force Interrupt
-//------------------------------------------------------------------------------
-void op_brk() {
-
-	static uint16_t vector_address;
-
-	switch(current_cycle) {
-	case 1:
-		// read next instruction byte (and throw it away),
-		// increment PC
-		read_byte(PC++);
-		break;
-	case 2:
-		// push PCH on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, pc_hi());
-		break;
-	case 3:
-		// push PCL on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, pc_lo());
-		break;
-	case 4:
-		// push P on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, P | B_MASK);
-		set_flag<I_MASK>();
-		
-		if(nmi_asserted) {
-			vector_address = NMI_VECTOR_ADDRESS;
-			nmi_asserted = false;
-		} else {
-			vector_address = IRQ_VECTOR_ADDRESS;
-		}
-		break;
-	case 5:
-		// fetch PCL
-		set_pc_lo(read_byte(vector_address + 0));
-		break;
-	case 6:
-		LAST_CYCLE;
-		// fetch PCH
-		set_pc_hi(read_byte(vector_address + 1));
-		OPCODE_COMPLETE;
-	default:
-		abort();
-	}
-}	
-
-//------------------------------------------------------------------------------
-// Name: do_irq
-// Desc: Interrupt
-//------------------------------------------------------------------------------
-void do_irq() {
-	static uint16_t vector_address;
-
-	switch(current_cycle) {
-	case 1:
-		// read next instruction byte (and throw it away),
-		// increment PC
-		read_byte(PC);
-		break;
-	case 2:
-		// push PCH on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, pc_hi());
-		break;
-	case 3:
-		// push PCL on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, pc_lo());
-		break;
-	case 4:
-		// push P on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, P);
-		set_flag<I_MASK>();
-		
-		if(nmi_asserted) {
-			vector_address = NMI_VECTOR_ADDRESS;
-			nmi_asserted = false;
-		} else {
-			vector_address = IRQ_VECTOR_ADDRESS;
-		}
-		break;
-	case 5:
-		// fetch PCL
-		set_pc_lo(read_byte(vector_address + 0));
-		break;
-	case 6:
-		LAST_CYCLE;
-		// fetch PCH
-		set_pc_hi(read_byte(vector_address + 1));
-		OPCODE_COMPLETE;
-	default:
-		abort();
-	}
-}
-
-//------------------------------------------------------------------------------
 // Name: do_reset
 // Desc:
 //------------------------------------------------------------------------------
@@ -441,9 +346,10 @@ void execute_opcode() {
 	static mode::zero_page_y	  zero_page_y_insn;
 	static opcode_irq             op_irq;
 	static opcode_nmi             op_nmi;
+	static opcode_brk             op_brk;
 
 	switch(instruction) {
-	case 0x00: op_brk(); break;
+	case 0x00: op_brk(current_cycle); break;
 	case 0x01: indexed_indirect_insn(current_cycle, opcode_ora()); break;
 	case 0x02: opcode_jam(); break;
 	case 0x03: indexed_indirect_insn(current_cycle, opcode_slo()); break;
