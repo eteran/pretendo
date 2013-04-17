@@ -184,108 +184,6 @@ inline void update_nz_flags(uint8_t value) {
 #include "address_modes.h"
 
 //------------------------------------------------------------------------------
-// Name: op_jsr
-// Desc: Jump to Subroutine
-//------------------------------------------------------------------------------
-void op_jsr() {
-
-	static uint16_t effective_address;
-
-	switch(current_cycle) {
-	case 1:
-		// fetch low address byte, increment PC
-		effective_address = (effective_address & 0xff00) | read_byte(PC++);
-		break;
-	case 2:
-		// internal operation (predecrement S?)
-		break;
-	case 3:
-		// push PCH on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, pc_hi());
-		break;
-	case 4:
-		// push PCL on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, pc_lo());
-		break;
-	case 5:
-		LAST_CYCLE;
-		// fetch high address byte to PCH
-		effective_address = (effective_address & 0x00ff) | (read_byte(PC) << 8);
-		PC = effective_address;
-		OPCODE_COMPLETE;
-	default:
-		abort();
-	}
-}
-
-
-//------------------------------------------------------------------------------
-// Name: op_rti
-// Desc: Return from Interrupt
-//------------------------------------------------------------------------------
-void op_rti() {
-
-	switch(current_cycle) {
-	case 1:
-		// read next instruction byte (and throw it away)
-		read_byte(PC);
-		break;
-	case 2:
-		// increment S
-		++S;
-		break;
-	case 3:
-		// pull P from stack, increment S
-		P = (read_byte(S++ + STACK_ADDRESS) & ~B_MASK) | R_MASK;
-		break;
-	case 4:
-		// pull PCL from stack, increment S
-		set_pc_lo(read_byte(S++ + STACK_ADDRESS));
-		break;
-	case 5:
-		LAST_CYCLE;
-		// pull PCH from stack
-		set_pc_hi(read_byte(S + STACK_ADDRESS));
-		OPCODE_COMPLETE;
-	default:
-		abort();
-
-	}
-}
-
-//------------------------------------------------------------------------------
-// Name: op_rts
-// Desc: Return from Subroutine
-//------------------------------------------------------------------------------
-void op_rts() {
-	switch(current_cycle) {
-	case 1:
-		// read next instruction byte (and throw it away)
-		read_byte(PC);
-		break;
-	case 2:
-		// increment S
-		++S;
-		break;
-	case 3:
-		// pull PCL from stack, increment S
-		set_pc_lo(read_byte(S++ + STACK_ADDRESS));
-		break;
-	case 4:
-		// pull PCH from stack
-		set_pc_hi(read_byte(S + STACK_ADDRESS));
-		break;
-	case 5:
-		LAST_CYCLE;
-		 // increment PC
-		++PC;
-		OPCODE_COMPLETE;
-	default:
-		abort();
-	}
-}
-
-//------------------------------------------------------------------------------
 // Name: do_reset
 // Desc:
 //------------------------------------------------------------------------------
@@ -347,6 +245,9 @@ void execute_opcode() {
 	static opcode_irq             op_irq;
 	static opcode_nmi             op_nmi;
 	static opcode_brk             op_brk;
+	static opcode_rts             op_rts;
+	static opcode_rti             op_rti;
+	static opcode_jsr             op_jsr;
 
 	switch(instruction) {
 	case 0x00: op_brk(current_cycle); break;
@@ -381,7 +282,7 @@ void execute_opcode() {
 	case 0x1d: absolute_x_insn(current_cycle, opcode_ora()); break;
 	case 0x1e: absolute_x_insn(current_cycle, opcode_asl()); break;
 	case 0x1f: absolute_x_insn(current_cycle, opcode_slo()); break;
-	case 0x20: op_jsr(); break;
+	case 0x20: op_jsr(current_cycle); break;
 	case 0x21: indexed_indirect_insn(current_cycle, opcode_and()); break;
 	case 0x22: opcode_jam(); break;
 	case 0x23: indexed_indirect_insn(current_cycle, opcode_rla()); break;
@@ -413,7 +314,7 @@ void execute_opcode() {
 	case 0x3d: absolute_x_insn(current_cycle, opcode_and()); break;
 	case 0x3e: absolute_x_insn(current_cycle, opcode_rol()); break;
 	case 0x3f: absolute_x_insn(current_cycle, opcode_rla()); break;
-	case 0x40: op_rti(); break;
+	case 0x40: op_rti(current_cycle); break;
 	case 0x41: indexed_indirect_insn(current_cycle, opcode_eor()); break;
 	case 0x42: opcode_jam(); break;
 	case 0x43: indexed_indirect_insn(current_cycle, opcode_sre()); break;
@@ -445,7 +346,7 @@ void execute_opcode() {
 	case 0x5d: absolute_x_insn(current_cycle, opcode_eor()); break;
 	case 0x5e: absolute_x_insn(current_cycle, opcode_lsr()); break;
 	case 0x5f: absolute_x_insn(current_cycle, opcode_sre()); break;
-	case 0x60: op_rts(); break;
+	case 0x60: op_rts(current_cycle); break;
 	case 0x61: indexed_indirect_insn(current_cycle, opcode_adc()); break;
 	case 0x62: opcode_jam(); break;
 	case 0x63: indexed_indirect_insn(current_cycle, opcode_rra()); break;

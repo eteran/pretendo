@@ -86,6 +86,9 @@ void opcode_jam() {
 #include "opcodes/special/irq.h"
 #include "opcodes/special/nmi.h"
 #include "opcodes/special/brk.h"
+#include "opcodes/special/jsr.h"
+#include "opcodes/special/rti.h"
+#include "opcodes/special/rts.h"
 
 // unofficial
 #include "opcodes/unofficial/asr.h"
