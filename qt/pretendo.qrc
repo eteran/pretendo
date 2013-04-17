@@ -1,8 +1,6 @@
 <RCC>
   <qresource prefix="/pretendo">
     <file>../graphics/eject.png</file>
-    <file>../graphics/file.png</file>
-    <file>../graphics/folder-close.png</file>
     <file>../graphics/logo.bmp</file>
     <file>../graphics/pause.png</file>
     <file>../graphics/play.png</file>
