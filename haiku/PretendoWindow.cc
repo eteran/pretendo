@@ -186,8 +186,7 @@ PretendoWindow::DirectConnected (direct_buffer_info *info)
 			fClipInfo.clip_count = info->clip_list_count;
 			fClipInfo.clip_list = 
 				reinterpret_cast<clipping_rect *>(realloc(fClipInfo.clip_list, 								fClipInfo.clip_count * sizeof(clipping_rect)));
-			sse_copy (reinterpret_cast<uint8 *>(fClipInfo.clip_list), 
-				reinterpret_cast<uint8 *>(info->clip_list),
+			memcpy (fClipInfo.clip_list, info->clip_list,
 				fClipInfo.clip_count * sizeof(clipping_rect));
 			
 			for (int32 i = 0; i < fClipInfo.clip_count; i++) {
@@ -349,8 +348,7 @@ PretendoWindow::QuitRequested()
 void
 PretendoWindow::ResizeTo (float width, float height)
 {
-	height += fMenuHeight + 1;
-	width++;
+	height += fMenuHeight;
 	BDirectWindow::ResizeTo (width, height);
 }
 
@@ -362,30 +360,21 @@ PretendoWindow::Zoom (BPoint origin, float width, float height)
 	(void)width;
 	(void)height;
 	
-	float w = Frame().right - Frame().left;
-	
-	if (w <= SCREEN_WIDTH) {
-		if (fFramework == DIRECTWINDOW_FRAMEWORK) {
-			ResizeTo ((SCREEN_WIDTH*2), (SCREEN_HEIGHT*2));
-		} else {
-			ResizeTo ((SCREEN_WIDTH*2) - 1, (SCREEN_HEIGHT*2) - 1);
-		}
+	float w = Bounds().right - Bounds().left;	
 		
+	if (w == SCREEN_WIDTH) {
+		ResizeTo ((SCREEN_WIDTH*2), (SCREEN_HEIGHT*2));
 		fDoubled = true;
 	} else {
-		if (fFramework == DIRECTWINDOW_FRAMEWORK) {
+		if (w == SCREEN_WIDTH*2) {
 			ResizeTo (SCREEN_WIDTH, SCREEN_HEIGHT);
-		} else {
-			ResizeTo (SCREEN_WIDTH-1, SCREEN_HEIGHT-1);
-		}
+		} 
 		
 		fDoubled = false;
 	}
 	
 	Hide();
 	Show();
-	
-	//BDirectWindow::Zoom(origin, width, height);
 }
 
 
@@ -451,8 +440,6 @@ PretendoWindow::OnLoadCart (BMessage *message)
 			fView->SetViewColor (0, 0, 0);
 			fView->Invalidate();
 		}
-		
-		reset(nes::HARD_RESET);
 	}
 }
 
@@ -494,7 +481,6 @@ PretendoWindow::OnStop (void)
 	if (fRunning) {
 		fRunning = false;
 		
-//		suspend_thread(fThread);
 		acquire_sem(fMutex);
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
