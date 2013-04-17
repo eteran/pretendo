@@ -13,6 +13,7 @@
 
 //#define SPRITE_ZERO_HACK
 
+
 namespace {
 
 const int cycles_per_scanline = 341;
@@ -164,8 +165,9 @@ PPU::~PPU() {
 //------------------------------------------------------------------------------
 void PPU::reset(nes::RESET reset_type) {
 
+	std::generate(sprite_ram_, sprite_ram_ + 0x100,  rand);
+
 	if(reset_type == nes::HARD_RESET) {
-		std::fill_n(sprite_ram_, 0x100,  0);
 		std::fill_n(nametables_, 0x1000, 0);
 
 		for(int i = 0; i < 8; ++i) {
@@ -252,7 +254,7 @@ void PPU::write2000(uint8_t value) {
 
 
 	// we can re-trigger an NMI ... though
-	// it should have a 1 OP delay (which we don't emulate yet)
+	// it should have a 1 OP delay (which we don't emulate yet, cause I'm not sure how to do it)
 	if(!prev_nmi_on_vblank && nmi_on_vblank_ && (status_ & 0x80)) {
 		nes::cpu.nmi();
 	}
@@ -1034,16 +1036,7 @@ void PPU::enter_vblank() {
 	// Reading one PPU clock before reads it as clear and never sets the flag
 	// or generates NMI for that frame.
 	if(ppu_cycle_ != (ppu_read_2002_cycle_ + 1)) {
-
 		status_ |= 0x80;
-
-#if 0
-		// Reading on the same PPU clock or one later reads it as set,
-		// clears it, and suppresses the NMI for that frame.
-		if(nmi_on_vblank()) {
-			nes::cpu.nmi();
-		}
-#endif
 	}
 }
 
@@ -1170,9 +1163,7 @@ void PPU::update_vram_address() {
 //------------------------------------------------------------------------------
 // Name: execute_cycle
 //------------------------------------------------------------------------------
-void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_prerender &) {
-
-	(void)dest_buffer;
+void PPU::execute_cycle(const scanline_prerender &) {
 
 	if(hpos_ == 1) {
 		exit_vblank();
@@ -1358,48 +1349,24 @@ void PPU::execute_scanline(int line, const scanline_vblank &) {
 	// BUT, the PPU cycle count isn't incremented in step
 	// so the MMC3 filtering based on PPU cycles doesn't
 	// see the manual toggles :-/
+	int cycles = 0;
+	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
+		if(line == 0 && hpos_ == 1) {
+			enter_vblank();
+		}
+		
+		if(line == 0 && hpos_ == 3) {
+			if(nmi_on_vblank() && status_ & 0x80) {
+				nes::cpu.nmi();
+			}
+		}
+
+		cycles += clock_cpu();
+	}
 
 #ifdef FAST_CPU
-	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_) {
-
-		if(line == 0 && hpos_ == 1) {
-			enter_vblank();
-		}
-		
-		if(line == 0 && hpos_ == 3) {
-			if(nmi_on_vblank() && status_ & 0x80) {
-				nes::cpu.nmi();
-			}
-		}
-
-		if((ppu_cycle_ % 3) == cpu_alignment) {
-			++cycles;
-		}
-
-		++ppu_cycle_;
-	}
 	nes::cpu.exec(cycles);
 	nes::cart.mapper()->hsync();
-#else
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_) {
-
-		if(line == 0 && hpos_ == 1) {
-			enter_vblank();
-		}
-		
-		if(line == 0 && hpos_ == 3) {
-			if(nmi_on_vblank() && status_ & 0x80) {
-				nes::cpu.nmi();
-			}
-		}
-
-		if((ppu_cycle_ % 3) == cpu_alignment) {
-			nes::cpu.exec(1);
-		}
-
-		++ppu_cycle_;
-	}
 #endif
 }
 
@@ -1409,23 +1376,14 @@ void PPU::execute_scanline(int line, const scanline_vblank &) {
 void PPU::execute_scanline(const scanline_postrender &) {
 	// Same issue as scanline_vblank version
 
-#ifdef FAST_CPU
 	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_) {
-		if((ppu_cycle_ % 3) == cpu_alignment) {
-			++cycles;
-		}
-		++ppu_cycle_;
+	for(int i = 0; i < cycles_per_scanline; ++i, ++ppu_cycle_) {
+		cycles += clock_cpu();
 	}
+
+#ifdef FAST_CPU
 	nes::cpu.exec(cycles);
 	nes::cart.mapper()->hsync();
-#else
-	for(int i = 0; i < cycles_per_scanline; ++i) {
-		if((ppu_cycle_ % 3) == cpu_alignment) {
-			nes::cpu.exec(1);
-		}
-		++ppu_cycle_;
-	}
 #endif
 }
 
@@ -1434,28 +1392,16 @@ void PPU::execute_scanline(const scanline_postrender &) {
 //------------------------------------------------------------------------------
 void PPU::execute_scanline(const scanline_prerender &) {
 
-	static uint8_t dummy[1] = {0};
-#ifdef FAST_CPU
 	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_) {
-		execute_cycle(dummy, scanline_prerender());
 
-		if((ppu_cycle_ % 3) == cpu_alignment) {
-			++cycles;
-		}
-		++ppu_cycle_;
+	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
+		execute_cycle(scanline_prerender());
+		cycles += clock_cpu();
 	}
+
+#ifdef FAST_CPU
 	nes::cpu.exec(cycles);
 	nes::cart.mapper()->hsync();
-#else
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_) {
-		execute_cycle(dummy, scanline_prerender());
-
-		if((ppu_cycle_ % 3) == cpu_alignment) {
-			nes::cpu.exec(1);
-		}
-		++ppu_cycle_;
-	}
 #endif
 	++vpos_;
 }
@@ -1465,27 +1411,31 @@ void PPU::execute_scanline(const scanline_prerender &) {
 //------------------------------------------------------------------------------
 void PPU::execute_scanline(uint8_t *dest_buffer, const scanline_render &) {
 
-#ifdef FAST_CPU
 	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_) {
-		execute_cycle(dest_buffer, scanline_render());
 
-		if((ppu_cycle_ % 3) == cpu_alignment) {
-			++cycles;
-		}
-		++ppu_cycle_;
+	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
+		execute_cycle(dest_buffer, scanline_render());
+		cycles += clock_cpu();
 	}
+
+#ifdef FAST_CPU
 	nes::cpu.exec(cycles);
 	nes::cart.mapper()->hsync();
-#else
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_) {
-		execute_cycle(dest_buffer, scanline_render());
-
-		if((ppu_cycle_ % 3) == cpu_alignment) {
-			nes::cpu.exec(1);
-		}
-		++ppu_cycle_;
-	}
 #endif
 	++vpos_;
+}
+
+//------------------------------------------------------------------------------
+// Name: clock_cpu
+// Desc: optionally executes a CPU cycle returns the number of CPU cycles 
+//       executed
+//------------------------------------------------------------------------------
+int PPU::clock_cpu() {
+	if((ppu_cycle_ % 3) == cpu_alignment) {
+#ifndef FAST_CPU
+		nes::cpu.exec(1);
+#endif
+		return 1;
+	}
+	return 0;
 }

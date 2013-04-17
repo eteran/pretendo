@@ -104,7 +104,7 @@ private:
 	void clock_x();
 	void clock_y();
 	void enter_vblank();
-	void execute_cycle(uint8_t *dest_buffer, const scanline_prerender &);
+	void execute_cycle(const scanline_prerender &);
 	void execute_cycle(uint8_t *dest_buffer, const scanline_render &);
 	void exit_vblank();
 	void open_background_attribute();
@@ -119,6 +119,7 @@ private:
 	void update_vram_address();
 	void evaluate_sprites_even();
 	void evaluate_sprites_odd();
+	int clock_cpu();
 
 private:
 	template <int Size>

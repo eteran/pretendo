@@ -298,7 +298,6 @@ void op_brk() {
 	case 1:
 		// read next instruction byte (and throw it away),
 		// increment PC
-		vector_address = IRQ_VECTOR_ADDRESS;
 		read_byte(PC++);
 		break;
 	case 2:
@@ -313,6 +312,13 @@ void op_brk() {
 		// push P on stack, decrement S
 		write_byte(S-- + STACK_ADDRESS, P | B_MASK);
 		set_flag<I_MASK>();
+		
+		if(nmi_pending) {
+			vector_address = NMI_VECTOR_ADDRESS;
+			nmi_pending = false;
+		} else {
+			vector_address = IRQ_VECTOR_ADDRESS;
+		}
 		break;
 	case 5:
 		// fetch PCL
@@ -326,57 +332,7 @@ void op_brk() {
 	default:
 		abort();
 	}
-	
-	if(nmi_pending) {
-		if(current_cycle < 5) {
-			printf("BRK/NMI CONFLICT! %d [OVERRIDE]\n", current_cycle);
-			vector_address = NMI_VECTOR_ADDRESS;
-			nmi_pending = false;
-		} else {
-			//printf("BRK/NMI CONFLICT! %d [NMI CANCEL]\n", current_cycle);
-			//nmi_pending = false;			
-		}
-	}
 }	
-
-
-//------------------------------------------------------------------------------
-// Name: execute_interrupt
-// Desc: generic interrupt handler
-//------------------------------------------------------------------------------
-template <uint16_t Vector>
-void execute_interrupt() {
-
-	switch(current_cycle) {
-	case 1:
-		read_byte(PC);
-		break;
-	case 2:
-		// push PCH on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, pc_hi());
-		break;
-	case 3:
-		// push PCL on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, pc_lo());
-		break;
-	case 4:
-		// push P on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, P);
-		set_flag<I_MASK>();
-		break;
-	case 5:
-		// fetch PCL
-		set_pc_lo(read_byte(Vector + 0));
-		break;
-	case 6:
-		LAST_CYCLE;
-		// fetch PCH
-		set_pc_hi(read_byte(Vector + 1));
-		OPCODE_COMPLETE;
-	default:
-		abort();
-	}
-}
 
 //------------------------------------------------------------------------------
 // Name: do_irq
@@ -389,7 +345,49 @@ void do_irq() {
 	case 1:
 		// read next instruction byte (and throw it away),
 		// increment PC
-		vector_address = IRQ_VECTOR_ADDRESS;
+		read_byte(PC);
+		break;
+	case 2:
+		// push PCH on stack, decrement S
+		write_byte(S-- + STACK_ADDRESS, pc_hi());
+		break;
+	case 3:
+		// push PCL on stack, decrement S
+		write_byte(S-- + STACK_ADDRESS, pc_lo());
+		break;
+	case 4:
+		// push P on stack, decrement S
+		write_byte(S-- + STACK_ADDRESS, P);
+		set_flag<I_MASK>();
+		
+		if(nmi_pending) {
+			vector_address = NMI_VECTOR_ADDRESS;
+			nmi_pending = false;
+		} else {
+			vector_address = IRQ_VECTOR_ADDRESS;
+		}
+		break;
+	case 5:
+		// fetch PCL
+		set_pc_lo(read_byte(vector_address + 0));
+		break;
+	case 6:
+		LAST_CYCLE;
+		// fetch PCH
+		set_pc_hi(read_byte(vector_address + 1));
+		OPCODE_COMPLETE;
+	default:
+		abort();
+	}
+}
+
+//------------------------------------------------------------------------------
+// Name: do_nmi
+// Desc: Non-Maskable Interrupt
+//------------------------------------------------------------------------------
+void do_nmi() {
+	switch(current_cycle) {
+	case 1:
 		read_byte(PC);
 		break;
 	case 2:
@@ -407,29 +405,16 @@ void do_irq() {
 		break;
 	case 5:
 		// fetch PCL
-		set_pc_lo(read_byte(vector_address + 0));
+		set_pc_lo(read_byte(NMI_VECTOR_ADDRESS + 0));
 		break;
 	case 6:
 		LAST_CYCLE;
 		// fetch PCH
-		set_pc_hi(read_byte(vector_address + 1));
+		set_pc_hi(read_byte(NMI_VECTOR_ADDRESS + 1));
 		OPCODE_COMPLETE;
 	default:
 		abort();
 	}
-	
-	if(nmi_pending && current_cycle < 4) {
-		vector_address = NMI_VECTOR_ADDRESS;
-		nmi_pending = false;
-	}
-}
-
-//------------------------------------------------------------------------------
-// Name: do_nmi
-// Desc: Non-Maskable Interrupt
-//------------------------------------------------------------------------------
-void do_nmi() {
-	execute_interrupt<NMI_VECTOR_ADDRESS>();
 }
 
 //------------------------------------------------------------------------------
@@ -772,10 +757,13 @@ void clock() {
 		// first cycle is always instruction fetch
 		// or do we force an interrupt?
 		if(rst_executing) {
+			read_byte(PC);
 			instruction = 0x100;
 		} else if(nmi_executing) {
+			read_byte(PC);
 			instruction = 0x101;
 		} else if(irq_executing) {
+			read_byte(PC);
 			instruction = 0x102;
 		} else {
 			instruction = read_byte(PC++);
