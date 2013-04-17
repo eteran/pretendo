@@ -186,8 +186,7 @@ PretendoWindow::DirectConnected (direct_buffer_info *info)
 			fClipInfo.clip_count = info->clip_list_count;
 			fClipInfo.clip_list = 
 				reinterpret_cast<clipping_rect *>(realloc(fClipInfo.clip_list, 								fClipInfo.clip_count * sizeof(clipping_rect)));
-			sse_copy (reinterpret_cast<uint8 *>(fClipInfo.clip_list), 
-				reinterpret_cast<uint8 *>(info->clip_list),
+			memcpy (fClipInfo.clip_list, info->clip_list,
 				fClipInfo.clip_count * sizeof(clipping_rect));
 			
 			for (int32 i = 0; i < fClipInfo.clip_count; i++) {
@@ -451,8 +450,6 @@ PretendoWindow::OnLoadCart (BMessage *message)
 			fView->SetViewColor (0, 0, 0);
 			fView->Invalidate();
 		}
-		
-		reset(nes::HARD_RESET);
 	}
 }
 
@@ -494,7 +491,6 @@ PretendoWindow::OnStop (void)
 	if (fRunning) {
 		fRunning = false;
 		
-//		suspend_thread(fThread);
 		acquire_sem(fMutex);
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
