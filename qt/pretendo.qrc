@@ -1,20 +1,14 @@
 <RCC>
   <qresource prefix="/pretendo">
-    <file>../graphics/glyphicons_179_eject.png</file>
-    <file>../graphics/glyphicons_170_step_backward.png</file>
-    <file>../graphics/glyphicons_171_fast_backward.png</file>
-    <file>../graphics/glyphicons_172_rewind.png</file>
-    <file>../graphics/glyphicons_173_play.png</file>
-    <file>../graphics/glyphicons_174_pause.png</file>
-    <file>../graphics/glyphicons_175_stop.png</file>
-    <file>../graphics/glyphicons_176_forward.png</file>
-    <file>../graphics/glyphicons_177_fast_forward.png</file>
-    <file>../graphics/glyphicons_178_step_forward.png</file>
+    <file>../graphics/eject.png</file>
+    <file>../graphics/file.png</file>
+    <file>../graphics/folder-close.png</file>
     <file>../graphics/logo.bmp</file>
+    <file>../graphics/pause.png</file>
+    <file>../graphics/play.png</file>
+    <file>../graphics/pretendo.ico</file>
     <file>../graphics/pretendo_32x32x8.png</file>
-    <file>../graphics/pretendo_eject.png</file>
-    <file>../graphics/pretendo_pause.png</file>
-    <file>../graphics/pretendo_play.png</file>
-    <file>../graphics/pretendo_stop.png</file>
+    <file>../graphics/repeat.png</file>
+    <file>../graphics/stop.png</file>
   </qresource>
 </RCC>

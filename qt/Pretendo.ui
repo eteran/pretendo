@@ -129,11 +129,12 @@
    <addaction name="action_Run"/>
    <addaction name="action_Pause"/>
    <addaction name="action_Stop"/>
+   <addaction name="actionReset"/>
   </widget>
   <action name="action_Load_ROM">
    <property name="icon">
     <iconset resource="pretendo.qrc">
-     <normaloff>:/pretendo/graphics/glyphicons_179_eject.png</normaloff>:/pretendo/graphics/glyphicons_179_eject.png</iconset>
+     <normaloff>:/pretendo/graphics/eject.png</normaloff>:/pretendo/graphics/eject.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Load ROM</string>
@@ -147,7 +148,7 @@
   <action name="action_Run">
    <property name="icon">
     <iconset resource="pretendo.qrc">
-     <normaloff>:/pretendo/graphics/glyphicons_173_play.png</normaloff>:/pretendo/graphics/glyphicons_173_play.png</iconset>
+     <normaloff>:/pretendo/graphics/play.png</normaloff>:/pretendo/graphics/play.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Run</string>
@@ -156,7 +157,7 @@
   <action name="action_Stop">
    <property name="icon">
     <iconset resource="pretendo.qrc">
-     <normaloff>:/pretendo/graphics/glyphicons_175_stop.png</normaloff>:/pretendo/graphics/glyphicons_175_stop.png</iconset>
+     <normaloff>:/pretendo/graphics/stop.png</normaloff>:/pretendo/graphics/stop.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Stop</string>
@@ -168,7 +169,7 @@
    </property>
    <property name="icon">
     <iconset resource="pretendo.qrc">
-     <normaloff>:/pretendo/graphics/glyphicons_174_pause.png</normaloff>:/pretendo/graphics/glyphicons_174_pause.png</iconset>
+     <normaloff>:/pretendo/graphics/pause.png</normaloff>:/pretendo/graphics/pause.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Pause</string>
@@ -207,6 +208,10 @@
    </property>
   </action>
   <action name="actionReset">
+   <property name="icon">
+    <iconset resource="pretendo.qrc">
+     <normaloff>:/pretendo/graphics/repeat.png</normaloff>:/pretendo/graphics/repeat.png</iconset>
+   </property>
    <property name="text">
     <string>Reset</string>
    </property>

@@ -21,8 +21,8 @@
 
 namespace {
 
-const int timer_interval = 1000. / 60;
-//const int timer_interval = 0;
+//const int timer_interval = 1000. / 60;
+const int timer_interval = 0;
 
 }
 
