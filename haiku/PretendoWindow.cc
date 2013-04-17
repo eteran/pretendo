@@ -461,7 +461,7 @@ void
 PretendoWindow::OnFreeCart (void)
 {	
 	OnStop();
-	reset(nes::HARD_RESET);
+	nes::cart.unload();
 }
 
 
