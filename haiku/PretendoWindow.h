@@ -20,6 +20,7 @@
 #include "ROMFilePanel.h"
 #include "VideoInterface.h"
 #include "AudioStream.h"
+#include "SimpleMutex.h"
 
 #include "VideoScreen.h"
 //#include "InputWindow.h"
@@ -197,20 +198,22 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	bool fPaused;
-	sem_id fMutex;
 	
 	private:
 	thread_id fThread;
 	static status_t thread_func (void *data);
 	bool fRunning;
 	
-	private:
+	public:
 	bool Running (void) { return fRunning; }
-	sem_id Mutex (void) { return fMutex; }
+	SimpleMutex *Mutex (void) { return fMutex; }
 	
 	private:
 	key_info fKeyStates;
+	inline void CheckKey (int32 index, int32 key);
 	void ReadKeyStates (void);
+	
+	SimpleMutex *fMutex;
 };
 				
 #endif // _PRETENDO_WINDOW_H_

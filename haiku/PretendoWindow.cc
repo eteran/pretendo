@@ -26,7 +26,8 @@ PretendoWindow::PretendoWindow()
 		fVideoScreen(NULL),
 		fAudioStream(NULL),
 		fPaused(false),
-		fRunning(false)
+		fRunning(false),
+		fMutex(NULL)
 {
 	BRect bounds (Bounds());
 	bounds.OffsetTo (B_ORIGIN);
@@ -118,13 +119,16 @@ PretendoWindow::PretendoWindow()
 	fClear = 0;
 	
 	if ((fThread = spawn_thread(thread_func, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
-			std::cout << "failed to spawn thread" << std::endl;
-	} else {
-		fRunning = false;
+			(new BAlert(0, 
+			"Unable to spawn emulation thread.  Continuation is impossible", "Bummer",  				NULL, NULL, B_WIDTH_AS_USUAL, B_STOP_ALERT))->Go();
+		OnQuit();
 	}
 	
-	fMutex = create_sem(1, "pretendo_mutex");
-	acquire_sem(fMutex);
+	//fMutex = create_sem(1, "pretendo_mutex");
+	//acquire_sem(fMutex);
+	
+	fMutex = new SimpleMutex("pretendo_mutex", this);
+	fMutex->Lock();
 	resume_thread(fThread);
 }
 
@@ -153,9 +157,8 @@ PretendoWindow::~PretendoWindow()
 	delete fAudioStream;
 	
 	fRunning = fDirectConnected = false;
-	fMutex = B_BAD_SEM_ID;
 	fThread = B_BAD_THREAD_ID;
-	
+		
 	Hide();
 	Sync();	
 }
@@ -333,12 +336,13 @@ PretendoWindow::QuitRequested()
 	
 	status_t ret;
 	
-	delete_sem(fMutex);
+	//delete_sem(fMutex);
+	delete fMutex;
 	wait_for_thread(fThread, &ret);
 	
 	fRunning = 
 	fDirectConnected = false;
-		
+	
 	be_app->PostMessage(B_QUIT_REQUESTED);
 	
 	return true;
@@ -466,9 +470,9 @@ PretendoWindow::OnRun (void)
 	
 	if (! fRunning) {
 		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
-			//resume_thread(fThread);
 			reset(nes::HARD_RESET);
-			release_sem(fMutex);
+			//release_sem(fMutex);
+			fMutex->Unlock();
 			fRunning = true;
 		}
 	}
@@ -481,7 +485,8 @@ PretendoWindow::OnStop (void)
 	if (fRunning) {
 		fRunning = false;
 		
-		acquire_sem(fMutex);
+		//acquire_sem(fMutex);
+		fMutex->Lock();
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
 			ClearBitmap (true);
@@ -503,10 +508,12 @@ PretendoWindow::OnPause (void)
 {	
 	if (fRunning) {
 		if (fPaused) {
-			release_sem(fMutex);
-		fEmuMenu->ItemAt(1)->SetMarked(false);
+			//release_sem(fMutex);
+			fMutex->Unlock();
+			fEmuMenu->ItemAt(1)->SetMarked(false);
 		} else {
-			acquire_sem(fMutex);
+			//acquire_sem(fMutex);
+			fMutex->Lock();
 			fEmuMenu->ItemAt(1)->SetMarked(true);
 		}
 	
@@ -612,7 +619,7 @@ PretendoWindow::ClearBitmap (bool overlay)
 			bits += fOverlayBitmap->BytesPerRow();
 		}
 	} else {
-		memset (fBitmapBits, 0x00, fBitmap->BitsLength());
+		memset (fBitmapBits, 0x0, fBitmap->BitsLength());
 	}
 }
 
@@ -667,7 +674,7 @@ PretendoWindow::SetFrontBuffer (uint8 *bits, color_space cs, int32 pixel_width,
 	fFrontBuffer.row_bytes = row_bytes;
 	
 	if (fFramework == WINDOWSCREEN_FRAMEWORK) {
-		memset (fFrontBuffer.bits, 0x00, 480 * fFrontBuffer.row_bytes);
+		memset (fFrontBuffer.bits, 0x0, 480 * fFrontBuffer.row_bytes);
 		memset (fDirtyBuffer.bits, 0xff, 480 * fFrontBuffer.row_bytes);
 		fFrontBuffer.bits += (640 - SCREEN_WIDTH*2) / 2;
 	} else {
@@ -709,7 +716,7 @@ PretendoWindow::ChangeFramework (VIDEO_FRAMEWORK fw)
 		case OVERLAY_FRAMEWORK:
 			ClearBitmap (true);
 			fView->ClearViewOverlay();
-			fView->SetViewColor(0,0,0);
+			fView->SetViewColor(0, 0, 0);
 			fView->Invalidate();
 			break;
 			
@@ -1043,48 +1050,41 @@ PretendoWindow::thread_func (void *data)
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
 		while (1) {
-			if ((acquire_sem(w->Mutex()) != B_NO_ERROR)) {
+			if (w->Mutex()->Lock() != B_NO_ERROR) {
 				break;
 			}
+			
 			
 			w->start_frame();
 			nes::run_frame(w);
 			w->end_frame();
 			w->ReadKeyStates();
 			
-			release_sem(w->Mutex());
+			w->Mutex()->Unlock();
 		}	
 	
-	return 0;
+	return B_OK;
 }
 
+
+inline void
+PretendoWindow::CheckKey (int32 index, int32 key)
+{
+	nes::input.controller1().keystate_[index] = 
+		fKeyStates.key_states[key >> 3] & (1 << (7 - (key % 8)));
+}
 
 void
 PretendoWindow::ReadKeyStates (void)
 {
 	get_key_info(&fKeyStates);
 	
-	nes::input.controller1().keystate_[Controller::INDEX_UP] = 
-		fKeyStates.key_states[kKeyUp >> 3] & (1 << (7 - (kKeyUp % 8)));
-		
-	nes::input.controller1().keystate_[Controller::INDEX_DOWN] =
-		fKeyStates.key_states[kKeyDown >> 3] & (1 << (7 - (kKeyDown % 8)));
-		
-	nes::input.controller1().keystate_[Controller::INDEX_LEFT] =
-		fKeyStates.key_states[kKeyLeft >> 3] & (1 << (7 - (kKeyLeft % 8)));
-	
-	nes::input.controller1().keystate_[Controller::INDEX_RIGHT] =
-		fKeyStates.key_states[kKeyRight >> 3] & (1 << (7 - (kKeyRight % 8)));
-		
-	nes::input.controller1().keystate_[Controller::INDEX_SELECT] =
-		fKeyStates.key_states[kKeySelect >> 3] & (1 << (7 - (kKeySelect % 8)));
-		
-	nes::input.controller1().keystate_[Controller::INDEX_START] =
-		fKeyStates.key_states[kKeyStart >> 3] & (1 << (7 - (kKeyStart % 8)));	
-		
-	nes::input.controller1().keystate_[Controller::INDEX_B] =
-		fKeyStates.key_states[kKeyB >> 3] & (1 << (7 - (kKeyB % 8)));
-		
-	nes::input.controller1().keystate_[Controller::INDEX_A] =
-		fKeyStates.key_states[kKeyA >> 3] & (1 << (7 - (kKeyA % 8)));
+	CheckKey(Controller::INDEX_UP, kKeyUp);
+	CheckKey(Controller::INDEX_DOWN, kKeyDown);
+	CheckKey(Controller::INDEX_LEFT, kKeyLeft);
+	CheckKey(Controller::INDEX_RIGHT, kKeyRight);
+	CheckKey(Controller::INDEX_SELECT, kKeySelect);
+	CheckKey(Controller::INDEX_START, kKeyStart);
+	CheckKey(Controller::INDEX_B, kKeyB);
+	CheckKey(Controller::INDEX_A, kKeyA);
 }
