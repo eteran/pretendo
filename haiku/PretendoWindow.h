@@ -210,6 +210,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	key_info fKeyStates;
+	inline void CheckKey (int32 index, int32 key);
 	void ReadKeyStates (void);
 };
 				
