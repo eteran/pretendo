@@ -515,15 +515,17 @@ PretendoWindow::OnStop (void)
 void
 PretendoWindow::OnPause (void)
 {	
-	if (fPaused) {
-		//release_sem(fMutex);
+	if (fRunning) {
+		if (fPaused) {
+			release_sem(fMutex);
 		fEmuMenu->ItemAt(1)->SetMarked(false);
-	} else {
-		//acquire_sem(fMutex);
-		fEmuMenu->ItemAt(1)->SetMarked(true);
-	}
+		} else {
+			acquire_sem(fMutex);
+			fEmuMenu->ItemAt(1)->SetMarked(true);
+		}
 	
-	fPaused = !fPaused;
+		fPaused = !fPaused;
+	}
 }
 
 
@@ -1055,7 +1057,7 @@ PretendoWindow::thread_func (void *data)
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
 		while (1) {
-			if ((acquire_sem(w->Mutex()) != B_NO_ERROR) || ! w->Running()) {
+			if ((acquire_sem(w->Mutex()) != B_NO_ERROR)) {
 				break;
 			}
 			
