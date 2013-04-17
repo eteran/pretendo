@@ -82,6 +82,10 @@ void opcode_jam() {
 #include "opcodes/txs.h"
 #include "opcodes/tya.h"
 
+// special
+#include "opcodes/special/irq.h"
+#include "opcodes/special/nmi.h"
+
 // unofficial
 #include "opcodes/unofficial/asr.h"
 #include "opcodes/unofficial/aac.h"

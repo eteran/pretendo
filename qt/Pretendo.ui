@@ -97,12 +97,25 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="action_About"/>
+    <addaction name="actionAbout_Qt"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <widget class="QMenu" name="menuZoom">
+     <property name="title">
+      <string>Zoom</string>
+     </property>
+     <addaction name="action1x"/>
+     <addaction name="action2x"/>
+     <addaction name="action3x"/>
+     <addaction name="action4x"/>
+    </widget>
     <addaction name="actionShow_Sprites"/>
+    <addaction name="separator"/>
+    <addaction name="menuZoom"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_CPU"/>
@@ -153,6 +166,9 @@
    <property name="text">
     <string>&amp;Run</string>
    </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
   </action>
   <action name="action_Stop">
    <property name="icon">
@@ -174,6 +190,9 @@
    <property name="text">
     <string>&amp;Pause</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
   </action>
   <action name="action_Exit">
    <property name="text">
@@ -191,17 +210,6 @@
     <string>Show &amp;Background</string>
    </property>
   </action>
-  <action name="actionShow_Sprites">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Show &amp;Sprites</string>
-   </property>
-  </action>
   <action name="action_Hard_Reset">
    <property name="text">
     <string>&amp;Hard Reset</string>
@@ -215,10 +223,54 @@
    <property name="text">
     <string>Reset</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
   </action>
   <action name="action_Preferences">
    <property name="text">
     <string>&amp;Preferences</string>
+   </property>
+  </action>
+  <action name="action2x">
+   <property name="text">
+    <string>2x</string>
+   </property>
+  </action>
+  <action name="action3x">
+   <property name="text">
+    <string>3x</string>
+   </property>
+  </action>
+  <action name="action4x">
+   <property name="text">
+    <string>4x</string>
+   </property>
+  </action>
+  <action name="action1x">
+   <property name="text">
+    <string>1x</string>
+   </property>
+  </action>
+  <action name="actionShow_Sprites">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show &amp;Sprites</string>
+   </property>
+  </action>
+  <action name="action_About">
+   <property name="text">
+    <string>&amp;About</string>
+   </property>
+  </action>
+  <action name="actionAbout_Qt">
+   <property name="text">
+    <string>About &amp;Qt</string>
    </property>
   </action>
  </widget>

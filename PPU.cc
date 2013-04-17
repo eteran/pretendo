@@ -20,6 +20,12 @@ const int cycles_per_scanline = 341;
 const int cpu_alignment       = 0;
 
 enum {
+	STATUS_OVERFLOW = 0x20,
+	STATUS_SPRITE0  = 0x40,
+	STATUS_VBLANK   = 0x80
+};
+
+enum {
 	SPRITE_VFLIP    = 0x80,
 	SPRITE_HFLIP    = 0x40,
 	SPRITE_PRIORITY = 0x20,
@@ -255,7 +261,7 @@ void PPU::write2000(uint8_t value) {
 
 	// we can re-trigger an NMI ... though
 	// it should have a 1 OP delay (which we don't emulate yet, cause I'm not sure how to do it)
-	if(!prev_nmi_on_vblank && nmi_on_vblank_ && (status_ & 0x80)) {
+	if(!prev_nmi_on_vblank && nmi_on_vblank_ && (status_ & STATUS_VBLANK)) {
 		nes::cpu.nmi();
 	}
 }
@@ -425,7 +431,7 @@ uint8_t PPU::read2002() {
 	write_latch_ = false;
 
 	// clear vblank flag
-	status_ &= ~0x80;
+	status_ &= ~STATUS_VBLANK;
 
 	ppu_read_2002_cycle_ = ppu_cycle_;
 
@@ -802,7 +808,7 @@ void PPU::evaluate_sprites() {
 				//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
 				//     'n' when 'm' overflows); if m = 3, increment n
 				if(sprite_line < Size) {
-					status_ |= 0x20;
+					status_ |= STATUS_OVERFLOW;
 					++index;
 				} else {
 					// 3b. If the value is not in range, increment n AND m (without carry). If n overflows
@@ -900,7 +906,7 @@ uint8_t PPU::select_pixel(uint8_t index) {
 				#else
 					if(p->is_sprite_zero() && (index < 255)) {
 				#endif
-						status_ |= 0x40;
+						status_ |= STATUS_SPRITE0;
 						sprite_zero_found_curr_ = false;
 					}
 
@@ -1036,7 +1042,7 @@ void PPU::enter_vblank() {
 	// Reading one PPU clock before reads it as clear and never sets the flag
 	// or generates NMI for that frame.
 	if(ppu_cycle_ != (ppu_read_2002_cycle_ + 1)) {
-		status_ |= 0x80;
+		status_ |= STATUS_VBLANK;
 	}
 }
 
@@ -1349,14 +1355,16 @@ void PPU::execute_scanline(int line, const scanline_vblank &) {
 	// BUT, the PPU cycle count isn't incremented in step
 	// so the MMC3 filtering based on PPU cycles doesn't
 	// see the manual toggles :-/
+	
 	int cycles = 0;
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
 		if(line == 0 && hpos_ == 1) {
 			enter_vblank();
 		}
 		
+		// we do we need this 2 PPU tick delay?
 		if(line == 0 && hpos_ == 3) {
-			if(nmi_on_vblank() && status_ & 0x80) {
+			if(nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
 				nes::cpu.nmi();
 			}
 		}
@@ -1393,7 +1401,6 @@ void PPU::execute_scanline(const scanline_postrender &) {
 void PPU::execute_scanline(const scanline_prerender &) {
 
 	int cycles = 0;
-
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
 		execute_cycle(scanline_prerender());
 		cycles += clock_cpu();
@@ -1412,7 +1419,6 @@ void PPU::execute_scanline(const scanline_prerender &) {
 void PPU::execute_scanline(uint8_t *dest_buffer, const scanline_render &) {
 
 	int cycles = 0;
-
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
 		execute_cycle(dest_buffer, scanline_render());
 		cycles += clock_cpu();

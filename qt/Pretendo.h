@@ -38,6 +38,10 @@ private Q_SLOTS:
 	void on_actionShow_Sprites_toggled(bool value);
 	void on_action_Hard_Reset_triggered();
 	void on_actionReset_triggered();
+	void on_action1x_triggered();
+	void on_action2x_triggered();
+	void on_action3x_triggered();
+	void on_action4x_triggered();
 
 protected:
 	virtual void keyPressEvent(QKeyEvent *event);

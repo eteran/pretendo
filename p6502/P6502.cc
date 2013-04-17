@@ -60,23 +60,22 @@ write_handler_t		write_handler	= 0;
 read_handler_t		read_handler	= 0;
 sync_handler_t      sync_handler    = 0;
 
-#define LAST_CYCLE                                  \
-do {                                                \
-	rst_executing = false;                          \
-	nmi_executing = false;                          \
-	irq_executing = false;                          \
-													\
-	if(rst_pending) {                               \
-		rst_executing = true;                       \
-		rst_pending   = false;                      \
-		nmi_pending   = false;                      \
-		irq_pending   = false;                      \
-	} else if(nmi_pending) {                        \
-		nmi_pending   = false;                      \
-		nmi_executing = true;                       \
-	} else if(irq_pending && ((P & I_MASK) == 0)) { \
-		irq_executing = true;                       \
-	}                                               \
+#define LAST_CYCLE                                   \
+do {                                                 \
+	rst_executing = false;                           \
+	nmi_executing = false;                           \
+	irq_executing = false;                           \
+													 \
+	if(rst_asserted) {                               \
+		rst_executing = true;                        \
+		rst_asserted   = false;                      \
+		irq_asserted   = false;                      \
+	} else if(nmi_asserted) {                        \
+		nmi_executing = true;                        \
+	} else if(irq_asserted && ((P & I_MASK) == 0)) { \
+		irq_executing = true;                        \
+	}                                                \
+	nmi_asserted = false;                            \
 } while(0)
 
 #define OPCODE_COMPLETE do { current_cycle = -1; return; } while(0)
@@ -91,9 +90,9 @@ int current_cycle = 0;
 bool     irq_executing        = false;
 bool     nmi_executing        = false;
 bool     rst_executing        = false;
-bool     irq_pending          = false;
-bool     nmi_pending          = false;
-bool     rst_pending          = false;
+bool     irq_asserted          = false;
+bool     nmi_asserted          = false;
+bool     rst_asserted          = false;
 int      burn_count           = 0;
 uint64_t executed_cycle_count = 0;
 uint16_t instruction          = 0;
@@ -313,9 +312,9 @@ void op_brk() {
 		write_byte(S-- + STACK_ADDRESS, P | B_MASK);
 		set_flag<I_MASK>();
 		
-		if(nmi_pending) {
+		if(nmi_asserted) {
 			vector_address = NMI_VECTOR_ADDRESS;
-			nmi_pending = false;
+			nmi_asserted = false;
 		} else {
 			vector_address = IRQ_VECTOR_ADDRESS;
 		}
@@ -360,9 +359,9 @@ void do_irq() {
 		write_byte(S-- + STACK_ADDRESS, P);
 		set_flag<I_MASK>();
 		
-		if(nmi_pending) {
+		if(nmi_asserted) {
 			vector_address = NMI_VECTOR_ADDRESS;
-			nmi_pending = false;
+			nmi_asserted = false;
 		} else {
 			vector_address = IRQ_VECTOR_ADDRESS;
 		}
@@ -375,42 +374,6 @@ void do_irq() {
 		LAST_CYCLE;
 		// fetch PCH
 		set_pc_hi(read_byte(vector_address + 1));
-		OPCODE_COMPLETE;
-	default:
-		abort();
-	}
-}
-
-//------------------------------------------------------------------------------
-// Name: do_nmi
-// Desc: Non-Maskable Interrupt
-//------------------------------------------------------------------------------
-void do_nmi() {
-	switch(current_cycle) {
-	case 1:
-		read_byte(PC);
-		break;
-	case 2:
-		// push PCH on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, pc_hi());
-		break;
-	case 3:
-		// push PCL on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, pc_lo());
-		break;
-	case 4:
-		// push P on stack, decrement S
-		write_byte(S-- + STACK_ADDRESS, P);
-		set_flag<I_MASK>();
-		break;
-	case 5:
-		// fetch PCL
-		set_pc_lo(read_byte(NMI_VECTOR_ADDRESS + 0));
-		break;
-	case 6:
-		LAST_CYCLE;
-		// fetch PCH
-		set_pc_hi(read_byte(NMI_VECTOR_ADDRESS + 1));
 		OPCODE_COMPLETE;
 	default:
 		abort();
@@ -476,6 +439,8 @@ void execute_opcode() {
 	static mode::zero_page  	  zero_page_insn;
 	static mode::zero_page_x	  zero_page_x_insn;
 	static mode::zero_page_y	  zero_page_y_insn;
+	static opcode_irq             op_irq;
+	static opcode_nmi             op_nmi;
 
 	switch(instruction) {
 	case 0x00: op_brk(); break;
@@ -737,8 +702,8 @@ void execute_opcode() {
 	
 	// IRQ/NMI/RESET
 	case 0x100: do_reset(); break;
-	case 0x101: do_nmi(); break;
-	case 0x102: do_irq(); break;
+	case 0x101: op_nmi(current_cycle); break;
+	case 0x102: op_irq(current_cycle); break;
 	default:
 		abort();
 	}
@@ -806,7 +771,7 @@ void run(int cycles) {
 // Desc:
 //------------------------------------------------------------------------------
 void irq() {
-	irq_pending = true;
+	irq_asserted = true;
 }
 
 //------------------------------------------------------------------------------
@@ -814,7 +779,7 @@ void irq() {
 // Desc:
 //------------------------------------------------------------------------------
 void nmi() {
-	nmi_pending = true;
+	nmi_asserted = true;
 }
 
 //------------------------------------------------------------------------------
@@ -823,9 +788,9 @@ void nmi() {
 //------------------------------------------------------------------------------
 void reset() {
 	if(!rst_executing) {
-		rst_pending = true;
-		irq_pending = false;
-		nmi_pending = false;
+		rst_asserted = true;
+		irq_asserted = false;
+		nmi_asserted = false;
 	}
 }
 
@@ -834,7 +799,7 @@ void reset() {
 // Desc:
 //------------------------------------------------------------------------------
 void reset_irq() {
-	irq_pending = false;
+	irq_asserted = false;
 }
 
 //------------------------------------------------------------------------------
@@ -847,10 +812,10 @@ void init(jam_handler_t jam, read_handler_t read, write_handler_t write, sync_ha
 	assert(read);
 	assert(write);
 
-	jam_handler     = jam;
-	read_handler    = read;
-	write_handler   = write;
-	sync_handler    = sync;
+	jam_handler   = jam;
+	read_handler  = read;
+	write_handler = write;
+	sync_handler  = sync;
 
 	stop();
 }
@@ -868,9 +833,9 @@ void stop() {
 	P = I_MASK | R_MASK;
 
 	executed_cycle_count = 0;
-	irq_pending          = false;
-	nmi_pending          = false;
-	rst_pending          = false;
+	irq_asserted         = false;
+	nmi_asserted         = false;
+	rst_asserted         = false;
 	irq_executing        = false;
 	nmi_executing        = false;
 	rst_executing        = true;
