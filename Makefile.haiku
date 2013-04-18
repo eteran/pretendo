@@ -140,8 +140,7 @@ H_FILES     := \
 	haiku/PretendoWindow.h \
 	haiku/VideoScreen.h \
 	haiku/blitters.h \
-	haiku/copies.h \
-	haiku/SimpleMutex.h
+	haiku/copies.h
 	
 
 CXX_FILES   := \
@@ -237,8 +236,7 @@ CXX_FILES   := \
 	haiku/PretendoApp.cc \
 	haiku/ROMFilePanel.cc \
 	haiku/PretendoWindow.cc \
-	haiku/VideoScreen.cc \
-	haiku/SimpleMutex.cc
+	haiku/VideoScreen.cc
 
 C_FILES     := \
 	libunif/ines_convert.c \
