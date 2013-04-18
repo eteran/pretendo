@@ -1260,7 +1260,7 @@ void PPU::execute_cycle(const scanline_prerender &) {
 //------------------------------------------------------------------------------
 // Name: execute_cycle
 //------------------------------------------------------------------------------
-void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
+void PPU::execute_cycle(const scanline_render &target) {
 
 	if(!screen_enabled()) {
 
@@ -1269,9 +1269,9 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 		} else if(hpos_ < 257) {
 			const uint8_t pixel = select_blank_pixel();
 			if(greyscale_) {
-				dest_buffer[hpos_ - 1] = palette_[pixel] & 0x30;
+				target.buffer[hpos_ - 1] = palette_[pixel] & 0x30;
 			} else {
-				dest_buffer[hpos_ - 1] = palette_[pixel];
+				target.buffer[hpos_ - 1] = palette_[pixel];
 			}
 		} else {
 			// idle
@@ -1287,14 +1287,14 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 			// idle
 		} else if(hpos_ < 257) {
 			switch(hpos_ & 0x07) {
-			case 1: render_pixel(dest_buffer); evaluate_sprites_odd();  open_tile_index(); break;
-			case 2: render_pixel(dest_buffer); evaluate_sprites_even(); read_tile_index(); break;
-			case 3: render_pixel(dest_buffer); evaluate_sprites_odd();  open_background_attribute(); break;
-			case 4: render_pixel(dest_buffer); evaluate_sprites_even(); read_background_attribute(); break;
-			case 5: render_pixel(dest_buffer); evaluate_sprites_odd();  open_background_pattern<pattern_0>(); break;
-			case 6: render_pixel(dest_buffer); evaluate_sprites_even(); read_background_pattern<pattern_0>(); break;
-			case 7: render_pixel(dest_buffer); evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
-			case 0: render_pixel(dest_buffer); evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+			case 1: render_pixel(target.buffer); evaluate_sprites_odd();  open_tile_index(); break;
+			case 2: render_pixel(target.buffer); evaluate_sprites_even(); read_tile_index(); break;
+			case 3: render_pixel(target.buffer); evaluate_sprites_odd();  open_background_attribute(); break;
+			case 4: render_pixel(target.buffer); evaluate_sprites_even(); read_background_attribute(); break;
+			case 5: render_pixel(target.buffer); evaluate_sprites_odd();  open_background_pattern<pattern_0>(); break;
+			case 6: render_pixel(target.buffer); evaluate_sprites_even(); read_background_pattern<pattern_0>(); break;
+			case 7: render_pixel(target.buffer); evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
+			case 0: render_pixel(target.buffer); evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
 			}
 
 			if(hpos_ == 256) {
@@ -1346,7 +1346,30 @@ void PPU::execute_cycle(uint8_t *dest_buffer, const scanline_render &) {
 //------------------------------------------------------------------------------
 // Name: execute_scanline
 //------------------------------------------------------------------------------
-void PPU::execute_scanline(int line, const scanline_vblank &) {
+void PPU::execute_cycle(const scanline_postrender &target) {
+
+}
+
+//------------------------------------------------------------------------------
+// Name: execute_scanline
+//------------------------------------------------------------------------------
+void PPU::execute_cycle(const scanline_vblank &target) {
+	if(target.line == 0 && hpos_ == 1) {
+		enter_vblank();
+	}
+
+	// we do we need this 2 PPU tick delay?
+	if(target.line == 0 && hpos_ == 3) {
+		if(nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
+			nes::cpu.nmi();
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
+// Name: execute_scanline
+//------------------------------------------------------------------------------
+void PPU::execute_scanline(const scanline_vblank &target) {
 
 	// NOTE: MMC3 isn't quite right in "FAST_CPU" mode
 	// (but likely good enough for most games)
@@ -1358,51 +1381,7 @@ void PPU::execute_scanline(int line, const scanline_vblank &) {
 	
 	int cycles = 0;
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-		if(line == 0 && hpos_ == 1) {
-			enter_vblank();
-		}
-		
-		// we do we need this 2 PPU tick delay?
-		if(line == 0 && hpos_ == 3) {
-			if(nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
-				nes::cpu.nmi();
-			}
-		}
-
-		cycles += clock_cpu();
-	}
-
-#ifdef FAST_CPU
-	nes::cpu.exec(cycles);
-	nes::cart.mapper()->hsync();
-#endif
-}
-
-//------------------------------------------------------------------------------
-// Name: execute_scanline
-//------------------------------------------------------------------------------
-void PPU::execute_scanline(const scanline_postrender &) {
-	// Same issue as scanline_vblank version
-
-	int cycles = 0;
-	for(int i = 0; i < cycles_per_scanline; ++i, ++ppu_cycle_) {
-		cycles += clock_cpu();
-	}
-
-#ifdef FAST_CPU
-	nes::cpu.exec(cycles);
-	nes::cart.mapper()->hsync();
-#endif
-}
-
-//------------------------------------------------------------------------------
-// Name: execute_scanline
-//------------------------------------------------------------------------------
-void PPU::execute_scanline(const scanline_prerender &) {
-
-	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-		execute_cycle(scanline_prerender());
+		execute_cycle(target);
 		cycles += clock_cpu();
 	}
 
@@ -1416,11 +1395,47 @@ void PPU::execute_scanline(const scanline_prerender &) {
 //------------------------------------------------------------------------------
 // Name: execute_scanline
 //------------------------------------------------------------------------------
-void PPU::execute_scanline(uint8_t *dest_buffer, const scanline_render &) {
+void PPU::execute_scanline(const scanline_postrender &target) {
 
 	int cycles = 0;
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-		execute_cycle(dest_buffer, scanline_render());
+		execute_cycle(target);
+		cycles += clock_cpu();
+	}
+
+#ifdef FAST_CPU
+	nes::cpu.exec(cycles);
+	nes::cart.mapper()->hsync();
+#endif
+	++vpos_;
+}
+
+//------------------------------------------------------------------------------
+// Name: execute_scanline
+//------------------------------------------------------------------------------
+void PPU::execute_scanline(const scanline_prerender &target) {
+
+	int cycles = 0;
+	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
+		execute_cycle(target);
+		cycles += clock_cpu();
+	}
+
+#ifdef FAST_CPU
+	nes::cpu.exec(cycles);
+	nes::cart.mapper()->hsync();
+#endif
+	++vpos_;
+}
+
+//------------------------------------------------------------------------------
+// Name: execute_scanline
+//------------------------------------------------------------------------------
+void PPU::execute_scanline(const scanline_render &target) {
+
+	int cycles = 0;
+	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
+		execute_cycle(target);
 		cycles += clock_cpu();
 	}
 

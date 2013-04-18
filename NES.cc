@@ -24,7 +24,7 @@ void execute_scanline_0_19() {
 	 */
 
 	for(int i = 0; i < 20; ++i) {
-		nes::ppu.execute_scanline(i, scanline_vblank());
+		nes::ppu.execute_scanline(scanline_vblank(i));
 	}
 }
 
@@ -68,7 +68,7 @@ void execute_scanline_21_260(VideoInterface *video) {
 
 	// process the visible range
 	for(int i = 0; i < 240; ++i) {
-		nes::ppu.execute_scanline(buffer, scanline_render());
+		nes::ppu.execute_scanline(scanline_render(buffer));
 		video->submit_scanline(i, nes::ppu.color_intensity(), buffer);
 	}
 }

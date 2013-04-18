@@ -14,11 +14,26 @@ using boost::uint64_t;
 
 class Mapper;
 
-struct scanline                       {};
-struct scanline_vblank     : scanline {};
-struct scanline_prerender  : scanline {};
-struct scanline_postrender : scanline {};
-struct scanline_render     : scanline {};
+struct scanline {
+};
+
+struct scanline_vblank : scanline {
+	explicit scanline_vblank(int l) : line(l) {
+	}
+	int line;
+};
+
+struct scanline_prerender : scanline {
+};
+
+struct scanline_postrender : scanline {
+};
+
+struct scanline_render : scanline {
+	explicit scanline_render(uint8_t *p) : buffer(p) {
+	}
+	uint8_t *const buffer;
+};
 
 class PPU : public boost::noncopyable {
 public:
@@ -81,10 +96,10 @@ public:
 public:
 	uint8_t color_intensity() const;
 	void end_frame();
-	void execute_scanline(int line, const scanline_vblank &);
-	void execute_scanline(const scanline_prerender &);
-	void execute_scanline(const scanline_postrender &);
-	void execute_scanline(uint8_t *dest_buffer, const scanline_render &);
+	void execute_scanline(const scanline_vblank &target);
+	void execute_scanline(const scanline_prerender &target);
+	void execute_scanline(const scanline_postrender &target);
+	void execute_scanline(const scanline_render &target);
 	void set_mirroring(uint8_t mir);
 	void set_vram_bank(uint8_t bank, uint8_t *p, bool writeable);
 	void start_frame();
@@ -104,8 +119,10 @@ private:
 	void clock_x();
 	void clock_y();
 	void enter_vblank();
-	void execute_cycle(const scanline_prerender &);
-	void execute_cycle(uint8_t *dest_buffer, const scanline_render &);
+	void execute_cycle(const scanline_prerender &target);
+	void execute_cycle(const scanline_render &target);
+	void execute_cycle(const scanline_postrender &target);
+	void execute_cycle(const scanline_vblank &target);
 	void exit_vblank();
 	void open_background_attribute();
 	void open_tile_index();
