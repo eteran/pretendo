@@ -333,8 +333,7 @@ void Pretendo::showEvent(QShowEvent *event) {
 // Name: 
 //------------------------------------------------------------------------------
 void Pretendo::on_action1x_triggered() {
-	qDebug() << "ZOOM 1x";
-	ui_.video->setMinimumSize(256,240);
+	ui_.video->setFixedSize(256,240);
 	adjustSize();
 }
 
@@ -342,8 +341,7 @@ void Pretendo::on_action1x_triggered() {
 // Name: 
 //------------------------------------------------------------------------------
 void Pretendo::on_action2x_triggered() {
-	qDebug() << "ZOOM 2x";
-	ui_.video->setMinimumSize(512,480);
+	ui_.video->setFixedSize(256 * 2, 240 * 2);
 	adjustSize();
 }
 
@@ -351,8 +349,7 @@ void Pretendo::on_action2x_triggered() {
 // Name: 
 //------------------------------------------------------------------------------
 void Pretendo::on_action3x_triggered() {
-	qDebug() << "ZOOM 3x";
-	ui_.video->setMinimumSize(768,720);
+	ui_.video->setFixedSize(256 * 3, 240 * 3);
 	adjustSize();
 }
 
@@ -360,7 +357,6 @@ void Pretendo::on_action3x_triggered() {
 // Name: 
 //------------------------------------------------------------------------------
 void Pretendo::on_action4x_triggered() {
-	qDebug() << "ZOOM 4x";
-	ui_.video->setMinimumSize(1024,960);
+	ui_.video->setFixedSize(256 * 4, 240 * 4);
 	adjustSize();
 }
