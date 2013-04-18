@@ -1,2 +1,4 @@
 .release-shared
 .debug-shared
+Makefile
+pretendo
