@@ -68,7 +68,7 @@ PretendoWindow::PretendoWindow()
 			"Bummer", NULL, NULL, B_WIDTH_AS_USUAL, B_STOP_ALERT))->Go();
 		OnQuit();
 	} else {
-		memset (areaBits, 0x00, (SCREEN_WIDTH*2) * (SCREEN_HEIGHT*2) * 4);
+		memset (areaBits, 0x0, (SCREEN_WIDTH*2) * (SCREEN_HEIGHT*2) * 4);
 		memset (dirtyBits, 0xff, (SCREEN_WIDTH*2) * (SCREEN_HEIGHT*2) * 4);
 		
 		fBackBuffer.bits = reinterpret_cast<uint8 *>(areaBits);
@@ -118,15 +118,12 @@ PretendoWindow::PretendoWindow()
 	fDoubled = false;
 	fClear = 0;
 	
-	if ((fThread = spawn_thread(thread_func, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
+	if ((fThread = spawn_thread(emulation_thread, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
 			(new BAlert(0, 
 			"Unable to spawn emulation thread.  Continuation is impossible", "Bummer",  				NULL, NULL, B_WIDTH_AS_USUAL, B_STOP_ALERT))->Go();
 		OnQuit();
 	}
-	
-	//fMutex = create_sem(1, "pretendo_mutex");
-	//acquire_sem(fMutex);
-	
+		
 	fMutex = new SimpleMutex("pretendo_mutex", this);
 	fMutex->Lock();
 	resume_thread(fThread);
@@ -336,7 +333,6 @@ PretendoWindow::QuitRequested()
 	
 	status_t ret;
 	
-	//delete_sem(fMutex);
 	delete fMutex;
 	wait_for_thread(fThread, &ret);
 	
@@ -372,9 +368,8 @@ PretendoWindow::Zoom (BPoint origin, float width, float height)
 	} else {
 		if (w == SCREEN_WIDTH*2) {
 			ResizeTo (SCREEN_WIDTH, SCREEN_HEIGHT);
+			fDoubled = false;
 		} 
-		
-		fDoubled = false;
 	}
 	
 	Hide();
@@ -471,7 +466,6 @@ PretendoWindow::OnRun (void)
 	if (! fRunning) {
 		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 			reset(nes::HARD_RESET);
-			//release_sem(fMutex);
 			fMutex->Unlock();
 			fRunning = true;
 		}
@@ -485,7 +479,6 @@ PretendoWindow::OnStop (void)
 	if (fRunning) {
 		fRunning = false;
 		
-		//acquire_sem(fMutex);
 		fMutex->Lock();
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
@@ -508,11 +501,9 @@ PretendoWindow::OnPause (void)
 {	
 	if (fRunning) {
 		if (fPaused) {
-			//release_sem(fMutex);
 			fMutex->Unlock();
 			fEmuMenu->ItemAt(1)->SetMarked(false);
 		} else {
-			//acquire_sem(fMutex);
 			fMutex->Lock();
 			fEmuMenu->ItemAt(1)->SetMarked(true);
 		}
@@ -1045,7 +1036,7 @@ PretendoWindow::end_frame()
 
 
 status_t
-PretendoWindow::thread_func (void *data)
+PretendoWindow::emulation_thread (void *data)
 {
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
@@ -1059,7 +1050,6 @@ PretendoWindow::thread_func (void *data)
 			nes::run_frame(w);
 			w->end_frame();
 			w->ReadKeyStates();
-			
 			w->Mutex()->Unlock();
 		}	
 	
@@ -1073,6 +1063,7 @@ PretendoWindow::CheckKey (int32 index, int32 key)
 	nes::input.controller1().keystate_[index] = 
 		fKeyStates.key_states[key >> 3] & (1 << (7 - (key % 8)));
 }
+
 
 void
 PretendoWindow::ReadKeyStates (void)

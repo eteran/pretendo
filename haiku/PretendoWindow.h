@@ -201,7 +201,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	thread_id fThread;
-	static status_t thread_func (void *data);
+	static status_t emulation_thread (void *data);
 	bool fRunning;
 	
 	public:
