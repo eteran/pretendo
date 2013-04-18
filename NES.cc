@@ -24,7 +24,7 @@ void execute_scanline_0_19() {
 	 */
 
 	for(int i = 0; i < 20; ++i) {
-		nes::ppu.execute_scanline(scanline_vblank(i));
+		nes::ppu.execute_scanline(scanline_vblank());
 	}
 }
 
