@@ -1347,7 +1347,7 @@ void PPU::execute_cycle(const scanline_render &target) {
 // Name: execute_scanline
 //------------------------------------------------------------------------------
 void PPU::execute_cycle(const scanline_postrender &target) {
-
+	(void)target;
 }
 
 //------------------------------------------------------------------------------
