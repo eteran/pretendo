@@ -18,9 +18,6 @@ struct scanline {
 };
 
 struct scanline_vblank : scanline {
-	explicit scanline_vblank(int l) : line(l) {
-	}
-	int line;
 };
 
 struct scanline_prerender : scanline {

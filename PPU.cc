@@ -753,7 +753,7 @@ void PPU::evaluate_sprites() {
 			//    the next open slot in secondary OAM (unless 8 sprites have been found, in
 			//    which case the write is ignored).
 			if(sprite_data_index_ < 8) {
-				const uint16_t sprite_line = vpos_ - (sprite_ram_[index] + 1);
+				const uint16_t sprite_line = (vpos_ - 1) - (sprite_ram_[index]);
 
 				// 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
@@ -802,7 +802,7 @@ void PPU::evaluate_sprites() {
 		case STATE_3:
 			{
 				// 3. Starting at m = 0, evaluate OAM[n][m] as a Y-coordinate.
-				const uint16_t sprite_line = vpos_ - (sprite_ram_[index] + 1);
+				const uint16_t sprite_line = (vpos_ - 1) - (sprite_ram_[index]);
 
 				// 3a. If the value is in range, set the sprite overflow flag in $2002 and read
 				//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
@@ -1354,12 +1354,18 @@ void PPU::execute_cycle(const scanline_postrender &target) {
 // Name: execute_scanline
 //------------------------------------------------------------------------------
 void PPU::execute_cycle(const scanline_vblank &target) {
-	if(target.line == 0 && hpos_ == 1) {
+
+	(void)target;
+
+	// I know this should be 241 in theory, but we consider the pre-rendering 
+	// scanline to be #0 for now
+
+	if(vpos_ == 242 && hpos_ == 1) {
 		enter_vblank();
 	}
 
 	// we do we need this 2 PPU tick delay?
-	if(target.line == 0 && hpos_ == 3) {
+	if(vpos_ == 242 && hpos_ == 3) {
 		if(nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
 			nes::cpu.nmi();
 		}
