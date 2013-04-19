@@ -26,71 +26,65 @@ private:
 			data = read_byte(PC++);
 			break;
 		case 2:
-			{
-				// Fetch opcode of next instruction,
-				// If branch is taken, add operand to PCL.
-				// Otherwise increment PC.
-				new_op = read_byte(PC);
+			// Fetch opcode of next instruction,
+			// If branch is taken, add operand to PCL.
+			// Otherwise increment PC.
+			new_op = read_byte(PC);
 
-				// According to Shay Green (blargg)
-				// ------
-				// A taken non-page-crossing branch ignores IRQ during
-				// its last clock, so that next instruction executes
-				// before the IRQ. Other instructions would execute the
-				// NMI before the next instruction.
-				// ------
-				// Therefore, we DON'T check for IRQ/NMI/RESET here
+			// According to Shay Green (blargg)
+			// ------
+			// A taken non-page-crossing branch ignores IRQ during
+			// its last clock, so that next instruction executes
+			// before the IRQ. Other instructions would execute the
+			// NMI before the next instruction.
+			// ------
+			// Therefore, we DON'T check for IRQ/NMI/RESET here
 
-				if(op()) {
-					old_pc = PC;
-					new_pc = (PC + static_cast<int8_t>(data));
-					set_pc_lo(new_pc & 0xff);
-					break;
+			if(op()) {
+				old_pc = PC;
+				new_pc = (PC + static_cast<int8_t>(data));
+				set_pc_lo(new_pc & 0xff);
+			} else {
+				if(rst_executing) {
+					instruction = 0x100;
+				} else if(nmi_executing) {
+					instruction = 0x101;
+				} else if(irq_executing) {
+					instruction = 0x102;
 				} else {
-					if(rst_executing) {
-						instruction = 0x100;
-					} else if(nmi_executing) {
-						instruction = 0x101;
-					} else if(irq_executing) {
-						instruction = 0x102;
-					} else {
-						instruction = new_op;
-						++PC;
-					}
-
-					current_cycle = 0;
-					//TRACE;
-					break;
+					instruction = new_op;
+					++PC;
 				}
+
+				current_cycle = 0;
+				//TRACE;
 			}
+			break;
 		case 3:
-			{
-				// Fetch opcode of next instruction.
-				// Fix PCH. If it did not change, increment PC.
-				new_op = read_byte(PC);
+			// Fetch opcode of next instruction.
+			// Fix PCH. If it did not change, increment PC.
+			new_op = read_byte(PC);
 
-				if((new_pc & 0xff00) != (old_pc & 0xff00)) {
-					LAST_CYCLE;
-					PC = new_pc;
-					OPCODE_COMPLETE;
+			if((new_pc & 0xff00) != (old_pc & 0xff00)) {
+				LAST_CYCLE;
+				PC = new_pc;
+				OPCODE_COMPLETE;
+			} else {
+				if(rst_executing) {
+					instruction = 0x100;
+				} else if(nmi_executing) {
+					instruction = 0x101;
+				} else if(irq_executing) {
+					instruction = 0x102;
 				} else {
-
-					if(rst_executing) {
-						instruction = 0x100;
-					} else if(nmi_executing) {
-						instruction = 0x101;
-					} else if(irq_executing) {
-						instruction = 0x102;
-					} else {
-						instruction = new_op;
-						++PC;
-					}
-
-					current_cycle = 0;
-					//TRACE;
-					break;
+					instruction = new_op;
+					++PC;
 				}
+
+				current_cycle = 0;
+				//TRACE;
 			}
+			break;
 		default:
 			abort();
 		}

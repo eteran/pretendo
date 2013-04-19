@@ -9,6 +9,22 @@ APU   nes::apu;
 Cart  nes::cart;
 Input nes::input;
 
+/*
+ * Just some thoughts on timing:
+ * NTSC has a PPU/CPU ratio of 3.0/1.0
+ * PAL  has a PPU/CPU ratio of 3.2/1.0
+ * 
+ * If we want to smoothly support both, we need to implement
+ * some sort of common cycle system. This will probably mean
+ * adding some sort of "master cycle" system where:
+ * 1 NTSC CPU cycle = 15 "master cycles"
+ * 1 PAL  CPU cycle = 16 "master cycles"
+ * 1 PPU cycle      =  5 "master cycles"
+ *
+ * using such a system would allow there to be a single absolute
+ * timestamp system which would be possibly be very beneficial
+ */
+
 namespace {
 
 //------------------------------------------------------------------------------
