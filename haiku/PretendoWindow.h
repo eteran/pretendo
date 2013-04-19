@@ -25,6 +25,8 @@
 //#include "InputWindow.h"
 //#include "PaletteWindow.h"
 
+#include "SimpleMutex.h"
+
 #include "blitters.h"
 #include "copies.h"
 
@@ -201,7 +203,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	thread_id fThread;
-	static status_t thread_func (void *data);
+	static status_t emulation_thread (void *data);
 	bool fRunning;
 	
 	private:
@@ -212,6 +214,9 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	key_info fKeyStates;
 	inline void CheckKey (int32 index, int32 key);
 	void ReadKeyStates (void);
+	
+	//SimpleMutex *aMutex;
+	//SimpleMutex *Mutex (void) { return aMutex; }
 };
 				
 #endif // _PRETENDO_WINDOW_H_
