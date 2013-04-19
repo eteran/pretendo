@@ -68,14 +68,13 @@ do {                                                 \
 													 \
 	if(rst_asserted) {                               \
 		rst_executing = true;                        \
-		rst_asserted   = false;                      \
-		irq_asserted   = false;                      \
 	} else if(nmi_asserted) {                        \
 		nmi_executing = true;                        \
 	} else if(irq_asserted && ((P & I_MASK) == 0)) { \
 		irq_executing = true;                        \
 	}                                                \
 	nmi_asserted = false;                            \
+	rst_asserted = false;                            \
 } while(0)
 
 #define OPCODE_COMPLETE do { current_cycle = -1; return; } while(0)
@@ -90,9 +89,9 @@ int current_cycle = 0;
 bool     irq_executing        = false;
 bool     nmi_executing        = false;
 bool     rst_executing        = false;
-bool     irq_asserted          = false;
-bool     nmi_asserted          = false;
-bool     rst_asserted          = false;
+bool     irq_asserted         = false;
+bool     nmi_asserted         = false;
+bool     rst_asserted         = false;
 int      burn_count           = 0;
 uint64_t executed_cycle_count = 0;
 uint16_t instruction          = 0;
@@ -191,7 +190,7 @@ void do_reset() {
 
 	switch(current_cycle) {
 	case 1:
-		// read from current PC 
+		// read from current PC
 		read_byte(PC);
 		break;
 	case 2:
@@ -506,7 +505,7 @@ void execute_opcode() {
 	case 0xfd: absolute_x_insn(current_cycle, opcode_sbc()); break;
 	case 0xfe: absolute_x_insn(current_cycle, opcode_inc()); break;
 	case 0xff: absolute_x_insn(current_cycle, opcode_isc()); break;
-	
+
 	// IRQ/NMI/RESET
 	case 0x100: do_reset(); break;
 	case 0x101: op_nmi(current_cycle); break;
@@ -557,14 +556,14 @@ void clock() {
 void run(int cycles) {
 
 	while(cycles-- > 0) {
-		
+
 		if(burn_count != 0) {
 			assert(burn_count >= 0);
 			--burn_count;
 		} else {
 			clock();
 		}
-		
+
 		if(sync_handler) {
 			(*sync_handler)();
 		}
