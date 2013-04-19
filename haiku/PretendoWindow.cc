@@ -117,7 +117,7 @@ PretendoWindow::PretendoWindow()
 	fDoubled = false;
 	fClear = 0;
 	
-	if ((fThread = spawn_thread(thread_func, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
+	if ((fThread = spawn_thread(emulation_thread, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
 			std::cout << "failed to spawn thread" << std::endl;
 	} else {
 		fRunning = false;
@@ -125,6 +125,9 @@ PretendoWindow::PretendoWindow()
 	
 	fMutex = create_sem(1, "pretendo_mutex");
 	acquire_sem(fMutex);
+	//status_t error;
+	//aMutex = new SimpleMutex("pretendo_mutex", error);
+	//aMutex->Lock();
 	resume_thread(fThread);
 }
 
@@ -154,6 +157,7 @@ PretendoWindow::~PretendoWindow()
 	
 	fRunning = fDirectConnected = false;
 	fMutex = B_BAD_SEM_ID;
+	//delete aMutex;
 	fThread = B_BAD_THREAD_ID;
 	
 	Hide();
@@ -334,6 +338,7 @@ PretendoWindow::QuitRequested()
 	status_t ret;
 	
 	delete_sem(fMutex);
+	//delete aMutex;
 	wait_for_thread(fThread, &ret);
 	
 	fRunning = 
@@ -472,6 +477,7 @@ PretendoWindow::OnRun (void)
 		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 			reset(nes::HARD_RESET);
 			release_sem(fMutex);
+			//aMutex->Unlock();
 			fRunning = true;
 		}
 	}
@@ -485,6 +491,7 @@ PretendoWindow::OnStop (void)
 		fRunning = false;
 		
 		acquire_sem(fMutex);
+		//aMutex->Lock();
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
 			ClearBitmap (true);
@@ -507,9 +514,11 @@ PretendoWindow::OnPause (void)
 	if (fRunning) {
 		if (fPaused) {
 			release_sem(fMutex);
+			//aMutex->Unlock();
 			fEmuMenu->ItemAt(1)->SetMarked(false);
 		} else {
 			acquire_sem(fMutex);
+			//aMutex->Unlock();
 			fEmuMenu->ItemAt(1)->SetMarked(true);
 		}
 	
@@ -1041,7 +1050,7 @@ PretendoWindow::end_frame()
 
 
 status_t
-PretendoWindow::thread_func (void *data)
+PretendoWindow::emulation_thread (void *data)
 {
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
@@ -1050,15 +1059,16 @@ PretendoWindow::thread_func (void *data)
 				break;
 			}
 			
+			//if (w->Mutex()->Lock() != B_NO_ERROR) {
 			w->start_frame();
 			nes::run_frame(w);
 			w->end_frame();
 			w->ReadKeyStates();
-			
 			release_sem(w->Mutex());
+			//w->Mutex()->Unlock();
 		}	
 	
-	return 0;
+	return B_OK;
 }
 
 
