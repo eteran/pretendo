@@ -19,7 +19,7 @@ Input nes::input;
  * adding some sort of "master cycle" system where:
  * 1 NTSC CPU cycle = 15 "master cycles"
  * 1 PAL  CPU cycle = 16 "master cycles"
- * 1 PPU cycle      =  5 "master cycles"
+ * 1 PPU      cycle =  5 "master cycles"
  *
  * using such a system would allow there to be a single absolute
  * timestamp system which would be possibly be very beneficial
