@@ -26,9 +26,9 @@ struct opcode_nmi {
 		case 4:
 			// push P on stack, decrement S
 			write_byte(S-- + STACK_ADDRESS, P);
-			set_flag<I_MASK>();
 			break;
 		case 5:
+			set_flag<I_MASK>();
 			// fetch PCL
 			set_pc_lo(read_byte(NMI_VECTOR_ADDRESS + 0));
 			break;
