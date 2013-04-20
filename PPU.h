@@ -36,8 +36,8 @@ class PPU : public boost::noncopyable {
 public:
 	class SpriteEntry {
 	public:
-		uint8_t  pattern[2];
-		uint8_t  sprite_bytes[4];
+		uint8_t pattern[2];
+		uint8_t sprite_bytes[4];
 	public:
 		bool horizontal_flip() const;
 		bool is_background() const;

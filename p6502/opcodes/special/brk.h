@@ -10,7 +10,7 @@ struct opcode_brk {
 	void operator()(int cycle) {
 
 		switch(cycle) {
-		case 1:
+		case 1:		
 			// read next instruction byte (and throw it away),
 			// increment PC
 			read_byte(PC++);
@@ -26,8 +26,6 @@ struct opcode_brk {
 		case 4:
 			// push P on stack, decrement S
 			write_byte(S-- + STACK_ADDRESS, P | B_MASK);
-			set_flag<I_MASK>();
-
 			if(nmi_asserted) {
 				vector_ = NMI_VECTOR_ADDRESS;
 				nmi_asserted = false;
@@ -36,11 +34,15 @@ struct opcode_brk {
 			}
 			break;
 		case 5:
+			set_flag<I_MASK>();
 			// fetch PCL
 			set_pc_lo(read_byte(vector_ + 0));
 			break;
 		case 6:
-			LAST_CYCLE;
+			// NOTE: are we supposed to check for interrupts here?
+			//       I only pass the tests if I don't.			
+			// LAST_CYCLE;
+			
 			// fetch PCH
 			set_pc_hi(read_byte(vector_ + 1));
 			OPCODE_COMPLETE;

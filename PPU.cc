@@ -154,10 +154,42 @@ uint8_t PPU::SpriteEntry::x() const {
 PPU::PPU() :
 	ppu_cycle_(0),
 	ppu_read_2002_cycle_(0),
+	next_ppu_fetch_address_(0),
+	background_pattern_table_(0),
+	nametable_(0),
+	sprite_pattern_table_(0),
+	vram_address_(0),
+	hpos_(0),
+	vpos_(0),
+	address_increment_(0),
+	color_intensity_(0),
+	latch_(0),
+	next_attribute_(0),
+	next_tile_index_(0),
 	register_2000_(0),
 	register_2001_(0),
+	register_2007_buffer_(0),
+	sprite_address_(0),
 	sprite_data_index_(0),
+	sprite_size_(0),
+	status_(0),
+	tile_offset_(0),
+	sprite_buffer_(0),
+	background_clipping_(false),
+	background_visible_(false),
+	greyscale_(false),
+	nmi_on_vblank_(false),
+	odd_frame_(false),
+	rendering_(false),
+	sprite_clipping_(false),
+	sprite_init_(false),
+	sprite_zero_found_next_(false),
+	sprite_zero_found_curr_(false),
+	sprites_visible_(false),
+	write_latch_(false),
+	write_block_(true),
 	show_sprites_(true) {
+
 }
 
 //------------------------------------------------------------------------------
@@ -244,7 +276,7 @@ void PPU::write2000(uint8_t value) {
 
 	register_2000_ = value;
 
-	const bool prev_nmi_on_vblank = nmi_on_vblank_;
+	const bool prev_nmi_on_vblank = nmi_on_vblank();
 
 	nmi_on_vblank_            = (value & 0x80);
 	// 0x40 is EXT bus direction
@@ -261,7 +293,7 @@ void PPU::write2000(uint8_t value) {
 
 	// we can re-trigger an NMI ... though
 	// it should have a 1 OP delay (which we don't emulate yet, cause I'm not sure how to do it)
-	if(!prev_nmi_on_vblank && nmi_on_vblank_ && (status_ & STATUS_VBLANK)) {
+	if(!prev_nmi_on_vblank && nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
 		nes::cpu.nmi();
 	}
 }
@@ -1358,16 +1390,15 @@ void PPU::execute_cycle(const scanline_vblank &target) {
 	(void)target;
 
 	// I know this should be 241 in theory, but we consider the pre-rendering 
-	// scanline to be #0 for now
-
-	if(vpos_ == 242 && hpos_ == 1) {
-		enter_vblank();
-	}
-
-	// we do we need this 2 PPU tick delay?
-	if(vpos_ == 242 && hpos_ == 3) {
-		if(nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
-			nes::cpu.nmi();
+	// scanline to be #0 for now	
+	if(vpos_ == 242) {
+		
+		if(hpos_ == 1) {
+			enter_vblank();
+		} else if(hpos_ == 3) {
+			if(nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
+				nes::cpu.nmi();
+			}
 		}
 	}
 }

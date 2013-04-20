@@ -55,9 +55,8 @@ private:
 					instruction = new_op;
 					++PC;
 				}
-
+				TRACE;
 				current_cycle = 0;
-				//TRACE;
 			}
 			break;
 		case 3:
@@ -80,9 +79,9 @@ private:
 					instruction = new_op;
 					++PC;
 				}
-
+				TRACE;
 				current_cycle = 0;
-				//TRACE;
+				
 			}
 			break;
 		default:

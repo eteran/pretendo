@@ -78,8 +78,16 @@ do {                                                 \
 } while(0)
 
 #define OPCODE_COMPLETE do { current_cycle = -1; return; } while(0)
-#if 1
-#define TRACE           do { printf("%04X  [%02X] A:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%3lu [%u]\n", (PC - 1) & 0xffff, instruction & 0xff, A, X, Y, P, S, executed_cycle_count, current_cycle); } while(0)
+#if 0
+#define TRACE           do {             \
+	switch(instruction) {                \
+	case 0x100: printf("RST!\n"); break; \
+	case 0x101: printf("NMI!\n"); break; \
+	case 0x102: printf("IRQ!\n"); break; \
+	default:                             \
+		printf("%04X  [%02X] A:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%3lu [%u]\n", (PC - 1) & 0xffff, instruction & 0xff, A, X, Y, P, S, executed_cycle_count, current_cycle); \
+	}	                                 \
+} while(0)
 #else
 #define TRACE           do { } while(0)
 #endif
@@ -183,44 +191,6 @@ inline void update_nz_flags(uint8_t value) {
 #include "address_modes.h"
 
 //------------------------------------------------------------------------------
-// Name: do_reset
-// Desc:
-//------------------------------------------------------------------------------
-void do_reset() {
-
-	switch(current_cycle) {
-	case 1:
-		// read from current PC
-		read_byte(PC);
-		break;
-	case 2:
-		// push PCH on stack, decrement S (fake)
-		read_byte(S-- + STACK_ADDRESS);
-		break;
-	case 3:
-		// push PCL on stack, decrement S (fake)
-		read_byte(S-- + STACK_ADDRESS);
-		break;
-	case 4:
-		// push P on stack, decrement S (fake)
-		read_byte(S-- + STACK_ADDRESS);
-		set_flag<I_MASK>();
-		break;
-	case 5:
-		// fetch PCL
-		set_pc_lo(read_byte(RST_VECTOR_ADDRESS + 0));
-		break;
-	case 6:
-		// fetch PCH
-		LAST_CYCLE;
-		set_pc_hi(read_byte(RST_VECTOR_ADDRESS + 1));
-		OPCODE_COMPLETE;
-	default:
-		abort();
-	}
-}
-
-//------------------------------------------------------------------------------
 // Name: execute_opcode
 // Desc:
 //------------------------------------------------------------------------------
@@ -247,6 +217,7 @@ void execute_opcode() {
 	static opcode_rts             op_rts;
 	static opcode_rti             op_rti;
 	static opcode_jsr             op_jsr;
+	static opcode_rst             op_rst;
 
 	switch(instruction) {
 	case 0x00: op_brk(current_cycle); break;
@@ -507,7 +478,7 @@ void execute_opcode() {
 	case 0xff: absolute_x_insn(current_cycle, opcode_isc()); break;
 
 	// IRQ/NMI/RESET
-	case 0x100: do_reset(); break;
+	case 0x100: op_rst(current_cycle); break;
 	case 0x101: op_nmi(current_cycle); break;
 	case 0x102: op_irq(current_cycle); break;
 	default:
@@ -539,6 +510,9 @@ void clock() {
 		} else {
 			instruction = read_byte(PC++);
 		}
+		
+		TRACE;
+		
 	} else {
 		// execute the current part of the instruction
 		execute_opcode();

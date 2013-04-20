@@ -88,6 +88,7 @@ void opcode_jam() {
 #include "opcodes/special/brk.h"
 #include "opcodes/special/jsr.h"
 #include "opcodes/special/rti.h"
+#include "opcodes/special/rst.h"
 #include "opcodes/special/rts.h"
 
 // unofficial

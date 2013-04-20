@@ -10,7 +10,7 @@ struct opcode_irq {
 	void operator()(int cycle) {
 
 		switch(cycle) {
-		case 1:
+		case 1:		
 			// read next instruction byte (and throw it away),
 			// increment PC
 			read_byte(PC);
@@ -26,8 +26,6 @@ struct opcode_irq {
 		case 4:
 			// push P on stack, decrement S
 			write_byte(S-- + STACK_ADDRESS, P);
-			set_flag<I_MASK>();
-
 			if(nmi_asserted) {
 				vector_ = NMI_VECTOR_ADDRESS;
 				nmi_asserted = false;
@@ -36,11 +34,21 @@ struct opcode_irq {
 			}
 			break;
 		case 5:
+			set_flag<I_MASK>();
 			// fetch PCL
 			set_pc_lo(read_byte(vector_ + 0));
 			break;
 		case 6:
 			LAST_CYCLE;
+			
+			if(nmi_executing) {
+				printf("HUH?\n");			
+			}
+			
+			if(irq_executing) {
+				printf("IMPOSSIBLE\n");
+			}
+			
 			// fetch PCH
 			set_pc_hi(read_byte(vector_ + 1));
 			OPCODE_COMPLETE;
