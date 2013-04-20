@@ -80,8 +80,12 @@ void APU::reset(nes::RESET reset_type) {
 	write400F(00);
 	write4010(10);
 
-	// TODO: why doesn't this make it pass? If I put 5 here, it does, but that
-	//       doesn't seem correct. Blargg says it is as if this happens
+	// OK, the APU is supposed to act as if it has run for approximately 9
+	// cycles after the reset is complete. I beleive that the first 7 of these
+	// cycles are the 7 cycles of the reset itself. So we run the APU manually
+	// for an extra 2 ticks.
+	//
+	// Blargg says it is as if this happens
 	//
 	//       lda   #$00
 	//       sta   $4017       ; 1
@@ -90,8 +94,9 @@ void APU::reset(nes::RESET reset_type) {
 	//       nop
 	//       nop
 	//     reset:
-
-	run(10);
+	if(reset_type == nes::HARD_RESET) {
+		run(2);
+	}
 
 	std::cout << "[APU::reset] reset complete" << std::endl;
 }

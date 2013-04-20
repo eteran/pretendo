@@ -1085,7 +1085,7 @@ void PPU::enter_vblank() {
 //------------------------------------------------------------------------------
 void PPU::exit_vblank() {
 	// clear all the relevant status bits
-	status_ &= 0x1f;
+	status_ &= ~(STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK);
 	write_block_ = false;
 }
 

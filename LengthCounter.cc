@@ -57,7 +57,6 @@ void LengthCounter::load(uint8_t index) {
 // Name: reset
 //------------------------------------------------------------------------------
 void LengthCounter::reset() {
-
 	prev_halt_    = false;
 	halt_         = false;
 	reload_       = false;
@@ -112,19 +111,8 @@ uint8_t LengthCounter::clock() {
 
 	// reload the value if needed
 	if(reload_) {	
-#if 0
-		printf("RELOAD[%c]: %8lu:%8lu [v = %02x]\n", 
-			(reload_cycle_ == nes::apu.cycle_count()) ? '=' : (reload_cycle_ == nes::apu.cycle_count() - 1) ? '-' : (reload_cycle_ == nes::apu.cycle_count() + 1) ? '+' : ' ', 
-			reload_cycle_,
-			nes::apu.cycle_count(),
-			value_);
-#endif
 		if((reload_cycle_ != nes::apu.cycle_count()) || (value_ == 0)) {
 			value_ = reload_value_;
-		} else {
-#if 0
-			printf("RELOAD SUPRESSED\n");
-#endif
 		}
 		reload_ = false;
 	}

@@ -43,6 +43,7 @@ void DMC::disable() {
 // Name: reset
 //------------------------------------------------------------------------------
 void DMC::reset() {
+	/*
 	enabled_        = false;
 	frequency_      = 0;
 	sample_address_ = 0;
@@ -51,6 +52,7 @@ void DMC::reset() {
 	irq_enabled_    = 0;
 	load_counter_   = 0;
 	loop_           = 0;
+	*/
 }
 
 //------------------------------------------------------------------------------
