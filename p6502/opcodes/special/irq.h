@@ -10,7 +10,7 @@ struct opcode_irq {
 	void operator()(int cycle) {
 
 		switch(cycle) {
-		case 1:		
+		case 1:
 			// read next instruction byte (and throw it away),
 			// increment PC
 			read_byte(PC);
@@ -40,15 +40,6 @@ struct opcode_irq {
 			break;
 		case 6:
 			LAST_CYCLE;
-			
-			if(nmi_executing) {
-				printf("HUH?\n");			
-			}
-			
-			if(irq_executing) {
-				printf("IMPOSSIBLE\n");
-			}
-			
 			// fetch PCH
 			set_pc_hi(read_byte(vector_ + 1));
 			OPCODE_COMPLETE;
@@ -56,7 +47,7 @@ struct opcode_irq {
 			abort();
 		}
 	}
-	
+
 private:
 	uint16_t vector_;
 };

@@ -1,6 +1,7 @@
 
 #include "APU.h"
 #include "NES.h"
+#include <iostream>
 #include <cassert>
 
 namespace {
@@ -47,7 +48,7 @@ void APU::reset(nes::RESET reset_type) {
 	apu_cycles_    = 0;
 	next_clock_    = 0;
 	clock_step_    = 0;
-	
+
 	if(reset_type == nes::HARD_RESET) {
 		last_frame_counter_ = 0;
 	}
@@ -60,7 +61,7 @@ void APU::reset(nes::RESET reset_type) {
 
 	write4017(last_frame_counter_);
 	write4015(0x00);
-		
+
 	write4000(10);
 	write4001(00);
 	write4002(00);
@@ -89,8 +90,10 @@ void APU::reset(nes::RESET reset_type) {
 	//       nop
 	//       nop
 	//     reset:
-	
-	run(5);
+
+	run(10);
+
+	std::cout << "[APU::reset] reset complete" << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -256,7 +259,7 @@ void APU::write4015(uint8_t value) {
 	} else {
 		dmc_.disable();
 	}
-	
+
 	if(!(status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ))) {
 		nes::cpu.clear_irq(CPU::APU_IRQ);
 	}
@@ -283,7 +286,7 @@ uint8_t APU::read4015() {
 	if(noise_.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_NOISE;
 	}
-	
+
 	if(dmc_.sample_length() > 0) {
 		ret |= STATUS_ENABLE_DMC;
 	}
@@ -445,10 +448,10 @@ void APU::run(int cycles) {
 
 
 		triangle_.tick();
-		
+
 		if((apu_cycles_ % 2) == 0) {
 			square_1.tick();
-			square_2.tick();		
+			square_2.tick();
 			noise_.tick();
 			dmc_.tick();
 		}

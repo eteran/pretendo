@@ -67,7 +67,7 @@ private:
 	Triangle triangle_;
 	Noise    noise_;
 	DMC      dmc_;
-	
+
 	uint64_t apu_cycles_;
 	uint64_t next_clock_;
 	uint8_t  clock_step_;

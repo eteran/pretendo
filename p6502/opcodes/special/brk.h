@@ -10,7 +10,7 @@ struct opcode_brk {
 	void operator()(int cycle) {
 
 		switch(cycle) {
-		case 1:		
+		case 1:
 			// read next instruction byte (and throw it away),
 			// increment PC
 			read_byte(PC++);
@@ -40,9 +40,9 @@ struct opcode_brk {
 			break;
 		case 6:
 			// NOTE: are we supposed to check for interrupts here?
-			//       I only pass the tests if I don't.			
-			// LAST_CYCLE;
-			
+			//       I only pass the tests if I don't.
+			//LAST_CYCLE;
+
 			// fetch PCH
 			set_pc_hi(read_byte(vector_ + 1));
 			OPCODE_COMPLETE;
@@ -50,7 +50,7 @@ struct opcode_brk {
 			abort();
 		}
 	}
-	
+
 private:
 	uint16_t vector_;
 };

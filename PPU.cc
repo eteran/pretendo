@@ -203,10 +203,12 @@ PPU::~PPU() {
 //------------------------------------------------------------------------------
 void PPU::reset(nes::RESET reset_type) {
 
+#if 0
 	std::generate(sprite_ram_, sprite_ram_ + 0x100,  rand);
-
+#endif
 	if(reset_type == nes::HARD_RESET) {
 		std::fill_n(nametables_, 0x1000, 0);
+		std::fill_n(sprite_ram_, 0x0100, 0);
 
 		for(int i = 0; i < 8; ++i) {
 			sprite_data_[i].pattern[0] = 0;
@@ -1084,7 +1086,6 @@ void PPU::enter_vblank() {
 void PPU::exit_vblank() {
 	// clear all the relevant status bits
 	status_ &= 0x1f;
-
 	write_block_ = false;
 }
 
@@ -1203,6 +1204,7 @@ void PPU::update_vram_address() {
 //------------------------------------------------------------------------------
 void PPU::execute_cycle(const scanline_prerender &) {
 
+	// passes when this is 0...
 	if(hpos_ == 1) {
 		exit_vblank();
 	}
@@ -1389,16 +1391,20 @@ void PPU::execute_cycle(const scanline_vblank &target) {
 
 	(void)target;
 
-	// I know this should be 241 in theory, but we consider the pre-rendering 
-	// scanline to be #0 for now	
+	// I know this should be 241 in theory, but we consider the pre-rendering
+	// scanline to be #0 for now
 	if(vpos_ == 242) {
-		
-		if(hpos_ == 1) {
+
+
+		switch(hpos_) {
+		case 1:
 			enter_vblank();
-		} else if(hpos_ == 3) {
+			break;
+		case 3:
 			if(nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
 				nes::cpu.nmi();
 			}
+			break;
 		}
 	}
 }
@@ -1415,7 +1421,7 @@ void PPU::execute_scanline(const scanline_vblank &target) {
 	// BUT, the PPU cycle count isn't incremented in step
 	// so the MMC3 filtering based on PPU cycles doesn't
 	// see the manual toggles :-/
-	
+
 	int cycles = 0;
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
 		execute_cycle(target);
@@ -1485,7 +1491,7 @@ void PPU::execute_scanline(const scanline_render &target) {
 
 //------------------------------------------------------------------------------
 // Name: clock_cpu
-// Desc: optionally executes a CPU cycle returns the number of CPU cycles 
+// Desc: optionally executes a CPU cycle returns the number of CPU cycles
 //       executed
 //------------------------------------------------------------------------------
 int PPU::clock_cpu() {
