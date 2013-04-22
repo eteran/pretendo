@@ -1,26 +1,19 @@
-/* $Header: /var/cvsroot/pretendo/misc/ConfigManager.cpp,v 1.10 2005/09/17 21:23:00 eli Exp $ */
-
 #include "ConfigManager.h"
 
 
-ConfigManager::ConfigManager()
-	: mFilename("pretendo.cfg")
-{
-} 
+ConfigManager::ConfigManager() : filename_("pretendo.cfg") {
+}
 
 
-bool
-ConfigManager::Load (void)
-{
-	cout << "Loading config from file..." << endl;
+bool ConfigManager::Load() {
 
-	fstream file;
-	file.open (mFilename.c_str(), fstream::in);	
-	
-	if (! file.is_open()) {
+	std::cout << "Loading config from file..." << std::endl;
+	std::fstream file(filename_.c_str(), std::ios::in);
+
+	if(!file) {
 		// file does not exist, make a new one with some defaults
-		cout << "Couldn't load file.  Creating new one..." << endl;
-		
+		std::cout << "Couldn't load file.  Creating new one..." << std::endl;
+
 		NewSection("App Settings");
 		NewKey("App Settings", kv_pair("ShowOpenOnLoad", "false"));
 		NewKey("App Settings", kv_pair("AutoRun", "false"));
@@ -29,177 +22,157 @@ ConfigManager::Load (void)
 		NewKey("App Settings", kv_pair("UseROMDB", "false"));
 		NewKey("App Settings", kv_pair("DBFile", "./roms.db"));
 		Save();
-		
+
 		return false;
 	}
-	
-	string linebuffer;
+
+	std::string linebuffer;
+	std::string section;
 	unsigned int line = 0;
-	string section;
-	
-	while (! getline (file, linebuffer).eof()) {
+
+	while(std::getline(file, linebuffer)) {
 		++line;
-		if (linebuffer.empty()) {
+		if(linebuffer.empty()) {
 			continue;
 		}
-		
-		if (linebuffer.at(0) == '[') {
-			linebuffer.erase (0, 1);
-			
-			size_t end = linebuffer.find_last_of(']');
-			
-			if (end != string::npos) {
-				linebuffer.erase (end, 1);
-				NewSection (linebuffer);
+
+		if(linebuffer.at(0) == '[') {
+			linebuffer.erase(0, 1);
+
+			const size_t end = linebuffer.find_last_of(']');
+
+			if(end != std::string::npos) {
+				linebuffer.erase(end, 1);
+				NewSection(linebuffer);
 				section = linebuffer;
 			} else {
-				cout << "ConfigFile: error on line " << line << endl;
+				std::cout << "ConfigFile: error on line " << line << std::endl;
 				continue;
 			}
 		} else {
-			size_t eqPos = linebuffer.find_first_of ("=");
-			if (eqPos == string::npos) {
-				cout << "Error loading config file, line " << line << endl;
+			const size_t eqPos = linebuffer.find_first_of("=");
+			if(eqPos == std::string::npos) {
+				std::cout << "Error loading config file, line " << line << std::endl;
 				continue;
 			}
-			
-			string key = linebuffer;
-			string value = linebuffer;
-			
-			key.erase (eqPos);
-			value.erase (0, eqPos+1);
-			
-			if (key.empty()) {
-				cout << "config file: bad key on line " << line << endl;
+
+			std::string key   = linebuffer;
+			std::string value = linebuffer;
+
+			key.erase(eqPos);
+			value.erase(0, eqPos + 1);
+
+			if(key.empty()) {
+				std::cout << "config file: bad key on line " << line << std::endl;
 				continue;
 			}
-			
-			NewKey (section, kv_pair(key, value));		
-		}	
+
+			NewKey(section, kv_pair(key, value));
+		}
 	}
-	
-	file.close();
 
 	return true;
 }
 
 
-bool
-ConfigManager::Save (void)
-{
-	cout << "Saving Config..." << endl;	
-	
-	fstream file;
-	file.open(mFilename.c_str(), fstream::out | fstream::trunc);
-	
-	if (! file.is_open()) {
-		cout << "Error:  Config::Save() couldn't open file for writing" << endl;
+bool ConfigManager::Save() {
+
+	std::cout << "Saving Config..." << std::endl;
+	std::fstream file(filename_.c_str(), std::ios::out | std::ios::trunc);
+
+	if(!file) {
+		std::cout << "Error:  Config::Save() couldn't open file for writing" << std::endl;
 		//FIXME: throw exception or something equally creative
 		return false;
 	}
+
+	for(config_iterator ci = map_.begin(); ci != map_.end(); ci++) {
 	
-	for (config_iterator ci = mMap.begin(); ci != mMap.end(); ci++) {
-		kv_iterator kvm_start = mMap[ci->first].begin();
-		kv_iterator kvm_end = mMap[ci->first].end();
-		
-		file << "\n[" << ci->first << "]" << endl;
-		
-		for (kv_iterator ki = kvm_start; ki != kvm_end; ki++) {
-			if (ki->first.empty() || ki->second.empty()) {
+		file << "\n[" << ci->first << "]" << std::endl;
+
+		for(kv_iterator ki = map_[ci->first].begin(); ki != map_[ci->first].end(); ki++) {
+			if(ki->first.empty() || ki->second.empty()) {
 				continue;
 			}
-			
-			file << ki->first << "=" << ki->second << endl;
+
+			file << ki->first << "=" << ki->second << std::endl;
 		}
 	}
-		
+
 	file.flush();
-	file.close();
-	
-	return true;
-}
-
-	
-bool 
-ConfigManager::DeleteSection (string const &section)
-{
-	cout << "DeleteSection -> " << section << endl;
-	config_iterator ci = mMap.find (section);
-	
-	if (ci == mMap.end()) {
-		return false;
-	}
-	
-	if (! mMap[section].empty()) {
-		mMap[section].clear();		
-	}
-	
-	mMap.erase(ci);
-
 	return true;
 }
 
 
-bool
-ConfigManager::NewSection (string const &section)
-{
-	cout << "NewSection: " << section << endl;
+bool ConfigManager::DeleteSection(const std::string &section) {
 	
-	if (section.empty()) {
+	std::cout << "DeleteSection -> " << section << std::endl;
+	const config_iterator ci = map_.find(section);
+
+	if(ci == map_.end()) {
 		return false;
 	}
 
-	if (mMap.find (section) != mMap.end()) {
-		cout << "Section: " << section << " already in list." << endl;
-		return false;
+	if(!map_[section].empty()) {
+		map_[section].clear();
 	}
-	
-	mMap[section] = kv_map();
+
+	map_.erase(ci);
 	return true;
 }
 
 
-bool 
-ConfigManager::NewKey (string const &section, kv_pair key)
-{
-	if (section.empty()) {
+bool ConfigManager::NewSection(const std::string &section) {
+	std::cout << "NewSection: " << section << std::endl;
+
+	if(section.empty()) {
 		return false;
 	}
-	
-	if (mMap.find(section) == mMap.end()) {
+
+	if(map_.find(section) != map_.end()) {
+		std::cout << "Section: " << section << " already in list." << std::endl;
 		return false;
 	}
-	
-	kv_map kvm = mMap[section];
-	for (kv_iterator i = kvm.begin(); i != kvm.end(); i++) {
-		if (i->first == key.first) {
-			cout << "key " << key.first << " already exists." << endl;
+
+	map_[section] = kv_map();
+	return true;
+}
+
+
+bool ConfigManager::NewKey(const std::string &section, kv_pair key) {
+	if(section.empty()) {
+		return false;
+	}
+
+	if(map_.find(section) == map_.end()) {
+		return false;
+	}
+
+	for(kv_const_iterator it = map_[section].begin(); it != map_[section].end(); ++it) {
+		if(it->first == key.first) {
+			std::cout << "key " << key.first << " already exists." << std::endl;
 			return false;
 		}
 	}
 
-	cout << "NewKey -> adding: " << key.first << ", " << key.second << endl;
-	mMap[section].insert(key);
+	std::cout << "NewKey -> adding: " << key.first << ", " << key.second << std::endl;
+	map_[section].insert(key);
 	return true;
 }
-	
-	
-bool
-ConfigManager::DeleteKey (string const &section, string const &keyName)
-{
-	if (section.empty()) {
+
+
+bool ConfigManager::DeleteKey(const std::string &section, const std::string &keyName) {
+	if(section.empty()) {
 		return false;
 	}
-	
-	kv_map kvm = mMap[section];
-	kv_iterator kvi;
-	for (kvi = kvm.begin(); kvi != kvm.end(); kvi++){
-		if (kvi->first == keyName) {
-			cout << "DeleteKey -> " << keyName << endl;
-			mMap[section].erase(kvi);
+
+	for(kv_iterator it = map_[section].begin(); it != map_[section].end(); ++it){
+		if(it->first == keyName) {
+			std::cout << "DeleteKey -> " << keyName << std::endl;
+			map_[section].erase(it);
 			return true;
 		}
 	}
-	
+
 	return false;
 }
