@@ -1,6 +1,19 @@
 #ifndef IRQ_20140417_H_
 #define IRQ_20140417_H_
 
+#define LAST_CYCLE_0                                 \
+do {                                                 \
+	rst_executing = false;                           \
+	irq_executing = false;                           \
+													 \
+	if(rst_asserted) {                               \
+		rst_executing = true;                        \
+	} else if(irq_asserted && ((P & I_MASK) == 0)) { \
+		irq_executing = true;                        \
+	}                                                \
+	rst_asserted = false;                            \
+} while(0)
+
 //------------------------------------------------------------------------------
 // Name: opcode_irq
 // Desc: Interrupt
@@ -39,7 +52,7 @@ struct opcode_irq {
 			set_pc_lo(read_byte(vector_ + 0));
 			break;
 		case 6:
-			LAST_CYCLE;
+			LAST_CYCLE_0;
 			// fetch PCH
 			set_pc_hi(read_byte(vector_ + 1));
 			OPCODE_COMPLETE;
@@ -51,6 +64,8 @@ struct opcode_irq {
 private:
 	uint16_t vector_;
 };
+
+#undef LAST_CYCLE_0
 
 #endif
 
