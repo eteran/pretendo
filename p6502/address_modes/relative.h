@@ -2,6 +2,20 @@
 #ifndef RELATIVE_H_
 #define RELATIVE_H_
 
+#define LAST_CYCLE_0                          \
+do {                                          \
+	rst_executing = false;                           \
+	irq_executing = false;                           \
+													 \
+	if(rst_asserted) {                               \
+		rst_executing = true;                        \
+	} else if(irq_asserted && ((P & I_MASK) == 0)) { \
+		irq_executing = true;                        \
+	}                                                \
+	rst_asserted = false;                            \
+} while(0)
+
+
 struct relative {
 
 	// dispatch to the appropriate version of the address mode
@@ -21,7 +35,7 @@ private:
 	void execute(int cycle, Op op, const operation_branch &) {
 		switch(cycle) {
 		case 1:
-			LAST_CYCLE;
+			LAST_CYCLE_0;
 			// fetch operand, increment PC
 			data = read_byte(PC++);
 			break;
@@ -31,7 +45,6 @@ private:
 			// Otherwise increment PC.
 			new_op = read_byte(PC);
 
-			// According to Shay Green (blargg)
 			// ------
 			// A taken non-page-crossing branch ignores IRQ during
 			// its last clock, so that next instruction executes
@@ -52,8 +65,7 @@ private:
 				} else if(irq_executing) {
 					instruction = 0x102;
 				} else {
-					instruction = new_op;
-					++PC;
+					instruction = new_op; ++PC;
 				}
 				TRACE;
 				current_cycle = 0;
@@ -65,9 +77,8 @@ private:
 			new_op = read_byte(PC);
 
 			if((new_pc & 0xff00) != (old_pc & 0xff00)) {
-				LAST_CYCLE;
+				LAST_CYCLE_0;
 				PC = new_pc;
-				OPCODE_COMPLETE;
 			} else {
 				if(rst_executing) {
 					instruction = 0x100;
@@ -76,13 +87,26 @@ private:
 				} else if(irq_executing) {
 					instruction = 0x102;
 				} else {
-					instruction = new_op;
-					++PC;
+					instruction = new_op; ++PC;
 				}
 				TRACE;
 				current_cycle = 0;
-				
 			}
+			break;
+		case 4:
+			new_op = read_byte(PC);
+
+			if(rst_executing) {
+				instruction = 0x100;
+			} else if(nmi_executing) {
+				instruction = 0x101;
+			} else if(irq_executing) {
+				instruction = 0x102;
+			} else {
+				instruction = new_op; ++PC;
+			}
+			TRACE;
+			current_cycle = 0;
 			break;
 		default:
 			abort();

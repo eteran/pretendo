@@ -55,10 +55,10 @@ enum {
 	STACK_ADDRESS		= 0x0100
 };
 
-jam_handler_t		jam_handler		= 0;
-write_handler_t		write_handler	= 0;
-read_handler_t		read_handler	= 0;
-sync_handler_t      sync_handler    = 0;
+jam_handler_t   jam_handler   = 0;
+write_handler_t write_handler = 0;
+read_handler_t  read_handler  = 0;
+sync_handler_t  sync_handler  = 0;
 
 #define LAST_CYCLE                                   \
 do {                                                 \
@@ -510,9 +510,9 @@ void clock() {
 		} else {
 			instruction = read_byte(PC++);
 		}
-		
+
 		TRACE;
-		
+
 	} else {
 		// execute the current part of the instruction
 		execute_opcode();

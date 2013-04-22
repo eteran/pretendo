@@ -171,7 +171,7 @@ PPU::PPU() :
 	register_2007_buffer_(0),
 	sprite_address_(0),
 	sprite_data_index_(0),
-	sprite_size_(0x08),
+	sprite_size_(8),
 	status_(0),
 	tile_offset_(0),
 	sprite_buffer_(0xff),
@@ -187,7 +187,7 @@ PPU::PPU() :
 	sprite_zero_found_curr_(false),
 	sprites_visible_(false),
 	write_latch_(false),
-	write_block_(true),
+	write_block_(false),
 	show_sprites_(true) {
 
 }
@@ -222,7 +222,7 @@ void PPU::reset(nes::RESET reset_type) {
 		memcpy(palette_, powerup_palette, sizeof(palette_));
 	}
 
-	address_increment_        = 0x01;
+	address_increment_        = 1;
 	attribute_queue_[0]       = 0;
 	attribute_queue_[1]       = 0;
 	background_clipping_      = false;
@@ -251,7 +251,7 @@ void PPU::reset(nes::RESET reset_type) {
 	sprite_clipping_          = false;
 	sprite_data_index_        = 0;
 	sprite_pattern_table_     = 0x0000;
-	sprite_size_              = 0x08;
+	sprite_size_              = 8;
 	sprite_zero_found_curr_   = false;
 	sprite_zero_found_next_   = false;
 	sprites_visible_          = false;
@@ -291,7 +291,6 @@ void PPU::write2000(uint8_t value) {
 	// t:0000110000000000=d:00000011
 	nametable_ &= 0xf3ff;
 	nametable_ |= (value & 0x03) << 10;
-
 
 	// we can re-trigger an NMI ... though
 	// it should have a 1 OP delay (which we don't emulate yet, cause I'm not sure how to do it)
@@ -554,7 +553,7 @@ uint8_t PPU::read2007() {
 //------------------------------------------------------------------------------
 void PPU::sprite_dma(uint8_t value) {
 	// drain current cycles, then go ahead and do the DMA
-	if(nes::cpu.cycle_count() & 1) {
+	if((nes::cpu.cycle_count() & 1)) {
 		nes::cpu.burn(514);
 	} else {
 		nes::cpu.burn(513);
@@ -1394,8 +1393,6 @@ void PPU::execute_cycle(const scanline_vblank &target) {
 	// I know this should be 241 in theory, but we consider the pre-rendering
 	// scanline to be #0 for now
 	if(vpos_ == 242) {
-
-
 		switch(hpos_) {
 		case 1:
 			enter_vblank();

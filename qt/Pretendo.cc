@@ -21,8 +21,8 @@
 
 namespace {
 
-const int timer_interval = 1000. / 60;
-//const int timer_interval = 0;
+//const int timer_interval = 1000. / 60;
+const int timer_interval = 0;
 
 }
 
@@ -315,22 +315,22 @@ void Pretendo::on_actionReset_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::showEvent(QShowEvent *event) {
 	Q_UNUSED(event);
-	
+
 	if(qApp->arguments().size() == 2) {
 		const QString rom = qApp->arguments()[1];
-		
+
 		// make the ROM viewer default to the location of the run ROM
 		const QFileInfo info(rom);
 		const QModelIndex root_model_index = filesystem_model_->setRootPath(info.absolutePath());
 		ui_.listView->setRootIndex(filter_model_->mapFromSource(root_model_index));
-			
+
 		nes::cart.load(qPrintable(rom));
 		on_action_Run_triggered();
 	}
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name:
 //------------------------------------------------------------------------------
 void Pretendo::on_action1x_triggered() {
 	ui_.video->setFixedSize(256,240);
@@ -338,7 +338,7 @@ void Pretendo::on_action1x_triggered() {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name:
 //------------------------------------------------------------------------------
 void Pretendo::on_action2x_triggered() {
 	ui_.video->setFixedSize(256 * 2, 240 * 2);
@@ -346,7 +346,7 @@ void Pretendo::on_action2x_triggered() {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name:
 //------------------------------------------------------------------------------
 void Pretendo::on_action3x_triggered() {
 	ui_.video->setFixedSize(256 * 3, 240 * 3);
@@ -354,7 +354,7 @@ void Pretendo::on_action3x_triggered() {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name:
 //------------------------------------------------------------------------------
 void Pretendo::on_action4x_triggered() {
 	ui_.video->setFixedSize(256 * 4, 240 * 4);

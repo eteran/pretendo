@@ -13,7 +13,7 @@ Input nes::input;
  * Just some thoughts on timing:
  * NTSC has a PPU/CPU ratio of 3.0/1.0
  * PAL  has a PPU/CPU ratio of 3.2/1.0
- * 
+ *
  * If we want to smoothly support both, we need to implement
  * some sort of common cycle system. This will probably mean
  * adding some sort of "master cycle" system where:
@@ -111,7 +111,7 @@ void execute_scanline_261() {
 void nes::run_frame(VideoInterface *video) {
 
 	// ppu
-	
+
 	nes::ppu.start_frame();
 	execute_scanline_20();
 	execute_scanline_21_260(video);
