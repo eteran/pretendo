@@ -238,8 +238,8 @@ CXX_FILES   := \
 	haiku/ROMFilePanel.cc \
 	haiku/PretendoWindow.cc \
 	haiku/VideoScreen.cc \
-	haiku/SimpleMutex.cc
-
+	haiku/SimpleMutex.cc 
+	
 C_FILES     := \
 	libunif/ines_convert.c \
 	libunif/lib_ines.c \
