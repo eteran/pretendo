@@ -1,8 +1,6 @@
-/* $Header: /var/cvsroot/pretendo/misc/ConfigManager.h,v 1.10 2006/01/17 02:15:11 eteran Exp $ */
-// ConfigFile.h
 
-#ifndef CONFIG_FILE_H_
-#define CONFIG_FILE_H_
+#ifndef CONFIG_MANAGER_20130421_H_
+#define CONFIG_MANAGER_20130421_H_
 
 #include <iostream>
 #include <fstream>
@@ -12,106 +10,91 @@
 #include <typeinfo>
 #include <map>
 
-using std::string;
-using std::pair;
-using std::map;
-using std::ostringstream;
-using std::istringstream;
-using std::ios;
-using std::cout;
-using std::endl;
-using std::fstream;
+class ConfigManager {
 
+	typedef std::pair<std::string, std::string> kv_pair;
 
+public:
+	typedef std::map<std::string, std::string> kv_map;
+	typedef std::map<std::string, kv_map>      config_map;
+	typedef kv_map::iterator                   kv_iterator;
+	typedef kv_map::const_iterator             kv_const_iterator;
+	typedef config_map::iterator               config_iterator;
 
-class ConfigManager
-{
-	typedef pair<string, string> kv_pair;
-
-	public:
-	typedef map<string, string> kv_map;
-	typedef map<string, kv_map> config_map;
-	typedef kv_map::iterator kv_iterator;
-	typedef config_map::iterator config_iterator;
-	
-	protected:
+protected:
 	ConfigManager();
-	
-	public:
-	bool Load (void);
-	bool Save (void);
-	
-	public:
-	bool NewSection (string const &section);
-	bool DeleteSection (string const &section);
-	bool NewKey (string const &section, kv_pair key);
-	bool DeleteKey (string const &section, string const &keyName);
-	
-	
-	public:
-	template<typename T> 
-	bool ReadKey (string const &section, string const &key, T &container)
-	{
-		if (section.empty() || key.empty()) {
+
+public:
+	bool Load();
+	bool Save();
+
+public:
+	bool NewSection(const std::string &section);
+	bool DeleteSection(const std::string &section);
+	bool NewKey(const std::string &section, kv_pair key);
+	bool DeleteKey(const std::string &section, const std::string &keyName);
+
+public:
+	template <class T>
+	bool ReadKey(const std::string &section, const std::string &key, T &container) {
+		
+		if(section.empty() || key.empty()) {
 			return false;
 		}
-		
-		config_iterator ci = mMap.find (section);
-		if (ci == mMap.end()) {
-			cout << "cant find section" << endl;
+
+		if(map_.find(section) == map_.end()) {
+			std::cout << "cant find section" << std::endl;
 			return false;
 		}
-		
-		kv_map *kvm = &mMap[section];
-		
-		for (kv_iterator kvi = kvm->begin(); kvi != kvm->end(); kvi++) {
-			cout << key << ", " << kvi->first << endl;
-			if (key == kvi->first) {
-				
-				istringstream iss (kvi->second, ios::in);
+
+		const kv_map &kvm = map_[section];
+		for(kv_iterator kvi = kvm.begin(); kvi != kvm.end(); kvi++) {
+			std::cout << key << ", " << kvi->first << std::endl;
+
+			if(key == kvi->first) {
+				std::istringstream iss(kvi->second, std::ios::in);
 				iss >> container;
-				return true;	
+				return true;
 			}
 		}
-		
+
 		return false;
 	}
+
+	template <class T>
+	bool WriteKey(const std::string &section, const std::string &key, T value) {
 	
-	template<typename T> 
-	bool WriteKey (string const &section, string const &key, T value)
-	{
-		if (section.empty() || key.empty()) {
+		if(section.empty() || key.empty()) {
 			return false;
 		}
 
-		if (mMap.find (section) == mMap.end()) {
+		if(map_.find(section) == map_.end()) {
 			return false;
 		}
-		
-		ostringstream oss;
-		if (typeid(T) == typeid(double)) {
-			oss << std::setprecision (4) << value;
+
+		std::ostringstream oss;
+		if(typeid(T) == typeid(double)) {
+			oss << std::setprecision(4) << value;
 		} else {
 			oss << value;
 		}
-		
-		kv_map *kvm = &mMap[section];
-		for (kv_iterator kvi = kvm->begin(); kvi != kvm->end(); kvi++) {
-			cout << key << ", " << kvi->first << endl;
-			if (key == kvi->first) {
+
+		kv_map &kvm = map_[section];
+		for(kv_iterator kvi = kvm.begin(); kvi != kvm.end(); kvi++) {
+			std::cout << key << ", " << kvi->first << std::endl;
+			if(key == kvi->first) {
 				kvi->second = oss.str();
-				return true;	
+				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
-
-	private:
-	string mFilename;
-	config_map mMap;
+private:
+	std::string filename_;
+	config_map  map_;
 };
 
 
-#endif // CONFIG_FILE_H_
+#endif

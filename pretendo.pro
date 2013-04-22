@@ -8,6 +8,7 @@ HEADERS += \
 		BNROM.h \
 		Bandai.h \
 		Cart.h \
+		ConfigManager.h \
 		Controller.h \
 		DMC.h \
 		Input.h \
@@ -105,6 +106,7 @@ SOURCES += \
 		BNROM.cc \
 		Bandai.cc \
 		Cart.cc \
+		ConfigManager.cc \
 		Controller.cc \
 		DMC.cc \
 		Input.cc \
