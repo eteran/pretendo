@@ -2,8 +2,8 @@
 #ifndef RELATIVE_H_
 #define RELATIVE_H_
 
-#define LAST_CYCLE_0                          \
-do {                                          \
+#define LAST_CYCLE_0                                 \
+do {                                                 \
 	rst_executing = false;                           \
 	irq_executing = false;                           \
 													 \
@@ -35,7 +35,7 @@ private:
 	void execute(int cycle, Op op, const operation_branch &) {
 		switch(cycle) {
 		case 1:
-			LAST_CYCLE_0;
+			LAST_CYCLE;
 			// fetch operand, increment PC
 			data = read_byte(PC++);
 			break;
