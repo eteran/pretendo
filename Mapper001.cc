@@ -22,13 +22,13 @@ enum {
 //------------------------------------------------------------------------------
 // Name: Mapper1
 //------------------------------------------------------------------------------
-Mapper1::Mapper1() : cpu_cycles_(0), latch_(0), write_counter_(0), prg_hi_(0x0f), prg_lo_(0x00) {
+Mapper1::Mapper1() : cpu_cycles_(0), latch_(0), write_counter_(0) {
 
 	memset(prg_ram_, 0, sizeof(prg_ram_));
 	memset(chr_ram_, 0, sizeof(chr_ram_));
 
-	set_prg_89ab(prg_lo_);
-	set_prg_cdef(prg_hi_);
+	set_prg_89ab(0);
+	set_prg_cdef(-1);
 
 	if(nes::cart.has_chr_rom()) {
 		set_chr_0000_1fff(0);

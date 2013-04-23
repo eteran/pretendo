@@ -283,8 +283,8 @@ void PPU::write2000(uint8_t value) {
 	nmi_on_vblank_            = (value & 0x80);
 	// 0x40 is EXT bus direction
 	sprite_size_              = (value & 0x20) ? 16 : 8;
-	background_pattern_table_ = (value & 0x10) << 8;
-	sprite_pattern_table_     = (value & 0x08) << 9;
+	background_pattern_table_ = (value & 0x10) ? 0x1000 : 0x0000;
+	sprite_pattern_table_     = (value & 0x08) ? 0x1000 : 0x0000;
 	address_increment_        = (value & 0x04) ? 32 : 1;
 
 	// name table address
@@ -292,8 +292,7 @@ void PPU::write2000(uint8_t value) {
 	nametable_ &= 0xf3ff;
 	nametable_ |= (value & 0x03) << 10;
 
-	// we can re-trigger an NMI ... though
-	// it should have a 1 OP delay (which we don't emulate yet, cause I'm not sure how to do it)
+	// we can re-trigger an NMI ...
 	if(!prev_nmi_on_vblank && nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
 		nes::cpu.nmi();
 	}

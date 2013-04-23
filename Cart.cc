@@ -11,10 +11,11 @@ namespace {
 // Name:
 //------------------------------------------------------------------------------
 size_t create_mask(size_t size) {
+
 	// returns 1 less than closest fitting power of 2
 	// is this number not a power of two or 0?
 	if((size & (size - 1)) != 0) {
-		//yea, fix it!
+		// yea, fix it!
 		--size;
 		size |= size >> 1;
 		size |= size >> 2;

@@ -1,5 +1,7 @@
 
 #include "DMC.h"
+#include "NES.h"
+#include "Mapper.h"
 
 namespace {
 
@@ -15,7 +17,7 @@ const uint16_t frequency_table[16] = {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-DMC::DMC() : enabled_(false), frequency_(0), sample_address_(0), sample_length_(0), reload_length_(0), irq_enabled_(0), load_counter_(0), loop_(0) {
+DMC::DMC() : enabled_(false), frequency_(0xffff), reload_frequency_(0xffff), current_address_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), irq_enabled_(0x80), load_counter_(0), loop_(0), bit_(0) {
 }
 
 //------------------------------------------------------------------------------
@@ -36,7 +38,7 @@ void DMC::enable() {
 //------------------------------------------------------------------------------
 void DMC::disable() {
 	enabled_       = false;
-	reload_length_ = 0;
+	sample_length_ = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -45,13 +47,16 @@ void DMC::disable() {
 void DMC::reset() {
 	/*
 	enabled_        = false;
-	frequency_      = 0;
+	frequency_      = 0xffff;
+	reload_frequency_ = 0xffff;
+	current_address_ = 0;
 	sample_address_ = 0;
+	bytes_remaining_  = 0;
 	sample_length_  = 0;
-	reload_length_  = 0;
-	irq_enabled_    = 0;
+	irq_enabled_    = 0x80;
 	load_counter_   = 0;
 	loop_           = 0;
+	bit_            = 0;
 	*/
 }
 
@@ -59,9 +64,10 @@ void DMC::reset() {
 // Name: write_reg0
 //------------------------------------------------------------------------------
 void DMC::write_reg0(uint8_t value) {
-	irq_enabled_ = value & 0x80;
-	loop_        = value & 0x40;
-	frequency_   = frequency_table[value & 0x0f];
+	irq_enabled_      = value & 0x80;
+	loop_             = value & 0x40;
+	frequency_        = frequency_table[value & 0x0f];
+	reload_frequency_ = frequency_table[value & 0x0f];
 }
 
 //------------------------------------------------------------------------------
@@ -75,15 +81,16 @@ void DMC::write_reg1(uint8_t value) {
 // Name: write_reg2
 //------------------------------------------------------------------------------
 void DMC::write_reg2(uint8_t value) {
-	sample_address_ = 0xc000 | (value << 6);
+	current_address_ = 0xc000 | (value << 6);
+	sample_address_  = 0xc000 | (value << 6);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_reg3
 //------------------------------------------------------------------------------
 void DMC::write_reg3(uint8_t value) {
-	sample_length_ = (value << 4) | 1;
-	reload_length_ = (value << 4) | 1;
+	bytes_remaining_ = (value << 4) | 1;
+	sample_length_   = (value << 4) | 1;
 }
 
 //------------------------------------------------------------------------------
@@ -97,20 +104,38 @@ bool DMC::enabled() const {
 // Name: sample_length
 //------------------------------------------------------------------------------
 uint16_t DMC::sample_length() const {
-	return sample_length_;
+	return bytes_remaining_;
 }
 
 //------------------------------------------------------------------------------
 // Name: tick
 //------------------------------------------------------------------------------
 void DMC::tick() {
-	if(sample_length_) {
-		--sample_length_;
-		if(sample_length_ == 0) {
-			if(loop_) {
-				sample_length_ = reload_length_;
-			} else if(irq_enabled_) {
-				// DO IRQ
+
+	if(bytes_remaining_) {
+		if(--frequency_ == 0) {
+			frequency_ = reload_frequency_;
+		
+			nes::cpu.burn(4);
+			sample_buffer_ = nes::cart.mapper()->read_memory(current_address_);
+
+
+			if(current_address_ == 0xffff) {
+				current_address_ = 0x8000;
+			} else {
+				++current_address_;
+			}
+
+
+			--bytes_remaining_;
+			if(bytes_remaining_ == 0) {
+				if(loop_) {
+					bytes_remaining_ = sample_length_;
+					current_address_ = sample_address_;
+				} else if(irq_enabled_) {
+					// DO IRQ
+					//nes::cpu.irq(CPU::APU_IRQ);
+				}
 			}
 		}
 	}

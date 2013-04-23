@@ -254,7 +254,6 @@ void MMC3A::clock_irq() {
 	}
 	
 	if (irq_enabled_ && irq_counter_ == 0 && irq_reload_) {
-		printf("HPOS-A: %u @ %u\n", nes::ppu.hpos(), nes::ppu.vpos());
 		nes::cpu.irq(CPU::MAPPER_IRQ);
 	}
 
@@ -281,7 +280,6 @@ void MMC3B::clock_irq() {
 	}
 	
 	if (irq_enabled_ && irq_counter_ == 0) {
-		printf("HPOS-B: %u @ %u\n", nes::ppu.hpos(), nes::ppu.vpos());
 		nes::cpu.irq(CPU::MAPPER_IRQ);
 	}
 

@@ -23,6 +23,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <assert.h>
 
+/*------------------------------------------------------------------------------
+// Name:
+//----------------------------------------------------------------------------*/
+size_t next_power(size_t size) {
+
+	/* returns 1 less than closest fitting power of 2
+	 * is this number not a power of two or 0?
+	 */
+	if((size & (size - 1)) != 0) {
+		--size;
+		size |= size >> 1;
+		size |= size >> 2;
+		size |= size >> 4;
+		size |= size >> 8;
+		size |= size >> 16;
+		++size;
+	} else if(size == 0) {
+		++size;
+	}
+
+	return size;
+}
+
 /*-----------------------------------------------------------------------------
 // Name: write_file_INES
 //---------------------------------------------------------------------------*/
@@ -80,6 +103,8 @@ UNIF_RETURN_CODE load_ptr_INES(const uint8_t *rom, size_t size, ines_cart_t *car
     size_t prg_size        = 0;
     size_t chr_size        = 0;
     size_t trainer_size    = 0;
+	size_t prg_alloc_size  = 0;
+	size_t chr_alloc_size  = 0;
 	ines_header_t header;
 
 	void *header_ptr       = 0;
@@ -116,6 +141,9 @@ UNIF_RETURN_CODE load_ptr_INES(const uint8_t *rom, size_t size, ines_cart_t *car
 
 	prg_size = prg_size_INES(cart) * 16384;
 	chr_size = chr_size_INES(cart) * 8192;
+	
+	prg_alloc_size = next_power(prg_size);
+	chr_alloc_size = next_power(chr_size);
 
 	/* NULL the cart header pointer, it was temporary */
 	cart->header = 0;
@@ -126,9 +154,9 @@ UNIF_RETURN_CODE load_ptr_INES(const uint8_t *rom, size_t size, ines_cart_t *car
 
 	/* allocate memory for the cart */
 	header_ptr  = malloc(sizeof(ines_header_t));
-	prg_ptr     = prg_size     ? malloc(prg_size)     : 0;
-	chr_ptr     = chr_size     ? malloc(chr_size)     : 0;
-	trainer_ptr = trainer_size ? malloc(trainer_size) : 0;
+	prg_ptr     = prg_size     ? malloc(prg_alloc_size) : 0;
+	chr_ptr     = chr_size     ? malloc(chr_alloc_size) : 0;
+	trainer_ptr = trainer_size ? malloc(trainer_size)   : 0;
 
 	/* make sure it all went smoothly */
 	if((!header_ptr) || (prg_size & !prg_ptr) || (chr_size & !chr_ptr) || (trainer_size & !trainer_ptr)) {
@@ -162,10 +190,26 @@ UNIF_RETURN_CODE load_ptr_INES(const uint8_t *rom, size_t size, ines_cart_t *car
 	}
 
 	memcpy(cart->prg_rom, rom_ptr, prg_size);
+	if((prg_alloc_size - prg_size) > 0x2000 && prg_size >= 0x2000) {
+		/* replicate the last bank if necessary */
+		uint8_t *const last_8k = cart->prg_rom + prg_size - 0x2000;
+		uint8_t *p = cart->prg_rom + prg_size;
+		while(p < cart->prg_rom + prg_alloc_size) {
+			memcpy(p, last_8k, 0x2000);
+			p += 0x2000;
+		}
+	}
+
 	rom_ptr += prg_size;
 
 	if(chr_size != 0) {
 		memcpy(cart->chr_rom, rom_ptr, chr_size);
+		if(chr_size != chr_alloc_size) {
+			uint8_t *p = cart->chr_rom + chr_size;
+			while(p != cart->chr_rom + chr_alloc_size) {
+				*p++ = 0xff;
+			}
+		}
 	}
 
     return retcode;
@@ -182,6 +226,8 @@ UNIF_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 	size_t trainer_size   = 0;
 	size_t prg_size       = 0;
 	size_t chr_size       = 0;
+	size_t prg_alloc_size = 0;
+	size_t chr_alloc_size = 0;
 	ines_header_t header;
 
 	void *header_ptr       = 0;
@@ -223,15 +269,18 @@ UNIF_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 
 	prg_size = prg_size_INES(cart) * 16384;
 	chr_size = chr_size_INES(cart) * 8192;
+	
+	prg_alloc_size = next_power(prg_size);
+	chr_alloc_size = next_power(chr_size);
 
 	/* NULL the cart header pointer, it was temporary */
 	cart->header = 0;
 
 	/* allocate memory for the cart */
 	header_ptr  = malloc(sizeof(ines_header_t));
-	prg_ptr     = prg_size     ? malloc(prg_size)     : 0;
-	chr_ptr     = chr_size     ? malloc(chr_size)     : 0;
-	trainer_ptr = trainer_size ? malloc(trainer_size) : 0;
+	prg_ptr     = prg_size     ? malloc(prg_alloc_size) : 0;
+	chr_ptr     = chr_size     ? malloc(chr_alloc_size) : 0;
+	trainer_ptr = trainer_size ? malloc(trainer_size)   : 0;
 
 	/* make sure it all went smoothly */
 	if((!header_ptr) || (prg_size & !prg_ptr) || (chr_size & !chr_ptr) || (trainer_size & !trainer_ptr)) {
@@ -258,12 +307,27 @@ UNIF_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 		if(retcode != UNIF_OK) {
 			goto error;
 		}
+		
+		if((prg_alloc_size - prg_size) > 0x2000 && prg_size >= 0x2000) {
+			/* replicate the last bank if necessary */
+			uint8_t *const last_8k = cart->prg_rom + prg_size - 0x2000;
+			uint8_t *p = cart->prg_rom + prg_size;
+			while(p < cart->prg_rom + prg_alloc_size) {
+				memcpy(p, last_8k, 0x2000);
+				p += 0x2000;
+			}
+		}
 	}
 
 	if(chr_size != 0) {
 		retcode = read_data_INES(file, cart->chr_rom, chr_size);
 		if(retcode != UNIF_OK) {
 			goto error;
+		}
+		
+		uint8_t *p = cart->chr_rom + chr_size;
+		while(p != cart->chr_rom + chr_alloc_size) {
+			*p++ = 0xff;
 		}
 	}
 

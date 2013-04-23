@@ -38,12 +38,16 @@ public:
 private:
 	bool     enabled_;
 	uint16_t frequency_;
+	uint16_t reload_frequency_;
+	uint16_t current_address_;
 	uint16_t sample_address_;
+	uint16_t bytes_remaining_;
 	uint16_t sample_length_;
-	uint16_t reload_length_;
 	uint8_t  irq_enabled_;
 	uint8_t  load_counter_;
 	uint8_t  loop_;
+	uint8_t  bit_;
+	uint8_t  sample_buffer_;
 };
 
 #endif

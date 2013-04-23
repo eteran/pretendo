@@ -453,12 +453,12 @@ void APU::run(int cycles) {
 
 
 		triangle_.tick();
+		dmc_.tick();
 
 		if((apu_cycles_ % 2) == 0) {
 			square_1.tick();
 			square_2.tick();
 			noise_.tick();
-			dmc_.tick();
 		}
 
 		++apu_cycles_;

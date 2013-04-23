@@ -35,8 +35,6 @@ private:
 	uint64_t cpu_cycles_;
 	uint8_t  latch_;
 	uint8_t  write_counter_;
-	uint8_t  prg_hi_;
-	uint8_t  prg_lo_;
 };
 
 #endif
