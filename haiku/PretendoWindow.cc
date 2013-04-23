@@ -26,7 +26,8 @@ PretendoWindow::PretendoWindow()
 		fVideoScreen(NULL),
 		fAudioStream(NULL),
 		fPaused(false),
-		fRunning(false)
+		fRunning(false),
+		aMutex(0)
 {
 	BRect bounds (Bounds());
 	bounds.OffsetTo (B_ORIGIN);
@@ -123,11 +124,10 @@ PretendoWindow::PretendoWindow()
 		fRunning = false;
 	}
 	
-	fMutex = create_sem(1, "pretendo_mutex");
-	acquire_sem(fMutex);
-	//status_t error;
-	//aMutex = new SimpleMutex("pretendo_mutex", error);
-	//aMutex->Lock();
+	//fMutex = create_sem(1, "pretendo_mutex");
+	//acquire_sem(fMutex);
+	aMutex = new SimpleMutex("pretendo_mutex");
+	aMutex->Lock();
 	resume_thread(fThread);
 }
 
@@ -156,8 +156,9 @@ PretendoWindow::~PretendoWindow()
 	delete fAudioStream;
 	
 	fRunning = fDirectConnected = false;
-	fMutex = B_BAD_SEM_ID;
-	//delete aMutex;
+	//fMutex = B_BAD_SEM_ID;
+	delete aMutex;
+	aMutex = 0;
 	fThread = B_BAD_THREAD_ID;
 	
 	Hide();
@@ -337,8 +338,9 @@ PretendoWindow::QuitRequested()
 	
 	status_t ret;
 	
-	delete_sem(fMutex);
-	//delete aMutex;
+	//delete_sem(fMutex);
+	delete aMutex;
+	aMutex = 0;
 	wait_for_thread(fThread, &ret);
 	
 	fRunning = 
@@ -476,8 +478,8 @@ PretendoWindow::OnRun (void)
 	if (! fRunning) {
 		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 			reset(nes::HARD_RESET);
-			release_sem(fMutex);
-			//aMutex->Unlock();
+			//release_sem(fMutex);
+			aMutex->Unlock();
 			fRunning = true;
 		}
 	}
@@ -490,8 +492,8 @@ PretendoWindow::OnStop (void)
 	if (fRunning) {
 		fRunning = false;
 		
-		acquire_sem(fMutex);
-		//aMutex->Lock();
+		//acquire_sem(fMutex);
+		aMutex->Lock();
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
 			ClearBitmap (true);
@@ -513,12 +515,12 @@ PretendoWindow::OnPause (void)
 {	
 	if (fRunning) {
 		if (fPaused) {
-			release_sem(fMutex);
-			//aMutex->Unlock();
+			//release_sem(fMutex);
+			aMutex->Unlock();
 			fEmuMenu->ItemAt(1)->SetMarked(false);
 		} else {
-			acquire_sem(fMutex);
-			//aMutex->Unlock();
+			//acquire_sem(fMutex);
+			aMutex->Lock();
 			fEmuMenu->ItemAt(1)->SetMarked(true);
 		}
 	
@@ -1054,18 +1056,20 @@ PretendoWindow::emulation_thread (void *data)
 {
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
-		while (1) {
-			if ((acquire_sem(w->Mutex()) != B_NO_ERROR)) {
+		while (SimpleMutex *const mutex = w->Mutex()) {
+			//if ((acquire_sem(w->Mutex()) != B_NO_ERROR)) {
+			//	break;
+			//}
+			
+			if (mutex->Lock() != B_NO_ERROR) {
 				break;
 			}
-			
-			//if (w->Mutex()->Lock() != B_NO_ERROR) {
 			w->start_frame();
 			nes::run_frame(w);
 			w->end_frame();
 			w->ReadKeyStates();
-			release_sem(w->Mutex());
-			//w->Mutex()->Unlock();
+			//release_sem(w->Mutex());
+			mutex->Unlock();
 		}	
 	
 	return B_OK;

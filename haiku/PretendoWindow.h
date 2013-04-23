@@ -208,15 +208,15 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	bool Running (void) { return fRunning; }
-	sem_id Mutex (void) { return fMutex; }
+	//sem_id Mutex (void) { return fMutex; }
 	
 	private:
 	key_info fKeyStates;
 	inline void CheckKey (int32 index, int32 key);
 	void ReadKeyStates (void);
 	
-	//SimpleMutex *aMutex;
-	//SimpleMutex *Mutex (void) { return aMutex; }
+	SimpleMutex *aMutex;
+	SimpleMutex *Mutex (void) { return aMutex; }
 };
 				
 #endif // _PRETENDO_WINDOW_H_
