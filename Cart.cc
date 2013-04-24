@@ -56,9 +56,13 @@ void Cart::load(const std::string &s) {
 	const UNIF_RETURN_CODE r = load_file_INES(s.c_str(), &cart_);
 	if(r == UNIF_OK) {
 		std::cout << " OK!" << std::endl;
+		
+		const size_t prg_size = prg_pages() * K<16>::value;
+		const size_t chr_size = chr_pages() * K<8>::value;
+		
 		// get mask values
-		prg_mask_ = create_mask(prg_pages() * K<16>::value);
-		chr_mask_ = create_mask(chr_pages() * K<8>::value);
+		prg_mask_ = create_mask(prg_size);
+		chr_mask_ = create_mask(chr_size);
 
 		switch(mirroring_INES(&cart_)) {
 		case MIRR_HORIZONTAL: mirroring_ = MIR_HORIZONTAL; break;
@@ -74,6 +78,16 @@ void Cart::load(const std::string &s) {
 		std::cout << "PRG HASH: " << std::hex << std::setw(8) << std::setfill('0') << prg_hash_ << std::dec << std::endl;
 		std::cout << "CHR HASH: " << std::hex << std::setw(8) << std::setfill('0') << chr_hash_ << std::dec << std::endl;
 		std::cout << "ROM HASH: " << std::hex << std::setw(8) << std::setfill('0') << rom_hash_ << std::dec << std::endl;
+		
+		
+		
+		if((prg_size & (prg_size - 1)) != 0) {
+			std::cout << "WARNING: PRG size is not a power of 2, this is unusual" << std::endl;
+		}
+		
+		if((chr_size & (chr_size - 1)) != 0) {
+			std::cout << "WARNING: CHR size is not a power of 2, this is unusual" << std::endl;
+		}
 
 		mapper_ = Mapper::create_mapper(mapper_INES(&cart_));
 	} else {

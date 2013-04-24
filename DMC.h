@@ -4,6 +4,7 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
+#include "Timer.h"
 
 using boost::uint8_t;
 using boost::uint16_t;
@@ -37,8 +38,8 @@ public:
 
 private:
 	bool     enabled_;
-	uint16_t frequency_;
-	uint16_t reload_frequency_;
+//	uint16_t frequency_;
+//	uint16_t reload_frequency_;
 	uint16_t current_address_;
 	uint16_t sample_address_;
 	uint16_t bytes_remaining_;
@@ -48,6 +49,7 @@ private:
 	uint8_t  loop_;
 	uint8_t  bit_;
 	uint8_t  sample_buffer_;
+	Timer    timer_;
 };
 
 #endif

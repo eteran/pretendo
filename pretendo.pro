@@ -87,6 +87,7 @@ HEADERS += \
 		Square.h \
 		Triangle.h \
 		VRAMBank.h \
+		Timer.h \
 		VRC2.h \
 		VRC4.h \
 		VRC6.h \
@@ -183,6 +184,7 @@ SOURCES += \
 		Palette.cc \
 		Square.cc \
 		Triangle.cc \
+		Timer.cc \
 		VRC2.cc \
 		VRC4.cc \
 		VRC6.cc \

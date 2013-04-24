@@ -8,17 +8,6 @@ namespace {
 
 const int frame_irq_delay = 29832;
 
-enum {
-	STATUS_DMC_IRQ  	   = 0x80,
-	STATUS_FRAME_IRQ	   = 0x40,
-	STATUS_ENABLE_DMC	   = 0x10,
-	STATUS_ENABLE_NOISE    = 0x08,
-	STATUS_ENABLE_TRIANGLE = 0x04,
-	STATUS_ENABLE_SQUARE_2 = 0x02,
-	STATUS_ENABLE_SQUARE_1 = 0x01,
-	STATUS_ENABLE_ALL	   = STATUS_ENABLE_SQUARE_1 | STATUS_ENABLE_SQUARE_2 | STATUS_ENABLE_TRIANGLE | STATUS_ENABLE_NOISE | STATUS_ENABLE_DMC
-};
-
 const int FRAME_MODE		 = 0x80;
 const int FRAME_INHIBIT_IRQ  = 0x40;
 
@@ -292,6 +281,7 @@ uint8_t APU::read4015() {
 		ret |= STATUS_ENABLE_NOISE;
 	}
 
+	
 	if(dmc_.sample_length() > 0) {
 		ret |= STATUS_ENABLE_DMC;
 	}
@@ -301,7 +291,7 @@ uint8_t APU::read4015() {
 	if(!(status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ))) {
 		nes::cpu.clear_irq(CPU::APU_IRQ);
 	}
-
+	
 	return ret;
 }
 
@@ -451,15 +441,11 @@ void APU::run(int cycles) {
 			}
 		}
 
-
-		triangle_.tick();
 		dmc_.tick();
-
-		if((apu_cycles_ % 2) == 0) {
-			square_1.tick();
-			square_2.tick();
-			noise_.tick();
-		}
+		noise_.tick();
+		square_1.tick();
+		square_2.tick();
+		triangle_.tick();
 
 		++apu_cycles_;
 	}

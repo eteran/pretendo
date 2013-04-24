@@ -17,6 +17,23 @@ using boost::uint32_t;
 using boost::uint64_t;
 
 class APU : public boost::noncopyable {
+	friend class DMC;
+	friend class Noise;
+	friend class Triangle;
+	friend class Square;
+	
+public:
+	enum {
+		STATUS_DMC_IRQ  	   = 0x80,
+		STATUS_FRAME_IRQ	   = 0x40,
+		STATUS_ENABLE_DMC	   = 0x10,
+		STATUS_ENABLE_NOISE    = 0x08,
+		STATUS_ENABLE_TRIANGLE = 0x04,
+		STATUS_ENABLE_SQUARE_2 = 0x02,
+		STATUS_ENABLE_SQUARE_1 = 0x01,
+		STATUS_ENABLE_ALL	   = STATUS_ENABLE_SQUARE_1 | STATUS_ENABLE_SQUARE_2 | STATUS_ENABLE_TRIANGLE | STATUS_ENABLE_NOISE | STATUS_ENABLE_DMC
+	};
+
 public:
 	APU();
 	~APU();

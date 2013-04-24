@@ -92,8 +92,8 @@ public:
 	}
 
 private:
-	std::string filename_;
-	config_map  map_;
+	const std::string filename_;
+	config_map        map_;
 };
 
 

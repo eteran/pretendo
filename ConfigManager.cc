@@ -1,5 +1,5 @@
-#include "ConfigManager.h"
 
+#include "ConfigManager.h"
 
 ConfigManager::ConfigManager() : filename_("pretendo.cfg") {
 }
@@ -8,11 +8,11 @@ ConfigManager::ConfigManager() : filename_("pretendo.cfg") {
 bool ConfigManager::Load() {
 
 	std::cout << "Loading config from file..." << std::endl;
-	std::fstream file(filename_.c_str(), std::ios::in);
+	std::ifstream file(filename_.c_str());
 
 	if(!file) {
 		// file does not exist, make a new one with some defaults
-		std::cout << "Couldn't load file.  Creating new one..." << std::endl;
+		std::cout << "Couldn't load file. Creating new one..." << std::endl;
 
 		NewSection("App Settings");
 		NewKey("App Settings", kv_pair("ShowOpenOnLoad", "false"));
@@ -78,10 +78,10 @@ bool ConfigManager::Load() {
 bool ConfigManager::Save() {
 
 	std::cout << "Saving Config..." << std::endl;
-	std::fstream file(filename_.c_str(), std::ios::out | std::ios::trunc);
+	std::ofstream file(filename_.c_str(), std::ios::trunc);
 
 	if(!file) {
-		std::cout << "Error:  Config::Save() couldn't open file for writing" << std::endl;
+		std::cout << "Error:  ConfigManager::Save() couldn't open file for writing" << std::endl;
 		//FIXME: throw exception or something equally creative
 		return false;
 	}
