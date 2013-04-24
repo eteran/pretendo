@@ -19,7 +19,7 @@ const uint16_t frequency_table[16] = {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-DMC::DMC() : enabled_(false), current_address_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), irq_enabled_(0x80), load_counter_(0), loop_(0), sample_shift_counter_(0) {
+DMC::DMC() : enabled_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), irq_enabled_(0x80), load_counter_(0), loop_(0), sample_shift_counter_(0) {
 }
 
 //------------------------------------------------------------------------------
@@ -33,9 +33,33 @@ DMC::~DMC() {
 //------------------------------------------------------------------------------
 void DMC::enable() {
 	enabled_ = true;
-	
-	if(sample_length() == 0) {
+		
+	if(bytes_remaining_ == 0) {
 		bytes_remaining_ = sample_length_;
+	}
+	
+	// immediate load the first byte if the shift counter is empty
+	if(bytes_remaining_ != 0 && sample_shift_counter_ == 0) {
+		sample_shift_counter_ = 8;
+
+		// TODO: hijack the CPU for appropriate number of cycles, 
+		//       not hardcoded to 4
+		nes::cpu.burn(4);
+		sample_buffer_ = nes::cpu.read(sample_pointer_);
+
+
+		sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
+
+		if(--bytes_remaining_ == 0) {
+				
+			if(loop_) {
+				bytes_remaining_ = sample_length_;
+				sample_pointer_  = sample_address_;
+			} else if(irq_enabled_) {
+				nes::cpu.irq(CPU::APU_IRQ);
+				nes::apu.status_ |= APU::STATUS_DMC_IRQ;
+			}
+		}
 	}
 }
 
@@ -43,6 +67,7 @@ void DMC::enable() {
 // Name:
 //------------------------------------------------------------------------------
 void DMC::disable() {
+
 	enabled_              = false;
 	bytes_remaining_      = 0;
 	sample_shift_counter_ = 0;
@@ -53,7 +78,7 @@ void DMC::disable() {
 //------------------------------------------------------------------------------
 void DMC::reset() {
 	enabled_              = false;
-	current_address_      = 0;
+	sample_pointer_       = 0;
 	sample_address_       = 0;
 	bytes_remaining_      = 0;
 	sample_length_        = 0;
@@ -93,8 +118,8 @@ void DMC::write_reg1(uint8_t value) {
 // Name: write_reg2
 //------------------------------------------------------------------------------
 void DMC::write_reg2(uint8_t value) {
-	current_address_ = 0xc000 | (value << 6);
-	sample_address_  = 0xc000 | (value << 6);
+	sample_address_ = 0xc000 | (value << 6);
+	sample_pointer_ = sample_address_;
 }
 
 //------------------------------------------------------------------------------
@@ -102,6 +127,9 @@ void DMC::write_reg2(uint8_t value) {
 //------------------------------------------------------------------------------
 void DMC::write_reg3(uint8_t value) {
 	sample_length_ = (value << 4) | 1;
+	if(bytes_remaining_ == 0) {
+		bytes_remaining_ = sample_length_;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -112,9 +140,9 @@ bool DMC::enabled() const {
 }
 
 //------------------------------------------------------------------------------
-// Name: sample_length
+// Name: bytes_remaining
 //------------------------------------------------------------------------------
-uint16_t DMC::sample_length() const {
+uint16_t DMC::bytes_remaining() const {
 	return bytes_remaining_;
 }
 
@@ -124,33 +152,32 @@ uint16_t DMC::sample_length() const {
 void DMC::tick() {
 	if(enabled() && timer_.tick()) {
 		if(bytes_remaining_ != 0) {
-
+		
 			// read the 8-bit sample
 			if(sample_shift_counter_ == 0) {
-			
 				sample_shift_counter_ = 8;
 
 				// TODO: hijack the CPU for appropriate number of cycles, 
 				//       not hardcoded to 4
 				nes::cpu.burn(4);
-				sample_buffer_ = nes::cpu.read(current_address_);
+				sample_buffer_ = nes::cpu.read(sample_pointer_);
 
-
-				current_address_ = ((current_address_ + 1) & 0xffff) | 0x8000;
+				sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
 				if(--bytes_remaining_ == 0) {
 					if(loop_) {
 						bytes_remaining_ = sample_length_;
-						current_address_ = sample_address_;
+						sample_pointer_ = sample_address_;
 					} else if(irq_enabled_) {
 						nes::cpu.irq(CPU::APU_IRQ);
 						nes::apu.status_ |= APU::STATUS_DMC_IRQ;
 					}
 				}
 			}
-
-			// TODO: grab appropriate bit from sample_buffer and update
-			
+		}
+		
+		if(sample_shift_counter_ != 0) {
+			// TODO: process a bit from the sample
 			--sample_shift_counter_;
 		}
 	}

@@ -264,6 +264,9 @@ void APU::write4015(uint8_t value) {
 //------------------------------------------------------------------------------
 uint8_t APU::read4015() {
 	uint8_t ret = status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ);
+	
+	// clear frame IRQ flag
+	status_ &= ~STATUS_FRAME_IRQ;
 
 	if(square_1.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_SQUARE_1;
@@ -280,14 +283,11 @@ uint8_t APU::read4015() {
 	if(noise_.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_NOISE;
 	}
-
 	
-	if(dmc_.sample_length() > 0) {
+	if(dmc_.bytes_remaining() > 0) {
 		ret |= STATUS_ENABLE_DMC;
 	}
 
-	// clear frame IRQ flag
-	status_ &= ~STATUS_FRAME_IRQ;
 	if(!(status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ))) {
 		nes::cpu.clear_irq(CPU::APU_IRQ);
 	}

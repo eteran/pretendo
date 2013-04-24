@@ -28,7 +28,7 @@ public:
 	void write_reg3(uint8_t value);
 
 public:
-	uint16_t sample_length() const;
+	uint16_t bytes_remaining() const;
 
 public:
 	bool enabled() const;
@@ -38,7 +38,7 @@ public:
 
 private:
 	bool     enabled_;
-	uint16_t current_address_;
+	uint16_t sample_pointer_;
 	uint16_t sample_address_;
 	uint16_t bytes_remaining_;
 	uint16_t sample_length_;

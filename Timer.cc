@@ -34,3 +34,10 @@ void Timer::set_frequency(uint16_t frequency) {
 void Timer::reset() {
 	timer_ = frequency_;
 }
+
+//------------------------------------------------------------------------------
+// Name: frequency
+//------------------------------------------------------------------------------
+uint16_t Timer::frequency() const {
+	return frequency_;
+}
