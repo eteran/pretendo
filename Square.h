@@ -17,7 +17,6 @@ public:
 	~Square();
 
 public:
-	void reset();
 	void enable();
 	void disable();
 

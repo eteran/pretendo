@@ -60,7 +60,7 @@ void LengthCounter::reset() {
 	prev_halt_    = false;
 	halt_         = false;
 	reload_       = false;
-	//value_        = 0;
+	value_        = 0;
 	reload_value_ = 0;
 	reload_cycle_ = 0;
 	halt_cycle_   = 0;

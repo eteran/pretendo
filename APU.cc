@@ -42,31 +42,32 @@ void APU::reset(nes::RESET reset_type) {
 		last_frame_counter_ = 0;
 	}
 
-	square_1.reset();
-	square_2.reset();
-	triangle_.reset();
-	noise_.reset();
-	dmc_.reset();
-
 	write4017(last_frame_counter_);
 	write4015(0x00);
 
+	// square 1
 	write4000(10);
 	write4001(00);
 	write4002(00);
 	write4003(00);
+	
+	// square 2
 	write4004(10);
 	write4005(00);
 	write4006(00);
 	write4007(00);
-	write4008(10);
-//	write4009(00);
+	
+	// triangle
+//	write4008(10); // triangle is unaffected..
 	write400A(00);
 	write400B(00);
+	
+	// noise
 	write400C(10);
-//	write400D(00);
 	write400E(00);
 	write400F(00);
+	
+	// dmc
 	write4010(10);
 
 	// OK, the APU is supposed to act as if it has run for approximately 9
@@ -292,6 +293,8 @@ uint8_t APU::read4015() {
 		nes::cpu.clear_irq(CPU::APU_IRQ);
 	}
 	
+	
+	printf("read4015() == %02x\n", ret);
 	return ret;
 }
 

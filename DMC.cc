@@ -74,23 +74,6 @@ void DMC::disable() {
 }
 
 //------------------------------------------------------------------------------
-// Name: reset
-//------------------------------------------------------------------------------
-void DMC::reset() {
-	enabled_              = false;
-	sample_pointer_       = 0;
-	sample_address_       = 0;
-	bytes_remaining_      = 0;
-	sample_length_        = 0;
-	irq_enabled_          = 0x80;
-	load_counter_         = 0;
-	loop_                 = 0;
-	sample_shift_counter_ = 0;
-	
-	timer_.reset();
-}
-
-//------------------------------------------------------------------------------
 // Name: write_reg0
 //------------------------------------------------------------------------------
 void DMC::write_reg0(uint8_t value) {

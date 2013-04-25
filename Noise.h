@@ -17,7 +17,6 @@ public:
 	~Noise();
 
 public:
-	void reset();
 	void enable();
 	void disable();
 

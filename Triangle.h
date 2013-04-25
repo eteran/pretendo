@@ -17,7 +17,6 @@ public:
 	~Triangle();
 
 public:
-	void reset();
 	void enable();
 	void disable();
 
