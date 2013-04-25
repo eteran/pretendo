@@ -31,7 +31,7 @@ public:
 
 public:
 	bool enabled() const;
-	
+
 public:
 	void tick();
 

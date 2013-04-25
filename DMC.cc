@@ -33,25 +33,23 @@ DMC::~DMC() {
 //------------------------------------------------------------------------------
 void DMC::enable() {
 	enabled_ = true;
-		
+
 	if(bytes_remaining_ == 0) {
 		bytes_remaining_ = sample_length_;
 	}
-	
+
 	// immediate load the first byte if the shift counter is empty
 	if(bytes_remaining_ != 0 && sample_shift_counter_ == 0) {
 		sample_shift_counter_ = 8;
 
-		// TODO: hijack the CPU for appropriate number of cycles, 
+		// TODO: hijack the CPU for appropriate number of cycles,
 		//       not hardcoded to 4
 		nes::cpu.burn(4);
-		sample_buffer_ = nes::cpu.read(sample_pointer_);
-
+		sample_buffer_ = nes::cart.mapper()->read_memory(sample_pointer_);
 
 		sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
 		if(--bytes_remaining_ == 0) {
-				
 			if(loop_) {
 				bytes_remaining_ = sample_length_;
 				sample_pointer_  = sample_address_;
@@ -79,7 +77,7 @@ void DMC::disable() {
 void DMC::write_reg0(uint8_t value) {
 	irq_enabled_ = value & 0x80;
 	loop_        = value & 0x40;
-	
+
 	timer_.set_frequency(frequency_table[value & 0x0f]);
 
 	if(!irq_enabled_) {
@@ -135,15 +133,15 @@ uint16_t DMC::bytes_remaining() const {
 void DMC::tick() {
 	if(enabled() && timer_.tick()) {
 		if(bytes_remaining_ != 0) {
-		
+
 			// read the 8-bit sample
 			if(sample_shift_counter_ == 0) {
 				sample_shift_counter_ = 8;
 
-				// TODO: hijack the CPU for appropriate number of cycles, 
+				// TODO: hijack the CPU for appropriate number of cycles,
 				//       not hardcoded to 4
 				nes::cpu.burn(4);
-				sample_buffer_ = nes::cpu.read(sample_pointer_);
+				sample_buffer_ = nes::cart.mapper()->read_memory(sample_pointer_);
 
 				sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
@@ -158,7 +156,7 @@ void DMC::tick() {
 				}
 			}
 		}
-		
+
 		if(sample_shift_counter_ != 0) {
 			// TODO: process a bit from the sample
 			--sample_shift_counter_;

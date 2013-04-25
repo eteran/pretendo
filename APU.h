@@ -21,7 +21,7 @@ class APU : public boost::noncopyable {
 	friend class Noise;
 	friend class Triangle;
 	friend class Square;
-	
+
 public:
 	enum {
 		STATUS_DMC_IRQ  	   = 0x80,

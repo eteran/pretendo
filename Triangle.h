@@ -5,6 +5,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
 #include "LengthCounter.h"
+#include "Timer.h"
 
 using boost::uint8_t;
 using boost::uint16_t;
@@ -37,10 +38,12 @@ public:
 private:
 	LengthCounter length_counter_;
 	bool          enabled_;
+	uint16_t      timer_reload_;
 	uint16_t      linear_counter_;
 	uint16_t      linear_counter_control_;
 	uint16_t      linear_counter_reload_;
 	bool          linear_counter_halt_;
+	Timer         timer_;
 };
 
 #endif

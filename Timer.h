@@ -11,13 +11,13 @@ using boost::uint16_t;
 class Timer {
 public:
 	Timer();
-	
+
 public:
 	bool tick();
 	void set_frequency(uint16_t frequency);
 	uint16_t frequency() const;
 	void reset();
-	
+
 private:
 	uint16_t timer_;
 	uint16_t frequency_;

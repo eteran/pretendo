@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Triangle::Triangle() : enabled_(false), linear_counter_(0), linear_counter_control_(0), linear_counter_reload_(0), linear_counter_halt_(false) {
+Triangle::Triangle() : enabled_(false), timer_reload_(0), linear_counter_(0), linear_counter_control_(0), linear_counter_reload_(0), linear_counter_halt_(false) {
 
 }
 
@@ -40,7 +40,7 @@ void Triangle::write_reg0(uint8_t value) {
 	} else {
 		length_counter_.resume();
 	}
-	
+
 	linear_counter_control_ = (value & 0x80);
 	linear_counter_reload_  = (value & 0x7f);
 }
@@ -50,6 +50,7 @@ void Triangle::write_reg0(uint8_t value) {
 //------------------------------------------------------------------------------
 void Triangle::write_reg2(uint8_t value) {
 	linear_counter_ = (linear_counter_ & 0xff00) | value;
+	timer_reload_ = (timer_reload_ & 0xff00) | value;
 }
 
 //------------------------------------------------------------------------------
@@ -60,7 +61,10 @@ void Triangle::write_reg3(uint8_t value) {
 	if(enabled_) {
 		length_counter_.load((value >> 3) & 0x1f);
 	}
-	
+
+	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);	
+	timer_.set_frequency(timer_reload_ + 1);
+
 	linear_counter_      = (linear_counter_ & 0x00ff) | ((value & 0x07) << 8);
 	linear_counter_halt_ = true;
 }
@@ -83,5 +87,7 @@ LengthCounter &Triangle::length_counter() {
 // Name: tick
 //------------------------------------------------------------------------------
 void Triangle::tick() {
-
+	if(enabled() && timer_.tick()) {
+		// do query wave stuff
+	}
 }

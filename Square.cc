@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Square::Square() : timer_reload_(0), timer_(0), duty_(0), envelope_(0),
+Square::Square() : timer_reload_(0), duty_(0), envelope_(0),
 		sweep_enable_(0), sweep_period_(0), sweep_negate_(0), sweep_shift_(0),
 		enabled_(false) {
 
@@ -71,8 +71,8 @@ void Square::write_reg2(uint8_t value) {
 //------------------------------------------------------------------------------
 void Square::write_reg3(uint8_t value) {
 
-	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);
-	timer_        = (timer_reload_ << 1) + 2;
+	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);	
+	timer_.set_frequency((timer_reload_ << 1) + 2);
 
 	if(enabled_) {
 		length_counter_.load((value >> 3) & 0x1f);
@@ -83,7 +83,9 @@ void Square::write_reg3(uint8_t value) {
 // Name: tick
 //------------------------------------------------------------------------------
 void Square::tick() {
-
+	if(enabled() && timer_.tick()) {
+		// do query wave stuff
+	}
 }
 
 //------------------------------------------------------------------------------

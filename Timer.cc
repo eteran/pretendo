@@ -16,7 +16,7 @@ bool Timer::tick() {
 		timer_ = frequency_;
 		return true;
 	}
-	
+
 	return false;
 }
 

@@ -50,23 +50,23 @@ void APU::reset(nes::RESET reset_type) {
 	write4001(00);
 	write4002(00);
 	write4003(00);
-	
+
 	// square 2
 	write4004(10);
 	write4005(00);
 	write4006(00);
 	write4007(00);
-	
+
 	// triangle
 //	write4008(10); // triangle is unaffected..
 	write400A(00);
 	write400B(00);
-	
+
 	// noise
 	write400C(10);
 	write400E(00);
 	write400F(00);
-	
+
 	// dmc
 	write4010(10);
 
@@ -265,7 +265,7 @@ void APU::write4015(uint8_t value) {
 //------------------------------------------------------------------------------
 uint8_t APU::read4015() {
 	uint8_t ret = status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ);
-	
+
 	// clear frame IRQ flag
 	status_ &= ~STATUS_FRAME_IRQ;
 
@@ -284,7 +284,7 @@ uint8_t APU::read4015() {
 	if(noise_.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_NOISE;
 	}
-	
+
 	if(dmc_.bytes_remaining() > 0) {
 		ret |= STATUS_ENABLE_DMC;
 	}
@@ -292,8 +292,8 @@ uint8_t APU::read4015() {
 	if(!(status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ))) {
 		nes::cpu.clear_irq(CPU::APU_IRQ);
 	}
-	
-	
+
+
 	printf("read4015() == %02x\n", ret);
 	return ret;
 }

@@ -47,7 +47,7 @@ void LengthCounter::load(uint8_t index) {
 		value_  = reload_value_;
 		reload_ = false;
 	}
-	
+
 	reload_value_ = length_table[index & 0x1f];
 	reload_       = true;
 	reload_cycle_ = nes::apu.cycle_count();
@@ -110,15 +110,15 @@ uint8_t LengthCounter::value()  {
 uint8_t LengthCounter::clock() {
 
 	// reload the value if needed
-	if(reload_) {	
+	if(reload_) {
 		if((reload_cycle_ != nes::apu.cycle_count()) || (value_ == 0)) {
 			value_ = reload_value_;
 		}
 		reload_ = false;
 	}
-	
+
 	bool halted;
-	
+
 	// delay the halt 1 cycle
 	if(halt_cycle_ == nes::apu.cycle_count()) {
 		halted = prev_halt_;
@@ -130,6 +130,6 @@ uint8_t LengthCounter::clock() {
 		--value_;
 	}
 
-	
+
 	return value_;
 }
