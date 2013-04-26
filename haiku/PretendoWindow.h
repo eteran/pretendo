@@ -24,6 +24,7 @@
 #include "VideoScreen.h"
 //#include "InputWindow.h"
 //#include "PaletteWindow.h"
+#include "CartInfoWindow.h"
 
 #include "SimpleMutex.h"
 
@@ -35,6 +36,7 @@
 #define MSG_LOAD_RECENT	'RCNT'
 #define MSG_FREE_ROM	'FREE'
 #define MSG_ABOUT		'BOUT'
+#define MSG_CART_INFO	'INFO'
 #define MSG_QUIT		'QUIT'
 //
 #define MSG_CPU_RUN		'RUN_'
@@ -116,6 +118,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	private:
 	void OnLoadCart (BMessage *message);
 	void OnFreeCart (void);
+	void OnCartInfo (void);
 	void OnQuit (void);
 	void OnRun (void);
 	void OnStop (void);
@@ -160,6 +163,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	private:
 //	InputWindow *fInputWindow;
 //	PaletteWindow *fPaletteWindow;
+	CartInfoWindow *fCartInfoWindow;
 	
 	private:
 	uint8 *fLineOffsets[SCREEN_HEIGHT];
@@ -199,7 +203,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	bool fPaused;
-	sem_id fMutex;
+	//sem_id fMutex;
 	
 	private:
 	thread_id fThread;
@@ -215,8 +219,8 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	inline void CheckKey (int32 index, int32 key);
 	void ReadKeyStates (void);
 	
-	SimpleMutex *aMutex;
-	SimpleMutex *Mutex (void) { return aMutex; }
+	SimpleMutex *fMutex;
+	SimpleMutex *Mutex (void) { return fMutex; }
 };
 				
 #endif // _PRETENDO_WINDOW_H_

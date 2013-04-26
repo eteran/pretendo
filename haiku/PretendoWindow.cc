@@ -3,6 +3,7 @@
 #include "Mapper.h"
 #include "NES.h"
 #include "PretendoWindow.h"
+#include "CartInfoWindow.h"
 
 
 PretendoWindow::PretendoWindow()
@@ -16,7 +17,7 @@ PretendoWindow::PretendoWindow()
 		fOpenPanel(NULL),
 		
 //		fPaletteWindow(NULL),
-		
+		fCartInfoWindow(NULL),
 		fBitmap(NULL),
 		fOverlayBitmap(NULL),
 		fBitmapBits(NULL),
@@ -26,8 +27,7 @@ PretendoWindow::PretendoWindow()
 		fVideoScreen(NULL),
 		fAudioStream(NULL),
 		fPaused(false),
-		fRunning(false),
-		aMutex(0)
+		fRunning(false)
 {
 	BRect bounds (Bounds());
 	bounds.OffsetTo (B_ORIGIN);
@@ -126,8 +126,8 @@ PretendoWindow::PretendoWindow()
 	
 	//fMutex = create_sem(1, "pretendo_mutex");
 	//acquire_sem(fMutex);
-	aMutex = new SimpleMutex("pretendo_mutex");
-	aMutex->Lock();
+	fMutex = new SimpleMutex("pretendo_mutex");
+	fMutex->Lock();
 	resume_thread(fThread);
 }
 
@@ -157,8 +157,7 @@ PretendoWindow::~PretendoWindow()
 	
 	fRunning = fDirectConnected = false;
 	//fMutex = B_BAD_SEM_ID;
-	delete aMutex;
-	aMutex = 0;
+	//delete aMutex;
 	fThread = B_BAD_THREAD_ID;
 	
 	Hide();
@@ -241,6 +240,10 @@ PretendoWindow::MessageReceived (BMessage *message)
 
 		case MSG_FREE_ROM:
 			OnFreeCart();
+			break;
+			
+		case MSG_CART_INFO:
+			OnCartInfo();
 			break;
 			
 		case MSG_ABOUT:
@@ -339,8 +342,7 @@ PretendoWindow::QuitRequested()
 	status_t ret;
 	
 	//delete_sem(fMutex);
-	delete aMutex;
-	aMutex = 0;
+	delete fMutex;
 	wait_for_thread(fThread, &ret);
 	
 	fRunning = 
@@ -417,6 +419,7 @@ PretendoWindow::AddMenu (void)
 		new BMessage (MSG_ADJ_PALETTE)));
 
 	fFileMenu->AddItem (new BMenuItem ("Free ROM", new BMessage (MSG_FREE_ROM)));
+	fFileMenu->AddItem(new BMenuItem("ROM Info", new BMessage(MSG_CART_INFO)));
 	fFileMenu->AddSeparatorItem();
 	fFileMenu->AddItem (new BMenuItem ("About"B_UTF8_ELLIPSIS, new BMessage(MSG_ABOUT)));
 	fFileMenu->AddSeparatorItem();
@@ -464,6 +467,13 @@ PretendoWindow::OnFreeCart (void)
 
 
 void
+PretendoWindow::OnCartInfo (void)
+{
+	fCartInfoWindow = new CartInfoWindow();
+	fCartInfoWindow->Show();
+}
+
+void
 PretendoWindow::OnQuit (void)
 {
 	QuitRequested();
@@ -479,7 +489,7 @@ PretendoWindow::OnRun (void)
 		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 			reset(nes::HARD_RESET);
 			//release_sem(fMutex);
-			aMutex->Unlock();
+			fMutex->Unlock();
 			fRunning = true;
 		}
 	}
@@ -493,7 +503,7 @@ PretendoWindow::OnStop (void)
 		fRunning = false;
 		
 		//acquire_sem(fMutex);
-		aMutex->Lock();
+		fMutex->Lock();
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
 			ClearBitmap (true);
@@ -516,11 +526,11 @@ PretendoWindow::OnPause (void)
 	if (fRunning) {
 		if (fPaused) {
 			//release_sem(fMutex);
-			aMutex->Unlock();
+			fMutex->Unlock();
 			fEmuMenu->ItemAt(1)->SetMarked(false);
 		} else {
 			//acquire_sem(fMutex);
-			aMutex->Lock();
+			fMutex->Unlock();
 			fEmuMenu->ItemAt(1)->SetMarked(true);
 		}
 	
@@ -1056,20 +1066,21 @@ PretendoWindow::emulation_thread (void *data)
 {
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
-		while (SimpleMutex *const mutex = w->Mutex()) {
+		while (1) {
 			//if ((acquire_sem(w->Mutex()) != B_NO_ERROR)) {
 			//	break;
 			//}
 			
-			if (mutex->Lock() != B_NO_ERROR) {
+			if (w->Mutex()->Lock() != B_NO_ERROR) {
 				break;
 			}
+			
 			w->start_frame();
 			nes::run_frame(w);
 			w->end_frame();
 			w->ReadKeyStates();
 			//release_sem(w->Mutex());
-			mutex->Unlock();
+			w->Mutex()->Unlock();
 		}	
 	
 	return B_OK;
