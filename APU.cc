@@ -69,9 +69,9 @@ void APU::reset(nes::RESET reset_type) {
 	write4010(10);
 
 	// OK, the APU is supposed to act as if it has run for approximately 9
-	// cycles after the reset is complete. I beleive that the first 7 of these
-	// cycles are the 7 cycles of the reset itself. So we run the APU manually
-	// for an extra 2 ticks.
+	// cycles by the time the reset is complete. I beleive that the first 7 
+	// of these cycles are the 7 cycles of the reset itself. So we run the 
+	// APU manually for an extra 2 ticks.
 	//
 	// Blargg says it is as if this happens
 	//
