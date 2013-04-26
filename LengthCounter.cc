@@ -26,7 +26,7 @@ const uint8_t length_table[32] = {
 //------------------------------------------------------------------------------
 // Name: LengthCounter
 //------------------------------------------------------------------------------
-LengthCounter::LengthCounter() : halt_cycle_(0), reload_cycle_(0), reload_value_(0), value_(0), halt_(false), prev_halt_(false), reload_(false) {
+LengthCounter::LengthCounter() : halt_cycle_(-1), reload_cycle_(-1), reload_value_(0), value_(0), halt_(false), prev_halt_(false), reload_(false) {
 
 }
 
@@ -51,19 +51,6 @@ void LengthCounter::load(uint8_t index) {
 	reload_value_ = length_table[index & 0x1f];
 	reload_       = true;
 	reload_cycle_ = nes::apu.cycle_count();
-}
-
-//------------------------------------------------------------------------------
-// Name: reset
-//------------------------------------------------------------------------------
-void LengthCounter::reset() {
-	prev_halt_    = false;
-	halt_         = false;
-	reload_       = false;
-	value_        = 0;
-	reload_value_ = 0;
-	reload_cycle_ = 0;
-	halt_cycle_   = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -109,27 +96,35 @@ uint8_t LengthCounter::value()  {
 //------------------------------------------------------------------------------
 uint8_t LengthCounter::clock() {
 
-	// reload the value if needed
+	bool prevent_decrement     = false;
+	const uint64_t cycle_count = nes::apu.cycle_count();
+
 	if(reload_) {
-		if((reload_cycle_ != nes::apu.cycle_count()) || (value_ == 0)) {
+		if(reload_cycle_ == cycle_count && value_ == 0) {
+			value_ = reload_value_;
+			prevent_decrement = true;
+		} else if(reload_cycle_ == cycle_count && value_ != 0) {
+			// no reload!
+		} else {
 			value_ = reload_value_;
 		}
-		reload_ = false;
 	}
 
-	bool halted;
+	if(!prevent_decrement) {
+		bool halted;
 
-	// delay the halt 1 cycle
-	if(halt_cycle_ == nes::apu.cycle_count()) {
-		halted = prev_halt_;
-	} else {
-		halted = halt_;
+		// delay the halt 1 cycle
+		if(halt_cycle_ == nes::apu.cycle_count()) {
+			halted = prev_halt_;
+		} else {
+			halted = halt_;
+		}
+
+		if(!halted && value_ > 0) {
+			--value_;
+		}
 	}
 
-	if(!halted && value_ > 0) {
-		--value_;
-	}
-
-
+	reload_ = false;
 	return value_;
 }

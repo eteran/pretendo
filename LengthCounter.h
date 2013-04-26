@@ -19,7 +19,6 @@ public:
 	void clear();
 	void halt();
 	void load(uint8_t index);
-	void reset();
 	void resume();
 	uint8_t clock();
 

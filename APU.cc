@@ -16,7 +16,7 @@ const int FRAME_INHIBIT_IRQ  = 0x40;
 //------------------------------------------------------------------------------
 // Name: APU
 //------------------------------------------------------------------------------
-APU::APU() : apu_cycles_(0), next_clock_(0), clock_step_(0), status_(0x00), frame_counter_(0x00), last_frame_counter_(0x00) {
+APU::APU() : apu_cycles_(-1), next_clock_(-1), clock_step_(0), status_(0x00), frame_counter_(0x00), last_frame_counter_(0x00) {
 
 }
 
@@ -293,8 +293,6 @@ uint8_t APU::read4015() {
 		nes::cpu.clear_irq(CPU::APU_IRQ);
 	}
 
-
-	printf("read4015() == %02x\n", ret);
 	return ret;
 }
 
@@ -314,6 +312,7 @@ void APU::write4017(uint8_t value) {
 	}
 
 	next_clock_ = apu_cycles_ + (apu_cycles_ & 1) + 1;
+
 	clock_step_ = 0;
 
 	if(!(frame_counter_ & FRAME_MODE)) {
