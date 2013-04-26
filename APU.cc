@@ -6,8 +6,6 @@
 
 namespace {
 
-const int frame_irq_delay = 29832;
-
 const int FRAME_MODE		 = 0x80;
 const int FRAME_INHIBIT_IRQ  = 0x40;
 
