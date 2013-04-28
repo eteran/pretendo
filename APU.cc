@@ -264,7 +264,7 @@ void APU::write4015(uint8_t value) {
 uint8_t APU::read4015() {
 	uint8_t ret = status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ);
 
-	// clear frame IRQ flag
+	// Writing to this register clears the Frame interrupt flag.
 	status_ &= ~STATUS_FRAME_IRQ;
 
 	if(square_1.length_counter().value() > 0) {
