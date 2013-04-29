@@ -1205,7 +1205,7 @@ void PPU::update_vram_address() {
 //------------------------------------------------------------------------------
 void PPU::execute_cycle(const scanline_prerender &) {
 
-	// passes when this is 0...
+	// nmi_on_timing passes when this is 0...
 	if(hpos_ == 1) {
 		exit_vblank();
 	}
