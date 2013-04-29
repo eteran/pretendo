@@ -6,8 +6,6 @@
 
 namespace {
 
-const int frame_irq_delay = 29832;
-
 const int FRAME_MODE		 = 0x80;
 const int FRAME_INHIBIT_IRQ  = 0x40;
 
@@ -71,9 +69,9 @@ void APU::reset(nes::RESET reset_type) {
 	write4010(10);
 
 	// OK, the APU is supposed to act as if it has run for approximately 9
-	// cycles after the reset is complete. I beleive that the first 7 of these
-	// cycles are the 7 cycles of the reset itself. So we run the APU manually
-	// for an extra 2 ticks.
+	// cycles by the time the reset is complete. I beleive that the first 7 
+	// of these cycles are the 7 cycles of the reset itself. So we run the 
+	// APU manually for an extra 2 ticks.
 	//
 	// Blargg says it is as if this happens
 	//
@@ -266,7 +264,7 @@ void APU::write4015(uint8_t value) {
 uint8_t APU::read4015() {
 	uint8_t ret = status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ);
 
-	// clear frame IRQ flag
+	// Writing to this register clears the Frame interrupt flag.
 	status_ &= ~STATUS_FRAME_IRQ;
 
 	if(square_1.length_counter().value() > 0) {
