@@ -18,10 +18,16 @@ public:
 
 public:
 	Controller &controller1();
+	Controller &controller2();
+	Controller &controller3();
+	Controller &controller4();
 
 private:
 	uint8_t    strobe_;
-	Controller controller1_;
+	Controller controller1_;	
+	Controller controller2_;
+	Controller controller3_;
+	Controller controller4_;
 };
 
 #endif
