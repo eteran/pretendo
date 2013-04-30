@@ -50,7 +50,7 @@ void Triangle::write_reg0(uint8_t value) {
 //------------------------------------------------------------------------------
 void Triangle::write_reg2(uint8_t value) {
 	linear_counter_ = (linear_counter_ & 0xff00) | value;
-	timer_reload_ = (timer_reload_ & 0xff00) | value;
+	timer_reload_   = (timer_reload_ & 0xff00) | value;
 }
 
 //------------------------------------------------------------------------------

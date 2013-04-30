@@ -7,9 +7,6 @@
 #include <bitset>
 
 using boost::uint8_t;
-using boost::uint16_t;
-using boost::uint32_t;
-using boost::uint64_t;
 
 class Controller {
 public:
@@ -36,7 +33,8 @@ public:
 
 private:
 	ShiftRegister<uint8_t> data_;
-	bool                   enabled_;
+	uint8_t                read_index_;
+	bool                   connected_;
 };
 
 #endif

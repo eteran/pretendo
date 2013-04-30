@@ -60,6 +60,18 @@ write_handler_t write_handler = 0;
 read_handler_t  read_handler  = 0;
 sync_handler_t  sync_handler  = 0;
 
+
+dma_handler_t spr_dma_handler        = 0;
+uint16_t      spr_dma_source_address = 0;
+uint16_t      spr_dma_count          = 0;
+bool          spr_dma_first          = false;
+
+dma_handler_t dmc_dma_handler        = 0;
+uint16_t      dmc_dma_source_address = 0;
+uint16_t      dmc_dma_count          = 0;
+bool          dmc_dma_first          = false;
+
+
 #define LAST_CYCLE                                   \
 do {                                                 \
 	rst_executing = false;                           \
@@ -494,7 +506,38 @@ void clock() {
 
 	assert(current_cycle < 10);
 
+	/*
+	spr_dma_handler 	   = 0;
+	spr_dma_source_address = 0;
+	spr_dma_count		   = 0;
+	*/
+
+
+
+
 	if(current_cycle == 0) {
+
+
+		if(spr_dma_count) {
+			static uint8_t byte = 0;
+			if(spr_dma_first) {
+				spr_dma_first = false;
+				
+				if((executed_cycle_count & 1) == 0) {
+					byte = read_byte(spr_dma_source_address++);
+				} else {
+					// idle!
+				}
+			} else {
+				if((executed_cycle_count & 1) == 0) {
+					byte = read_byte(spr_dma_source_address++);
+				} else {
+					spr_dma_handler(byte);
+					--spr_dma_count;
+				}
+			}
+			return;
+		}
 
 		// first cycle is always instruction fetch
 		// or do we force an interrupt?
@@ -620,6 +663,42 @@ void stop() {
 	nmi_executing        = false;
 	rst_executing        = true;
 	current_cycle        = 0;
+		
+	spr_dma_handler 	   = 0;
+	spr_dma_source_address = 0;
+	spr_dma_count		   = 0;
+	spr_dma_first          = false;
+
+	dmc_dma_handler 	   = 0;
+	dmc_dma_source_address = 0;
+	dmc_dma_count		   = 0;
+	dmc_dma_first          = false;
+}
+
+//------------------------------------------------------------------------------
+// Name: schedule_dma
+// Desc:
+//------------------------------------------------------------------------------
+void schedule_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count, DMA_SOURCE source) {
+	
+	assert(dma_handler);
+	
+	switch(source) {
+	case SPR_DMA:
+		spr_dma_handler        = dma_handler;
+		spr_dma_source_address = source_address;
+		spr_dma_count          = count;
+		spr_dma_first          = true;
+		break;
+	case DMC_DMA:
+		dmc_dma_handler        = dma_handler;
+		dmc_dma_source_address = source_address;
+		dmc_dma_count          = count;
+		dmc_dma_first          = true;
+		break;
+	default:
+		abort();
+	}
 }
 
 //------------------------------------------------------------------------------

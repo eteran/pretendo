@@ -166,3 +166,18 @@ void CPU::clear_irq(IRQ_SOURCE source) {
 		P6502::reset_irq();
 	}
 }
+
+//-------------------------------------------------------------------
+// Name: schedule_spr_dma
+//-------------------------------------------------------------------
+void CPU::schedule_spr_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count) {
+	P6502::schedule_dma(dma_handler, source_address, count, P6502::SPR_DMA);
+}
+
+
+//-------------------------------------------------------------------
+// Name: schedule_dmc_dma
+//-------------------------------------------------------------------
+void CPU::schedule_dmc_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count) {
+	P6502::schedule_dma(dma_handler, source_address, count, P6502::DMC_DMA);
+}
