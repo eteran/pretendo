@@ -74,6 +74,8 @@ public:
 	void exec(int cycles);
 	void irq(IRQ_SOURCE source);
 	void nmi()                   { P6502::nmi(); }
+	void schedule_spr_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
+	void schedule_dmc_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
 
 public:
 	// 2 k pages

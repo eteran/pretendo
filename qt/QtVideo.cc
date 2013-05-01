@@ -129,8 +129,8 @@ void QtVideo::end_frame() {
 //------------------------------------------------------------------------------
 void QtVideo::paintGL() {
 
-	const unsigned output_width  = width();
-	const unsigned output_height = height();
+	const unsigned int output_width  = width();
+	const unsigned int output_height = height();
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -140,17 +140,14 @@ void QtVideo::paintGL() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (/*filter == Video::FilterPoint*/ false) ? GL_NEAREST : GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (/*filter == Video::FilterPoint*/ false) ? GL_NEAREST : GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, false ? GL_NEAREST : GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, false ? GL_NEAREST : GL_LINEAR);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, WIDTH, HEIGHT, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer_);
 
-	const unsigned u = output_width;
-	const unsigned v = output_height;
-
 	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0, 0.0); glVertex3i(0, v, 0);
-	glTexCoord2f(1.0, 0.0); glVertex3i(u, v, 0);
+	glTexCoord2f(0.0, 0.0); glVertex3i(0, output_height, 0);
+	glTexCoord2f(1.0, 0.0); glVertex3i(output_width, output_height, 0);
 	glTexCoord2f(0.0, 1.0); glVertex3i(0, 0, 0);
-	glTexCoord2f(1.0, 1.0); glVertex3i(u, 0, 0);
+	glTexCoord2f(1.0, 1.0); glVertex3i(output_width, 0, 0);
 	glEnd();
 }

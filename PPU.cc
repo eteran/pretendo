@@ -89,6 +89,11 @@ uint16_t tile_address(uint16_t vram_address) {
 	return 0x2000 | (vram_address & 0x0fff);
 }
 
+
+void sprite_dma_write(uint8_t value) {
+	nes::ppu.write2004(value);
+}
+
 }
 
 //------------------------------------------------------------------------------
@@ -518,29 +523,31 @@ uint8_t PPU::read2006() {
 //------------------------------------------------------------------------------
 uint8_t PPU::read2007() {
 
-	if(!write_block_) {
-		const uint16_t temp_address = vram_address_ & 0x3fff;
+	if(write_block_) {
+		return 0x00;
+	}
 
-		if(rendering_ && screen_enabled()) {
-			if(address_increment_ == 32) {
-				clock_y();
-			} else {
-				clock_x();
-			}
+	const uint16_t temp_address = vram_address_ & 0x3fff;
+
+	if(rendering_ && screen_enabled()) {
+		if(address_increment_ == 32) {
+			clock_y();
 		} else {
-			vram_address_ += address_increment_;
+			clock_x();
 		}
+	} else {
+		vram_address_ += address_increment_;
+	}
 
-		nes::cart.mapper()->vram_change_hook(vram_address_);
+	nes::cart.mapper()->vram_change_hook(vram_address_);
 
-		latch_ = register_2007_buffer_;
-		register_2007_buffer_ = nes::cart.mapper()->read_vram(temp_address);
+	latch_ = register_2007_buffer_;
+	register_2007_buffer_ = nes::cart.mapper()->read_vram(temp_address);
 
-		if((temp_address & 0x3f00) == 0x3f00) {
-			latch_ = palette_[temp_address & 0x1f];
-			if(greyscale_) {
-				latch_ &= 0x30;
-			}
+	if((temp_address & 0x3f00) == 0x3f00) {
+		latch_ = palette_[temp_address & 0x1f];
+		if(greyscale_) {
+			latch_ &= 0x30;
 		}
 	}
 
@@ -555,6 +562,7 @@ void PPU::sprite_dma(uint8_t value) {
 	// the procedure takes 513 CPU cycles (+1 on odd CPU cycles): 
 	// first one (or two) idle cycles, and then 256 pairs of alternating 
 	// read/write cycles.
+#if 1
 	if((nes::cpu.cycle_count() & 1)) {
 		nes::cpu.burn(514);
 	} else {
@@ -567,6 +575,10 @@ void PPU::sprite_dma(uint8_t value) {
 	for(int i = 0; i < 256; ++i) {
 		write2004(nes::cart.mapper()->read_memory(sprite_addr++));
 	}
+#else
+	const uint16_t sprite_addr = (value << 8);
+	nes::cpu.schedule_spr_dma(sprite_dma_write, sprite_addr, 256);
+#endif
 }
 
 //------------------------------------------------------------------------------

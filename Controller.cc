@@ -4,14 +4,18 @@
 //------------------------------------------------------------------------------
 // Name: Controller
 //------------------------------------------------------------------------------
-Controller::Controller() : data_(0), enabled_(true) {
+Controller::Controller() : data_(0), read_index_(0), connected_(true) {
 }
 
 //------------------------------------------------------------------------------
 // Name: read
 //------------------------------------------------------------------------------
 uint8_t Controller::read() {
-	return data_.read();
+	if(read_index_++ < 8) {
+		return data_.read();
+	} else {
+		return 0x01;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -19,8 +23,9 @@ uint8_t Controller::read() {
 //------------------------------------------------------------------------------
 void Controller::poll() {
 
-	if(enabled_) {
+	if(connected_) {
         data_.load(static_cast<uint8_t>(keystate_.to_ulong()));
+		read_index_ = 0;
 	}
 }
 

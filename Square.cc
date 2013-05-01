@@ -71,8 +71,11 @@ void Square::write_reg2(uint8_t value) {
 //------------------------------------------------------------------------------
 void Square::write_reg3(uint8_t value) {
 
-	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);	
-	timer_.set_frequency((timer_reload_ << 1) + 2);
+	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);
+	
+	// multiply by 2 so it is the same as if it were clocked
+	// every other CPU cycle
+	timer_.set_frequency((timer_reload_ + 1) * 2);
 
 	if(enabled_) {
 		length_counter_.load((value >> 3) & 0x1f);

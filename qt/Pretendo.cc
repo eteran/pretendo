@@ -296,6 +296,11 @@ void Pretendo::on_actionShow_Sprites_toggled(bool value) {
 // Name: on_action_Hard_Reset_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Hard_Reset_triggered() {
+
+	if(paused_) {
+		on_action_Pause_triggered();
+	}
+
 	if(timer_->isActive()) {
 		nes::reset(nes::HARD_RESET);
 	}
@@ -305,6 +310,10 @@ void Pretendo::on_action_Hard_Reset_triggered() {
 // Name: on_actionReset_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_actionReset_triggered() {
+	if(paused_) {
+		on_action_Pause_triggered();
+	}
+	
 	if(timer_->isActive()) {
 		nes::reset(nes::SOFT_RESET);
 	}
@@ -324,8 +333,10 @@ void Pretendo::showEvent(QShowEvent *event) {
 		const QModelIndex root_model_index = filesystem_model_->setRootPath(info.absolutePath());
 		ui_.listView->setRootIndex(filter_model_->mapFromSource(root_model_index));
 
-		nes::cart.load(qPrintable(rom));
-		on_action_Run_triggered();
+		if(info.isFile()) {
+			nes::cart.load(qPrintable(rom));
+			on_action_Run_triggered();
+		}
 	}
 }
 
@@ -333,7 +344,8 @@ void Pretendo::showEvent(QShowEvent *event) {
 // Name:
 //------------------------------------------------------------------------------
 void Pretendo::on_action1x_triggered() {
-	ui_.video->setFixedSize(256,240);
+	ui_.video->setFixedSize(256 * 1, 240 * 1);
+	//ui_.stackedWidget->setFixedSize(256 * 1, 240 * 1);
 	adjustSize();
 }
 
@@ -342,6 +354,7 @@ void Pretendo::on_action1x_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action2x_triggered() {
 	ui_.video->setFixedSize(256 * 2, 240 * 2);
+	//ui_.stackedWidget->setFixedSize(256 * 2, 240 * 2);
 	adjustSize();
 }
 
@@ -350,6 +363,7 @@ void Pretendo::on_action2x_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action3x_triggered() {
 	ui_.video->setFixedSize(256 * 3, 240 * 3);
+	//ui_.stackedWidget->setFixedSize(256 * 3, 240 * 3);
 	adjustSize();
 }
 
@@ -358,5 +372,6 @@ void Pretendo::on_action3x_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action4x_triggered() {
 	ui_.video->setFixedSize(256 * 4, 240 * 4);
+	//ui_.stackedWidget->setFixedSize(256 * 4, 240 * 4);
 	adjustSize();
 }
