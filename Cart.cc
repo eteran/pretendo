@@ -195,7 +195,7 @@ uint32_t Cart::rom_hash() const {
 }
 
 
-uint8_t *Cart::raw_image() const 
+uint8_t *Cart::raw_image(int32_t &length) const 
 {
 	uint8_t *prgRom = nes::cart.prg();
 	uint8_t *chrRom = nes::cart.chr();
@@ -203,8 +203,9 @@ uint8_t *Cart::raw_image() const
 	int32_t prgSize = nes::cart.prg_pages() * 16 * 1024;
 	int32_t chrSize = nes::cart.chr_pages() * 8 * 1024;
 	
+	length = prgSize+chrSize;
 	
-	uint8_t *buffer = new uint8_t[prgSize+chrSize];
+	uint8_t *buffer = new uint8_t[length];
 	std::memcpy(buffer, prgRom, prgSize);
 	std::memcpy(buffer+prgSize, chrRom, chrSize);
 	

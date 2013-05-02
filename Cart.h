@@ -43,7 +43,7 @@ public:
 	uint8_t *chr() const;
 	MIRRORING mirroring() const;
 	const boost::shared_ptr<Mapper> &mapper() const;
-	uint8_t *raw_image() const;
+	uint8_t *raw_image (int32_t &length) const;
 
 private:
 	ines_cart_t               cart_;
