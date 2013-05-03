@@ -21,7 +21,7 @@ CartInfoWindow::CartInfoWindow()
 {
 	LIBXML_TEST_VERSION;
 	
-	ResizeTo(500, 300);
+	ResizeTo(200, 300);
 	CenterOnScreen();
 		
 	BRect r = Bounds();
@@ -31,53 +31,77 @@ CartInfoWindow::CartInfoWindow()
 	fTabView = new BTabView(r, "_tab_view");
 	fMainView->AddChild(fTabView);
 	
-	
-	fGameInfoOutline = new BOutlineListView(r, "_game_info");
-	fCartInfoOutline = new BOutlineListView(r, "_cart_info");
-	fPeripheralsOutline= new BOutlineListView(r,"_periph");
-	
+	r = Bounds();
+	r.InsetBy(8, 8);
+	fGameInfoList = new BListView(r, "_game_info_list", B_SINGLE_SELECTION_LIST, B_FOLLOW_ALL);
+	fCartInfoList = new BListView(r, "_cart_info_list");
+	fPeripheralInfoList = new BListView(r, "_periph_info_list");
+	fPRGInfoList = new BListView(r, "_prg_info_list");
+	fCHRInfoList = new BListView(r, "_chr_info_list");
+	fWRAMInfoList = new BListView(r, "_wram_info_list");
+	fMapperInfoList = new BListView(r, "_mapper_info_list");
+	fCICInfoList = new BListView(r, "_cic_info_list");
 	
 	BTab *tab = new BTab;
-	fTabView->AddTab(fGameInfoOutline, tab);
+	fTabView->AddTab(fGameInfoList, tab);
 	tab->SetLabel("Game Info");
 	
-	BStringItem *region = new BStringItem("United States of America");
-	fGameInfoOutline->AddItem(region);
-	BStringItem *state = new BStringItem("California");
-	fGameInfoOutline->AddUnder(state, region);
-	fGameInfoOutline->AddUnder(new BStringItem("Menlo Park"), state);
-	fGameInfoOutline->AddUnder(new BStringItem("Los Angeles"), state);
 	
 	
 	tab = new BTab;
-	fTabView->AddTab(fCartInfoOutline, tab);
-	tab->SetLabel("Game Info");
-	
-	region = new BStringItem("United States of America");
-	fCartInfoOutline->AddItem(region);
-	state = new BStringItem("California");
-	fCartInfoOutline->AddUnder(state, region);
-	fCartInfoOutline->AddUnder(new BStringItem("Menlo Park"), state);
-	fCartInfoOutline->AddUnder(new BStringItem("Los Angeles"), state);
-	
+	fTabView->AddTab(fCartInfoList, tab);
+	tab->SetLabel("Cart Info");
 	
 		
 	tab = new BTab;
-	fTabView->AddTab(fPeripheralsOutline, tab);
+	fTabView->AddTab(fPeripheralInfoList, tab);
 	tab->SetLabel("Peripherals");
 	
-	region = new BStringItem("United States of America");
-	fPeripheralsOutline->AddItem(region);
-	state = new BStringItem("California");
-	fPeripheralsOutline->AddUnder(state, region);
-	fPeripheralsOutline->AddUnder(new BStringItem("Menlo Park"), state);
-	fPeripheralsOutline->AddUnder(new BStringItem("Los Angeles"), state);
+	tab = new BTab;
+	fTabView->AddTab(fPRGInfoList, tab);
+	tab->SetLabel("PRG Info");
+	
+	tab = new BTab;
+	fTabView->AddTab(fCHRInfoList, tab);
+	tab->SetLabel("CHR Info");
+	
+	tab = new BTab;
+	fTabView->AddTab(fWRAMInfoList, tab);
+	tab->SetLabel("WRAM Info");
+	
+	tab = new BTab;
+	fTabView->AddTab(fMapperInfoList, tab);
+	tab->SetLabel("Mapper");
+	
+	tab = new BTab;
+	fTabView->AddTab(fCICInfoList, tab);
+	tab->SetLabel("CIC Info");
+	
 	
 	int32_t length;
 	const char *ptr = reinterpret_cast<char *>(cart.raw_image(length));
     BString stringSHA1 = StreamToSHA1 (ptr, length);
-    (new BAlert(0, stringSHA1.String(), "Okay"))->Go();    
-		
+    (new BAlert(0, stringSHA1.String(), "Okay"))->Go();
+    
+    
+    if(xmlDoc *const file = xmlParseFile("/boot/home/Desktop/nescarts.xml")) {
+        
+                // get the root element it should be <database>
+                if(const xmlNodePtr root = xmlDocGetRootElement(file)) {
+                        if (xmlStrcmp(root->name, reinterpret_cast<const xmlChar *>("database")) == 0) {
+                                if(rom_match *const rom = process_database(root, 
+									reinterpret_cast<const xmlChar *>("sha1"), reinterpret_cast<const xmlChar *>(stringSHA1.String()))) {
+                                        // goto work!
+                                        print_info(rom);
+                                }
+                        }
+                }
+        
+                xmlFreeDoc(file);
+        }
+        
+  
+        xmlCleanupParser();		
 }
 
 
@@ -176,6 +200,7 @@ CartInfoWindow::print_info(rom_match *rom) {
 	printf("GAME INFO\n");
 	for(xmlAttr *properties = rom->game->properties; properties; properties = properties->next) {
 		printf("%-15s : %s\n", properties->name, xmlGetProp(rom->game, properties->name));
+		
 	}
 
 	printf("\n");
@@ -270,122 +295,20 @@ CartInfoWindow::sha1_to_string(uint32 hash[5])
 }
 
 
-
 BString
 CartInfoWindow::StreamToSHA1 (const char *stream, int32 length)
 {
-	//std::cout << stream << std::endl;
-	//std::ifstream ifs(stream, std::ios::binary);
-  
- 	//if(!ifs.good()) {
-	//	std::cerr<<"bad file\n";
-	//	return "-2";
-	//}
 
 	boost::uuids::detail::sha1 sha1;
-  	unsigned int hash[5];
-  	//for (int32_t len = 0; len < length / 2; len+=2)
-	//{
-		sha1.process_bytes(stream, length);
-	//}
-	
-	printf ("%ld\n", length);;
-  	
-  	//char buf[1024];
-  	//while(ifs.good()) {
-    ///	ifs.read(buf,sizeof(buf));
-    //	sha1.process_bytes(buf,ifs.gcount());
-  	//}
-  	
-  	
-  
-  	//if(!ifs.eof()) {
-    //	std::cerr<<"not at eof\n";
-    //	return "-3";
-  	//}
-  	
-  	//ifs.close();
-  	sha1.get_digest(hash);
+  	uint32_t hash[5];
+ 	sha1.process_bytes(stream, length);
+ 	sha1.get_digest(hash);
 
-  	char buffer[32];
-  	char buffer1[32];
-  	char buffer2[32];
-  	char buffer3[32];
-  	char buffer4[32];
+  	char buffer[32*4];
   	
-
-  	sprintf(buffer, "%08x", hash[0]);
-	sprintf(buffer1, "%08x", hash[1]);
-	sprintf(buffer2, "%08x", hash[2]);
-	sprintf(buffer3, "%08x", hash[3]);
-	sprintf(buffer4, "%08x", hash[4]);
+  	sprintf(buffer, "%08X%08X%08X%08X%08X", hash[0], hash[1], hash[2], hash[3], hash[4]);
   	
   	BString bstHash;
   	bstHash += buffer;
-  	bstHash += buffer1;
-  	bstHash += buffer2;
-  	bstHash += buffer3;
-  	bstHash += buffer4;
-  	
-  	BString output = bstHash;
-  	
-  	(new BAlert(0, output, "Okay"))->Go();
-  	
-  	return output;
+  	return bstHash;
 }
-
-
-//int main() {
-
-        /*
-        LIBXML_TEST_VERSION;
-        
-        if(xmlDoc *const file =
-xmlParseFile("/home/eteran/Downloads/NesCarts-2011-09-10.xml")) {
-        
-                // get the root element it should be <database>
-                if(const xmlNodePtr root = xmlDocGetRootElement(file)) {
-                        if (xmlStrcmp(root->name, reinterpret_cast<const xmlChar *>("database")) == 0) {
-                                if(rom_match *const rom = process_database(root, reinterpret_cast<const xmlChar
-*>("sha1"), reinterpret_cast<const xmlChar
-*>("CE70E57475F4058AC5A05DFED92163D42F0B8B96"))) {
-                                        print_info(rom);
-                                }
-                        }
-                }
-        
-                xmlFreeDoc(file);
-        }
-        
-  
-        xmlCleanupParser();
-        */
-//
-
-/*
- std::ifstream ifs(argv[1],std::ios::binary);
-  
-  if(!ifs.good()) {
-    std::cerr<<"bad file\n";
-    return -2;
-  }
-
-  boost::uuids::detail::sha1 sha1;
-  unsigned int hash[5];
-  char buf[1024];
-  while(ifs.good()) {
-    ifs.read(buf,sizeof(buf));
-    sha1.process_bytes(buf,ifs.gcount());
-  }
-  if(!ifs.eof()) {
-    std::cerr<<"not at eof\n";
-    return -3;
-  }
-  ifs.close();
-  sha1.get_digest(hash);
-  std::cout<<std::hex<<std::setfill('0')<<std::setw(sizeof(int)*2);
-  for(std::size_t i=0; i<sizeof(hash)/sizeof(hash[0]); ++i) {
-    std::cout<<hash[i];
-  }
-  std::cout<<"  "<<argv[1]<<std::endl;
-  return 0;*/

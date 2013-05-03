@@ -4,7 +4,7 @@
 
 #include <Window.h>
 #include <TabView.h>
-#include <OutlineListView.h>
+#include <ListView.h>
 #include <libxml/parser.h>
 #include <string>
 
@@ -28,18 +28,27 @@ class CartInfoWindow : public BWindow
 	
 	private:
 	
-	BOutlineListView *fGameInfoOutline;
-	BOutlineListView *fCartInfoOutline;
-	BOutlineListView *fPeripheralsOutline;
-	
+	BListView *fGameInfoList;
+	BListView *fCartInfoList;
+	BListView *fPeripheralInfoList;
+	BListView *fPRGInfoList;
+	BListView *fCHRInfoList;
+	BListView *fWRAMInfoList;
+	BListView *fMapperInfoList;
+	BListView *fCICInfoList;
+		
 	BView *fMainView;
 	BTabView *fTabView;
 	
 	public:
-	BOutlineListView *GameInfoOutline (void) { return fGameInfoOutline; }
-	BOutlineListView *CartInfoOutline (void) { return fCartInfoOutline; }
-	BOutlineListView *PeripheralsOutline (void) { return fPeripheralsOutline; }
-	
+	BListView *GameInfoList (void) { return fGameInfoList; }
+	BListView *CartInfoList (void) { return fCartInfoList; }
+	BListView *PeripheralsList(void) { return fPeripheralInfoList; }
+	BListView *PRGInfoList (void) { return fPRGInfoList; }
+	BListView *CHRInfoList (void) { return fCHRInfoList; }
+	BListView *WRAMInfoList (void) { return fWRAMInfoList; }
+	BListView *MapperInfoList (void) { return fMapperInfoList; }
+	BListView *CICInfoList (void) { return fCICInfoList; }
 	BTabView *TabView (void) { return fTabView; }
 	
 	private:
