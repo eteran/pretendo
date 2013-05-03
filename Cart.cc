@@ -1,11 +1,13 @@
 
 #include "Cart.h"
 #include "Mapper.h"
+#include "NES.h"
 #include <cstring>
 #include <iostream>
 #include <iomanip>
 
 namespace {
+	using namespace std;
 
 //------------------------------------------------------------------------------
 // Name:
@@ -163,7 +165,7 @@ Cart::MIRRORING Cart::mirroring() const {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name:st
 //------------------------------------------------------------------------------
 const boost::shared_ptr<Mapper> &Cart::mapper() const {
 	return mapper_;
@@ -188,4 +190,27 @@ uint32_t Cart::chr_hash() const {
 //------------------------------------------------------------------------------
 uint32_t Cart::rom_hash() const {
 	return rom_hash_;
+}
+
+
+uint8_t *Cart::raw_image(int32_t &length) const 
+{
+	uint8_t *prgRom = nes::cart.prg();
+	uint8_t *chrRom = nes::cart.chr();
+	
+	if (chrRom == NULL) chrSize = 0;
+	
+	int32_t prgSize = nes::cart.prg_pages() * 16 * 1024;
+	int32_t chrSize = nes::cart.chr_pages() * 8 * 1024;
+	
+	length = prgSize+chrSize;
+	
+	uint8_t *buffer = new uint8_t[length];
+	std::memcpy(buffer, prgRom, prgSize);
+	
+	if (chrRom != NULL) {
+		std::memcpy(buffer+prgSize, chrRom, chrSize);
+	}
+	
+ 	return buffer;
 }

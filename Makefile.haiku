@@ -29,11 +29,11 @@ RES	   := xres
 APPNAME := pretendo
 
 DEFINES  := -DLinux
-INCLUDES := -I. -Ilibunif -Ip6502 -isystem boost
+INCLUDES := -I. -I/boot/common/include/libxml2 -Ilibunif -Ip6502 -isystem boost
 ASMFLAGS :=
 CXXFLAGS := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
 CFLAGS   := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
-LDFLAGS  := -g -lbe -lroot -ltranslation -ltracker -lmedia -lgame
+LDFLAGS  := -g -lbe -lroot -ltranslation -ltracker -lmedia -lgame -lxml2
 
 ASM_FILES   := \
 	haiku/blitters.asm \
@@ -125,6 +125,7 @@ H_FILES     := \
 	ShiftRegister.h \
 	Sprite.h \
 	Square.h \
+	Timer.h \
 	Triangle.h \
 	VRAMBank.h \
 	VRC2.h \
@@ -141,7 +142,8 @@ H_FILES     := \
 	haiku/VideoScreen.h \
 	haiku/blitters.h \
 	haiku/copies.h \
-	haiku/SimpleMutex.h
+	haiku/SimpleMutex.h \
+	haiku/CartInfoWindow.h
 	
 
 CXX_FILES   := \
@@ -223,6 +225,7 @@ CXX_FILES   := \
 	PPU.cc \
 	Palette.cc \
 	Square.cc \
+	Timer.cc \
 	Triangle.cc \
 	VRC2.cc \
 	VRC4.cc \
@@ -238,7 +241,8 @@ CXX_FILES   := \
 	haiku/ROMFilePanel.cc \
 	haiku/PretendoWindow.cc \
 	haiku/VideoScreen.cc \
-	haiku/SimpleMutex.cc 
+	haiku/SimpleMutex.cc \
+	haiku/CartInfoWindow.cc
 	
 C_FILES     := \
 	libunif/ines_convert.c \
