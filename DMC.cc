@@ -19,7 +19,7 @@ const uint16_t frequency_table[16] = {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-DMC::DMC() : enabled_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), irq_enabled_(0x80), load_counter_(0), loop_(0), sample_shift_counter_(0) {
+DMC::DMC() : enabled_(false), muted_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), irq_enabled_(0x80), loop_(0), sample_shift_counter_(0) {
 }
 
 //------------------------------------------------------------------------------
@@ -62,6 +62,8 @@ void DMC::enable() {
 	
 	if(sample_shift_counter_ != 0) {
 		// TODO: process a bit from the sample
+		const int delta = (sample_buffer_ & (1 << (8 - sample_shift_counter_))) ? 2 : -2;			
+		output_ += delta;			
 		--sample_shift_counter_;
 	}
 }
@@ -73,7 +75,7 @@ void DMC::disable() {
 
 	enabled_              = false;
 	bytes_remaining_      = 0;
-	sample_shift_counter_ = 0;
+	//sample_shift_counter_ = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -97,7 +99,7 @@ void DMC::write_reg0(uint8_t value) {
 // Name: write_reg1
 //------------------------------------------------------------------------------
 void DMC::write_reg1(uint8_t value) {
-	load_counter_ = value & 0x7f;
+	output_ = value & 0x7f;
 }
 
 //------------------------------------------------------------------------------
@@ -136,7 +138,9 @@ uint16_t DMC::bytes_remaining() const {
 // Name: tick
 //------------------------------------------------------------------------------
 void DMC::tick() {
-	if(enabled() && timer_.tick()) {
+
+	if(timer_.tick() && enabled()) {
+
 		if(bytes_remaining_ != 0 && sample_shift_counter_ == 0) {
 			sample_shift_counter_ = 8;
 
@@ -158,9 +162,25 @@ void DMC::tick() {
 			}
 		}
 
-		if(sample_shift_counter_ != 0) {
+		if(sample_shift_counter_ != 0) {		
 			// TODO: process a bit from the sample
+			const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
+			
+			output_ += delta;
+			
+				
 			--sample_shift_counter_;
 		}
 	}
+}
+
+//------------------------------------------------------------------------------
+// Name: dac
+//------------------------------------------------------------------------------
+uint8_t DMC::output() const {
+	//if(enabled()) {
+		return output_;
+	//} else {
+	//	return 0;
+	//}
 }

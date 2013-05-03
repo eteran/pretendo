@@ -1,50 +1,60 @@
 
-#include "Timer.h"
+#include "LinearCounter.h"
 
 //------------------------------------------------------------------------------
-// Name: Timer
+// Name: LengthCounter
 //------------------------------------------------------------------------------
-Timer::Timer() : timer_(0xffff), frequency_(0xffff) {
+LinearCounter::LinearCounter() : value_(0), reload_(0), control_(0), halt_(false)  {
 
 }
 
 //------------------------------------------------------------------------------
-// Name: tick
+// Name: ~LengthCounter
 //------------------------------------------------------------------------------
-bool Timer::tick() {
-	if(--timer_ == 0) {
-		timer_ = frequency_;
-		return true;
+LinearCounter::~LinearCounter() {
+
+}
+
+//------------------------------------------------------------------------------
+// Name: clock
+//------------------------------------------------------------------------------
+void LinearCounter::clock() {
+	
+	if(halt_) {
+		value_ = reload_;
+	} else if(value_ != 0) {
+		--value_;
 	}
-
-	return false;
+	
+	if(!control_) {
+		halt_ = false;
+	}
 }
 
 //------------------------------------------------------------------------------
-// Name: set_frequency
+// Name: set_control
 //------------------------------------------------------------------------------
-void Timer::set_frequency(uint16_t frequency) {
-	frequency_ = frequency;
-	timer_     = frequency_;
+void LinearCounter::set_mode(uint8_t value) {
+	control_ = (value & 0x80);
 }
 
 //------------------------------------------------------------------------------
-// Name: reset
+// Name: set_reload
 //------------------------------------------------------------------------------
-void Timer::reset() {
-	timer_ = frequency_;
+void LinearCounter::set_reload(uint8_t value) {
+	reload_ = value;
 }
 
 //------------------------------------------------------------------------------
-// Name: frequency
+// Name: halt
 //------------------------------------------------------------------------------
-uint16_t Timer::frequency() const {
-	return frequency_;
+void LinearCounter::halt() {
+	halt_ = true;
 }
 
 //------------------------------------------------------------------------------
 // Name: value
 //------------------------------------------------------------------------------
-uint16_t Timer::value() const {
-	return timer_;
+uint8_t LinearCounter::value() const {
+	return value_;
 }

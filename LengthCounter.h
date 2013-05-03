@@ -20,19 +20,19 @@ public:
 	void halt();
 	void load(uint8_t index);
 	void resume();
-	uint8_t clock();
+	void clock();
 
 public:
-	uint8_t value();
+	uint8_t value() const;
 
 private:
-	uint64_t halt_cycle_;
-	uint64_t reload_cycle_;
-	uint8_t  reload_value_;
-	uint8_t  value_;
-	bool     halt_;
-	bool     prev_halt_;
-	bool     reload_;
+	uint64_t        halt_cycle_;
+	uint64_t        reload_cycle_;
+	uint8_t         reload_value_;
+	mutable uint8_t value_;
+	bool            halt_;
+	bool            prev_halt_;
+	mutable bool    reload_;
 };
 
 #endif

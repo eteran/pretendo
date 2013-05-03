@@ -34,19 +34,21 @@ public:
 
 public:
 	void tick();
+	uint8_t output() const;
 
 private:
 	bool     enabled_;
+	bool     muted_;
 	uint16_t sample_pointer_;
 	uint16_t sample_address_;
 	uint16_t bytes_remaining_;
 	uint16_t sample_length_;
 	uint8_t  irq_enabled_;
-	uint8_t  load_counter_;
 	uint8_t  loop_;
 	uint8_t  sample_shift_counter_;
 	uint8_t  sample_buffer_;
 	Timer    timer_;
+	uint8_t  output_;
 };
 
 #endif

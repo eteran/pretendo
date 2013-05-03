@@ -1,12 +1,22 @@
 
 #include "Square.h"
 
+namespace {
+
+const uint8_t sequence[4][8] = {
+	{ 0,1,0,0,0,0,0,0 },
+	{ 0,1,1,0,0,0,0,0 },
+	{ 0,1,1,1,1,0,0,0 },
+	{ 1,0,0,1,1,1,1,1 }
+};
+
+}
+
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Square::Square() : timer_reload_(0), duty_(0), envelope_(0),
-		sweep_enable_(0), sweep_period_(0), sweep_negate_(0), sweep_shift_(0),
-		enabled_(false) {
+Square::Square() : sweep_(timer_), timer_reload_(0), duty_(0), sequence_index_(0), 
+		enabled_(false), output_(0) {
 
 }
 
@@ -37,25 +47,24 @@ void Square::disable() {
 //------------------------------------------------------------------------------
 void Square::write_reg0(uint8_t value) {
 
-	duty_     = (value >> 6) & 0x03;
-	envelope_ = (value & 0x1f);
+	duty_ = (value >> 6) & 0x03;
 
 	if(value & 0x20) {
 		length_counter_.halt();
 	} else {
 		length_counter_.resume();
 	}
+	
+	envelope_.set_constant(value & 0x10);
+	envelope_.set_divider(value & 0x0f);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_reg1
 //------------------------------------------------------------------------------
-void Square::write_reg1(uint8_t value) {
-
-	sweep_enable_ = (value >> 7) & 0x01;
-	sweep_period_ = (value >> 4) & 0x07;
-	sweep_negate_ = (value >> 3) & 0x01;
-	sweep_shift_  = (value & 7);
+void Square::write_reg1(uint8_t value) {	
+	sweep_.reload();
+	sweep_.set_control(value);
 }
 
 //------------------------------------------------------------------------------
@@ -64,6 +73,8 @@ void Square::write_reg1(uint8_t value) {
 void Square::write_reg2(uint8_t value) {
 
 	timer_reload_ = (timer_reload_ & 0xff00) | value;
+	timer_.set_frequency(timer_reload_ + 1);
+	sweep_.update_target_period(false);
 }
 
 //------------------------------------------------------------------------------
@@ -71,23 +82,26 @@ void Square::write_reg2(uint8_t value) {
 //------------------------------------------------------------------------------
 void Square::write_reg3(uint8_t value) {
 
-	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);
-	
-	// multiply by 2 so it is the same as if it were clocked
-	// every other CPU cycle
-	timer_.set_frequency((timer_reload_ + 1) * 2);
+	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);	
+	timer_.set_frequency(timer_reload_ + 1);
+	sweep_.update_target_period(false);
 
 	if(enabled_) {
 		length_counter_.load((value >> 3) & 0x1f);
 	}
+	
+	sequence_index_ = 0;
+	envelope_.start();
 }
 
 //------------------------------------------------------------------------------
 // Name: tick
 //------------------------------------------------------------------------------
 void Square::tick() {
-	if(enabled() && timer_.tick()) {
-		// do query wave stuff
+	if(timer_.tick() && enabled()) {
+		// do square wave stuff
+		
+		sequence_index_ = (sequence_index_ + 1) % 8;
 	}
 }
 
@@ -103,4 +117,30 @@ bool Square::enabled() const {
 //------------------------------------------------------------------------------
 LengthCounter &Square::length_counter() {
 	return length_counter_;
+}
+
+//------------------------------------------------------------------------------
+// Name: dac
+//------------------------------------------------------------------------------
+uint8_t Square::output() const {
+
+	if(!sequence[duty_][sequence_index_] || length_counter_.value() == 0 || sweep_.silence_channel()) {
+		return 0;	
+	} else {
+		return envelope_.volume();
+	}
+}
+
+//------------------------------------------------------------------------------
+// Name: envelope
+//------------------------------------------------------------------------------
+Envelope &Square::envelope() {
+	return envelope_;
+}
+
+//------------------------------------------------------------------------------
+// Name: sweep
+//------------------------------------------------------------------------------
+Sweep &Square::sweep() {
+	return sweep_;
 }
