@@ -4,6 +4,7 @@
 
 #include "libunif/load_ines.h"
 #include <string>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 
 class Mapper;
@@ -38,7 +39,7 @@ public:
 	uint8_t *chr() const;
 	MIRRORING mirroring() const;
 	const boost::shared_ptr<Mapper> &mapper() const;
-	uint8_t *raw_image (int32_t &length) const;
+	std::vector<uint8_t> raw_image() const;
 
 private:
 	ines_cart_t               cart_;

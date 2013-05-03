@@ -191,27 +191,23 @@ uint32_t Cart::rom_hash() const {
 	return rom_hash_;
 }
 
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+std::vector<uint8_t> Cart::raw_image() const {
 
-uint8_t *Cart::raw_image(int32_t &length) const 
-{
-	uint8_t *prgRom = nes::cart.prg();
-	uint8_t *chrRom = nes::cart.chr();
-
-	int32_t prgSize = nes::cart.prg_pages() * 16 * 1024;
-	int32_t chrSize = 0;
+	const uint8_t *const prgRom  = nes::cart.prg();
+	const uint8_t *const chrRom  = nes::cart.chr();
+	const size_t         prgSize = nes::cart.prg_pages() * 16 * 1024;	
 	
+	// create a vector and copy the PRG into it
+	std::vector<uint8_t> image(prgRom, prgRom + prgSize);
+	
+	// if there is CHR, insert it at the end of the vector
 	if (chrRom != NULL) {
-		chrSize = nes::cart.chr_pages() * 8 * 1024;
+		const size_t chrSize = nes::cart.chr_pages() * 8 * 1024;
+		image.insert(image.end(), chrRom, chrRom + chrSize);
 	}
 	
-	length = prgSize+chrSize;
-	
-	uint8_t *buffer = new uint8_t[length];
-	std::memcpy(buffer, prgRom, prgSize);
-	
-	if (chrRom != NULL) {
-		std::memcpy(buffer+prgSize, chrRom, chrSize);
-	}
-	
- 	return buffer;
+ 	return image;
 }

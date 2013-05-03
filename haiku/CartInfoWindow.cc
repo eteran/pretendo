@@ -78,9 +78,8 @@ CartInfoWindow::CartInfoWindow()
 	tab->SetLabel("CIC Info");
 	
 	
-	int32_t length;
-	const char *ptr = reinterpret_cast<char *>(cart.raw_image(length));
-    BString stringSHA1 = StreamToSHA1 (ptr, length);
+	std::vector<uint8_t> image = cart.raw_image();
+    BString stringSHA1 = StreamToSHA1 (&image[0], image.size());
     (new BAlert(0, stringSHA1.String(), "Okay"))->Go();
     
     
