@@ -31,7 +31,7 @@ private:
 	uint16_t value_;
 	uint16_t target_period_;
 	uint8_t divider_;
-	uint8_t divider_period_;
+	uint8_t period_;
 	uint8_t shift_;
 	uint8_t negate_;
 	uint8_t enable_;

@@ -6,7 +6,7 @@
 // Name: Sweep
 //------------------------------------------------------------------------------
 Sweep::Sweep(Timer &timer) : timer_(timer), value_(0), target_period_(0), 
-		divider_(0), divider_period_(0), shift_(0), negate_(0), enable_(0),
+		divider_(0), period_(0), shift_(0), negate_(0), enable_(0),
 		reload_(false), silence_(false) {
 
 }
@@ -59,16 +59,14 @@ void Sweep::update_target_period(bool from_divider) {
 //------------------------------------------------------------------------------
 void Sweep::clock() {
 
-	if(divider_) {	
-		--divider_;
-		
-		if(!divider_) {
+	if(divider_) {			
+		if(--divider_ == 0) {
 			update_target_period(true);
 		
 		
 			if(reload_) {
 				reload_  = false;		
-				divider_ = divider_period_ + 1;
+				divider_ = period_ + 1;
 			}
 		}
 	}
@@ -80,7 +78,7 @@ void Sweep::clock() {
 void Sweep::clock_divider() {
 		
 	if(divider_ == 0) {
-		divider_ = divider_period_;
+		divider_ = period_;
 	}
 }
 
@@ -89,7 +87,7 @@ void Sweep::clock_divider() {
 //------------------------------------------------------------------------------
 void Sweep::set_control(uint8_t value) {
 	enable_         = (value & 0x80);
-	divider_period_ = (value >> 4) & 0x07;
+	period_ = (value >> 4) & 0x07;
 	negate_         = (value & 0x08);
 	shift_          = (value & 0x07);
 }
