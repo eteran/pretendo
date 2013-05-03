@@ -199,11 +199,13 @@ uint8_t *Cart::raw_image(int32_t &length) const
 {
 	uint8_t *prgRom = nes::cart.prg();
 	uint8_t *chrRom = nes::cart.chr();
-	
-	if (chrRom == NULL) chrSize = 0;
-	
+
 	int32_t prgSize = nes::cart.prg_pages() * 16 * 1024;
-	int32_t chrSize = nes::cart.chr_pages() * 8 * 1024;
+	int32_t chrSize = 0;
+	
+	if (chrRom != NULL) {
+		chrSize = nes::cart.chr_pages() * 8 * 1024;
+	}
 	
 	length = prgSize+chrSize;
 	
