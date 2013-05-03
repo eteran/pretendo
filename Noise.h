@@ -6,6 +6,8 @@
 #include <boost/noncopyable.hpp>
 #include "LengthCounter.h"
 #include "Timer.h"
+#include "LFSR.h"
+#include "Envelope.h"
 
 using boost::uint8_t;
 using boost::uint16_t;
@@ -30,15 +32,19 @@ public:
 	bool enabled() const;
 public:
 	void tick();
+	uint8_t output() const;
 
 public:
 	LengthCounter &length_counter();
+	Envelope      &envelope();
 
 private:
 	LengthCounter length_counter_;
+	Envelope      envelope_;
 	bool          enabled_;
-	uint8_t       mode_;
 	Timer         timer_;
+	uint8_t       output_;
+	LFSR          lfsr_;
 };
 
 #endif

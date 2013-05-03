@@ -33,6 +33,8 @@ public:
 		STATUS_ENABLE_SQUARE_1 = 0x01,
 		STATUS_ENABLE_ALL	   = STATUS_ENABLE_SQUARE_1 | STATUS_ENABLE_SQUARE_2 | STATUS_ENABLE_TRIANGLE | STATUS_ENABLE_NOISE | STATUS_ENABLE_DMC
 	};
+	
+	static const int buffer_size = 735;
 
 public:
 	APU();
@@ -71,6 +73,9 @@ public:
 
 public:
 	void run(int cycles);
+	
+public:
+	const uint8_t *buffer();
 
 private:
 	void clock_frame_mode_0();
@@ -79,8 +84,8 @@ private:
 	void clock_linear();
 
 private:
-	Square   square_1;
-	Square   square_2;
+	Square   square_1_;
+	Square   square_2_;
 	Triangle triangle_;
 	Noise    noise_;
 	DMC      dmc_;
@@ -91,6 +96,10 @@ private:
 	uint8_t  status_;
 	uint8_t  frame_counter_;
 	uint8_t  last_frame_counter_;
+	
+private:
+	uint8_t sample_buffer_[buffer_size];
+	size_t  sample_index_;
 };
 
 #endif

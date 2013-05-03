@@ -78,9 +78,7 @@ void Cart::load(const std::string &s) {
 		std::cout << "PRG HASH: " << std::hex << std::setw(8) << std::setfill('0') << prg_hash_ << std::dec << std::endl;
 		std::cout << "CHR HASH: " << std::hex << std::setw(8) << std::setfill('0') << chr_hash_ << std::dec << std::endl;
 		std::cout << "ROM HASH: " << std::hex << std::setw(8) << std::setfill('0') << rom_hash_ << std::dec << std::endl;
-		
-		
-		
+
 		if((prg_size & (prg_size - 1)) != 0) {
 			std::cout << "WARNING: PRG size is not a power of 2, this is unusual" << std::endl;
 		}

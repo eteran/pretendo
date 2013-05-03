@@ -13,7 +13,7 @@ const uint16_t frequency_table[16] = {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Noise::Noise() : enabled_(false) {
+Noise::Noise() : enabled_(false), output_(0) {
 
 }
 
@@ -49,6 +49,9 @@ void Noise::write_reg0(uint8_t value) {
 	} else {
 		length_counter_.resume();
 	}
+	
+	envelope_.set_constant(value & 0x10);
+	envelope_.set_divider(value & 0x0f);
 }
 
 //------------------------------------------------------------------------------
@@ -56,7 +59,7 @@ void Noise::write_reg0(uint8_t value) {
 //------------------------------------------------------------------------------
 void Noise::write_reg2(uint8_t value) {
 	
-	mode_ = value & 0x80;
+	lfsr_.set_mode(value & 0x80);
 	timer_.set_frequency(frequency_table[value & 0x0f]);
 }
 
@@ -68,6 +71,8 @@ void Noise::write_reg3(uint8_t value) {
 	if(enabled_) {
 		length_counter_.load((value >> 3) & 0x1f);
 	}
+	
+	envelope_.start();
 }
 
 //------------------------------------------------------------------------------
@@ -88,7 +93,25 @@ LengthCounter &Noise::length_counter() {
 // Name: tick
 //------------------------------------------------------------------------------
 void Noise::tick() {
-	if(enabled() && timer_.tick()) {
-	
+	if(timer_.tick() && enabled()) {
+		lfsr_.clock();
 	}
+}
+
+//------------------------------------------------------------------------------
+// Name: dac
+//------------------------------------------------------------------------------
+uint8_t Noise::output() const {
+	if(length_counter_.value() == 0 || ((lfsr_.value() & 1) == 0)) {
+		return 0;
+	} else {
+		return envelope_.volume();
+	}
+}
+
+//------------------------------------------------------------------------------
+// Name: envelope
+//------------------------------------------------------------------------------
+Envelope &Noise::envelope() {
+	return envelope_;
 }

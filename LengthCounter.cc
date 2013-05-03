@@ -82,7 +82,7 @@ void LengthCounter::resume() {
 //------------------------------------------------------------------------------
 // Name: value
 //------------------------------------------------------------------------------
-uint8_t LengthCounter::value()  {
+uint8_t LengthCounter::value() const{
 	if(reload_) {
 		value_  = reload_value_;
 		reload_ = false;
@@ -94,7 +94,7 @@ uint8_t LengthCounter::value()  {
 //------------------------------------------------------------------------------
 // Name: clock
 //------------------------------------------------------------------------------
-uint8_t LengthCounter::clock() {
+void LengthCounter::clock() {
 
 	bool prevent_decrement     = false;
 	const uint64_t cycle_count = nes::apu.cycle_count();
@@ -126,5 +126,4 @@ uint8_t LengthCounter::clock() {
 	}
 
 	reload_ = false;
-	return value_;
 }

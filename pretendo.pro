@@ -11,8 +11,11 @@ HEADERS += \
 		ConfigManager.h \
 		Controller.h \
 		DMC.h \
+		Envelope.h \
+		Sweep.h \
 		Input.h \
 		LengthCounter.h \
+		LinearCounter.h \
 		MMC3.h \
 		Mapper.h \
 		Mapper000.h \
@@ -110,8 +113,11 @@ SOURCES += \
 		ConfigManager.cc \
 		Controller.cc \
 		DMC.cc \
+		Envelope.cc \
+		Sweep.cc \
 		Input.cc \
 		LengthCounter.cc \
+		LinearCounter.cc \
 		MMC3.cc \
 		Mapper.cc \
 		Mapper000.cc \

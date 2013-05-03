@@ -90,9 +90,9 @@ void Pretendo::update() {
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
-#if 0
-	const APU::buffer b = nes::apu.fill_buffer();
-	audio_->write(b.ptr, b.length);
+#if 1
+	const uint8_t *const b = nes::apu.buffer();
+	audio_->write(b, APU::buffer_size);
 #endif
 
 	// FPS calculation
