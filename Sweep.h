@@ -17,26 +17,26 @@ public:
 	~Sweep();
 	
 public:
-	void clock();
+	void clock(int channel);
 	void reload();
 	void set_control(uint8_t value);
-	void update_target_period(bool from_divider);
-	bool silence_channel() const;
+	void set_pulse_period(uint16_t value);
+	bool silenced() const;
 	
 private:
-	void clock_divider();
+	uint16_t target_period(int channel) const;
 	
 private:
 	Timer   &timer_;
 	uint16_t value_;
-	uint16_t target_period_;
-	uint8_t divider_;
+	uint16_t pulse_period_;
+	uint8_t counter_;
 	uint8_t period_;
 	uint8_t shift_;
 	uint8_t negate_;
 	uint8_t enable_;
 	bool    reload_;
-	bool    silence_;
+	bool    silenced_;
 };
 
 #endif

@@ -13,7 +13,7 @@ const uint16_t frequency_table[16] = {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Noise::Noise() : enabled_(false), output_(0) {
+Noise::Noise() : enabled_(false) {
 
 }
 
@@ -50,6 +50,7 @@ void Noise::write_reg0(uint8_t value) {
 		length_counter_.resume();
 	}
 	
+	envelope_.set_loop(value & 0x20);
 	envelope_.set_constant(value & 0x10);
 	envelope_.set_divider(value & 0x0f);
 }
@@ -93,13 +94,13 @@ LengthCounter &Noise::length_counter() {
 // Name: tick
 //------------------------------------------------------------------------------
 void Noise::tick() {
-	if(timer_.tick() && enabled()) {
+	if(timer_.tick()) {
 		lfsr_.clock();
 	}
 }
 
 //------------------------------------------------------------------------------
-// Name: dac
+// Name: output
 //------------------------------------------------------------------------------
 uint8_t Noise::output() const {
 	if(length_counter_.value() == 0 || ((lfsr_.value() & 1) == 0)) {

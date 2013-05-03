@@ -16,7 +16,7 @@ const uint8_t sequence[32] = {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Triangle::Triangle() : enabled_(false), timer_load_(0), output_(0), sequence_index_(0) {
+Triangle::Triangle() : enabled_(false), timer_load_(0), sequence_index_(0) {
 
 }
 
@@ -61,8 +61,8 @@ void Triangle::write_reg0(uint8_t value) {
 // Name: write_reg2
 //------------------------------------------------------------------------------
 void Triangle::write_reg2(uint8_t value) {
-	timer_load_  = (timer_load_  & 0xff00) | value;
-	timer_.set_frequency(timer_load_);	
+	timer_load_ = (timer_load_  & 0xff00) | value;
+	timer_.set_frequency(timer_load_ + 1);	
 }
 
 //------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ void Triangle::write_reg3(uint8_t value) {
 	}
 
 	timer_load_ = (timer_load_ & 0x00ff) | ((value & 0x07) << 8);
-	timer_.set_frequency(timer_load_);
+	timer_.set_frequency(timer_load_ + 1);
 	
 	linear_counter_.halt();
 }
@@ -105,16 +105,8 @@ LinearCounter &Triangle::linear_counter() {
 // Name: tick
 //------------------------------------------------------------------------------
 void Triangle::tick() {
-	if(timer_.tick() && enabled()) {
-		// do triangle wave stuff
-		if(length_counter_.value() && linear_counter_.value()) {
-			if(timer_.frequency() < 4) {
-				output_ = 0x00;
-			} else {
-				output_ = sequence[sequence_index_++];
-			}
-			sequence_index_ &= 0x1f;
-		}
+	if(timer_.tick()) {
+		sequence_index_ = (sequence_index_ + 1) % 32;
 	}
 }
 
@@ -122,6 +114,11 @@ void Triangle::tick() {
 // Name: dac
 //------------------------------------------------------------------------------
 uint8_t Triangle::output() const {
-	return output_;
-
+	if(length_counter_.value() && linear_counter_.value()) {
+		if(timer_.frequency() < 4) {
+			return 0x00;
+		} else {
+			return sequence[sequence_index_];
+		}
+	}
 }

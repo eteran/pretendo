@@ -19,6 +19,7 @@ public:
 	void start();
 	void set_constant(uint8_t value);
 	void set_divider(uint8_t value);
+	void set_loop(uint8_t value);
 	uint8_t volume() const;
 	
 private:
@@ -26,7 +27,7 @@ private:
 
 private:
 	bool    start_;
-	bool    loop_;
+	uint8_t loop_;
 	uint8_t constant_;
 	uint8_t constant_volume_;
 	uint8_t counter_;

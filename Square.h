@@ -50,7 +50,6 @@ private:
 	uint8_t       duty_;
 	uint8_t       sequence_index_;
 	bool          enabled_;	
-	uint8_t       output_;
 };
 
 #endif
