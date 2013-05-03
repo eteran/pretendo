@@ -7,7 +7,6 @@
 #include <iomanip>
 
 namespace {
-	using namespace std;
 
 //------------------------------------------------------------------------------
 // Name:
@@ -59,8 +58,8 @@ void Cart::load(const std::string &s) {
 	if(r == UNIF_OK) {
 		std::cout << " OK!" << std::endl;
 		
-		const size_t prg_size = prg_pages() * K<16>::value;
-		const size_t chr_size = chr_pages() * K<8>::value;
+		const size_t prg_size = prg_pages() * (16 * 1024);
+		const size_t chr_size = chr_pages() * (8 * 1024);
 		
 		// get mask values
 		prg_mask_ = create_mask(prg_size);

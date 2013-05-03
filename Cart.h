@@ -6,11 +6,6 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-template <int N>
-struct K {
-	static const int value = N * 1024;
-};
-
 class Mapper;
 
 class Cart {
