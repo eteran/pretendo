@@ -295,7 +295,7 @@ CartInfoWindow::sha1_to_string(uint32 hash[5])
 
 
 BString
-CartInfoWindow::StreamToSHA1 (const char *stream, int32 length)
+CartInfoWindow::StreamToSHA1 (const uint8 *stream, int32 length)
 {
 
 	boost::uuids::detail::sha1 sha1;

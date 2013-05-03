@@ -48,10 +48,12 @@ H_FILES     := \
 	ConfigManager.h \
 	Controller.h \
 	DMC.h \
+	Envelope.h \
 	Fixed.h \
 	Input.h \
 	LFSR.h \
 	LengthCounter.h \
+	LinearCounter.h \
 	MMC3.h \
 	Mapper.h \
 	Mapper000.h \
@@ -125,6 +127,7 @@ H_FILES     := \
 	ShiftRegister.h \
 	Sprite.h \
 	Square.h \
+	Sweep.h \
 	Timer.h \
 	Triangle.h \
 	VRAMBank.h \
@@ -153,8 +156,10 @@ CXX_FILES   := \
 	Cart.cc \
 	Controller.cc \
 	DMC.cc \
+	Envelope.cc \
 	Input.cc \
 	LengthCounter.cc \
+	LinearCounter.cc \
 	MMC3.cc \
 	Mapper.cc \
 	Mapper000.cc \
@@ -225,6 +230,7 @@ CXX_FILES   := \
 	PPU.cc \
 	Palette.cc \
 	Square.cc \
+	Sweep.cc \
 	Timer.cc \
 	Triangle.cc \
 	VRC2.cc \
