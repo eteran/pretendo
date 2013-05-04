@@ -146,7 +146,8 @@ H_FILES     := \
 	haiku/blitters.h \
 	haiku/copies.h \
 	haiku/SimpleMutex.h \
-	haiku/CartInfoWindow.h
+	haiku/CartInfoWindow.h \
+	haiku/CartInfoView.h
 	
 
 CXX_FILES   := \
@@ -248,7 +249,8 @@ CXX_FILES   := \
 	haiku/PretendoWindow.cc \
 	haiku/VideoScreen.cc \
 	haiku/SimpleMutex.cc \
-	haiku/CartInfoWindow.cc
+	haiku/CartInfoWindow.cc \
+	haiku/CartInfoView.cc
 	
 C_FILES     := \
 	libunif/ines_convert.c \

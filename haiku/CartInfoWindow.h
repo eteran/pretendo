@@ -8,6 +8,8 @@
 #include <libxml/parser.h>
 #include <string>
 
+#include "CartInfoView.h"
+
 using std::string;
 
 class CartInfoWindow : public BWindow
@@ -27,29 +29,30 @@ class CartInfoWindow : public BWindow
 	virtual bool QuitRequested (void);
 	
 	private:
+	CartInfoView *fCartInfoView;
 	
-	BListView *fGameInfoList;
-	BListView *fCartInfoList;
-	BListView *fPeripheralInfoList;
-	BListView *fPRGInfoList;
-	BListView *fCHRInfoList;
-	BListView *fWRAMInfoList;
-	BListView *fMapperInfoList;
-	BListView *fCICInfoList;
-		
-	BView *fMainView;
-	BTabView *fTabView;
+//	BListView *fGameInfoList;
+//	BListView *fCartInfoList;
+//	BListView *fPeripheralInfoList;
+//	BListView *fPRGInfoList;
+//	BListView *fCHRInfoList;
+//	BListView *fWRAMInfoList;
+//	BListView *fMapperInfoList;
+//	BListView *fCICInfoList;
+//		
+//	BView *fMainView;
+//	BTabView *fTabView;
 	
-	public:
-	BListView *GameInfoList (void) { return fGameInfoList; }
-	BListView *CartInfoList (void) { return fCartInfoList; }
-	BListView *PeripheralsList(void) { return fPeripheralInfoList; }
-	BListView *PRGInfoList (void) { return fPRGInfoList; }
-	BListView *CHRInfoList (void) { return fCHRInfoList; }
-	BListView *WRAMInfoList (void) { return fWRAMInfoList; }
-	BListView *MapperInfoList (void) { return fMapperInfoList; }
-	BListView *CICInfoList (void) { return fCICInfoList; }
-	BTabView *TabView (void) { return fTabView; }
+//	public:
+//	BListView *GameInfoList (void) { return fGameInfoList; }
+//	BListView *CartInfoList (void) { return fCartInfoList; }
+//	BListView *PeripheralsList(void) { return fPeripheralInfoList; }
+//	BListView *PRGInfoList (void) { return fPRGInfoList; }
+//	BListView *CHRInfoList (void) { return fCHRInfoList; }
+//	BListView *WRAMInfoList (void) { return fWRAMInfoList; }
+//	BListView *MapperInfoList (void) { return fMapperInfoList; }
+//	BListView *CICInfoList (void) { return fCICInfoList; }
+//	BTabView *TabView (void) { return fTabView; }
 	
 	private:
 	void print_info(rom_match *rom);

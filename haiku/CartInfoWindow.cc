@@ -13,74 +13,27 @@
 
 #include "NES.h"
 
+
 using nes::cart;
 
 CartInfoWindow::CartInfoWindow()
-	: BWindow(BRect(0, 0, 0, 0), "Cart Info", B_FLOATING_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL,
-	B_NOT_RESIZABLE|B_NOT_ZOOMABLE)
+	: BWindow(BRect(0, 0, 100, 100), "Cart Info", B_FLOATING_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL,
+	B_NOT_RESIZABLE|B_NOT_ZOOMABLE),
+	fCartInfoView(NULL)
 {
 	LIBXML_TEST_VERSION;
 	
-	ResizeTo(200, 300);
+	ResizeTo(800, 300);
 	CenterOnScreen();
 		
-	BRect r = Bounds();
-	fMainView = new BView(r, "_main_view", B_FOLLOW_ALL, 0);
-	AddChild(fMainView);
 	
-	fTabView = new BTabView(r, "_tab_view");
-	fMainView->AddChild(fTabView);
-	
-	r = Bounds();
-	r.InsetBy(8, 8);
-	fGameInfoList = new BListView(r, "_game_info_list", B_SINGLE_SELECTION_LIST, B_FOLLOW_ALL);
-	fCartInfoList = new BListView(r, "_cart_info_list");
-	fPeripheralInfoList = new BListView(r, "_periph_info_list");
-	fPRGInfoList = new BListView(r, "_prg_info_list");
-	fCHRInfoList = new BListView(r, "_chr_info_list");
-	fWRAMInfoList = new BListView(r, "_wram_info_list");
-	fMapperInfoList = new BListView(r, "_mapper_info_list");
-	fCICInfoList = new BListView(r, "_cic_info_list");
-	
-	BTab *tab = new BTab;
-	fTabView->AddTab(fGameInfoList, tab);
-	tab->SetLabel("Game Info");
-	
-	
-	
-	tab = new BTab;
-	fTabView->AddTab(fCartInfoList, tab);
-	tab->SetLabel("Cart Info");
-	
-		
-	tab = new BTab;
-	fTabView->AddTab(fPeripheralInfoList, tab);
-	tab->SetLabel("Peripherals");
-	
-	tab = new BTab;
-	fTabView->AddTab(fPRGInfoList, tab);
-	tab->SetLabel("PRG Info");
-	
-	tab = new BTab;
-	fTabView->AddTab(fCHRInfoList, tab);
-	tab->SetLabel("CHR Info");
-	
-	tab = new BTab;
-	fTabView->AddTab(fWRAMInfoList, tab);
-	tab->SetLabel("WRAM Info");
-	
-	tab = new BTab;
-	fTabView->AddTab(fMapperInfoList, tab);
-	tab->SetLabel("Mapper");
-	
-	tab = new BTab;
-	fTabView->AddTab(fCICInfoList, tab);
-	tab->SetLabel("CIC Info");
+	fCartInfoView = new CartInfoView(Bounds());
+	AddChild(fCartInfoView);
 	
 	
 	std::vector<uint8_t> image = cart.raw_image();
     BString stringSHA1 = StreamToSHA1 (&image[0], image.size());
-    (new BAlert(0, stringSHA1.String(), "Okay"))->Go();
+
     
     
     if(xmlDoc *const file = xmlParseFile("/boot/home/Desktop/nescarts.xml")) {
@@ -100,7 +53,8 @@ CartInfoWindow::CartInfoWindow()
         }
         
   
-        xmlCleanupParser();		
+        
+        xmlCleanupParser();	
 }
 
 
