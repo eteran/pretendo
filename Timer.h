@@ -17,7 +17,7 @@ public:
 	void set_frequency(uint16_t frequency);
 	uint16_t frequency() const;
 	uint16_t value() const;
-	void reset();
+
 
 private:
 	uint16_t timer_;

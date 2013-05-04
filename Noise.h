@@ -43,7 +43,6 @@ private:
 	Envelope      envelope_;
 	bool          enabled_;
 	Timer         timer_;
-	uint8_t       output_;
 	LFSR          lfsr_;
 };
 

@@ -19,7 +19,8 @@ T bound(T min, T value, T max) {
 //------------------------------------------------------------------------------
 // Name: APU
 //------------------------------------------------------------------------------
-APU::APU() : apu_cycles_(-1), next_clock_(-1), clock_step_(0), status_(0x00), frame_counter_(0x00), last_frame_counter_(0x00) {
+APU::APU() : apu_cycles_(-1), next_clock_(-1), clock_step_(0), status_(0), 
+		frame_counter_(0), last_frame_counter_(0), sample_index_(0) {
 
 }
 
@@ -269,7 +270,7 @@ void APU::write4015(uint8_t value) {
 uint8_t APU::read4015() {
 	uint8_t ret = status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ);
 
-	// Writing to this register clears the Frame interrupt flag.
+	// reading this register clears the Frame interrupt flag.
 	status_ &= ~STATUS_FRAME_IRQ;
 
 	if(square_1_.length_counter().value() > 0) {
@@ -332,8 +333,8 @@ void APU::clock_length() {
 	triangle_.length_counter().clock();
 	noise_.length_counter().clock();
 	
-	square_1_.sweep().clock();
-	square_2_.sweep().clock();
+	square_1_.sweep().clock(0);
+	square_2_.sweep().clock(1);
 }
 
 //------------------------------------------------------------------------------
@@ -456,15 +457,6 @@ void APU::run(int cycles) {
 			}
 		}
 
-		dmc_.tick();
-		noise_.tick();
-		triangle_.tick();
-		
-		if(apu_cycles_ & 1) {
-			square_1_.tick();
-			square_2_.tick();
-		}
-
 		// TODO: do this better, this is close to but not quite 735 samples per second
 		if(sample_index_ != sizeof(sample_buffer_)) {
 		
@@ -472,16 +464,24 @@ void APU::run(int cycles) {
 		
 			if((apu_cycles_ % 40) == 0) {
 				uint8_t mixer_value = (
-					square_1_.output() + 
+					square_1_.output() +
 					square_2_.output() + 
 					triangle_.output() + 
-					noise_.output()
+					noise_.output() +
+					
+					0
 					);	
 					
 				sample_buffer_[sample_index_] = mixer_value;
 				++sample_index_;
 			}
 		}
+		
+		dmc_.tick();
+		noise_.tick();
+		triangle_.tick();
+		square_1_.tick();
+		square_2_.tick();
 
 		++apu_cycles_;
 	}

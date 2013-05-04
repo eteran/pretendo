@@ -16,7 +16,7 @@ const uint8_t sequence[4][8] = {
 // Name:
 //------------------------------------------------------------------------------
 Square::Square() : sweep_(timer_), timer_reload_(0), duty_(0), sequence_index_(0), 
-		enabled_(false), output_(0) {
+		enabled_(false) {
 
 }
 
@@ -55,6 +55,7 @@ void Square::write_reg0(uint8_t value) {
 		length_counter_.resume();
 	}
 	
+	envelope_.set_loop(value & 0x20);
 	envelope_.set_constant(value & 0x10);
 	envelope_.set_divider(value & 0x0f);
 }
@@ -73,8 +74,8 @@ void Square::write_reg1(uint8_t value) {
 void Square::write_reg2(uint8_t value) {
 
 	timer_reload_ = (timer_reload_ & 0xff00) | value;
-	timer_.set_frequency(timer_reload_ + 1);
-	sweep_.update_target_period(false);
+	timer_.set_frequency((timer_reload_ + 1) * 2);
+	sweep_.set_pulse_period(timer_reload_);
 }
 
 //------------------------------------------------------------------------------
@@ -83,8 +84,8 @@ void Square::write_reg2(uint8_t value) {
 void Square::write_reg3(uint8_t value) {
 
 	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);	
-	timer_.set_frequency(timer_reload_ + 1);
-	sweep_.update_target_period(false);
+	timer_.set_frequency((timer_reload_ + 1) * 2);
+	sweep_.set_pulse_period(timer_reload_);
 
 	if(enabled_) {
 		length_counter_.load((value >> 3) & 0x1f);
@@ -98,9 +99,7 @@ void Square::write_reg3(uint8_t value) {
 // Name: tick
 //------------------------------------------------------------------------------
 void Square::tick() {
-	if(timer_.tick() && enabled()) {
-		// do square wave stuff
-		
+	if(timer_.tick()) {		
 		sequence_index_ = (sequence_index_ + 1) % 8;
 	}
 }
@@ -120,12 +119,18 @@ LengthCounter &Square::length_counter() {
 }
 
 //------------------------------------------------------------------------------
-// Name: dac
+// Name: output
 //------------------------------------------------------------------------------
 uint8_t Square::output() const {
 
-	if(!sequence[duty_][sequence_index_] || length_counter_.value() == 0 || sweep_.silence_channel()) {
-		return 0;	
+	if(timer_.frequency() - 1 < 8) {
+		return 0;
+	} else if(sequence[duty_][sequence_index_] == 0) {
+		return 0;
+	} else if(sweep_.silenced()) {
+		return 0;
+	} else if(length_counter_.value() == 0) {
+		return 0;
 	} else {
 		return envelope_.volume();
 	}

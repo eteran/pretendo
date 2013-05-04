@@ -43,7 +43,6 @@ private:
 	LinearCounter linear_counter_;
 	bool          enabled_;
 	uint16_t      timer_load_;
-	uint8_t       output_;
 	size_t        sequence_index_;
 	Timer         timer_;
 };

@@ -61,9 +61,9 @@ void DMC::enable() {
 	}
 	
 	if(sample_shift_counter_ != 0) {
-		// TODO: process a bit from the sample
-		const int delta = (sample_buffer_ & (1 << (8 - sample_shift_counter_))) ? 2 : -2;			
-		output_ += delta;			
+		const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
+		output_ += delta;
+		sample_buffer_ >>= 1;
 		--sample_shift_counter_;
 	}
 }
@@ -139,7 +139,7 @@ uint16_t DMC::bytes_remaining() const {
 //------------------------------------------------------------------------------
 void DMC::tick() {
 
-	if(timer_.tick() && enabled()) {
+	if(timer_.tick()) {
 
 		if(bytes_remaining_ != 0 && sample_shift_counter_ == 0) {
 			sample_shift_counter_ = 8;
@@ -163,12 +163,9 @@ void DMC::tick() {
 		}
 
 		if(sample_shift_counter_ != 0) {		
-			// TODO: process a bit from the sample
 			const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
-			
 			output_ += delta;
-			
-				
+			sample_buffer_ >>= 1;
 			--sample_shift_counter_;
 		}
 	}
