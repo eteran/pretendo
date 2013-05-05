@@ -13,6 +13,7 @@
 #include <libxml/parser.h>
 #include <stdio.h>
 
+
 class CartInfoView : public BOutlineListView
 {
 	public:
@@ -30,9 +31,9 @@ class CartInfoView : public BOutlineListView
 	virtual void Draw (BRect frame);
 	
 	private:
-	void print_info(rom_match *rom);
-	rom_match *process_database(xmlNodePtr root, const xmlChar *search_key, const xmlChar *search_value);
-	xmlNodePtr process_game(xmlNodePtr game, const xmlChar *search_key, const xmlChar *search_value);
+	void PrintInfo(rom_match *rom);
+	rom_match_t *ProcessDatabase(xmlNodePtr root, const xmlChar *search_key, const xmlChar *search_value);
+	xmlNodePtr ProcessGame(xmlNodePtr game, const xmlChar *search_key, const xmlChar *search_value);
 	std::string SHA1ToString(uint32 hash[5]);
 	BString StreamToSHA1 (const uint8 *stream, int32 length);
 };

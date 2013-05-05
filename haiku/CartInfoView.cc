@@ -7,7 +7,7 @@
 #include <string>
 #include <boost/uuid/sha1.hpp>
 #include <libxml/parser.h>
-
+#include <String.h>
 #include "NES.h"
 
 using nes::cart;
@@ -15,7 +15,6 @@ using nes::cart;
 CartInfoView::CartInfoView(BRect frame)
 	: BOutlineListView(frame, "_cart_info_view")
 {
-	std::cout << "CONSTRUCTOR" << std::endl;
 	std::vector<uint8_t> image = cart.raw_image();
     BString stringSHA1 = StreamToSHA1 (&image[0], image.size());
 
@@ -24,11 +23,11 @@ CartInfoView::CartInfoView(BRect frame)
 		if(const xmlNodePtr root = xmlDocGetRootElement(file)) {
 			if (xmlStrcmp(root->name, 
 				reinterpret_cast<const xmlChar *>("database")) == 0) {
-				if(rom_match *const rom = process_database(root, 
+				if(rom_match *const rom = ProcessDatabase(root, 
 					reinterpret_cast<const xmlChar *>("sha1"), 
 					reinterpret_cast<const xmlChar *>(stringSHA1.String()))) {
 					// goto work!
-					print_info(rom);
+					PrintInfo(rom);
 				}
 			}
 		}
@@ -70,7 +69,8 @@ CartInfoView::Draw (BRect updateRect)
 // Returns: NULL or a pointer to a the <cartridge> node which had a matching 
 //          property/value pair
 //------------------------------------------------------------------------------
-xmlNodePtr CartInfoView::process_game(xmlNodePtr game, const xmlChar *search_key, const xmlChar *search_value) {
+xmlNodePtr 
+CartInfoView::ProcessGame(xmlNodePtr game, const xmlChar *search_key, const xmlChar *search_value) {
 	// get the list of children, this should be text nodes and <cartridge> nodes
 	for(xmlNodePtr cartridge = game->children; cartridge; cartridge = cartridge->next) {
 		if (xmlStrcmp(cartridge->name, reinterpret_cast<const xmlChar *>("cartridge")) == 0) {
@@ -78,8 +78,8 @@ xmlNodePtr CartInfoView::process_game(xmlNodePtr game, const xmlChar *search_key
 
 			if(xmlChar *const value = xmlGetProp(cartridge, search_key)) {
 				if (xmlStrcmp(value, search_value) == 0) {
-					char buffer[256];
-					sprintf (buffer, "Process Game: %s %s\n", value, search_value);
+					BString buffer;
+					buffer << "Process Game: " << " " << reinterpret_cast<char *>(value) << " " << reinterpret_cast<const char *>(search_value);
 					BListItem *processGame = new BStringItem(buffer);
 					AddItem (processGame);
 					return cartridge;
@@ -98,15 +98,15 @@ xmlNodePtr CartInfoView::process_game(xmlNodePtr game, const xmlChar *search_key
 //          no need to free it
 //------------------------------------------------------------------------------
 
-CartInfoView::rom_match *
-CartInfoView::process_database(xmlNodePtr root, const xmlChar *search_key, const xmlChar *search_value) {
+CartInfoView::rom_match_t*
+CartInfoView::ProcessDatabase(xmlNodePtr root, const xmlChar *search_key, const xmlChar *search_value) {
 
 	static rom_match match;
 
 	// get the list of children, this should be text nodes and <game> nodes
 	for(xmlNodePtr game = root->children; game; game = game->next) {
 		if (xmlStrcmp(game->name, reinterpret_cast<const xmlChar *>("game")) == 0) {
-			if(xmlNodePtr node = process_game(game, search_key, search_value)) {
+			if(xmlNodePtr node = ProcessGame(game, search_key, search_value)) {
 				match.game = game;
 				match.cart = node;
 				return &match;
@@ -122,11 +122,10 @@ CartInfoView::process_database(xmlNodePtr root, const xmlChar *search_key, const
 // Desc: prints the info associated with a given game/cart
 //------------------------------------------------------------------------------
 void
-CartInfoView::print_info(rom_match *rom)
+CartInfoView::PrintInfo(rom_match *rom)
 {	
 	char buffer[256];
-	sprintf (buffer, "GAME INFO");
-	BListItem *gameInfo = new BStringItem(buffer);
+	BListItem *gameInfo = new BStringItem("Game Info");
 	AddItem (gameInfo);
 	for(xmlAttr *properties = rom->game->properties; properties; properties = properties->next) {
 		sprintf(buffer, "%-15s: %s\n", properties->name, xmlGetProp(rom->game, properties->name));
@@ -134,8 +133,7 @@ CartInfoView::print_info(rom_match *rom)
 		AddUnder(name, gameInfo);
 	}
 
-	sprintf(buffer, "CART INFO");
-	BListItem *cartInfo = new BStringItem(buffer);
+	BListItem *cartInfo = new BStringItem("Cart Info");
 	AddItem(cartInfo);
 	for(xmlAttr *properties = rom->cart->properties; properties; properties = properties->next) {
 		sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(rom->cart, properties->name));
@@ -146,8 +144,7 @@ CartInfoView::print_info(rom_match *rom)
 	// get the peripherals
 	for(xmlNodePtr node = rom->game->children; node; node = node->next) {		
 		if (xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>("peripherals")) == 0) {
-			sprintf(buffer, "PERIPHERAL INFO");
-			BListItem *periphInfo = new BStringItem(buffer);
+			BListItem *periphInfo = new BStringItem("Peripheral Info");
 			AddItem(periphInfo);
 			
 			for(xmlNodePtr device = node->children; device; device = device->next) {
@@ -166,12 +163,10 @@ CartInfoView::print_info(rom_match *rom)
 			for(xmlNodePtr node = board->children; node; node = node->next) {
 				if (xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>("prg")) == 0) {
 					
-					sprintf(buffer,"%s\n", "PRG INFO");
-					BListItem *prgInfo = new BStringItem(buffer);
+					BListItem *prgInfo = new BStringItem("PRG Info");
 					AddItem(prgInfo);
 					
 					for(xmlAttr *properties = node->properties; properties; properties = properties->next) {
-						
 						sprintf(buffer,"%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
 						BListItem *info = new BStringItem(buffer);
 						AddUnder(info, prgInfo);
@@ -179,40 +174,52 @@ CartInfoView::print_info(rom_match *rom)
 				}
 
 				if (xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>("chr")) == 0) {
-					printf("\n");
-					printf("CHR INFO\n");
+					BListItem *chrInfo = new BStringItem("CHR Info");
+					AddItem(chrInfo);
+					
 					for(xmlAttr *properties = node->properties; properties; properties = properties->next) {
-						printf("%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						BListItem *info = new BStringItem(buffer);
+						AddUnder(info, chrInfo);
 					}
 				}
 
 				if (xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>("wram")) == 0) {
-					printf("\n");
-					printf("WRAM INFO\n");
+					BListItem *wramInfo = new BStringItem("WRAM");
+					AddItem(wramInfo);
 					for(xmlAttr *properties = node->properties; properties; properties = properties->next) {
-						printf("%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						BListItem *info = new BStringItem(buffer);
+						AddUnder(info, wramInfo);
 					}
 				}
 
 				if (xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>("chip")) == 0) {
-					printf("\n");
-					printf("CHIP INFO\n");
+					BListItem *chipInfo = new BStringItem("Chip Info");
+					AddItem(chipInfo);
+
 					for(xmlAttr *properties = node->properties; properties; properties = properties->next) {
-						printf("%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						BListItem *info =  new BStringItem(buffer);
+						AddUnder(info, chipInfo);
 					}
 				}
 
 				if (xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>("cic")) == 0) {
-					printf("\n");
-					printf("CIC INFO\n");
+					BListItem *cicInfo = new BStringItem ("CIC Info");
+					AddItem(cicInfo);
+
 					for (xmlAttr *properties = node->properties; properties; properties = properties->next) {
-						printf("%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						BListItem *info = new BStringItem(buffer);
+						AddUnder(info, cicInfo);
 					}
 				}
 			}
 		}
 	}
 }
+
 
 std::string 
 CartInfoView::SHA1ToString(uint32 hash[5]) 

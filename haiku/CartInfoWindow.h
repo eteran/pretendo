@@ -5,6 +5,7 @@
 #include <Window.h>
 #include <TabView.h>
 #include <ListView.h>
+#include <ScrollView.h>
 #include <libxml/parser.h>
 #include <string>
 
@@ -12,14 +13,19 @@
 
 using std::string;
 
-class CartInfoWindow : public BWindow
+class CartInfoScrollView : public BScrollView
 {
 	public:
-	typedef struct rom_match {
-		xmlNodePtr game;
-		xmlNodePtr cart;
-	} rom_match_t;
+	CartInfoScrollView();
+	virtual ~CartInfoScrollView();
 	
+	public:
+	virtual void Draw(BRect updateRect);
+	virtual void AttachedToWindow (void);
+};
+
+class CartInfoWindow : public BWindow
+{	
 	public:
 			CartInfoWindow();
 	virtual ~CartInfoWindow();
@@ -30,36 +36,6 @@ class CartInfoWindow : public BWindow
 	
 	private:
 	CartInfoView *fCartInfoView;
-	
-//	BListView *fGameInfoList;
-//	BListView *fCartInfoList;
-//	BListView *fPeripheralInfoList;
-//	BListView *fPRGInfoList;
-//	BListView *fCHRInfoList;
-//	BListView *fWRAMInfoList;
-//	BListView *fMapperInfoList;
-//	BListView *fCICInfoList;
-//		
-//	BView *fMainView;
-//	BTabView *fTabView;
-	
-//	public:
-//	BListView *GameInfoList (void) { return fGameInfoList; }
-//	BListView *CartInfoList (void) { return fCartInfoList; }
-//	BListView *PeripheralsList(void) { return fPeripheralInfoList; }
-//	BListView *PRGInfoList (void) { return fPRGInfoList; }
-//	BListView *CHRInfoList (void) { return fCHRInfoList; }
-//	BListView *WRAMInfoList (void) { return fWRAMInfoList; }
-//	BListView *MapperInfoList (void) { return fMapperInfoList; }
-//	BListView *CICInfoList (void) { return fCICInfoList; }
-//	BTabView *TabView (void) { return fTabView; }
-	
-	private:
-	void print_info(rom_match *rom);
-	rom_match *process_database(xmlNodePtr root, const xmlChar *search_key, const xmlChar *search_value);
-	xmlNodePtr process_game(xmlNodePtr game, const xmlChar *search_key, const xmlChar *search_value);
-	std::string SHA1ToString(uint32 hash[5]);
-	BString StreamToSHA1 (const uint8 *stream, int32 length);
 };
 
 
