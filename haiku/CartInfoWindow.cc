@@ -17,81 +17,45 @@
 using nes::cart;
 
 CartInfoWindow::CartInfoWindow()
-	: BWindow(BRect(0, 0, 100, 100), "Cart Info", B_FLOATING_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL,
+	: BWindow(BRect(0, 0, 0, 0), "Cart Info", B_FLOATING_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL,
 	B_NOT_RESIZABLE|B_NOT_ZOOMABLE),
 	fCartInfoView(NULL)
 {
 	LIBXML_TEST_VERSION;
 	
-	ResizeTo(800, 300);
+	ResizeTo(800, 500);
 	CenterOnScreen();
-		
 	
 	fCartInfoView = new CartInfoView(Bounds());
 	AddChild(fCartInfoView);
 	
-	
 	std::vector<uint8_t> image = cart.raw_image();
     BString stringSHA1 = StreamToSHA1 (&image[0], image.size());
 
-    
-    
     if(xmlDoc *const file = xmlParseFile("/boot/home/Desktop/nescarts.xml")) {
+        // get the root element it should be <database>
+		if(const xmlNodePtr root = xmlDocGetRootElement(file)) {
+			if (xmlStrcmp(root->name, 
+				reinterpret_cast<const xmlChar *>("database")) == 0) {
+				if(rom_match *const rom = process_database(root, 
+					reinterpret_cast<const xmlChar *>("sha1"), 
+					reinterpret_cast<const xmlChar *>(stringSHA1.String()))) {
+					// goto work!
+					print_info(rom);
+				}
+			}
+		}
+		
+		xmlFreeDoc(file);
+	}
         
-                // get the root element it should be <database>
-                if(const xmlNodePtr root = xmlDocGetRootElement(file)) {
-                        if (xmlStrcmp(root->name, reinterpret_cast<const xmlChar *>("database")) == 0) {
-                                if(rom_match *const rom = process_database(root, 
-									reinterpret_cast<const xmlChar *>("sha1"), reinterpret_cast<const xmlChar *>(stringSHA1.String()))) {
-                                        // goto work!
-                                        print_info(rom);
-                                }
-                        }
-                }
-        
-                xmlFreeDoc(file);
-        }
-        
-  
-        
-        xmlCleanupParser();	
+	xmlCleanupParser();	
 }
 
 
 CartInfoWindow::~CartInfoWindow()
 {
 }
-
-
-void
-CartInfoWindow::MessageReceived (BMessage *message)
-{
-	switch (message->what) {
-		default:
-			BWindow::MessageReceived (message);
-			break;
-		
-		case 'OKAY':
-			Quit();
-			break;
-	}
-}
-
-
-bool
-CartInfoWindow::QuitRequested (void)
-{
-	return true;
-}
-
-// gcc -I/boot/common/include/libxml2 -I/pretendo/boost_1_50_0 rominfo.cc -o rominfo -lxml2 -lstdc++
-
-
-struct rom_match {
-	xmlNodePtr game;
-	xmlNodePtr cart;
-};
-
 
 //------------------------------------------------------------------------------
 // Name: process_game
@@ -225,7 +189,7 @@ CartInfoWindow::print_info(rom_match *rom) {
 }
 
 std::string 
-CartInfoWindow::sha1_to_string(uint32 hash[5]) 
+CartInfoWindow::SHA1ToString(uint32 hash[5]) 
 {
 	static const char hexchars[] = "0123456789ABCDEF";
 	char buf[40];
@@ -265,3 +229,27 @@ CartInfoWindow::StreamToSHA1 (const uint8 *stream, int32 length)
   	bstHash += buffer;
   	return bstHash;
 }
+
+
+void
+CartInfoWindow::MessageReceived (BMessage *message)
+{
+	switch (message->what) {
+		default:
+			BWindow::MessageReceived (message);
+			break;
+		
+		case 'OKAY':
+			Quit();
+			break;
+	}
+}
+
+
+bool
+CartInfoWindow::QuitRequested (void)
+{
+	return true;
+}
+
+// gcc -I/boot/common/include/libxml2 -I/pretendo/boost_1_50_0 rominfo.cc -o rominfo -lxml2 -lstdc++
