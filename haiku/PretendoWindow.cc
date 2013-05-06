@@ -153,6 +153,7 @@ PretendoWindow::~PretendoWindow()
 	delete_area (fBitsArea);
 	delete_area (fDirtyArea);
 	
+	fAudioStream->Stop();
 	delete fAudioStream;
 	
 	fRunning = fDirectConnected = false;
@@ -442,8 +443,6 @@ PretendoWindow::OnLoadCart (BMessage *message)
 {
 	BString path;
 	
-	
-	
 	if (message->FindString ("path", &path) == B_OK) {
 		OnFreeCart();
 		nes::cart.load(path.String());
@@ -493,6 +492,7 @@ PretendoWindow::OnRun (void)
 			//release_sem(fMutex);
 			fMutex->Unlock();
 			fRunning = true;
+			fAudioStream->Start();
 		}
 	}
 }
@@ -503,7 +503,7 @@ PretendoWindow::OnStop (void)
 {		
 	if (fRunning) {
 		fRunning = false;
-		
+		fAudioStream->Stop();
 		//acquire_sem(fMutex);
 		fMutex->Lock();
 		
@@ -530,10 +530,12 @@ PretendoWindow::OnPause (void)
 			//release_sem(fMutex);
 			fMutex->Unlock();
 			fEmuMenu->ItemAt(1)->SetMarked(false);
+			fAudioStream->Start();
 		} else {
 			//acquire_sem(fMutex);
 			fMutex->Unlock();
 			fEmuMenu->ItemAt(1)->SetMarked(true);
+			fAudioStream->Stop();
 		}
 	
 		fPaused = !fPaused;
@@ -1058,6 +1060,8 @@ PretendoWindow::start_frame()
 void
 PretendoWindow::end_frame()
 {
+	uint8 *buffer = const_cast<uint8 *>(nes::apu.buffer());
+	fAudioStream->Stream(buffer, 735);
 	BlitScreen();
 	fMainLocker.Unlock();
 }
