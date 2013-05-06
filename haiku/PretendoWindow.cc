@@ -503,9 +503,10 @@ PretendoWindow::OnStop (void)
 {		
 	if (fRunning) {
 		fRunning = false;
-		fAudioStream->Stop();
 		//acquire_sem(fMutex);
 		fMutex->Lock();
+		
+		fAudioStream->Stop();
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
 			ClearBitmap (true);
