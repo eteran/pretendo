@@ -124,11 +124,11 @@ CartInfoView::ProcessDatabase(xmlNodePtr root, const xmlChar *search_key, const 
 void
 CartInfoView::PrintInfo(rom_match *rom)
 {	
-	char buffer[256];
+	char buffer[1024];
 	BListItem *gameInfo = new BStringItem("Game Info");
 	AddItem (gameInfo);
 	for(xmlAttr *properties = rom->game->properties; properties; properties = properties->next) {
-		sprintf(buffer, "%-15s: %s", properties->name, xmlGetProp(rom->game, properties->name));
+		snprintf(buffer, sizeof(buffer), "%-15s: %s", properties->name, xmlGetProp(rom->game, properties->name));
 		BListItem *name = new BStringItem(buffer);
 		AddUnder(name, gameInfo);
 	}
@@ -136,7 +136,7 @@ CartInfoView::PrintInfo(rom_match *rom)
 	BListItem *cartInfo = new BStringItem("Cart Info");
 	AddItem(cartInfo);
 	for(xmlAttr *properties = rom->cart->properties; properties; properties = properties->next) {
-		sprintf(buffer, "%-15s : %s", properties->name, xmlGetProp(rom->cart, properties->name));
+		snprintf(buffer, sizeof(buffer), "%-15s : %s", properties->name, xmlGetProp(rom->cart, properties->name));
 		BListItem *info = new BStringItem(buffer);
 		AddUnder(info, cartInfo);
 	}
@@ -149,7 +149,7 @@ CartInfoView::PrintInfo(rom_match *rom)
 			
 			for(xmlNodePtr device = node->children; device; device = device->next) {
 				for(xmlAttr *properties = device->properties; properties; properties = properties->next) {
-					sprintf(buffer, "%-15s : %s", properties->name, xmlGetProp(device, properties->name));
+					snprintf(buffer, sizeof(buffer), "%-15s : %s", properties->name, xmlGetProp(device, properties->name));
 					BListItem *info = new BStringItem(buffer);
 					AddUnder(info, periphInfo);
 				}
