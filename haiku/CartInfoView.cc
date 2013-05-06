@@ -171,6 +171,8 @@ CartInfoView::PrintInfo(rom_match *rom)
 						BListItem *info = new BStringItem(buffer);
 						AddUnder(info, prgInfo);
 					}
+					
+					Collapse(prgInfo);
 				}
 
 				if (xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>("chr")) == 0) {
@@ -182,6 +184,8 @@ CartInfoView::PrintInfo(rom_match *rom)
 						BListItem *info = new BStringItem(buffer);
 						AddUnder(info, chrInfo);
 					}
+					
+					Collapse(chrInfo);
 				}
 
 				if (xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>("wram")) == 0) {
@@ -192,6 +196,8 @@ CartInfoView::PrintInfo(rom_match *rom)
 						BListItem *info = new BStringItem(buffer);
 						AddUnder(info, wramInfo);
 					}
+					
+					Collapse(wramInfo);
 				}
 
 				if (xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>("chip")) == 0) {
@@ -203,6 +209,8 @@ CartInfoView::PrintInfo(rom_match *rom)
 						BListItem *info =  new BStringItem(buffer);
 						AddUnder(info, chipInfo);
 					}
+					
+					Collapse(chipInfo);
 				}
 
 				if (xmlStrcmp(node->name, reinterpret_cast<const xmlChar *>("cic")) == 0) {
@@ -214,8 +222,11 @@ CartInfoView::PrintInfo(rom_match *rom)
 						BListItem *info = new BStringItem(buffer);
 						AddUnder(info, cicInfo);
 					}
+					
+					Collapse(cicInfo);
 				}
 			}
+			
 		}
 	}
 }
