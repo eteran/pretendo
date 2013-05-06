@@ -130,8 +130,6 @@ AudioStream::InternalSync (void *buffer, size_t size)
 		}
 	} else {
 		///uint16 *out = reinterpret_cast<uint16 *>(buffer);
-		
-		
 	}
 	
 	release_sem(fSemaphore);
