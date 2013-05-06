@@ -128,7 +128,7 @@ CartInfoView::PrintInfo(rom_match *rom)
 	BListItem *gameInfo = new BStringItem("Game Info");
 	AddItem (gameInfo);
 	for(xmlAttr *properties = rom->game->properties; properties; properties = properties->next) {
-		sprintf(buffer, "%-15s: %s\n", properties->name, xmlGetProp(rom->game, properties->name));
+		sprintf(buffer, "%-15s: %s", properties->name, xmlGetProp(rom->game, properties->name));
 		BListItem *name = new BStringItem(buffer);
 		AddUnder(name, gameInfo);
 	}
@@ -136,7 +136,7 @@ CartInfoView::PrintInfo(rom_match *rom)
 	BListItem *cartInfo = new BStringItem("Cart Info");
 	AddItem(cartInfo);
 	for(xmlAttr *properties = rom->cart->properties; properties; properties = properties->next) {
-		sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(rom->cart, properties->name));
+		sprintf(buffer, "%-15s : %s", properties->name, xmlGetProp(rom->cart, properties->name));
 		BListItem *info = new BStringItem(buffer);
 		AddUnder(info, cartInfo);
 	}
@@ -149,7 +149,7 @@ CartInfoView::PrintInfo(rom_match *rom)
 			
 			for(xmlNodePtr device = node->children; device; device = device->next) {
 				for(xmlAttr *properties = device->properties; properties; properties = properties->next) {
-					sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(device, properties->name));
+					sprintf(buffer, "%-15s : %s", properties->name, xmlGetProp(device, properties->name));
 					BListItem *info = new BStringItem(buffer);
 					AddUnder(info, periphInfo);
 				}
@@ -167,7 +167,7 @@ CartInfoView::PrintInfo(rom_match *rom)
 					AddItem(prgInfo);
 					
 					for(xmlAttr *properties = node->properties; properties; properties = properties->next) {
-						sprintf(buffer,"%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						snprintf(buffer, sizeof(buffer), "%-15s : %s", properties->name, xmlGetProp(node, properties->name));
 						BListItem *info = new BStringItem(buffer);
 						AddUnder(info, prgInfo);
 					}
@@ -180,7 +180,7 @@ CartInfoView::PrintInfo(rom_match *rom)
 					AddItem(chrInfo);
 					
 					for(xmlAttr *properties = node->properties; properties; properties = properties->next) {
-						sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						snprintf(buffer, sizeof(buffer), "%-15s : %s", properties->name, xmlGetProp(node, properties->name));
 						BListItem *info = new BStringItem(buffer);
 						AddUnder(info, chrInfo);
 					}
@@ -192,7 +192,7 @@ CartInfoView::PrintInfo(rom_match *rom)
 					BListItem *wramInfo = new BStringItem("WRAM");
 					AddItem(wramInfo);
 					for(xmlAttr *properties = node->properties; properties; properties = properties->next) {
-						sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						snprintf(buffer, sizeof(buffer), "%-15s : %s", properties->name, xmlGetProp(node, properties->name));
 						BListItem *info = new BStringItem(buffer);
 						AddUnder(info, wramInfo);
 					}
@@ -205,7 +205,7 @@ CartInfoView::PrintInfo(rom_match *rom)
 					AddItem(chipInfo);
 
 					for(xmlAttr *properties = node->properties; properties; properties = properties->next) {
-						sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						snprintf(buffer, sizeof(buffer), "%-15s : %s", properties->name, xmlGetProp(node, properties->name));
 						BListItem *info =  new BStringItem(buffer);
 						AddUnder(info, chipInfo);
 					}
@@ -218,7 +218,7 @@ CartInfoView::PrintInfo(rom_match *rom)
 					AddItem(cicInfo);
 
 					for (xmlAttr *properties = node->properties; properties; properties = properties->next) {
-						sprintf(buffer, "%-15s : %s\n", properties->name, xmlGetProp(node, properties->name));
+						snprintf(buffer, sizeof(buffer), "%-15s : %s", properties->name, xmlGetProp(node, properties->name));
 						BListItem *info = new BStringItem(buffer);
 						AddUnder(info, cicInfo);
 					}
