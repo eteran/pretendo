@@ -469,8 +469,10 @@ PretendoWindow::OnFreeCart (void)
 void
 PretendoWindow::OnCartInfo (void)
 {
-	fCartInfoWindow = new CartInfoWindow();
-	fCartInfoWindow->Show();
+	if (nes::cart.prg() != NULL) {
+		fCartInfoWindow = new CartInfoWindow();
+		fCartInfoWindow->Show();
+	}
 }
 
 void
