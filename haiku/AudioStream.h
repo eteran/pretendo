@@ -13,9 +13,9 @@ class AudioStream
 	virtual ~AudioStream();
 	
 	public:
-	virtual void Stream (uint8 *stream, size_t numSamples);
-	virtual void Start (void);
-	virtual void Stop (void);
+	void Stream (uint8 *stream, size_t numSamples);
+	void Start (void);
+	void Stop (void);
 	
 	public:
 	void InternalSync (void *buffer, size_t size);
