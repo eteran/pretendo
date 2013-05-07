@@ -8,7 +8,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(4);
 // Name: Mapper4
 //------------------------------------------------------------------------------
 Mapper4::Mapper4() : mapper_(
-	(nes::cart.rom_hash() == 0xf312d1de || 
+	(nes::cart.rom_hash() == 0xf312d1de ||
 	 nes::cart.rom_hash() == 0xa512bdf6 ||
 	 nes::cart.rom_hash() == 0x633afe6f ||
 	 nes::cart.rom_hash() == 0x1335cb05

@@ -14,6 +14,8 @@ class QTimer;
 
 #if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
 	class QtAudio;
+#elif defined(ENABLE_SOUND) && defined(USE_SDLAUDIO)
+	class SDLAudio;
 #elif defined(ENABLE_SOUND)
 	class AlsaAudio;
 #else
@@ -59,6 +61,8 @@ private:
 	bool                   paused_;
 #if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
 	QtAudio *audio_;
+#elif defined(ENABLE_SOUND) && defined(USE_SDLAUDIO)
+	SDLAudio *audio_;
 #elif defined(ENABLE_SOUND)
 	AlsaAudio *audio_;
 #else

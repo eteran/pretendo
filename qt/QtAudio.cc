@@ -1,6 +1,7 @@
 
 #include "QtAudio.h"
 #include "AudioBuffer.h"
+#include "../APU.h"
 #include <QtMultimedia/QAudioOutput>
 #include <iostream>
 #include <QtDebug>
@@ -16,7 +17,7 @@ QtAudio::QtAudio(QObject *parent) : QObject(parent) {
 
 	// Set up the format
 	format.setChannels(1);
-	format.setFrequency(44100);
+	format.setFrequency(APU::frequency);
 	format.setSampleSize(8);
 	format.setCodec("audio/pcm");
 	format.setByteOrder(QAudioFormat::LittleEndian);
@@ -28,9 +29,6 @@ QtAudio::QtAudio(QObject *parent) : QObject(parent) {
 	}
 
 	audio_ = new QAudioOutput(format, this);
-
-	audio_->setBufferSize(735);
-
 	audio_buffer_ = new AudioBuffer(this);
 }
 

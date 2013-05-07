@@ -87,7 +87,7 @@ bool ConfigManager::Save() {
 	}
 
 	for(config_iterator ci = map_.begin(); ci != map_.end(); ci++) {
-	
+
 		file << "\n[" << ci->first << "]" << std::endl;
 
 		for(kv_iterator ki = map_[ci->first].begin(); ki != map_[ci->first].end(); ki++) {
@@ -105,7 +105,7 @@ bool ConfigManager::Save() {
 
 
 bool ConfigManager::DeleteSection(const std::string &section) {
-	
+
 	std::cout << "DeleteSection -> " << section << std::endl;
 	const config_iterator ci = map_.find(section);
 

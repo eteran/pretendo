@@ -49,7 +49,7 @@ private:
 	uint8_t read_handler(uint16_t address);
 
 private:
-	
+
 	uint8_t  prg_ram_[2][0x8000];
 	uint8_t  exram_[0x400];
 	uint8_t  bg_chr_banks_[8];

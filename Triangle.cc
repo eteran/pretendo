@@ -52,9 +52,8 @@ void Triangle::write_reg0(uint8_t value) {
 	} else {
 		length_counter_.resume();
 	}
-	
-	linear_counter_.set_mode(value & 0x80);
-	linear_counter_.set_reload(value & 0x7f);
+
+	linear_counter_.set_control(value);
 }
 
 //------------------------------------------------------------------------------
@@ -62,7 +61,7 @@ void Triangle::write_reg0(uint8_t value) {
 //------------------------------------------------------------------------------
 void Triangle::write_reg2(uint8_t value) {
 	timer_load_ = (timer_load_  & 0xff00) | value;
-	timer_.set_frequency(timer_load_ + 1);	
+	timer_.set_frequency(timer_load_ + 1);
 }
 
 //------------------------------------------------------------------------------
@@ -76,8 +75,8 @@ void Triangle::write_reg3(uint8_t value) {
 
 	timer_load_ = (timer_load_ & 0x00ff) | ((value & 0x07) << 8);
 	timer_.set_frequency(timer_load_ + 1);
-	
-	linear_counter_.halt();
+
+	linear_counter_.reload();
 }
 
 //------------------------------------------------------------------------------
@@ -105,7 +104,7 @@ LinearCounter &Triangle::linear_counter() {
 // Name: tick
 //------------------------------------------------------------------------------
 void Triangle::tick() {
-	if(timer_.tick()) {
+	if(timer_.tick() && length_counter_.value() && linear_counter_.value()) {
 		sequence_index_ = (sequence_index_ + 1) % 32;
 	}
 }
@@ -114,11 +113,9 @@ void Triangle::tick() {
 // Name: dac
 //------------------------------------------------------------------------------
 uint8_t Triangle::output() const {
-	if(length_counter_.value() && linear_counter_.value()) {
-		if(timer_.frequency() < 4) {
-			return 0x00;
-		} else {
-			return sequence[sequence_index_];
-		}
+	if(timer_.frequency() < 4) {
+		return 0x00;
+	} else {
+		return sequence[sequence_index_];
 	}
 }

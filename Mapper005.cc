@@ -366,7 +366,7 @@ uint8_t Mapper5::read_5(uint16_t address) {
 	uint8_t ret = (address >> 8);
 
 	switch(address) {
-	case 0x5204:	
+	case 0x5204:
 		ret = irq_status_;
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
 		irq_status_ &= ~IRQ_PENDING;
@@ -720,7 +720,7 @@ void Mapper5::write_3(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper5::vram_change_hook(uint16_t vram_address) {
 
-	
+
 
 	// when this is > 128 (32 * 4), we are fetching sprites, not BG tiles
 	++fetch_count_;
@@ -765,7 +765,7 @@ void Mapper5::clock_irq() {
 // Name: clock_irq
 //------------------------------------------------------------------------------
 void Mapper5::ppu_end_frame() {
-	// since we have no idea how MMC5 detects the end of the frame, 
+	// since we have no idea how MMC5 detects the end of the frame,
 	// we use this hook for now
 	irq_status_ &= ~IN_FRAME;
 }

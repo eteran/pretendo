@@ -559,8 +559,8 @@ uint8_t PPU::read2007() {
 //------------------------------------------------------------------------------
 void PPU::sprite_dma(uint8_t value) {
 	// drain current cycles, then go ahead and do the DMA
-	// the procedure takes 513 CPU cycles (+1 on odd CPU cycles): 
-	// first one (or two) idle cycles, and then 256 pairs of alternating 
+	// the procedure takes 513 CPU cycles (+1 on odd CPU cycles):
+	// first one (or two) idle cycles, and then 256 pairs of alternating
 	// read/write cycles.
 #if 1
 	if((nes::cpu.cycle_count() & 1)) {

@@ -13,7 +13,7 @@ public:
 
 public:
 	virtual void write_8(uint16_t address, uint8_t value);
-	
+
 private:
 	uint8_t command_;
 };

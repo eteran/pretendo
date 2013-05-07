@@ -37,7 +37,7 @@ void DMC::enable() {
 	if(bytes_remaining_ == 0) {
 		bytes_remaining_ = sample_length_;
 	}
-	
+
 	// immediate load the first byte if the shift counter is empty
 	if(bytes_remaining_ != 0 && sample_shift_counter_ == 0) {
 		sample_shift_counter_ = 8;
@@ -59,7 +59,7 @@ void DMC::enable() {
 			}
 		}
 	}
-	
+
 	if(sample_shift_counter_ != 0) {
 		const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
 		output_ += delta;
@@ -162,7 +162,7 @@ void DMC::tick() {
 			}
 		}
 
-		if(sample_shift_counter_ != 0) {		
+		if(sample_shift_counter_ != 0) {
 			const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
 			output_ += delta;
 			sample_buffer_ >>= 1;

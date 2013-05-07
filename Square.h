@@ -15,8 +15,10 @@ using boost::uint32_t;
 using boost::uint64_t;
 
 class Square : public boost::noncopyable {
+	friend class Sweep;
+	
 public:
-	Square();
+	explicit Square(int channel);
 	~Square();
 
 public:
@@ -49,7 +51,7 @@ private:
 	uint16_t      timer_reload_;
 	uint8_t       duty_;
 	uint8_t       sequence_index_;
-	bool          enabled_;	
+	bool          enabled_;
 };
 
 #endif

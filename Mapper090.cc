@@ -128,7 +128,7 @@ void Mapper90::write_8(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper90::write_9(uint16_t address, uint8_t value) {
-	
+
 	switch(address & 0x07) {
 	case 0x00:
 	case 0x01:
@@ -149,7 +149,7 @@ void Mapper90::write_9(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper90::write_a(uint16_t address, uint8_t value) {
-	
+
 	switch(address & 0x07) {
 	case 0x00:
 	case 0x01:

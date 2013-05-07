@@ -46,7 +46,7 @@ void Mapper79::write_5(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper79::write_handler(uint16_t address, uint8_t value) {
 	assert((address & 0x4100) == 0x4100);
-	
+
 	(void)address;
 
 	set_prg_89abcdef((value >> 3) & 0x07);

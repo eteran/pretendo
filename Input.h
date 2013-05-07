@@ -24,7 +24,7 @@ public:
 
 private:
 	uint8_t    strobe_;
-	Controller controller1_;	
+	Controller controller1_;
 	Controller controller2_;
 	Controller controller3_;
 	Controller controller4_;

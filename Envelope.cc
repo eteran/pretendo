@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // Name: Envelope
 //------------------------------------------------------------------------------
-Envelope::Envelope() : start_(false), loop_(false), constant_(0), constant_volume_(0), counter_(0), divider_(0) {
+Envelope::Envelope() : start_(false), counter_(0), divider_(0xff), control_(0) {
 }
 
 //------------------------------------------------------------------------------
@@ -18,8 +18,8 @@ Envelope::~Envelope() {
 // Name: volume
 //------------------------------------------------------------------------------
 uint8_t Envelope::volume() const {
-	if(constant_) {
-		return constant_volume_;
+	if(control_ & 0x10) {
+		return control_ & 0x0f;
 	} else {
 		return counter_;
 	}
@@ -28,26 +28,8 @@ uint8_t Envelope::volume() const {
 //------------------------------------------------------------------------------
 // Name: set_loop
 //------------------------------------------------------------------------------
-void Envelope::set_loop(uint8_t value) {
-	loop_ = value;
-}
-
-//------------------------------------------------------------------------------
-// Name: set_constant
-//------------------------------------------------------------------------------
-void Envelope::set_constant(uint8_t value) {
-	constant_ = value;
-}
-
-//------------------------------------------------------------------------------
-// Name: start
-//------------------------------------------------------------------------------
-void Envelope::set_divider(uint8_t value) {
-
-	constant_volume_ = value & 0x0f;
-	if(!constant_) {
-		divider_ = (value & 0x0f) + 1;		
-	}
+void Envelope::set_control(uint8_t value) {
+	control_ = value;
 }
 
 //------------------------------------------------------------------------------
@@ -66,6 +48,7 @@ void Envelope::clock() {
 	} else {
 		start_   = false;
 		counter_ = 15;
+		divider_ = (control_ & 0x0f) + 1;
 	}
 }
 
@@ -73,9 +56,13 @@ void Envelope::clock() {
 // Name: clock_divider
 //------------------------------------------------------------------------------
 void Envelope::clock_divider() {
-	if(counter_) {
-		--counter_;
-	} else if(loop_) {
-		counter_ = 15;
+
+	if(--divider_ == 0) {
+		divider_ = (control_ & 0x0f) + 1;
+		if(counter_) {
+			--counter_;
+		} else if(control_ & 0x20) {
+			counter_ = 15;
+		}
 	}
 }

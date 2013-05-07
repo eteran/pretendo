@@ -105,14 +105,14 @@ public:
 	uint64_t cycle_count() const {
 		return ppu_cycle_;
 	}
-	
+
 	uint16_t hpos() const {
-		return hpos_;	
+		return hpos_;
 	}
 
 	uint16_t vpos() const {
-		return vpos_;	
-	}	
+		return vpos_;
+	}
 
 private:
 	bool background_enabled() const;

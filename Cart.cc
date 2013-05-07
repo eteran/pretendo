@@ -9,7 +9,7 @@
 namespace {
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: create_mask
 //------------------------------------------------------------------------------
 size_t create_mask(size_t size) {
 
@@ -34,21 +34,21 @@ size_t create_mask(size_t size) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: Cart
 //------------------------------------------------------------------------------
 Cart::Cart() : prg_mask_(0), chr_mask_(0), prg_hash_(0), chr_hash_(0), rom_hash_(0), mirroring_(MIR_HORIZONTAL){
 	memset(&cart_, 0, sizeof(cart_));
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: ~Cart
 //------------------------------------------------------------------------------
 Cart::~Cart() {
 	unload();
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: load
 //------------------------------------------------------------------------------
 void Cart::load(const std::string &s) {
 
@@ -57,10 +57,10 @@ void Cart::load(const std::string &s) {
 	const UNIF_RETURN_CODE r = load_file_INES(s.c_str(), &cart_);
 	if(r == UNIF_OK) {
 		std::cout << " OK!" << std::endl;
-		
+
 		const size_t prg_size = prg_pages() * (16 * 1024);
 		const size_t chr_size = chr_pages() * (8 * 1024);
-		
+
 		// get mask values
 		prg_mask_ = create_mask(prg_size);
 		chr_mask_ = create_mask(chr_size);
@@ -71,11 +71,11 @@ void Cart::load(const std::string &s) {
 		case MIRR_4SCREEN:    mirroring_ = MIR_4SCREEN;    break;
 		default:              mirroring_ = MIR_MAPPER;     break;
 		}
-		
+
 		prg_hash_ = prg_hash_INES(&cart_);
 		chr_hash_ = chr_hash_INES(&cart_);
 		rom_hash_ = rom_hash_INES(&cart_);
-		
+
 		std::cout << "PRG HASH: " << std::hex << std::setw(8) << std::setfill('0') << prg_hash_ << std::dec << std::endl;
 		std::cout << "CHR HASH: " << std::hex << std::setw(8) << std::setfill('0') << chr_hash_ << std::dec << std::endl;
 		std::cout << "ROM HASH: " << std::hex << std::setw(8) << std::setfill('0') << rom_hash_ << std::dec << std::endl;
@@ -83,7 +83,7 @@ void Cart::load(const std::string &s) {
 		if((prg_size & (prg_size - 1)) != 0) {
 			std::cout << "WARNING: PRG size is not a power of 2, this is unusual" << std::endl;
 		}
-		
+
 		if((chr_size & (chr_size - 1)) != 0) {
 			std::cout << "WARNING: CHR size is not a power of 2, this is unusual" << std::endl;
 		}
@@ -99,7 +99,7 @@ void Cart::load(const std::string &s) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: unload
 //------------------------------------------------------------------------------
 void Cart::unload() {
 	free_file_INES(&cart_);
@@ -108,106 +108,106 @@ void Cart::unload() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: prg_pages
 //------------------------------------------------------------------------------
 int Cart::prg_pages() const {
 	return prg_size_INES(&cart_);
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: chr_pages
 //------------------------------------------------------------------------------
 int Cart::chr_pages() const{
 	return chr_size_INES(&cart_);
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: has_chr_rom
 //------------------------------------------------------------------------------
 bool Cart::has_chr_rom() const {
 	return chr_pages() != 0;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: prg_mask
 //------------------------------------------------------------------------------
 uint32_t Cart::prg_mask() const {
 	return prg_mask_;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: chr_mask
 //------------------------------------------------------------------------------
 uint32_t Cart::chr_mask() const {
 	return chr_mask_;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: prg
 //------------------------------------------------------------------------------
 uint8_t *Cart::prg() const {
 	return cart_.prg_rom;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: chr
 //------------------------------------------------------------------------------
 uint8_t *Cart::chr() const {
 	return cart_.chr_rom;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: mirroring
 //------------------------------------------------------------------------------
 Cart::MIRRORING Cart::mirroring() const {
 	return mirroring_;
 }
 
 //------------------------------------------------------------------------------
-// Name:st
+// Name: mapper
 //------------------------------------------------------------------------------
 const boost::shared_ptr<Mapper> &Cart::mapper() const {
 	return mapper_;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: prg_hash
 //------------------------------------------------------------------------------
 uint32_t Cart::prg_hash() const {
 	return prg_hash_;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: chr_hash
 //------------------------------------------------------------------------------
 uint32_t Cart::chr_hash() const {
 	return chr_hash_;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: rom_hash
 //------------------------------------------------------------------------------
 uint32_t Cart::rom_hash() const {
 	return rom_hash_;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: raw_image
 //------------------------------------------------------------------------------
 std::vector<uint8_t> Cart::raw_image() const {
 
-	const uint8_t *const prgRom  = nes::cart.prg();
-	const uint8_t *const chrRom  = nes::cart.chr();
-	const size_t         prgSize = nes::cart.prg_pages() * 16 * 1024;	
-	
+	const uint8_t *const prg_rom  = nes::cart.prg();
+	const uint8_t *const chr_rom  = nes::cart.chr();
+	const size_t         prg_size = nes::cart.prg_pages() * (16 * 1024);
+
 	// create a vector and copy the PRG into it
-	std::vector<uint8_t> image(prgRom, prgRom + prgSize);
-	
+	std::vector<uint8_t> image(prg_rom, prg_rom + prg_size);
+
 	// if there is CHR, insert it at the end of the vector
-	if (chrRom != NULL) {
-		const size_t chrSize = nes::cart.chr_pages() * 8 * 1024;
-		image.insert(image.end(), chrRom, chrRom + chrSize);
+	if(chr_rom) {
+		const size_t chr_size = nes::cart.chr_pages() * (8 * 1024);
+		image.insert(image.end(), chr_rom, chr_rom + chr_size);
 	}
-	
+
  	return image;
 }

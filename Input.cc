@@ -15,7 +15,7 @@
  * Read $4017 8 more times to get the signature, $20.
  *
  * The $10 and $20 signatures are sent most significant bit first.
- * They can be used to detect 1. whether the Four Score switch is in the 
+ * They can be used to detect 1. whether the Four Score switch is in the
  * 4 player position and 2. whether a DMC sample fetch caused a bit deletion.
  */
 

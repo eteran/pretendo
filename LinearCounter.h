@@ -18,15 +18,13 @@ public:
 public:
 	uint8_t value() const;
 	void clock();
-	void halt();
-	void set_reload(uint8_t value);
-	void set_mode(uint8_t value);
-	
+	void reload();
+	void set_control(uint8_t value);
+
 private:
 	uint8_t value_;
-	uint8_t reload_;
 	uint8_t control_;
-	bool    halt_;
+	bool    reload_;
 };
 
 #endif

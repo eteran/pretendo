@@ -37,7 +37,7 @@ public:
 public:
 	template <class T>
 	bool ReadKey(const std::string &section, const std::string &key, T &container) {
-		
+
 		if(section.empty() || key.empty()) {
 			return false;
 		}
@@ -63,7 +63,7 @@ public:
 
 	template <class T>
 	bool WriteKey(const std::string &section, const std::string &key, T value) {
-	
+
 		if(section.empty() || key.empty()) {
 			return false;
 		}

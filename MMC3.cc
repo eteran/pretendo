@@ -252,7 +252,7 @@ void MMC3A::clock_irq() {
 		--irq_counter_;
 		irq_reload_ = true;
 	}
-	
+
 	if (irq_enabled_ && irq_counter_ == 0 && irq_reload_) {
 		nes::cpu.irq(CPU::MAPPER_IRQ);
 	}
@@ -278,7 +278,7 @@ void MMC3B::clock_irq() {
 		--irq_counter_;
 		irq_reload_ = true;
 	}
-	
+
 	if (irq_enabled_ && irq_counter_ == 0) {
 		nes::cpu.irq(CPU::MAPPER_IRQ);
 	}

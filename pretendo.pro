@@ -338,6 +338,15 @@ asound {
 	LIBS    += -lasound
 }
 
+sdlsound {
+	DEFINES += ENABLE_SOUND USE_SDLAUDIO
+	
+	SOURCES += qt/SDLAudio.cc
+	HEADERS += qt/SDLAudio.h
+	
+	LIBS    += -lSDL
+}
+
 qsound {
 	QT      += multimedia
 	DEFINES += ENABLE_SOUND USE_QAUDIO

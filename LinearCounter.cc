@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // Name: LengthCounter
 //------------------------------------------------------------------------------
-LinearCounter::LinearCounter() : value_(0), reload_(0), control_(0), halt_(false)  {
+LinearCounter::LinearCounter() : value_(0), control_(0), reload_(false)  {
 
 }
 
@@ -19,37 +19,30 @@ LinearCounter::~LinearCounter() {
 // Name: clock
 //------------------------------------------------------------------------------
 void LinearCounter::clock() {
-	
-	if(halt_) {
-		value_ = reload_;
-	} else if(value_ != 0) {
+
+	if(reload_) {
+		value_ = (control_ & 0x7f);
+	} else if(value_) {
 		--value_;
 	}
-	
-	if(!control_) {
-		halt_ = false;
+
+	if(!(control_ & 0x80)) {
+		reload_ = false;
 	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_control
 //------------------------------------------------------------------------------
-void LinearCounter::set_mode(uint8_t value) {
-	control_ = (value & 0x80);
+void LinearCounter::set_control(uint8_t value) {
+	control_ = value;
 }
 
 //------------------------------------------------------------------------------
-// Name: set_reload
+// Name: reload
 //------------------------------------------------------------------------------
-void LinearCounter::set_reload(uint8_t value) {
-	reload_ = value;
-}
-
-//------------------------------------------------------------------------------
-// Name: halt
-//------------------------------------------------------------------------------
-void LinearCounter::halt() {
-	halt_ = true;
+void LinearCounter::reload() {
+	reload_ = true;
 }
 
 //------------------------------------------------------------------------------

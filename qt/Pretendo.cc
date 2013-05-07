@@ -13,6 +13,8 @@
 
 #if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
 #include "QtAudio.h"
+#elif defined(ENABLE_SOUND) && defined(USE_SDLAUDIO)
+#include "SDLAudio.h"
 #elif defined(ENABLE_SOUND)
 #include "AlsaAudio.h"
 #else
@@ -62,6 +64,8 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 
 #if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
 	audio_ = new QtAudio(this);
+#elif defined(ENABLE_SOUND) && defined(USE_SDLAUDIO)
+	audio_ = new SDLAudio();
 #elif defined(ENABLE_SOUND)
 	audio_ = new AlsaAudio();
 #else

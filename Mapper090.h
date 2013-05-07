@@ -41,7 +41,7 @@ private:
 	uint8_t  chr_mirror_;
 	uint8_t  chr_block_mode_;
 	uint8_t  chr_block_;
-	
+
 	uint8_t  multiply_1_;
 	uint8_t  multiply_2_;
 	uint8_t  prg_ram_;

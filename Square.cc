@@ -15,7 +15,7 @@ const uint8_t sequence[4][8] = {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Square::Square() : sweep_(timer_), timer_reload_(0), duty_(0), sequence_index_(0), 
+Square::Square(int channel) : sweep_(channel, this), timer_reload_(0), duty_(0), sequence_index_(0),
 		enabled_(false) {
 
 }
@@ -54,17 +54,14 @@ void Square::write_reg0(uint8_t value) {
 	} else {
 		length_counter_.resume();
 	}
-	
-	envelope_.set_loop(value & 0x20);
-	envelope_.set_constant(value & 0x10);
-	envelope_.set_divider(value & 0x0f);
+
+	envelope_.set_control(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_reg1
 //------------------------------------------------------------------------------
-void Square::write_reg1(uint8_t value) {	
-	sweep_.reload();
+void Square::write_reg1(uint8_t value) {
 	sweep_.set_control(value);
 }
 
@@ -83,14 +80,14 @@ void Square::write_reg2(uint8_t value) {
 //------------------------------------------------------------------------------
 void Square::write_reg3(uint8_t value) {
 
-	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);	
+	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);
 	timer_.set_frequency((timer_reload_ + 1) * 2);
 	sweep_.set_pulse_period(timer_reload_);
 
 	if(enabled_) {
 		length_counter_.load((value >> 3) & 0x1f);
 	}
-	
+
 	sequence_index_ = 0;
 	envelope_.start();
 }
@@ -99,7 +96,7 @@ void Square::write_reg3(uint8_t value) {
 // Name: tick
 //------------------------------------------------------------------------------
 void Square::tick() {
-	if(timer_.tick()) {		
+	if(timer_.tick()) {
 		sequence_index_ = (sequence_index_ + 1) % 8;
 	}
 }
@@ -123,7 +120,7 @@ LengthCounter &Square::length_counter() {
 //------------------------------------------------------------------------------
 uint8_t Square::output() const {
 
-	if(timer_.frequency() - 1 < 8) {
+	if((timer_.frequency() - 1) < 8) {
 		return 0;
 	} else if(sequence[duty_][sequence_index_] == 0) {
 		return 0;

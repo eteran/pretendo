@@ -34,7 +34,7 @@ Mapper::~Mapper() {
 	nes::cpu.unmap_ab();
 	nes::cpu.unmap_cd();
 	nes::cpu.unmap_ef();
-	
+
 	nes::ppu.unset_vram_bank(0);
 	nes::ppu.unset_vram_bank(1);
 	nes::ppu.unset_vram_bank(2);

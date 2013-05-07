@@ -11,7 +11,7 @@ using boost::uint16_t;
 using boost::uint32_t;
 using boost::uint64_t;
 
-class DMC {
+class DMC : public boost::noncopyable {
 public:
 	DMC();
 	~DMC();

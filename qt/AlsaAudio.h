@@ -15,8 +15,7 @@ public:
 	void stop();
 
 private:
-	snd_pcm_t        *handle_;
-	snd_pcm_uframes_t buffer_size_;
+	snd_pcm_t *handle_;
 };
 
 #endif

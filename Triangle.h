@@ -13,7 +13,7 @@ using boost::uint16_t;
 using boost::uint32_t;
 using boost::uint64_t;
 
-class Triangle {
+class Triangle : public boost::noncopyable {
 public:
 	Triangle();
 	~Triangle();

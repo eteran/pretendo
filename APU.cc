@@ -3,6 +3,7 @@
 #include "NES.h"
 #include <iostream>
 #include <cassert>
+#include <cstring>
 
 namespace {
 
@@ -19,8 +20,11 @@ T bound(T min, T value, T max) {
 //------------------------------------------------------------------------------
 // Name: APU
 //------------------------------------------------------------------------------
-APU::APU() : apu_cycles_(-1), next_clock_(-1), clock_step_(0), status_(0), 
-		frame_counter_(0), last_frame_counter_(0), sample_index_(0) {
+APU::APU() : square_0_(0), square_1_(1), apu_cycles_(-1), next_clock_(-1), 
+		clock_step_(0), status_(0), frame_counter_(0), last_frame_counter_(0), 
+		sample_index_(0) {
+
+	std::memset(sample_buffer_, 0, sizeof(sample_buffer_));
 
 }
 
@@ -75,8 +79,8 @@ void APU::reset(nes::RESET reset_type) {
 	write4010(10);
 
 	// OK, the APU is supposed to act as if it has run for approximately 9
-	// cycles by the time the reset is complete. I beleive that the first 7 
-	// of these cycles are the 7 cycles of the reset itself. So we run the 
+	// cycles by the time the reset is complete. I beleive that the first 7
+	// of these cycles are the 7 cycles of the reset itself. So we run the
 	// APU manually for an extra 2 ticks.
 	//
 	// Blargg says it is as if this happens
@@ -99,56 +103,56 @@ void APU::reset(nes::RESET reset_type) {
 // Name: write4000
 //------------------------------------------------------------------------------
 void APU::write4000(uint8_t value) {
-	square_1_.write_reg0(value);
+	square_0_.write_reg0(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4001
 //------------------------------------------------------------------------------
 void APU::write4001(uint8_t value) {
-	square_1_.write_reg1(value);
+	square_0_.write_reg1(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4002
 //------------------------------------------------------------------------------
 void APU::write4002(uint8_t value) {
-	square_1_.write_reg2(value);
+	square_0_.write_reg2(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4003
 //------------------------------------------------------------------------------
 void APU::write4003(uint8_t value) {
-	square_1_.write_reg3(value);
+	square_0_.write_reg3(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4004
 //------------------------------------------------------------------------------
 void APU::write4004(uint8_t value) {
-	square_2_.write_reg0(value);
+	square_1_.write_reg0(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4005
 //------------------------------------------------------------------------------
 void APU::write4005(uint8_t value) {
-	square_2_.write_reg1(value);
+	square_1_.write_reg1(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4006
 //------------------------------------------------------------------------------
 void APU::write4006(uint8_t value) {
-	square_2_.write_reg2(value);
+	square_1_.write_reg2(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4007
 //------------------------------------------------------------------------------
 void APU::write4007(uint8_t value) {
-	square_2_.write_reg3(value);
+	square_1_.write_reg3(value);
 }
 
 //------------------------------------------------------------------------------
@@ -230,15 +234,15 @@ void APU::write4015(uint8_t value) {
 	status_ &= ~STATUS_DMC_IRQ;
 
 	if(value & STATUS_ENABLE_SQUARE_1) {
-		square_1_.enable();
+		square_0_.enable();
 	} else {
-		square_1_.disable();
+		square_0_.disable();
 	}
 
 	if(value & STATUS_ENABLE_SQUARE_2) {
-		square_2_.enable();
+		square_1_.enable();
 	} else {
-		square_2_.disable();
+		square_1_.disable();
 	}
 
 	if(value & STATUS_ENABLE_TRIANGLE) {
@@ -273,11 +277,11 @@ uint8_t APU::read4015() {
 	// reading this register clears the Frame interrupt flag.
 	status_ &= ~STATUS_FRAME_IRQ;
 
-	if(square_1_.length_counter().value() > 0) {
+	if(square_0_.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_SQUARE_1;
 	}
 
-	if(square_2_.length_counter().value() > 0) {
+	if(square_1_.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_SQUARE_2;
 	}
 
@@ -328,13 +332,13 @@ void APU::write4017(uint8_t value) {
 // Name: clock_length
 //------------------------------------------------------------------------------
 void APU::clock_length() {
+	square_0_.length_counter().clock();
 	square_1_.length_counter().clock();
-	square_2_.length_counter().clock();
 	triangle_.length_counter().clock();
 	noise_.length_counter().clock();
-	
-	square_1_.sweep().clock(0);
-	square_2_.sweep().clock(1);
+
+	square_0_.sweep().clock();
+	square_1_.sweep().clock();
 }
 
 //------------------------------------------------------------------------------
@@ -342,9 +346,9 @@ void APU::clock_length() {
 //------------------------------------------------------------------------------
 void APU::clock_linear() {
 	triangle_.linear_counter().clock();
-	
+
+	square_0_.envelope().clock();
 	square_1_.envelope().clock();
-	square_2_.envelope().clock();
 	noise_.envelope().clock();
 }
 
@@ -458,30 +462,30 @@ void APU::run(int cycles) {
 		}
 
 		// TODO: do this better, this is close to but not quite 735 samples per second
+		// TODO: non-linear mixing
 		if(sample_index_ != sizeof(sample_buffer_)) {
-		
+
 			// 1.78977267Mhz / 44100Hz = 40.5844142857 clocks per sample
-		
 			if((apu_cycles_ % 40) == 0) {
 				uint8_t mixer_value = (
+					square_0_.output() +
 					square_1_.output() +
-					square_2_.output() + 
-					triangle_.output() + 
-					noise_.output() +
-					
+					triangle_.output() +
+					noise_.output()    +
+					dmc_.output()      +
 					0
-					);	
-					
+					);
+
 				sample_buffer_[sample_index_] = mixer_value;
 				++sample_index_;
 			}
 		}
-		
+
 		dmc_.tick();
 		noise_.tick();
 		triangle_.tick();
+		square_0_.tick();
 		square_1_.tick();
-		square_2_.tick();
 
 		++apu_cycles_;
 	}

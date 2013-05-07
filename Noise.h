@@ -14,7 +14,7 @@ using boost::uint16_t;
 using boost::uint32_t;
 using boost::uint64_t;
 
-class Noise {
+class Noise : public boost::noncopyable {
 public:
 	Noise();
 	~Noise();

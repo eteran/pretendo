@@ -1,13 +1,15 @@
 
 #include "Sweep.h"
 #include "Timer.h"
+#include "Square.h"
+#include <cstdio>
 
 //------------------------------------------------------------------------------
 // Name: Sweep
 //------------------------------------------------------------------------------
-Sweep::Sweep(Timer &timer) : timer_(timer), value_(0), pulse_period_(0),
-		counter_(0), period_(0), shift_(0), negate_(0), enable_(0),
-		reload_(false), silenced_(false) {
+Sweep::Sweep(int channel, Square *square) : square_(square), channel_(channel), 
+		pulse_period_(0), counter_(0), control_(0), reload_(false), 
+		silenced_(false) {
 
 }
 
@@ -19,24 +21,24 @@ Sweep::~Sweep() {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name:
 //------------------------------------------------------------------------------
 void Sweep::set_pulse_period(uint16_t value) {
 	pulse_period_ = value;
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name:
 //------------------------------------------------------------------------------
-uint16_t Sweep::target_period(int channel) const {
+uint16_t Sweep::target_period() const {
 
-	// The channel's 11-bit raw timer period is shifted right by the shift count 
-	// (using a barrel shifter), then either added to or subtracted from the 
+	// The channel's 11-bit raw timer period is shifted right by the shift count
+	// (using a barrel shifter), then either added to or subtracted from the
 	// channel's raw period, yielding the target period.
-	const uint16_t delta = pulse_period_ >> shift_;
+	const uint16_t delta = pulse_period_ >> shift();
 
-	if(negate_) {
-		if(channel == 0) {
+	if(negate()) {
+		if(channel_ == 0) {
 			return pulse_period_ - delta - 1;
 		} else {
 			return pulse_period_ - delta;
@@ -47,57 +49,87 @@ uint16_t Sweep::target_period(int channel) const {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name:
 //------------------------------------------------------------------------------
-void Sweep::clock(int channel) {
-		
-	if(counter_) {
-		if(--counter_ == 0) {		
-			const uint16_t target = target_period(channel);
+void Sweep::clock() {
 
-			if(pulse_period_ < 8 || target > 0x7ff) {
+	// If the reload flag flag is set, the divider's counter is set to the
+	// period P. If the divider's counter was zero before the reload, the
+	// pulse's period is also adjusted.
+	if(reload_) {
+		reload_ = false;
+		const uint8_t prev_counter = counter_;
+		counter_ = period() + 1;
 
-				// When the channel's current period is less than 8 or the target period 
-				// is greater than $7FF, the channel is silenced (0 is sent to the mixer) 
-				// but the channel's current period remains unchanged.
-				silenced_ = true;
-			} else {
-
-				// Otherwise, if the enable flag is set and the shift count is non-zero, 
-				// when the divider outputs a clock, the channel's period is updated.
-				silenced_ = false;
-				if(enable_ && shift_) {
-					timer_.set_frequency((target + 1) * 2);
-				}
+		if(prev_counter == 0 && enabled() && shift()) {
+			const uint16_t target = target_period();
+			if(target < 0x800) {
+				square_->timer_reload_ = target;
+				pulse_period_          = target;
+				square_->timer_.set_frequency((target + 1) * 2);
 			}
+		}
 
-			if(reload_) {
-				reload_  = false;		
-				counter_ = period_ + 1;
+	} else {
+		if(counter_) {
+			// If the reload flag is clear and the divider's counter is non-zero,
+			// it is decremented.
+			--counter_;
+		} else {
+			// If the reload flag is clear and the divider's counter is zero,
+			// the counter is set to P and the pulse's period is adjusted.
+			counter_ = period() + 1;
+
+			if(enabled() && shift()) {
+				const uint16_t target = target_period();
+				if(target < 0x800) {
+					square_->timer_reload_ = target;
+					pulse_period_          = target;
+					square_->timer_.set_frequency((target + 1) * 2);
+				}
 			}
 		}
 	}
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name:
 //------------------------------------------------------------------------------
-void Sweep::set_control(uint8_t value) {
-	enable_ = (value & 0x80);
-	period_ = (value >> 4) & 0x07;
-	negate_ = (value & 0x08);
-	shift_  = (value & 0x07);
+bool Sweep::enabled() const {
+	return control_ & 0x80;
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name:
 //------------------------------------------------------------------------------
-void Sweep::reload() {
-	reload_ = true;
+bool Sweep::negate() const {
+	return control_ & 0x08;
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name:
+//------------------------------------------------------------------------------
+uint8_t Sweep::period() const {
+	return (control_ >> 4) & 0x07;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint8_t Sweep::shift() const {
+	return control_ & 0x07;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+void Sweep::set_control(uint8_t value) {	
+	control_ = value;
+	reload_  = true;
+}
+
+//------------------------------------------------------------------------------
+// Name:
 //------------------------------------------------------------------------------
 bool Sweep::silenced() const {
 	return silenced_;

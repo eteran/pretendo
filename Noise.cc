@@ -49,17 +49,15 @@ void Noise::write_reg0(uint8_t value) {
 	} else {
 		length_counter_.resume();
 	}
-	
-	envelope_.set_loop(value & 0x20);
-	envelope_.set_constant(value & 0x10);
-	envelope_.set_divider(value & 0x0f);
+
+	envelope_.set_control(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_reg2
 //------------------------------------------------------------------------------
 void Noise::write_reg2(uint8_t value) {
-	
+
 	lfsr_.set_mode(value & 0x80);
 	timer_.set_frequency(frequency_table[value & 0x0f]);
 }
@@ -72,7 +70,7 @@ void Noise::write_reg3(uint8_t value) {
 	if(enabled_) {
 		length_counter_.load((value >> 3) & 0x1f);
 	}
-	
+
 	envelope_.start();
 }
 

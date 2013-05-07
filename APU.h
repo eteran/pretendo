@@ -33,7 +33,8 @@ public:
 		STATUS_ENABLE_SQUARE_1 = 0x01,
 		STATUS_ENABLE_ALL	   = STATUS_ENABLE_SQUARE_1 | STATUS_ENABLE_SQUARE_2 | STATUS_ENABLE_TRIANGLE | STATUS_ENABLE_NOISE | STATUS_ENABLE_DMC
 	};
-	
+
+	static const int frequency   = 44100;
 	static const int buffer_size = 735;
 
 public:
@@ -73,7 +74,7 @@ public:
 
 public:
 	void run(int cycles);
-	
+
 public:
 	const uint8_t *buffer();
 
@@ -84,8 +85,8 @@ private:
 	void clock_linear();
 
 private:
+	Square   square_0_;
 	Square   square_1_;
-	Square   square_2_;
 	Triangle triangle_;
 	Noise    noise_;
 	DMC      dmc_;
@@ -96,7 +97,7 @@ private:
 	uint8_t  status_;
 	uint8_t  frame_counter_;
 	uint8_t  last_frame_counter_;
-	
+
 private:
 	uint8_t sample_buffer_[buffer_size];
 	size_t  sample_index_;

@@ -30,7 +30,7 @@ void Mapper206::write_8(uint16_t address, uint8_t value) {
 	case 0x8000:
 		command_ = value & 0x07;
 		break;
-		
+
 	case 0x8001:
 		switch(command_) {
 		case 0x00: set_chr_0000_07ff((value & 0x3e)); break;
