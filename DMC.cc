@@ -19,7 +19,7 @@ const uint16_t frequency_table[16] = {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-DMC::DMC() : enabled_(false), muted_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), irq_enabled_(0x80), loop_(0), sample_shift_counter_(0) {
+DMC::DMC() : muted_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), irq_enabled_(0x80), loop_(0), sample_shift_counter_(0) {
 }
 
 //------------------------------------------------------------------------------
@@ -32,7 +32,6 @@ DMC::~DMC() {
 // Name:
 //------------------------------------------------------------------------------
 void DMC::enable() {
-	enabled_ = true;
 
 	if(bytes_remaining_ == 0) {
 		bytes_remaining_ = sample_length_;
@@ -72,10 +71,7 @@ void DMC::enable() {
 // Name:
 //------------------------------------------------------------------------------
 void DMC::disable() {
-
-	enabled_              = false;
-	bytes_remaining_      = 0;
-	//sample_shift_counter_ = 0;
+	bytes_remaining_ = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -118,13 +114,6 @@ void DMC::write_reg3(uint8_t value) {
 	if(bytes_remaining_ == 0) {
 		bytes_remaining_ = sample_length_;
 	}
-}
-
-//------------------------------------------------------------------------------
-// Name: enabled
-//------------------------------------------------------------------------------
-bool DMC::enabled() const {
-	return enabled_;
 }
 
 //------------------------------------------------------------------------------
