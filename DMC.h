@@ -30,14 +30,10 @@ public:
 	uint16_t bytes_remaining() const;
 
 public:
-	bool enabled() const;
-
-public:
 	void tick();
 	uint8_t output() const;
 
 private:
-	bool     enabled_;
 	bool     muted_;
 	uint16_t sample_pointer_;
 	uint16_t sample_address_;
