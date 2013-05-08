@@ -83,6 +83,7 @@ private:
 	void clock_frame_mode_1();
 	void clock_length();
 	void clock_linear();
+	uint8_t mix_channels() const;
 
 private:
 	Square   square_0_;

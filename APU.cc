@@ -20,8 +20,8 @@ T bound(T min, T value, T max) {
 //------------------------------------------------------------------------------
 // Name: APU
 //------------------------------------------------------------------------------
-APU::APU() : square_0_(0), square_1_(1), apu_cycles_(-1), next_clock_(-1), 
-		clock_step_(0), status_(0), frame_counter_(0), last_frame_counter_(0), 
+APU::APU() : square_0_(0), square_1_(1), apu_cycles_(-1), next_clock_(-1),
+		clock_step_(0), status_(0), frame_counter_(0), last_frame_counter_(0),
 		sample_index_(0) {
 
 	std::memset(sample_buffer_, 0, sizeof(sample_buffer_));
@@ -462,22 +462,11 @@ void APU::run(int cycles) {
 		}
 
 		// TODO: do this better, this is close to but not quite 735 samples per second
-		// TODO: non-linear mixing
 		if(sample_index_ != sizeof(sample_buffer_)) {
 
 			// 1.78977267Mhz / 44100Hz = 40.5844142857 clocks per sample
 			if((apu_cycles_ % 40) == 0) {
-				uint8_t mixer_value = (
-					square_0_.output() +
-					square_1_.output() +
-					triangle_.output() +
-					noise_.output()    +
-					dmc_.output()      +
-					0
-					);
-
-				sample_buffer_[sample_index_] = mixer_value;
-				++sample_index_;
+				sample_buffer_[sample_index_++] = mix_channels();
 			}
 		}
 
@@ -497,4 +486,29 @@ void APU::run(int cycles) {
 const uint8_t *APU::buffer() {
 	sample_index_ = 0;
 	return sample_buffer_;
+}
+
+//------------------------------------------------------------------------------
+// Name: mix_channels
+//------------------------------------------------------------------------------
+uint8_t APU::mix_channels() const {
+
+	const uint8_t pulse1   = square_0_.output();
+	const uint8_t pulse2   = square_1_.output();
+	const uint8_t triangle = triangle_.output();
+	const uint8_t noise    = noise_.output();
+	const uint8_t dmc      = dmc_.output();
+
+	float pulse_volume = 0;
+	float tnd_volume   = 0;
+
+	if(pulse1 || pulse2) {
+		pulse_volume = 95.88 / ((8128.0 / (pulse1 + pulse2)) + 100.0);
+	}
+
+	if(triangle || noise || dmc) {
+		tnd_volume = 159.79 / ((1 / ((triangle / 8227.0) + (noise / 12241.0) + (dmc / 22638.0))) + 100.0);
+	}
+
+	return (pulse_volume + tnd_volume) * 0x100;
 }
