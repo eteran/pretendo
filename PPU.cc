@@ -167,12 +167,11 @@ PPU::PPU() :
 	hpos_(0),
 	vpos_(0),
 	address_increment_(1),
-	color_intensity_(0),
 	latch_(0),
 	next_attribute_(0),
 	next_tile_index_(0),
-	register_2000_(0),
-	register_2001_(0),
+	ppu_control_(0),
+	ppu_mask_(0),
 	register_2007_buffer_(0),
 	sprite_address_(0),
 	sprite_data_index_(0),
@@ -180,17 +179,12 @@ PPU::PPU() :
 	status_(0),
 	tile_offset_(0),
 	sprite_buffer_(0xff),
-	background_clipping_(false),
-	background_visible_(false),
-	greyscale_(false),
 	nmi_on_vblank_(false),
 	odd_frame_(false),
 	rendering_(false),
-	sprite_clipping_(false),
 	sprite_init_(false),
 	sprite_zero_found_next_(false),
 	sprite_zero_found_curr_(false),
-	sprites_visible_(false),
 	write_latch_(false),
 	write_block_(false),
 	show_sprites_(true) {
@@ -230,11 +224,7 @@ void PPU::reset(nes::RESET reset_type) {
 	address_increment_        = 1;
 	attribute_queue_[0]       = 0;
 	attribute_queue_[1]       = 0;
-	background_clipping_      = false;
 	background_pattern_table_ = 0x0000;
-	background_visible_       = false;
-	color_intensity_          = 0x00;
-	greyscale_                = false;
 	hpos_                     = 0;
 	latch_                    = 0x00;
 	nametable_                = 0x0000;
@@ -247,19 +237,17 @@ void PPU::reset(nes::RESET reset_type) {
 	pattern_queue_[0]         = 0;
 	pattern_queue_[1]         = 0;
 	ppu_cycle_                = 0;
-	register_2000_            = 0;
-	register_2001_            = 0;
+	ppu_control_              = 0;
+	ppu_mask_                 = 0;
 	register_2007_buffer_     = 0x00;
 	rendering_                = false;
 	sprite_address_           = 0x00;
 	sprite_buffer_            = 0xff;
-	sprite_clipping_          = false;
 	sprite_data_index_        = 0;
 	sprite_pattern_table_     = 0x0000;
 	sprite_size_              = 8;
 	sprite_zero_found_curr_   = false;
 	sprite_zero_found_next_   = false;
-	sprites_visible_          = false;
 	status_                   = 0x00;
 	tile_offset_              = 0x00;
 	vpos_                     = 0;
@@ -281,7 +269,7 @@ void PPU::write2000(uint8_t value) {
 		return;
 	}
 
-	register_2000_ = value;
+	ppu_control_ = value;
 
 	const bool prev_nmi_on_vblank = nmi_on_vblank();
 
@@ -313,14 +301,7 @@ void PPU::write2001(uint8_t value) {
 		return;
 	}
 
-	register_2001_ = value;
-
-	color_intensity_     = (value & 0xe0) >> 5;
-	sprites_visible_     = value & 0x10;
-	background_visible_  = value & 0x08;
-	sprite_clipping_     = value & 0x04;
-	background_clipping_ = value & 0x02;
-	greyscale_           = value & 0x01;
+	ppu_mask_ = value;
 }
 
 //------------------------------------------------------------------------------
@@ -546,7 +527,7 @@ uint8_t PPU::read2007() {
 
 	if((temp_address & 0x3f00) == 0x3f00) {
 		latch_ = palette_[temp_address & 0x1f];
-		if(greyscale_) {
+		if(greyscale()) {
 			latch_ &= 0x30;
 		}
 	}
@@ -900,7 +881,7 @@ uint8_t PPU::select_pixel(uint8_t index) {
 	uint8_t pixel;
 
 	// first identify what the BG pixel would be
-	if((background_clipping_ || index >= 8) && background_enabled()) {
+	if((background_clipping() || index >= 8) && background_visible()) {
 		switch(tile_offset_) {
 		case 0: pixel = ((pattern_queue_[0] & 0x8000) >> 0x0f) | ((pattern_queue_[1] & 0x8000) >> 0x0e) | ((attribute_queue_[0] & 0x8000) >> 0x0d) | ((attribute_queue_[1] & 0x8000) >> 0x0c); break;
 		case 1: pixel = ((pattern_queue_[0] & 0x4000) >> 0x0e) | ((pattern_queue_[1] & 0x4000) >> 0x0d) | ((attribute_queue_[0] & 0x4000) >> 0x0c) | ((attribute_queue_[1] & 0x4000) >> 0x0b); break;
@@ -918,7 +899,7 @@ uint8_t PPU::select_pixel(uint8_t index) {
 	}
 
 	// then see if any of the sprites belong..
-	if((sprite_clipping_ || index >= 8) && sprites_enabled()) {
+	if((sprite_clipping() || index >= 8) && sprites_visible()) {
 		for(const SpriteEntry *p = sprite_data_; p != &sprite_data_[sprite_data_index_]; ++p) {
 			const uint16_t x_offset = index - p->x();
 
@@ -1103,31 +1084,10 @@ void PPU::exit_vblank() {
 }
 
 //------------------------------------------------------------------------------
-// Name: color_intensity
-//------------------------------------------------------------------------------
-uint8_t PPU::color_intensity() const {
-	return color_intensity_;
-}
-
-//------------------------------------------------------------------------------
-// Name: sprites_enabled
-//------------------------------------------------------------------------------
-bool PPU::sprites_enabled() const {
-	return sprites_visible_;
-}
-
-//------------------------------------------------------------------------------
-// Name: background_enabled
-//------------------------------------------------------------------------------
-bool PPU::background_enabled() const {
-	return background_visible_;
-}
-
-//------------------------------------------------------------------------------
 // Name: screen_enabled
 //------------------------------------------------------------------------------
 bool PPU::screen_enabled() const {
-	return sprites_enabled() || background_enabled();
+	return sprites_visible() || background_visible();
 }
 
 //------------------------------------------------------------------------------
@@ -1145,7 +1105,7 @@ void PPU::render_pixel(uint8_t *dest_buffer) {
 	const uint8_t index = hpos_ - 1;
 	const uint8_t pixel = select_pixel(index);
 
-	if(greyscale_) {
+	if(greyscale()) {
 		dest_buffer[index] = palette_[pixel & 0x03 ? pixel : 0x00] & 0x30;
 	} else {
 		dest_buffer[index] = palette_[pixel & 0x03 ? pixel : 0x00];
@@ -1315,7 +1275,7 @@ void PPU::execute_cycle(const scanline_render &target) {
 			// idle
 		} else if(hpos_ < 257) {
 			const uint8_t pixel = select_blank_pixel();
-			if(greyscale_) {
+			if(greyscale()) {
 				target.buffer[hpos_ - 1] = palette_[pixel] & 0x30;
 			} else {
 				target.buffer[hpos_ - 1] = palette_[pixel];
@@ -1513,4 +1473,46 @@ int PPU::clock_cpu() {
 		return 1;
 	}
 	return 0;
+}
+
+//------------------------------------------------------------------------------
+// Name: 
+//------------------------------------------------------------------------------
+uint8_t PPU::color_intensity() const {
+	return (ppu_mask_ >> 5) & 0x07;
+}
+
+//------------------------------------------------------------------------------
+// Name: 
+//------------------------------------------------------------------------------
+bool PPU::sprites_visible() const {
+	return ppu_mask_ & 0x10;
+}
+
+//------------------------------------------------------------------------------
+// Name: 
+//------------------------------------------------------------------------------
+bool PPU::background_visible() const {
+	return ppu_mask_ & 0x08;
+}
+
+//------------------------------------------------------------------------------
+// Name: 
+//------------------------------------------------------------------------------
+bool PPU::sprite_clipping() const {
+	return ppu_mask_ & 0x04;
+}
+
+//------------------------------------------------------------------------------
+// Name: 
+//------------------------------------------------------------------------------
+bool PPU::background_clipping() const {
+	return ppu_mask_ & 0x02;
+}
+
+//------------------------------------------------------------------------------
+// Name: 
+//------------------------------------------------------------------------------
+bool PPU::greyscale() const {
+	return ppu_mask_ & 0x01;
 }
