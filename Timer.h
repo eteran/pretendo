@@ -15,8 +15,10 @@ public:
 public:
 	bool tick();
 	void set_frequency(uint16_t frequency);
+	void reset();
 	uint16_t frequency() const;
 	uint16_t value() const;
+	
 
 private:
 	uint16_t timer_;
