@@ -19,7 +19,7 @@ const uint16_t frequency_table[16] = {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-DMC::DMC() : muted_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), irq_enabled_(0x80), loop_(0), sample_shift_counter_(0) {
+DMC::DMC() : muted_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), bits_remaining_(0), control_(0) {
 }
 
 //------------------------------------------------------------------------------
@@ -37,9 +37,16 @@ void DMC::enable() {
 		bytes_remaining_ = sample_length_;
 	}
 
+	if(bits_remaining_ != 0) {
+		const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
+		output_ += delta;
+		sample_buffer_ >>= 1;
+		--bits_remaining_;
+	}
+
 	// immediate load the first byte if the shift counter is empty
-	if(bytes_remaining_ != 0 && sample_shift_counter_ == 0) {
-		sample_shift_counter_ = 8;
+	if(bytes_remaining_ != 0 && bits_remaining_ == 0) {
+		bits_remaining_ = 8;
 
 		// TODO: hijack the CPU for appropriate number of cycles,
 		//       not hardcoded to 3
@@ -49,28 +56,24 @@ void DMC::enable() {
 		sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
 		if(--bytes_remaining_ == 0) {
-			if(loop_) {
+			if(loop()) {
 				bytes_remaining_ = sample_length_;
 				sample_pointer_  = sample_address_;
-			} else if(irq_enabled_) {
+			} else if(irq_enabled()) {
 				nes::cpu.irq(CPU::APU_IRQ);
 				nes::apu.status_ |= APU::STATUS_DMC_IRQ;
 			}
 		}
 	}
 
-	if(sample_shift_counter_ != 0) {
-		const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
-		output_ += delta;
-		sample_buffer_ >>= 1;
-		--sample_shift_counter_;
-	}
+
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 void DMC::disable() {
+
 	bytes_remaining_ = 0;
 }
 
@@ -78,12 +81,13 @@ void DMC::disable() {
 // Name: write_reg0
 //------------------------------------------------------------------------------
 void DMC::write_reg0(uint8_t value) {
-	irq_enabled_ = value & 0x80;
-	loop_        = value & 0x40;
 
-	timer_.set_frequency(frequency_table[value & 0x0f]);
+	control_ = value;
 
-	if(!irq_enabled_) {
+	timer_.set_frequency(frequency_table[control_ & 0x0f]);
+	timer_.reset();
+
+	if(!irq_enabled()) {
 		nes::apu.status_ &= ~APU::STATUS_DMC_IRQ;
 		if(!(nes::apu.status_ & (APU::STATUS_DMC_IRQ | APU::STATUS_FRAME_IRQ))) {
 			nes::cpu.clear_irq(CPU::APU_IRQ);
@@ -130,8 +134,15 @@ void DMC::tick() {
 
 	if(timer_.tick()) {
 
-		if(bytes_remaining_ != 0 && sample_shift_counter_ == 0) {
-			sample_shift_counter_ = 8;
+		if(bits_remaining_ != 0) {
+			const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
+			output_ += delta;
+			sample_buffer_ >>= 1;
+			--bits_remaining_;
+		}
+
+		if(bytes_remaining_ != 0 && bits_remaining_ == 0) {
+			bits_remaining_ = 8;
 
 			// TODO: hijack the CPU for appropriate number of cycles,
 			//       not hardcoded to 3
@@ -141,32 +152,35 @@ void DMC::tick() {
 			sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
 			if(--bytes_remaining_ == 0) {
-				if(loop_) {
+				if(loop()) {
 					bytes_remaining_ = sample_length_;
 					sample_pointer_  = sample_address_;
-				} else if(irq_enabled_) {
+				} else if(irq_enabled()) {
 					nes::cpu.irq(CPU::APU_IRQ);
 					nes::apu.status_ |= APU::STATUS_DMC_IRQ;
 				}
 			}
 		}
-
-		if(sample_shift_counter_ != 0) {
-			const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
-			output_ += delta;
-			sample_buffer_ >>= 1;
-			--sample_shift_counter_;
-		}
 	}
 }
 
 //------------------------------------------------------------------------------
-// Name: dac
+// Name: output
 //------------------------------------------------------------------------------
 uint8_t DMC::output() const {
-	//if(enabled()) {
-		return output_;
-	//} else {
-	//	return 0;
-	//}
+	return output_;
+}
+
+//------------------------------------------------------------------------------
+// Name: irq_enabled
+//------------------------------------------------------------------------------
+bool DMC::irq_enabled() const {
+	return control_ & 0x80;
+}
+
+//------------------------------------------------------------------------------
+// Name: loop
+//------------------------------------------------------------------------------
+bool DMC::loop() const {
+	return control_ & 0x40;
 }

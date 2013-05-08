@@ -32,6 +32,10 @@ public:
 public:
 	void tick();
 	uint8_t output() const;
+	
+private:
+	bool irq_enabled() const;
+	bool loop() const;
 
 private:
 	bool     muted_;
@@ -39,12 +43,11 @@ private:
 	uint16_t sample_address_;
 	uint16_t bytes_remaining_;
 	uint16_t sample_length_;
-	uint8_t  irq_enabled_;
-	uint8_t  loop_;
-	uint8_t  sample_shift_counter_;
+	uint8_t  bits_remaining_;
 	uint8_t  sample_buffer_;
 	Timer    timer_;
 	uint8_t  output_;
+	uint8_t  control_;
 };
 
 #endif

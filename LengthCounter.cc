@@ -42,7 +42,6 @@ LengthCounter::~LengthCounter() {
 //------------------------------------------------------------------------------
 void LengthCounter::load(uint8_t index) {
 
-	// still fails: 11.len_reload_timing.nes
 	if(reload_) {
 		value_  = reload_value_;
 		reload_ = false;

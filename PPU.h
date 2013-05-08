@@ -115,18 +115,24 @@ public:
 	}
 
 private:
-	bool background_enabled() const;
+	bool background_clipping() const;
+	bool background_visible() const;
+	bool greyscale() const;	
 	bool nmi_on_vblank() const;
 	bool screen_enabled() const;
-	bool sprites_enabled() const;
+	bool sprite_clipping() const;
+	bool sprites_visible() const;
+	int clock_cpu();	
 	uint8_t select_blank_pixel() const;
 	uint8_t select_pixel(uint8_t index);
 	void clock_x();
 	void clock_y();
 	void enter_vblank();
+	void evaluate_sprites_even();
+	void evaluate_sprites_odd();
+	void execute_cycle(const scanline_postrender &target);
 	void execute_cycle(const scanline_prerender &target);
 	void execute_cycle(const scanline_render &target);
-	void execute_cycle(const scanline_postrender &target);
 	void execute_cycle(const scanline_vblank &target);
 	void exit_vblank();
 	void open_background_attribute();
@@ -136,12 +142,9 @@ private:
 	void render_pixel(uint8_t *dest_buffer);
 	void update_shift_registers_idle();
 	void update_shift_registers_render();
-	void update_x_scroll();
 	void update_sprite_registers();
 	void update_vram_address();
-	void evaluate_sprites_even();
-	void evaluate_sprites_odd();
-	int clock_cpu();
+	void update_x_scroll();
 
 private:
 	template <int Size>
@@ -187,12 +190,11 @@ private:
 	uint16_t     vpos_;                  // scanline counter
 	uint8_t      next_pattern_[2];
 	uint8_t      address_increment_;
-	uint8_t      color_intensity_;
 	uint8_t      latch_;
 	uint8_t      next_attribute_;
 	uint8_t      next_tile_index_;
-	uint8_t      register_2000_;
-	uint8_t      register_2001_;
+	uint8_t      ppu_control_;
+	uint8_t      ppu_mask_;
 	uint8_t      register_2007_buffer_;
 	uint8_t      sprite_address_;
 	uint8_t      sprite_data_index_;
@@ -200,17 +202,12 @@ private:
 	uint8_t      status_;
 	uint8_t      tile_offset_;           // loopy's "x"
 	uint8_t      sprite_buffer_;
-	bool         background_clipping_;
-	bool         background_visible_;
-	bool         greyscale_;
 	bool         nmi_on_vblank_;
 	bool         odd_frame_;
 	bool         rendering_;
-	bool         sprite_clipping_;
 	bool         sprite_init_;
 	bool         sprite_zero_found_next_;
 	bool         sprite_zero_found_curr_;
-	bool         sprites_visible_;
 	bool         write_latch_;
 	bool         write_block_;
 
