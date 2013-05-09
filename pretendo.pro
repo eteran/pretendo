@@ -82,7 +82,6 @@ HEADERS += \
 		Mapper245.h \
 		NES.h \
 		NINA-001.h \
-		NTSC.h \
 		Noise.h \
 		PPU.h \
 		Palette.h \
@@ -184,7 +183,6 @@ SOURCES += \
 		Mapper245.cc \
 		NES.cc \
 		NINA-001.cc \
-		NTSC.cc \
 		Noise.cc \
 		PPU.cc \
 		Palette.cc \
@@ -386,8 +384,8 @@ win32-* {
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
 	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall
 
-	QMAKE_CFLAGS_RELEASE   += -march=native -g3 -W -Wall
-	QMAKE_CXXFLAGS_RELEASE += -march=native -g3 -W -Wall
+	QMAKE_CFLAGS_RELEASE   += -march=native -g3 -W -Wall -O3
+	QMAKE_CXXFLAGS_RELEASE += -march=native -g3 -W -Wall -O3
 	QMAKE_LFLAGS_RELEASE   += -march=native -g3
 }
 

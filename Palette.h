@@ -24,10 +24,13 @@ struct color_emphasis_t {
 
 namespace Palette {
 
-	static const double default_hue  = 342.00;
-	static const double default_tint = 0.50;
+	static const float default_saturation = 1.0f;
+	static const float default_hue        = 0.0f;
+	static const float default_contrast   = 1.0f;
+	static const float default_brightness = 1.0f;
+	static const float default_gamma      = 1.8f;
 
-	rgb_color_t *NTSCPalette(double hue, double tint);
+	rgb_color_t *NTSCPalette(float saturation, float hue, float contrast, float brightness, float gamma);
 
 	/*
 	   000 = No Effect

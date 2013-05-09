@@ -485,7 +485,12 @@ PretendoWindow::OnQuit (void)
 void
 PretendoWindow::OnRun (void)
 {
-	set_palette(Palette::intensity, Palette::NTSCPalette(355.00, 0.50));
+	set_palette(Palette::intensity, Palette::NTSCPalette(
+					Palette::default_saturation,
+					Palette::default_hue,
+					Palette::default_contrast,
+					Palette::default_brightness,
+					Palette::default_gamma));
 	
 	if (! fRunning) {
 		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {

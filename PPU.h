@@ -123,8 +123,12 @@ private:
 	bool sprite_clipping() const;
 	bool sprites_visible() const;
 	int clock_cpu();	
+	uint16_t background_pattern_table() const;
+	uint16_t sprite_pattern_table() const;
+	uint8_t address_increment() const;
 	uint8_t select_blank_pixel() const;
 	uint8_t select_pixel(uint8_t index);
+	uint8_t sprite_size() const;
 	void clock_x();
 	void clock_y();
 	void enter_vblank();
@@ -182,14 +186,11 @@ private:
 	uint16_t     next_ppu_fetch_address_;
 	uint16_t     attribute_queue_[2];
 	uint16_t     pattern_queue_[2];
-	uint16_t     background_pattern_table_;
 	uint16_t     nametable_;	         // loopy's "t"
-	uint16_t     sprite_pattern_table_;
 	uint16_t     vram_address_;          // loopy's "v"
 	uint16_t     hpos_;                  // pixel counter
 	uint16_t     vpos_;                  // scanline counter
 	uint8_t      next_pattern_[2];
-	uint8_t      address_increment_;
 	uint8_t      latch_;
 	uint8_t      next_attribute_;
 	uint8_t      next_tile_index_;
@@ -198,11 +199,9 @@ private:
 	uint8_t      register_2007_buffer_;
 	uint8_t      sprite_address_;
 	uint8_t      sprite_data_index_;
-	uint8_t      sprite_size_;
 	uint8_t      status_;
 	uint8_t      tile_offset_;           // loopy's "x"
 	uint8_t      sprite_buffer_;
-	bool         nmi_on_vblank_;
 	bool         odd_frame_;
 	bool         rendering_;
 	bool         sprite_init_;
