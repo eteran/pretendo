@@ -96,7 +96,7 @@ void Pretendo::update() {
 
 #if 1
 	const uint8_t *const b = nes::apu.buffer();
-	audio_->write(b, APU::buffer_size);
+//	audio_->write(b, APU::buffer_size);
 #endif
 
 	// FPS calculation

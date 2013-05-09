@@ -386,8 +386,8 @@ win32-* {
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
 	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall
 
-	QMAKE_CFLAGS_RELEASE   += -march=native -g3 -W -Wall
-	QMAKE_CXXFLAGS_RELEASE += -march=native -g3 -W -Wall
+	QMAKE_CFLAGS_RELEASE   += -march=native -g3 -W -Wall -O3
+	QMAKE_CXXFLAGS_RELEASE += -march=native -g3 -W -Wall -O3
 	QMAKE_LFLAGS_RELEASE   += -march=native -g3
 }
 
