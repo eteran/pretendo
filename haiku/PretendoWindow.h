@@ -20,10 +20,12 @@
 #include "ROMFilePanel.h"
 #include "VideoInterface.h"
 #include "AudioStream.h"
+#include <RadioButton.h>
+#include <Slider.h>
 
 #include "VideoScreen.h"
 //#include "InputWindow.h"
-//#include "PaletteWindow.h"
+#include "PaletteWindow.h"
 #include "CartInfoWindow.h"
 
 #include "SimpleMutex.h"
@@ -200,6 +202,9 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	AudioStream *fAudioStream;
+	
+	private:
+	PaletteWindow *fPaletteWindow;
 	
 	private:
 	bool fPaused;

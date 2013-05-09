@@ -4,7 +4,7 @@
 #include "NES.h"
 #include "PretendoWindow.h"
 #include "CartInfoWindow.h"
-
+#include "PaletteWindow.h"
 
 PretendoWindow::PretendoWindow()
 	: BDirectWindow (BRect (0, 0, 0, 0), "Pretendo", B_TITLED_WINDOW, B_NOT_RESIZABLE, 0),
@@ -26,6 +26,7 @@ PretendoWindow::PretendoWindow()
 		fDirtyArea(B_ERROR),
 		fVideoScreen(NULL),
 		fAudioStream(NULL),
+		fPaletteWindow(NULL),
 		fPaused(false),
 		fRunning(false)
 {
@@ -285,11 +286,11 @@ PretendoWindow::MessageReceived (BMessage *message)
 			break;
 			
 		case MSG_ADJ_PALETTE:
-		//	if (fPaletteWindow != NULL) {
-		//		fPaletteWindow->Show();
-		//	} else {
-		//		fPaletteWindow = new PaletteWindow;
-		//	}
+			if (fPaletteWindow != NULL) {
+				fPaletteWindow->Show();
+			} else {
+				fPaletteWindow = new PaletteWindow;
+			}
 			
 			break;
 			
