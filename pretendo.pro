@@ -82,7 +82,6 @@ HEADERS += \
 		Mapper245.h \
 		NES.h \
 		NINA-001.h \
-		NTSC.h \
 		Noise.h \
 		PPU.h \
 		Palette.h \
@@ -184,7 +183,6 @@ SOURCES += \
 		Mapper245.cc \
 		NES.cc \
 		NINA-001.cc \
-		NTSC.cc \
 		Noise.cc \
 		PPU.cc \
 		Palette.cc \
