@@ -10,7 +10,7 @@
 namespace {
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: bound
 //------------------------------------------------------------------------------
 template<class T>
 const T &bound(const T &lower, const T &value, const T &upper) {
@@ -21,23 +21,21 @@ const T &bound(const T &lower, const T &value, const T &upper) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: wave
 //------------------------------------------------------------------------------
 int wave(int p, int color) {
 	return (color + p + 8) % 12 < 6;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: gamma_fix
 //------------------------------------------------------------------------------
 float gamma_fix(float f, float gamma) {
 	return f < 0.f ? 0.f : std::pow(f, 2.2f / gamma);
 }
 
-}
-
 //------------------------------------------------------------------------------
-// Name:
+// Name: make_rgb_color
 //------------------------------------------------------------------------------
 rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float contrast, float brightness, float gamma) {
 
@@ -66,9 +64,9 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 	};
 
 	// Calculate the luma and chroma by emulating the relevant circuits:
-	float y=0.f;
-	float i=0.f;
-	float q=0.f;
+	float y = 0.f;
+	float i = 0.f;
+	float q = 0.f;
 
 	// 12 clock cycles per pixel.
 	for(int p = 0; p < 12; ++p) {
@@ -77,7 +75,7 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 		float spot = lo_and_hi[wave(p,color)];
 
 		// De-emphasis bits attenuate a part of the signal:
-		if(((pixel & 0x40) && wave(p,12)) || ((pixel & 0x80) && wave(p, 4)) || ((pixel &0x100) && wave(p, 8))) {
+		if(((pixel & 0x40) && wave(p,12)) || ((pixel & 0x80) && wave(p, 4)) || ((pixel & 0x100) && wave(p, 8))) {
 			spot *= attenuation;
 		}
 
@@ -105,11 +103,12 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 	return rgb;
 }
 
+}
+
 //------------------------------------------------------------------------------
-// Name:
+// Name: NTSCPalette
 //------------------------------------------------------------------------------
 rgb_color_t *Palette::NTSCPalette(float saturation, float hue, float contrast, float brightness, float gamma) {
-
 
 	static rgb_color_t color_list[64];
 
