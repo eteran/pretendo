@@ -96,7 +96,7 @@ void Pretendo::update() {
 
 #if 1
 	const uint8_t *const b = nes::apu.buffer();
-//	audio_->write(b, APU::buffer_size);
+	audio_->write(b, APU::buffer_size);
 #endif
 
 	// FPS calculation
@@ -176,8 +176,13 @@ void Pretendo::on_action_Run_triggered() {
 
 				ui_.stackedWidget->setCurrentIndex(1);
 
-				// setup video driver stuff
-				ui_.video->set_palette(Palette::intensity, Palette::NTSCPalette(355.00, 0.50));
+				// setup video driver stuff								
+				ui_.video->set_palette(Palette::intensity, Palette::NTSCPalette(
+					Palette::default_saturation,
+					Palette::default_hue,
+					Palette::default_contrast,
+					Palette::default_brightness,
+					Palette::default_gamma));
 
 				nes::reset(nes::HARD_RESET);
 
