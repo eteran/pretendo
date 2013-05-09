@@ -46,7 +46,7 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 
 	// Decode the color index
 	const uint8_t color = (pixel & 0x0F);
-	const uint8_t level = color<0xE ? (pixel>>4) & 3 : 1;
+	const uint8_t level = color < 0xE ? (pixel >> 4) & 3 : 1;
 
 	// Voltage levels, relative to synch voltage
 	static const float black       = 0.518f;
@@ -72,15 +72,15 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 	for(int p = 0; p < 12; ++p) {
 	
 		// NES NTSC modulator (square wave between two voltage levels):
-		float spot = lo_and_hi[wave(p,color)];
+		float spot = lo_and_hi[wave(p, color)];
 
 		// De-emphasis bits attenuate a part of the signal:
-		if(((pixel & 0x40) && wave(p,12)) || ((pixel & 0x80) && wave(p, 4)) || ((pixel & 0x100) && wave(p, 8))) {
+		if(((pixel & 0x40) && wave(p, 12)) || ((pixel & 0x80) && wave(p, 4)) || ((pixel & 0x100) && wave(p, 8))) {
 			spot *= attenuation;
 		}
 
 		// Normalize:
-		float v = (spot - black) / (white-black); 
+		float v = (spot - black) / (white - black); 
 
 		// Ideal TV NTSC demodulator:
 		// Apply contrast/brightness
@@ -88,8 +88,8 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 		v *= brightness / 12.f;
 
 		y += v;
-		i += v * std::cos( (M_PI / 6.f) * (p + hue) );
-		q += v * std::sin( (M_PI / 6.f) * (p + hue) );
+		i += v * std::cos((M_PI / 6.f) * (p + hue));
+		q += v * std::sin((M_PI / 6.f) * (p + hue));
 	}   
 
 	i *= saturation;
