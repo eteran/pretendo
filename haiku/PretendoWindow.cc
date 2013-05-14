@@ -4,7 +4,7 @@
 #include "NES.h"
 #include "PretendoWindow.h"
 #include "CartInfoWindow.h"
-#include "PaletteWindow.h"
+
 
 PretendoWindow::PretendoWindow()
 	: BDirectWindow (BRect (0, 0, 0, 0), "Pretendo", B_TITLED_WINDOW, B_NOT_RESIZABLE, 0),
@@ -16,7 +16,7 @@ PretendoWindow::PretendoWindow()
 //		fAudioMenu(NULL),
 		fOpenPanel(NULL),
 		
-//		fPaletteWindow(NULL),
+		// fPaletteWindow(NULL),
 		fCartInfoWindow(NULL),
 		fBitmap(NULL),
 		fOverlayBitmap(NULL),
@@ -286,11 +286,12 @@ PretendoWindow::MessageReceived (BMessage *message)
 			break;
 			
 		case MSG_ADJ_PALETTE:
-			if (fPaletteWindow != NULL) {
-				fPaletteWindow->Show();
-			} else {
+			//if (fPaletteWindow != NULL) {
+			//	fPaletteWindow->Show();
+			//} else {
 				fPaletteWindow = new PaletteWindow;
-			}
+				fPaletteWindow->Show();
+			//}
 			
 			break;
 			
@@ -417,9 +418,6 @@ PretendoWindow::AddMenu (void)
 	fVideoMenu->ItemAt(2)->SetMarked(false);
 	fVideoMenu->AddSeparatorItem();
 	
-	fVideoMenu->AddItem (new BMenuItem ("Adjust Palette"B_UTF8_ELLIPSIS, 
-		new BMessage (MSG_ADJ_PALETTE)));
-
 	fFileMenu->AddItem (new BMenuItem ("Free ROM", new BMessage (MSG_FREE_ROM)));
 	fFileMenu->AddItem(new BMenuItem("ROM Info", new BMessage(MSG_CART_INFO)));
 	fFileMenu->AddSeparatorItem();
@@ -434,6 +432,8 @@ PretendoWindow::AddMenu (void)
 	fEmuMenu->AddItem (new BMenuItem ("Reset (soft)", new BMessage (MSG_RST_SOFT)));
 	fEmuMenu->AddItem (new BMenuItem ("Reset (hard)", new BMessage (MSG_RST_HARD)));
 	fEmuMenu->AddSeparatorItem();
+	fEmuMenu->AddItem (new BMenuItem ("Adjust Palette"B_UTF8_ELLIPSIS, 
+		new BMessage (MSG_ADJ_PALETTE)));
 	fEmuMenu->AddItem (new BMenuItem ("Debug...", new BMessage(MSG_CPU_DEBUG)));
 	fMenuHeight = fMenu->Bounds().IntegerHeight();
 }

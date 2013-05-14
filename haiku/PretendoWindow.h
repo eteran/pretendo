@@ -164,7 +164,6 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 //	InputWindow *fInputWindow;
-//	PaletteWindow *fPaletteWindow;
 	CartInfoWindow *fCartInfoWindow;
 	
 	private:
