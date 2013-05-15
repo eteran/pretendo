@@ -1,12 +1,5 @@
 
-
-
-#include <String.h>
-#include <Alert.h>
 #include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <stdio.h>
 
 #include "PaletteWindow.h"
 #include "PaletteView.h"
@@ -19,9 +12,12 @@ PaletteWindow::PaletteWindow()
 	ResizeTo(640, 320);
 	CenterOnScreen();
 	
+	BView *backView = new BView(Bounds(), "_back_view", B_FOLLOW_ALL, 0);
+	backView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild (backView);
 	
 	fPaletteView = new PaletteView(BRect(8, 8, 343, 296), 64, 16);
-	AddChild(fPaletteView);
+	backView->AddChild(fPaletteView);
 }
 
 
@@ -43,5 +39,6 @@ PaletteWindow::MessageReceived (BMessage *message)
 bool
 PaletteWindow::QuitRequested (void)
 {
-	return true;
+	Hide();
+	return false;
 }

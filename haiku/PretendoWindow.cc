@@ -15,8 +15,6 @@ PretendoWindow::PretendoWindow()
 		fVideoMenu(NULL),
 //		fAudioMenu(NULL),
 		fOpenPanel(NULL),
-		
-		// fPaletteWindow(NULL),
 		fCartInfoWindow(NULL),
 		fBitmap(NULL),
 		fOverlayBitmap(NULL),
@@ -56,8 +54,7 @@ PretendoWindow::PretendoWindow()
 	
 	fBitsArea = create_area ("frame buffer", &areaBits, B_ANY_ADDRESS,
 					((SCREEN_WIDTH * 2) * (SCREEN_HEIGHT * 2) * 4 + B_PAGE_SIZE-1) & 
-					((uint32)-1 ^ (B_PAGE_SIZE-1)), B_NO_LOCK, 
-					B_READ_AREA | B_WRITE_AREA);
+					((uint32)-1 ^ (B_PAGE_SIZE-1)), B_NO_LOCK, 													B_READ_AREA | B_WRITE_AREA);
 	
 	fDirtyArea = create_area ("dirty buffer", &dirtyBits, B_ANY_ADDRESS,
 					((SCREEN_WIDTH * 2) * (SCREEN_HEIGHT * 2) * 4 + B_PAGE_SIZE-1) & 
@@ -76,7 +73,7 @@ PretendoWindow::PretendoWindow()
 		fDirtyBuffer.bits = reinterpret_cast<uint8 *>(dirtyBits);
 	}					
 	
-	// crate a BBitmap for overlay framework (checks for overlay support inherently)
+	// create a BBitmap for overlay framework (checks for overlay support inherently)
 	bool overlayOK = false;
 
 	bounds.Set (0, 0, SCREEN_WIDTH-1, SCREEN_HEIGHT-1);
@@ -107,7 +104,7 @@ PretendoWindow::PretendoWindow()
 	if (overlayOK) {
 		ChangeFramework (OVERLAY_FRAMEWORK);
 	} else {
-		// wait till we get a hardware cursor...
+		// things will be boring until we get a hardware cursor
 		//ChangeFramework(DIRECTWINDOW_FRAMEWORK);
 		ChangeFramework(BITMAP_FRAMEWORK);
 	}
@@ -125,8 +122,6 @@ PretendoWindow::PretendoWindow()
 		fRunning = false;
 	}
 	
-	//fMutex = create_sem(1, "pretendo_mutex");
-	//acquire_sem(fMutex);
 	fMutex = new SimpleMutex("pretendo_mutex");
 	fMutex->Lock();
 	resume_thread(fThread);
@@ -158,8 +153,6 @@ PretendoWindow::~PretendoWindow()
 	delete fAudioStream;
 	
 	fRunning = fDirectConnected = false;
-	//fMutex = B_BAD_SEM_ID;
-	//delete aMutex;
 	fThread = B_BAD_THREAD_ID;
 	
 	Hide();
@@ -286,12 +279,11 @@ PretendoWindow::MessageReceived (BMessage *message)
 			break;
 			
 		case MSG_ADJ_PALETTE:
-			//if (fPaletteWindow != NULL) {
-			//	fPaletteWindow->Show();
-			//} else {
+			if (fPaletteWindow == NULL) {
 				fPaletteWindow = new PaletteWindow;
-				fPaletteWindow->Show();
-			//}
+			}
+			
+			fPaletteWindow->Show();
 			
 			break;
 			
@@ -310,13 +302,7 @@ PretendoWindow::WindowActivated (bool flag)
 
 void
 PretendoWindow::MenusBeginning (void)
-{
-	#if 0
-	if (fPaused == false) {
-		fMediator->pauseOn();
-	}
-	#endif
-	
+{	
 	BMenu *menu = BRecentFilesList::NewFileListMenu ("Load ROM"B_UTF8_ELLIPSIS,
 		NULL, NULL, this->PreferredHandler(), 10, false, NULL, 0, 
 		"application/x-vnd.scanty-Pretendo");
@@ -340,17 +326,19 @@ PretendoWindow::QuitRequested()
 {	
 	// do not touch this code.
 	// do not even look at it.
-	// do not even breathe on it.
-	
+	// do not even breathe on it.		
 	status_t ret;
-	
-	//delete_sem(fMutex);
+
 	delete fMutex;
 	wait_for_thread(fThread, &ret);
 	
 	fRunning = 
 	fDirectConnected = false;
-		
+	
+	if (fPaletteWindow) {
+		fPaletteWindow->LockLooper();
+		fPaletteWindow->Quit();
+	}	
 	be_app->PostMessage(B_QUIT_REQUESTED);
 	
 	return true;
@@ -495,7 +483,6 @@ PretendoWindow::OnRun (void)
 	if (! fRunning) {
 		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 			reset(nes::HARD_RESET);
-			//release_sem(fMutex);
 			fMutex->Unlock();
 			fRunning = true;
 			fAudioStream->Start();
@@ -509,7 +496,6 @@ PretendoWindow::OnStop (void)
 {		
 	if (fRunning) {
 		fRunning = false;
-		//acquire_sem(fMutex);
 		fMutex->Lock();
 		
 		fAudioStream->Stop();
@@ -534,12 +520,10 @@ PretendoWindow::OnPause (void)
 {	
 	if (fRunning) {
 		if (fPaused) {
-			//release_sem(fMutex);
 			fMutex->Unlock();
 			fEmuMenu->ItemAt(1)->SetMarked(false);
 			fAudioStream->Start();
 		} else {
-			//acquire_sem(fMutex);
 			fMutex->Unlock();
 			fEmuMenu->ItemAt(1)->SetMarked(true);
 			fAudioStream->Stop();
@@ -863,7 +847,6 @@ PretendoWindow::DrawDirect (void)
 }
 		
 
-
 void
 PretendoWindow::BlitScreen (void)
 {	
@@ -1080,10 +1063,6 @@ PretendoWindow::emulation_thread (void *data)
 	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
 	
 		while (1) {
-			//if ((acquire_sem(w->Mutex()) != B_NO_ERROR)) {
-			//	break;
-			//}
-			
 			if (w->Mutex()->Lock() != B_NO_ERROR) {
 				break;
 			}
@@ -1092,7 +1071,6 @@ PretendoWindow::emulation_thread (void *data)
 			nes::run_frame(w);
 			w->end_frame();
 			w->ReadKeyStates();
-			//release_sem(w->Mutex());
 			w->Mutex()->Unlock();
 		}	
 	
