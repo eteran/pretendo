@@ -336,7 +336,7 @@ PretendoWindow::QuitRequested()
 	fDirectConnected = false;
 	
 	if (fPaletteWindow) {
-		fPaletteWindow->LockLooper();
+		fPaletteWindow->Lock();
 		fPaletteWindow->Quit();
 	}	
 	be_app->PostMessage(B_QUIT_REQUESTED);
