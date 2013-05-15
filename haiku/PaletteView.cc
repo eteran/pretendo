@@ -7,9 +7,9 @@
 PaletteView::PaletteView (BRect frame,int32 numcolors, int32 swatchSize)
 	: BView (frame, "palette", B_FOLLOW_NONE, B_WILL_DRAW),
 	fSwatchSize(swatchSize),
-	fColors(numcolors), fPalette(new rgb_color[fColors])
+	fColors(numcolors)//, fPalette(new rgb_color[fColors])
 {
-	
+	fPalette = new rgb_color[numcolors];
 	
 	
 	rgb_color_t *ntscPalette = Palette::NTSCPalette(
@@ -32,6 +32,7 @@ PaletteView::PaletteView (BRect frame,int32 numcolors, int32 swatchSize)
 
 PaletteView::~PaletteView()
 {
+	delete[] fPalette;
 }
 
 
@@ -59,6 +60,7 @@ PaletteView::AttachedToWindow (void)
 	fBrightness = new BMenuField(r, "_bright_menu", "Brightness", mnuBrightness);
 	
 	
+	
 	AddChild(fHueMenu);
 	AddChild (fSaturation);
 	AddChild(fContrast);
@@ -66,17 +68,7 @@ PaletteView::AttachedToWindow (void)
 }
 
 
-#if 0
-void
-PaletteView::MessageReceived (BMessage *message)
-{
-	if (message->what == 'TINT') {
-		cout << "EF YOU SEE CAY" << endl;
-	}
-	
-	BView::MessageReceived(message);
-}
-#endif
+
 
 void
 PaletteView::Draw (BRect frame)
@@ -93,7 +85,7 @@ PaletteView::Draw (BRect frame)
 		fPalette[i].blue = ntscPalette[i].b;
 	}
 	
-	DrawSwatchMatrix (BPoint(16, 16), fSwatchSize, 32, 4);
+	DrawSwatchMatrix (BPoint(16, 16), fSwatchSize, 16, 4);
 	DrawIndexes();
 }
 
