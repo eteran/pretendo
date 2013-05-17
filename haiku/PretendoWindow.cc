@@ -130,8 +130,12 @@ PretendoWindow::PretendoWindow()
 
 PretendoWindow::~PretendoWindow()
 {	
+	
+	fRunning = fDirectConnected = false;
+	fThread = B_BAD_THREAD_ID;
+
 	if (fOpenPanel->Window()) {
-		fOpenPanel->Window()->LockLooper();
+		fOpenPanel->Window()->Lock();
 		fOpenPanel->Window()->Quit();
 		fOpenPanel = NULL;
 	}
@@ -152,8 +156,15 @@ PretendoWindow::~PretendoWindow()
 	fAudioStream->Stop();
 	delete fAudioStream;
 	
-	fRunning = fDirectConnected = false;
-	fThread = B_BAD_THREAD_ID;
+	if (fCartInfoWindow != NULL) {
+		fCartInfoWindow->Lock();
+		fCartInfoWindow->Quit();
+	}
+	
+	if (fPaletteWindow != NULL) {
+		fPaletteWindow->Lock();
+		fPaletteWindow->Quit();
+	}
 	
 	Hide();
 	Sync();	
@@ -198,7 +209,9 @@ PretendoWindow::DirectConnected (direct_buffer_info *info)
 			
 		case B_DIRECT_STOP:
 			fDirectConnected = false;
-			free (fClipInfo.clip_list);
+			if (fClipInfo.clip_list != NULL) {
+				free (fClipInfo.clip_list);
+			}
 			break;
 	}
 	
@@ -334,11 +347,7 @@ PretendoWindow::QuitRequested()
 	
 	fRunning = 
 	fDirectConnected = false;
-	
-	if (fPaletteWindow) {
-		fPaletteWindow->Lock();
-		fPaletteWindow->Quit();
-	}	
+		
 	be_app->PostMessage(B_QUIT_REQUESTED);
 	
 	return true;
@@ -404,7 +413,6 @@ PretendoWindow::AddMenu (void)
 						new BMessage(MSG_CHANGE_RENDER), 'F'));
 	fVideoMenu->SetRadioMode(true);
 	fVideoMenu->ItemAt(2)->SetMarked(false);
-	fVideoMenu->AddSeparatorItem();
 	
 	fFileMenu->AddItem (new BMenuItem ("Free ROM", new BMessage (MSG_FREE_ROM)));
 	fFileMenu->AddItem(new BMenuItem("ROM Info", new BMessage(MSG_CART_INFO)));

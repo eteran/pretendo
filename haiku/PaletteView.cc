@@ -7,9 +7,8 @@
 PaletteView::PaletteView (BRect frame, int32 numcolors, int32 swatchSize)
 	: BView (frame, "palette", B_FOLLOW_NONE, B_WILL_DRAW),
 	fSwatchSize(swatchSize),
-	fColors(numcolors)//, fPalette(new rgb_color[fColors])
+	fColors(numcolors), fPalette(new rgb_color[fColors])
 {
-	fPalette = new rgb_color[numcolors];
 	
 	
 	rgb_color_t *ntscPalette = Palette::NTSCPalette(
@@ -24,9 +23,7 @@ PaletteView::PaletteView (BRect frame, int32 numcolors, int32 swatchSize)
 		fPalette[i].blue = ntscPalette[i].b;
 	}
 	
-	
-	
-	//SetPalette(fPalette);
+	fWorkPalette = const_cast<rgb_color *>(fPalette);
 }
 
 
@@ -58,8 +55,6 @@ PaletteView::AttachedToWindow (void)
 	
 	r.Set(158, 156, 302, 402);
 	fBrightness = new BMenuField(r, "_bright_menu", "Brightness", mnuBrightness);
-	
-	
 	
 	AddChild(fHueMenu);
 	AddChild (fSaturation);
@@ -118,26 +113,23 @@ PaletteView::DrawSwatch (BPoint where, rgb_color fill)
 	
 	BRect rect (where.x, where.y, where.x+fSwatchSize, where.y+fSwatchSize);
 	
-	//SetHighColor (darken1); 
-	//StrokeLine (rect.LeftBottom(), rect.LeftTop()); 
-	//StrokeLine (rect.LeftTop(), rect.RightTop()); 
-	//SetHighColor (lightenmax); 
-	//StrokeLine (BPoint(rect.left + 1.0f, rect.bottom), rect.RightBottom()); 
-	//StrokeLine (rect.RightBottom(), BPoint(rect.right, rect.top + 1.0f)); 
-	//rect.InsetBy (1, 1);
+	SetHighColor (darken1); 
+	StrokeLine (rect.LeftBottom(), rect.LeftTop()); 
+	StrokeLine (rect.LeftTop(), rect.RightTop()); 
+	SetHighColor (lightenmax); 
+	StrokeLine (BPoint(rect.left + 1.0f, rect.bottom), rect.RightBottom()); 
+	StrokeLine (rect.RightBottom(), BPoint(rect.right, rect.top + 1.0f)); 
+	rect.InsetBy (1, 1);
 	
-//	SetHighColor (darken4); 
-//	StrokeLine (rect.LeftBottom(), rect.LeftTop()); 
-//	StrokeLine (rect.LeftTop(), rect.RightTop()); 
-//	SetHighColor (no_tint); 
-//	StrokeLine (BPoint(rect.left + 1.0f, rect.bottom), rect.RightBottom()); 
-//	StrokeLine (rect.RightBottom(), BPoint(rect.right, rect.top + 1.0f)); 
-//	
-//	rect.InsetBy (1,1);
-//	
-//	
-
+	SetHighColor (darken4); 
+	StrokeLine (rect.LeftBottom(), rect.LeftTop()); 
+	StrokeLine (rect.LeftTop(), rect.RightTop()); 
+	SetHighColor (no_tint); 
+	StrokeLine (BPoint(rect.left + 1.0f, rect.bottom), rect.RightBottom()); 
+	StrokeLine (rect.RightBottom(), BPoint(rect.right, rect.top + 1.0f)); 
 	
+	rect.InsetBy (1,1);
+		
 	SetHighColor (fill);
 	FillRect (rect);		
 }
@@ -151,7 +143,7 @@ PaletteView::DrawSwatchRow (BPoint start, int32 size, int32 rowlen)
 	}
 	
 	for (int32_t i = 0; i < rowlen; i++) {
-		DrawSwatch (start, fPalette[i]);
+		DrawSwatch (start, fWorkPalette[i]);
 		start.x += size+4;
 	}
 		
@@ -166,12 +158,11 @@ PaletteView::DrawSwatchMatrix (BPoint start, int32 size, int32 ncols, int32 nrow
 		return;
 	}
 	
-	
-	
 	for (int32_t y = 0; y < nrows; y++) {
 		DrawSwatchRow (start, size, ncols);
 		start.y += size+4;
-		fPalette += nrows * sizeof(rgb_color);
+		fWorkPalette += nrows * sizeof(rgb_color);
+		//fPalette += nrows * sizeof(rgb_color);
 	}
 }
 

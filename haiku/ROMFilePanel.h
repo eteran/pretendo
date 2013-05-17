@@ -63,7 +63,6 @@ class ROMFilter : public BRefFilter
 			tempFileName.ICompare ("unf") == 0 ||	// UNIF archive (DOS)
 			tempFileName.ICompare ("unif") == 0 ||	// UNIF archive (UNIX)
 			tempFileName.ICompare ("fds") == 0) {	// FDS format
-			std::cout<<tempFileName << std::endl;
 			return true;
 		}
 	

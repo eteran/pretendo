@@ -25,7 +25,8 @@ class PaletteView : public BView
 	int32 fSwatchSize;
 	int32 fColors;
 	int32 fNumColors;
-	rgb_color *fPalette;
+	rgb_color *const fPalette;
+	rgb_color *fWorkPalette;
 	
 	private:
 	BMenuField *fHueMenu;
