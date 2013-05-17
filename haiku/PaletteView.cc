@@ -4,7 +4,7 @@
 #include "PaletteView.h"
 #include "Palette.h"
 
-PaletteView::PaletteView (BRect frame,int32 numcolors, int32 swatchSize)
+PaletteView::PaletteView (BRect frame, int32 numcolors, int32 swatchSize)
 	: BView (frame, "palette", B_FOLLOW_NONE, B_WILL_DRAW),
 	fSwatchSize(swatchSize),
 	fColors(numcolors)//, fPalette(new rgb_color[fColors])
@@ -26,7 +26,7 @@ PaletteView::PaletteView (BRect frame,int32 numcolors, int32 swatchSize)
 	
 	
 	
-	SetPalette(fPalette);
+	//SetPalette(fPalette);
 }
 
 
@@ -86,6 +86,7 @@ PaletteView::Draw (BRect frame)
 	}
 	
 	DrawSwatchMatrix (BPoint(16, 16), fSwatchSize, 16, 4);
+	
 	DrawIndexes();
 }
 
@@ -117,32 +118,27 @@ PaletteView::DrawSwatch (BPoint where, rgb_color fill)
 	
 	BRect rect (where.x, where.y, where.x+fSwatchSize, where.y+fSwatchSize);
 	
-	SetHighColor (darken1); 
-	StrokeLine (rect.LeftBottom(), rect.LeftTop()); 
-	StrokeLine (rect.LeftTop(), rect.RightTop()); 
-	SetHighColor (lightenmax); 
-	StrokeLine (BPoint(rect.left + 1.0f, rect.bottom), rect.RightBottom()); 
-	StrokeLine (rect.RightBottom(), BPoint(rect.right, rect.top + 1.0f)); 
-	rect.InsetBy (1, 1);
+	//SetHighColor (darken1); 
+	//StrokeLine (rect.LeftBottom(), rect.LeftTop()); 
+	//StrokeLine (rect.LeftTop(), rect.RightTop()); 
+	//SetHighColor (lightenmax); 
+	//StrokeLine (BPoint(rect.left + 1.0f, rect.bottom), rect.RightBottom()); 
+	//StrokeLine (rect.RightBottom(), BPoint(rect.right, rect.top + 1.0f)); 
+	//rect.InsetBy (1, 1);
 	
-	SetHighColor (darken4); 
-	StrokeLine (rect.LeftBottom(), rect.LeftTop()); 
-	StrokeLine (rect.LeftTop(), rect.RightTop()); 
-	SetHighColor (no_tint); 
-	StrokeLine (BPoint(rect.left + 1.0f, rect.bottom), rect.RightBottom()); 
-	StrokeLine (rect.RightBottom(), BPoint(rect.right, rect.top + 1.0f)); 
+//	SetHighColor (darken4); 
+//	StrokeLine (rect.LeftBottom(), rect.LeftTop()); 
+//	StrokeLine (rect.LeftTop(), rect.RightTop()); 
+//	SetHighColor (no_tint); 
+//	StrokeLine (BPoint(rect.left + 1.0f, rect.bottom), rect.RightBottom()); 
+//	StrokeLine (rect.RightBottom(), BPoint(rect.right, rect.top + 1.0f)); 
+//	
+//	rect.InsetBy (1,1);
+//	
+//	
+
 	
-	rect.InsetBy (1,1);
-	
-	
-	rgb_color src = fill;
-	rgb_color dst;
-	
-	dst.red = src.red;
-	dst.green = src.green;
-	dst.blue = src.blue;
-	
-	SetHighColor (dst);
+	SetHighColor (fill);
 	FillRect (rect);		
 }
 
@@ -161,12 +157,16 @@ PaletteView::DrawSwatchRow (BPoint start, int32 size, int32 rowlen)
 		
 }
 
+#include <stdio.h>
+
 void
 PaletteView::DrawSwatchMatrix (BPoint start, int32 size, int32 ncols, int32 nrows)
 {
 	if (nrows <= 0 || size <= 0 || fPalette == NULL) {
 		return;
 	}
+	
+	
 	
 	for (int32_t y = 0; y < nrows; y++) {
 		DrawSwatchRow (start, size, ncols);
