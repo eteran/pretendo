@@ -45,8 +45,9 @@ PaletteView::AttachedToWindow (void)
 	BMenu *mnuGamma = new BMenu("Gamma");
 	
 	BRect r (18, 128, 120, 32);
-	fHueMenu = new BMenuField(r, "_hue_menu", "Hue", mnuHue);
+	fHueMenu = new BMenuField(r, "_hue_menu", B_EMPTY_STRING, mnuHue);
 	
+	/*
 	r.Set(128, 128, 332, 32);
 	fSaturation = new BMenuField(r, "_sat_menu", "Saturation", mnuSat);
 	
@@ -55,11 +56,15 @@ PaletteView::AttachedToWindow (void)
 	
 	r.Set(158, 156, 302, 402);
 	fBrightness = new BMenuField(r, "_bright_menu", "Brightness", mnuBrightness);
+	*/
 	
 	AddChild(fHueMenu);
+	
+	/*
 	AddChild (fSaturation);
 	AddChild(fContrast);
 	AddChild(fBrightness);
+	*/
 }
 
 
@@ -80,8 +85,8 @@ PaletteView::Draw (BRect frame)
 		fPalette[i].blue = ntscPalette[i].b;
 	}
 	
+	fWorkPalette = const_cast<rgb_color *>(fPalette);	
 	DrawSwatchMatrix (BPoint(16, 16), fSwatchSize, 16, 4);
-	
 	DrawIndexes();
 }
 
@@ -96,10 +101,12 @@ PaletteView::SetPalette (rgb_color *palette)
 					Palette::default_brightness,
 					Palette::default_gamma);
 	for (int32 i = 0; i < 64; i++) {
-		fPalette[i].red = ntscPalette[i].r;
-		fPalette[i].green = ntscPalette[i].g;
-		fPalette[i].blue = ntscPalette[i].b;
+		palette[i].red = ntscPalette[i].r;
+		palette[i].green = ntscPalette[i].g;
+		palette[i].blue = ntscPalette[i].b;
 	}
+	
+	fWorkPalette = const_cast<rgb_color *>(fPalette);
 }
 
 
