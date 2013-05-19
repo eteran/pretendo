@@ -526,7 +526,7 @@ void PPU::sprite_dma(uint8_t value) {
 	// the procedure takes 513 CPU cycles (+1 on odd CPU cycles):
 	// first one (or two) idle cycles, and then 256 pairs of alternating
 	// read/write cycles.
-#if 1
+#if 0
 	if((nes::cpu.cycle_count() & 1)) {
 		nes::cpu.burn(514);
 	} else {

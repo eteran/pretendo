@@ -2,6 +2,7 @@
 #include "Pretendo.h"
 #include "Controller.h"
 #include "Mapper.h"
+#include "Preferences.h"
 #include "NES.h"
 #include "SortFilterProxyModel.h"
 #include <QDebug>
@@ -23,16 +24,18 @@
 
 namespace {
 
-//const int timer_interval = 1000. / 60;
-const int timer_interval = 0;
+const int timer_interval = 1000. / 60;
+//const int timer_interval = 0;
 
 }
 
 //------------------------------------------------------------------------------
 // Name: Pretendo
 //------------------------------------------------------------------------------
-Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), timer_(0), fps_label_(0), framecount_(0), paused_(false) {
+Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(0), timer_(0), fps_label_(0), framecount_(0), paused_(false) {
 	ui_.setupUi(this);
+
+	preferences_ = new Preferences(this);
 
 	fps_label_ = new QLabel(tr("FPS: 0"));
 
@@ -350,7 +353,7 @@ void Pretendo::showEvent(QShowEvent *event) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: on_action1x_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action1x_triggered() {
 	ui_.video->setFixedSize(256 * 1, 240 * 1);
@@ -359,7 +362,7 @@ void Pretendo::on_action1x_triggered() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: on_action2x_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action2x_triggered() {
 	ui_.video->setFixedSize(256 * 2, 240 * 2);
@@ -368,7 +371,7 @@ void Pretendo::on_action2x_triggered() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: on_action3x_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action3x_triggered() {
 	ui_.video->setFixedSize(256 * 3, 240 * 3);
@@ -377,10 +380,17 @@ void Pretendo::on_action3x_triggered() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: on_action4x_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action4x_triggered() {
 	ui_.video->setFixedSize(256 * 4, 240 * 4);
 	//ui_.stackedWidget->setFixedSize(256 * 4, 240 * 4);
 	adjustSize();
+}
+
+//------------------------------------------------------------------------------
+// Name: on_action_Preferences_triggered
+//------------------------------------------------------------------------------
+void Pretendo::on_action_Preferences_triggered() {
+	preferences_->show();
 }

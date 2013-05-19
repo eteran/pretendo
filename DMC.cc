@@ -51,6 +51,7 @@ void DMC::enable() {
 		// TODO: hijack the CPU for appropriate number of cycles,
 		//       not hardcoded to 3
 		nes::cpu.burn(3);
+		printf("BURN.1\n");
 		sample_buffer_ = nes::cart.mapper()->read_memory(sample_pointer_);
 
 		sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
@@ -145,6 +146,7 @@ void DMC::tick() {
 			// TODO: hijack the CPU for appropriate number of cycles,
 			//       not hardcoded to 3
 			nes::cpu.burn(3);
+			printf("BURN.2\n");
 			sample_buffer_ = nes::cart.mapper()->read_memory(sample_pointer_);
 
 			sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;

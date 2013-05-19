@@ -4,6 +4,7 @@
 
 #include <QMainWindow>
 #include <QTime>
+#include "Preferences.h"
 #include "ui_Pretendo.h"
 
 class QAudioOutput;
@@ -44,6 +45,7 @@ private Q_SLOTS:
 	void on_action2x_triggered();
 	void on_action3x_triggered();
 	void on_action4x_triggered();
+	void on_action_Preferences_triggered();
 
 protected:
 	virtual void keyPressEvent(QKeyEvent *event);
@@ -52,6 +54,7 @@ protected:
 
 private:
 	Ui::Pretendo           ui_;
+	Preferences           *preferences_;
 	QFileSystemModel      *filesystem_model_;
 	QSortFilterProxyModel *filter_model_;
 	QTimer                *timer_;
