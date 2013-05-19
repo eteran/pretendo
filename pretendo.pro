@@ -102,7 +102,7 @@ HEADERS += \
 		libunif/unif_crc32.h \
 		libunif/unif_types.h
 
-FORMS += qt/Pretendo.ui
+FORMS += qt/Pretendo.ui qt/Preferences.ui
 
 SOURCES += \
 		APU.cc \
@@ -362,13 +362,15 @@ linux-* {
 		qt/NullAudio.cc \
 		qt/Pretendo.cc \
 		qt/QtVideo.cc \
-		qt/SortFilterProxyModel.cc
+		qt/SortFilterProxyModel.cc \
+		qt/Preferences.cc
 		
 	HEADERS += \
 		qt/NullAudio.h \
 		qt/Pretendo.h \
 		qt/QtVideo.h \
-		qt/SortFilterProxyModel.h
+		qt/SortFilterProxyModel.h \
+		qt/Preferences.h
 }
 
 win32-* {
