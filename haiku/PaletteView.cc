@@ -1,5 +1,6 @@
 
-#include <Menu.h>
+
+#include <MenuItem.h>
 
 #include "PaletteView.h"
 #include "Palette.h"
@@ -38,33 +39,78 @@ PaletteView::AttachedToWindow (void)
 {
 	SetViewColor (ui_color(B_PANEL_BACKGROUND_COLOR));
 
-	BMenu *mnuHue = new BMenu("Hue");
-	BMenu *mnuSat = new BMenu("Saturation");
-	BMenu *mnuContrast = new BMenu("Contrast");
-	BMenu *mnuBrightness = new BMenu("Brightness");
-	BMenu *mnuGamma = new BMenu("Gamma");
+	fHueMenu = new BMenu("Hue");
+	fSatMenu = new BMenu("Saturation");
+	fContrastMenu = new BMenu("Contrast");
+	fBrightnessMenu = new BMenu("Brightness");
+	fGammaMenu = new BMenu("Gamma");
 	
-	BRect r (18, 128, 120, 32);
-	fHueMenu = new BMenuField(r, "_hue_menu", B_EMPTY_STRING, mnuHue);
+	BRect r (8, 128, 120, 32);
+	fHueField = new BMenuField(r, "_hue_menu", B_EMPTY_STRING, fHueMenu, true);
+	fHueField->SetDivider(0);
 	
-	/*
-	r.Set(128, 128, 332, 32);
-	fSaturation = new BMenuField(r, "_sat_menu", "Saturation", mnuSat);
+	r.Set(8, 156, 120, 172);
+	fSaturationField = new BMenuField(r, "_sat_menu", "Saturation", fSatMenu, true);
+	fSaturationField->SetDivider(0);
 	
-	r.Set(18, 156, 138, 228);
-	fContrast = new BMenuField(r, "_contrast_menu", "Contrast", mnuContrast);
+	r.Set(8, 184, 120, 312);
+	fContrastField = new BMenuField(r, "_contrast_menu", "Contrast", fContrastMenu, true);
+	fContrastField->SetDivider(0);
 	
-	r.Set(158, 156, 302, 402);
-	fBrightness = new BMenuField(r, "_bright_menu", "Brightness", mnuBrightness);
-	*/
+	r.Set(8, 212, 120, 452);
+	fBrightnessField = new BMenuField(r, "_bright_menu", "Brightness", fBrightnessMenu, true);
+	fBrightnessField->SetDivider(0);
 	
-	AddChild(fHueMenu);
+	r.Set(8, 240, 120, 592);
+	fGammaField = new BMenuField(r, "_gamma_menu", "Gamma", fGammaMenu, true);
+	fGammaField->SetDivider(0);
 	
-	/*
-	AddChild (fSaturation);
-	AddChild(fContrast);
-	AddChild(fBrightness);
-	*/
+	AddChild(fHueField);
+	AddChild (fSaturationField);
+	AddChild(fContrastField);
+	AddChild(fBrightnessField);
+	AddChild(fGammaField);
+	
+	fHueMenu->AddItem(new BMenuItem("-1 (-30°)", new BMessage('HUM1')));
+	fHueMenu->AddItem(new BMenuItem("-.081 (-2.43°)", new BMessage('HU08')));
+	fHueMenu->AddItem(new BMenuItem("0 (0°)", new BMessage('HUE0')));
+	fHueMenu->AddItem(new BMenuItem("+1 (30°)", new BMessage('HUP1')));
+	
+	fSatMenu->AddItem(new BMenuItem("0.0 (grayscale)", new BMessage('SAT0')));
+	fSatMenu->AddItem(new BMenuItem("0.5", new BMessage('ST05')));
+	fSatMenu->AddItem(new BMenuItem("1.0", new BMessage('SAT1')));
+	fSatMenu->AddItem(new BMenuItem("1.2", new BMessage('ST12')));
+	fSatMenu->AddItem(new BMenuItem("1.5", new BMessage('ST15')));
+	fSatMenu->AddItem(new BMenuItem("1.53", new BMessage('S153')));
+	fSatMenu->AddItem(new BMenuItem("1.54", new BMessage('S154')));
+	fSatMenu->AddItem(new BMenuItem("2.0", new BMessage('ST20')));
+	fSatMenu->AddItem(new BMenuItem("3.0", new BMessage('ST30')));
+	fSatMenu->AddItem(new BMenuItem("4.0", new BMessage('ST40')));
+	fSatMenu->AddItem(new BMenuItem("5.0", new BMessage('ST50')));
+	
+	fContrastMenu->AddItem(new BMenuItem("0.5 (reduced)", new BMessage('CN05')));
+	fContrastMenu->AddItem(new BMenuItem("0.92", new BMessage('CN92')));
+	fContrastMenu->AddItem(new BMenuItem("0.94", new BMessage('CN94')));
+	fContrastMenu->AddItem(new BMenuItem("1.0 (normal)", new BMessage('CN10')));;
+	fContrastMenu->AddItem(new BMenuItem("1.5", new BMessage('CN15')));
+	fContrastMenu->AddItem(new BMenuItem("2.0", new BMessage('CN20')));
+	
+	fBrightnessMenu->AddItem(new BMenuItem("0.5 (reduced)", new BMessage('BR05')));
+	fBrightnessMenu->AddItem(new BMenuItem("1.0 (normal)", new BMessage('BR05')));
+	fBrightnessMenu->AddItem(new BMenuItem("1.07", new BMessage('B107')));
+	fBrightnessMenu->AddItem(new BMenuItem("1.08", new BMessage('B108')));
+	fBrightnessMenu->AddItem(new BMenuItem("1.5", new BMessage('BR15')));
+	fBrightnessMenu->AddItem(new BMenuItem("2.0", new BMessage('BR20')));
+	
+	fGammaMenu->AddItem(new BMenuItem("1.0", new BMessage('GM10')));
+	fGammaMenu->AddItem(new BMenuItem("1.5", new BMessage('GM15')));
+	fGammaMenu->AddItem(new BMenuItem("1.7", new BMessage('GM17')));
+	fGammaMenu->AddItem(new BMenuItem("1.8", new BMessage('GM18')));	
+	fGammaMenu->AddItem(new BMenuItem("1.99", new BMessage('G199')));
+	fGammaMenu->AddItem(new BMenuItem("2.0", new BMessage('GM20')));
+	fGammaMenu->AddItem(new BMenuItem("2.1", new BMessage('GM21')));
+	fGammaMenu->AddItem(new BMenuItem("2.2", new BMessage('GM22')));
+	fGammaMenu->AddItem(new BMenuItem("2.5", new BMessage('GM25')));
 }
 
 
@@ -73,6 +119,8 @@ PaletteView::AttachedToWindow (void)
 void
 PaletteView::Draw (BRect frame)
 {		
+	(void)frame;
+	
 	rgb_color_t *ntscPalette = Palette::NTSCPalette(
 					Palette::default_saturation,
 					Palette::default_hue,

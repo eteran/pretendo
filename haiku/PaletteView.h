@@ -4,6 +4,7 @@
 
 #include <View.h>
 #include <MenuField.h>
+#include <Menu.h>
 
 class PaletteView : public BView
 {
@@ -29,11 +30,17 @@ class PaletteView : public BView
 	rgb_color *fWorkPalette;
 	
 	private:
-	BMenuField *fHueMenu;
-	BMenuField *fSaturation;
-	BMenuField *fContrast;
-	BMenuField *fBrightness;
-	BMenuField *fGamma;
+	BMenuField *fHueField;
+	BMenuField *fSaturationField;
+	BMenuField *fContrastField;
+	BMenuField *fBrightnessField;
+	BMenuField *fGammaField;
+	
+	BMenu *fHueMenu;
+	BMenu *fSatMenu;
+	BMenu *fContrastMenu;
+	BMenu *fBrightnessMenu;
+	BMenu *fGammaMenu;
 
 };
 
