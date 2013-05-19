@@ -11,6 +11,9 @@ public:
 	Preferences(QWidget *parent = 0, Qt::WindowFlags f = 0);
 	virtual ~Preferences();
 	
+protected Q_SLOTS:
+	bool eventFilter(QObject *watched, QEvent *event);
+	
 private:
 	Ui::Preferences ui_;
 };
