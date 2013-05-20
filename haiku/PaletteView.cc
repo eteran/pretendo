@@ -13,7 +13,7 @@ PaletteView::PaletteView (BRect frame, int32 numcolors, int32 swatchSize)
 {
 	
 	
-	rgb_color_t *ntscPalette = Palette::NTSCPalette(
+	rgb_color_t *ntscPalette = Palette::NTSC(
 					Palette::default_saturation,
 					Palette::default_hue,
 					Palette::default_contrast,
@@ -144,7 +144,7 @@ PaletteView::Draw (BRect frame)
 {		
 	(void)frame;
 	
-	rgb_color_t *ntscPalette = Palette::NTSCPalette(
+	rgb_color_t *ntscPalette = Palette::NTSC(
 					Palette::default_saturation,
 					Palette::default_hue,
 					Palette::default_contrast,
@@ -165,7 +165,7 @@ PaletteView::Draw (BRect frame)
 void
 PaletteView::SetPalette (rgb_color *palette)
 {
-	rgb_color_t *ntscPalette = Palette::NTSCPalette(
+	rgb_color_t *ntscPalette = Palette::NTSC(
 					Palette::default_saturation,
 					Palette::default_hue,
 					Palette::default_contrast,

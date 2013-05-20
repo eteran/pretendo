@@ -39,7 +39,7 @@ bool Preferences::eventFilter(QObject *watched, QEvent *event) {
 		QPainter painter;
 		painter.begin(ui_.palette);
 
-		const rgb_color_t *const palette = Palette::NTSCPalette(
+		const rgb_color_t *const palette = Palette::NTSC(
 			current_saturation_,
 			current_hue_,
 			current_contrast_,

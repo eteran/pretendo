@@ -6,8 +6,6 @@
 
 using boost::uint8_t;
 using boost::uint16_t;
-using boost::uint32_t;
-using boost::uint64_t;
 
 struct rgb_color_t {
 	uint8_t r;
@@ -30,7 +28,7 @@ namespace Palette {
 	static const float default_brightness = 1.0f;
 	static const float default_gamma      = 1.8f;
 
-	rgb_color_t *NTSCPalette(float saturation, float hue, float contrast, float brightness, float gamma);
+	const rgb_color_t *NTSC(float saturation, float hue, float contrast, float brightness, float gamma);
 
 	/*
 	   000 = No Effect

@@ -481,7 +481,7 @@ PretendoWindow::OnQuit (void)
 void
 PretendoWindow::OnRun (void)
 {
-	set_palette(Palette::intensity, Palette::NTSCPalette(
+	set_palette(Palette::intensity, Palette::NTSC(
 					Palette::default_saturation,
 					Palette::default_hue,
 					Palette::default_contrast,

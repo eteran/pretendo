@@ -180,7 +180,7 @@ void Pretendo::on_action_Run_triggered() {
 				ui_.stackedWidget->setCurrentIndex(1);
 
 				// setup video driver stuff								
-				ui_.video->set_palette(Palette::intensity, Palette::NTSCPalette(
+				ui_.video->set_palette(Palette::intensity, Palette::NTSC(
 					Palette::default_saturation,
 					Palette::default_hue,
 					Palette::default_contrast,

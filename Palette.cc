@@ -106,9 +106,9 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 }
 
 //------------------------------------------------------------------------------
-// Name: NTSCPalette
+// Name: NTSC
 //------------------------------------------------------------------------------
-rgb_color_t *Palette::NTSCPalette(float saturation, float hue, float contrast, float brightness, float gamma) {
+const rgb_color_t *Palette::NTSC(float saturation, float hue, float contrast, float brightness, float gamma) {
 
 	static rgb_color_t color_list[64];
 
