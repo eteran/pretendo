@@ -11,6 +11,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QLabel>
+#include <QMessageBox>
 
 #if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
 #include "QtAudio.h"
@@ -74,6 +75,14 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 #else
 	audio_ = new NullAudio();
 #endif
+
+	// setup default palette
+	ui_.video->set_palette(Palette::intensity, Palette::NTSC(
+		Palette::default_saturation,
+		Palette::default_hue,
+		Palette::default_contrast,
+		Palette::default_brightness,
+		Palette::default_gamma));
 
 	time_.start();
 }
@@ -178,14 +187,6 @@ void Pretendo::on_action_Run_triggered() {
 			if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 
 				ui_.stackedWidget->setCurrentIndex(1);
-
-				// setup video driver stuff								
-				ui_.video->set_palette(Palette::intensity, Palette::NTSC(
-					Palette::default_saturation,
-					Palette::default_hue,
-					Palette::default_contrast,
-					Palette::default_brightness,
-					Palette::default_gamma));
 
 				nes::reset(nes::HARD_RESET);
 
@@ -392,5 +393,24 @@ void Pretendo::on_action4x_triggered() {
 // Name: on_action_Preferences_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Preferences_triggered() {
-	preferences_->show();
+	
+	if(timer_->isActive()) {
+		timer_->stop();
+		audio_->stop();
+	}
+	paused_ = !timer_->isActive();
+	
+	preferences_->exec();
+	
+	if(paused_) {
+		on_action_Pause_triggered();
+	}
+}
+
+//------------------------------------------------------------------------------
+// Name: on_actionAbout_Qt_triggered
+// Desc: shows an About Qt dialog box
+//------------------------------------------------------------------------------
+void Pretendo::on_actionAbout_Qt_triggered() {
+	QMessageBox::aboutQt(this, tr("About Qt"));
 }

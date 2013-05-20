@@ -19,6 +19,7 @@ protected Q_SLOTS:
 	void on_brightness_valueChanged(int value);
 	void on_gamma_valueChanged(int value);
 	void on_buttonBox_clicked(QAbstractButton *button);
+	void on_buttonBox_accepted();
 	
 private:
 	Ui::Preferences ui_;

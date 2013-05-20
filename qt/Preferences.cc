@@ -1,8 +1,10 @@
 
 #include "Preferences.h"
+#include "Pretendo.h"
 #include "../Palette.h"
 #include <QPainter>
 #include <QAbstractButton>
+#include <QDebug>
 
 namespace {
 	const int palette_block_width  = 24;
@@ -119,3 +121,16 @@ void Preferences::on_buttonBox_clicked(QAbstractButton *button) {
 	}
 }
 
+//------------------------------------------------------------------------------
+// Name: on_buttonBox_accepted
+//------------------------------------------------------------------------------
+void Preferences::on_buttonBox_accepted() {
+	if(Pretendo *p = qobject_cast<Pretendo *>(parent())) {
+		p->ui_.video->set_palette(Palette::intensity, Palette::NTSC(
+			current_saturation_,
+			current_hue_,
+			current_contrast_,
+			current_brightness_,
+			current_gamma_));
+	}
+}

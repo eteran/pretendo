@@ -25,6 +25,7 @@ class QTimer;
 
 class Pretendo : public QMainWindow {
 	Q_OBJECT
+	friend class Preferences;
 
 public:
 	Pretendo(QWidget *parent = 0, Qt::WindowFlags flags = 0);
@@ -46,6 +47,7 @@ private Q_SLOTS:
 	void on_action3x_triggered();
 	void on_action4x_triggered();
 	void on_action_Preferences_triggered();
+	void on_actionAbout_Qt_triggered();
 
 protected:
 	virtual void keyPressEvent(QKeyEvent *event);
