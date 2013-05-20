@@ -2,7 +2,6 @@
 #include "Sweep.h"
 #include "Timer.h"
 #include "Square.h"
-#include <cstdio>
 
 //------------------------------------------------------------------------------
 // Name: Sweep

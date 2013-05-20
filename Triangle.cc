@@ -1,6 +1,5 @@
 
 #include "Triangle.h"
-#include <cstdio>
 
 namespace {
 

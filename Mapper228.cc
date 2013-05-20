@@ -7,7 +7,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(228);
 
 namespace {
 	uint8_t *prg_chips[4];
-
 }
 
 //------------------------------------------------------------------------------
