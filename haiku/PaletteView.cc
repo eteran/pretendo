@@ -13,7 +13,7 @@ PaletteView::PaletteView (BRect frame, int32 numcolors, int32 swatchSize)
 {
 	
 	
-	rgb_color_t *ntscPalette = Palette::NTSC(
+	const rgb_color_t *ntscPalette = Palette::NTSC(
 					Palette::default_saturation,
 					Palette::default_hue,
 					Palette::default_contrast,
@@ -25,7 +25,7 @@ PaletteView::PaletteView (BRect frame, int32 numcolors, int32 swatchSize)
 		fPalette[i].blue = ntscPalette[i].b;
 	}
 	
-	fWorkPalette = const_cast<rgb_color *>(fPalette);
+	fWorkPalette = fPalette;
 }
 
 
@@ -144,7 +144,7 @@ PaletteView::Draw (BRect frame)
 {		
 	(void)frame;
 	
-	rgb_color_t *ntscPalette = Palette::NTSC(
+	const rgb_color_t *ntscPalette = Palette::NTSC(
 					Palette::default_saturation,
 					Palette::default_hue,
 					Palette::default_contrast,
@@ -156,7 +156,7 @@ PaletteView::Draw (BRect frame)
 		fPalette[i].blue = ntscPalette[i].b;
 	}
 	
-	fWorkPalette = const_cast<rgb_color *>(fPalette);	
+	fWorkPalette = fPalette;	
 	DrawSwatchMatrix (BPoint(16, 16), fSwatchSize, 16, 4);
 	DrawIndexes();
 }
@@ -165,7 +165,7 @@ PaletteView::Draw (BRect frame)
 void
 PaletteView::SetPalette (rgb_color *palette)
 {
-	rgb_color_t *ntscPalette = Palette::NTSC(
+	const rgb_color_t *ntscPalette = Palette::NTSC(
 					Palette::default_saturation,
 					Palette::default_hue,
 					Palette::default_contrast,
@@ -177,7 +177,7 @@ PaletteView::SetPalette (rgb_color *palette)
 		palette[i].blue = ntscPalette[i].b;
 	}
 	
-	fWorkPalette = const_cast<rgb_color *>(fPalette);
+	fWorkPalette = fPalette;
 }
 
 
