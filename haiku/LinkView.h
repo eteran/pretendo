@@ -10,7 +10,7 @@
 class LinkView : public BStringView
 {
 	public:
-	LinkView (BRect frame, char *text, char *link);
+	LinkView (BRect frame, const char *text, const char *link);
 	~LinkView();
 	
 	public:
@@ -21,8 +21,8 @@ class LinkView : public BStringView
 	virtual void MouseMoved (BPoint point, uint32 transit, const BMessage *message);
 	
 	private:
-	char *fText;
-	char *fLink;
+	const char *fText;
+	const char *fLink;
 	BCursor *fLinkCursor;
 };
 

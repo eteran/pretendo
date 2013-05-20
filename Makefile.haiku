@@ -33,7 +33,7 @@ INCLUDES := -I. -I/boot/common/include/libxml2 -Ilibunif -Ip6502 -isystem boost
 ASMFLAGS :=
 CXXFLAGS := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
 CFLAGS   := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
-LDFLAGS  := -g -lbe -lroot -ltranslation -ltracker -lmedia -lgame -lxml2
+LDFLAGS  := -g -lbe -lroot -ltranslation -ltracker -lmedia -lgame -L/boot/common/lib -lxml2
 
 ASM_FILES   := \
 	haiku/blitters.asm \

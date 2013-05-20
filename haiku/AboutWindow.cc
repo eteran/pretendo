@@ -95,13 +95,13 @@ AboutWindow::AboutWindow()
 	
 	BRect r;
 	r.Set(53, 185, 194, 200);
-	fAboutView->AddChild(new LinkView(r, const_cast<char *>("Pretendo on google code"), const_cast<char *>("http://code.google.com/p/pretendo/")));
+	fAboutView->AddChild(new LinkView(r, "Pretendo on google code", "http://code.google.com/p/pretendo/"));
 	
 	r.Set(53, 205, 124, 220);
-	fAboutView->AddChild(new LinkView(r, const_cast<char *>("Eli's website"), const_cast<char *>("http://shell.reverse.net/~eli")));
+	fAboutView->AddChild(new LinkView(r, "Eli's website", "http://shell.reverse.net/~eli"));
 	
 	r.Set(53, 225, 140, 240);
-	fAboutView->AddChild(new LinkView(r, const_cast<char *>("Evan's website"), const_cast<char *>("http://www.codef00.com")));
+	fAboutView->AddChild(new LinkView(r, "Evan's website", "http://www.codef00.com"));
 	
 }
 

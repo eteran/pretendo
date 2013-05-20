@@ -20,7 +20,7 @@ uint8 link_cursor[] = {
 };
 
 
-LinkView::LinkView (BRect frame, char *text, char *link)
+LinkView::LinkView (BRect frame, const char *text, const char *link)
 	: BStringView(frame, "_linkview", text, B_FOLLOW_LEFT|B_FOLLOW_TOP, B_WILL_DRAW),
 	fText(text), fLink(link)
 {
@@ -50,7 +50,7 @@ LinkView::MouseUp (BPoint point)
 	frame.OffsetTo(B_ORIGIN);
 	BStringView::Draw(frame);
 	
-	be_roster->Launch("text/html", 1, &fLink);
+	be_roster->Launch("text/html", 1, const_cast<char **>(&fLink));
 	
 	BStringView::MouseUp(point);
 }
