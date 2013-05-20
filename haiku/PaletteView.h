@@ -5,6 +5,7 @@
 #include <View.h>
 #include <MenuField.h>
 #include <Menu.h>
+#include <Button.h>
 
 class PaletteView : public BView
 {
@@ -17,15 +18,13 @@ class PaletteView : public BView
 	virtual void Draw (BRect updateRect);
 	
 	private:
-	void  DrawSwatchRow (BPoint start, int32 size, int32 rowlen);
+	void DrawSwatchRow (BPoint start, int32 size, int32 rowlen);
 	void SetPalette (rgb_color *palette);
 	void DrawSwatch (BPoint where, rgb_color fill);
 	void DrawSwatchMatrix (BPoint start, int32 size, int32 ncols, int32 nrows);
 	void DrawIndexes (void);
 	
 	int32 fSwatchSize;
-	int32 fColors;
-	int32 fNumColors;
 	rgb_color *const fPalette;
 	rgb_color *fWorkPalette;
 	

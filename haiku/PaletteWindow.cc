@@ -9,7 +9,7 @@ PaletteWindow::PaletteWindow()
 	: BWindow(BRect(0, 0, 0, 0), "Palette Info", B_FLOATING_WINDOW_LOOK, 						B_NORMAL_WINDOW_FEEL, B_NOT_RESIZABLE|B_NOT_ZOOMABLE)
 {
 	
-	ResizeTo(640, 320);
+	ResizeTo(356, 292);
 	CenterOnScreen();
 	
 	BView *backView = new BView(Bounds(), "_back_view", B_FOLLOW_ALL, 0);
