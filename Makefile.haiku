@@ -49,7 +49,6 @@ H_FILES     := \
 	Controller.h \
 	DMC.h \
 	Envelope.h \
-	Fixed.h \
 	Input.h \
 	LFSR.h \
 	LengthCounter.h \
