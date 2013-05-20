@@ -3,13 +3,11 @@
 #include "../Palette.h"
 #include <QPainter>
 #include <QAbstractButton>
-#include <cstdio>
 
 namespace {
 	const int palette_block_width  = 24;
 	const int palette_block_height = 12;
 }
-
 
 //------------------------------------------------------------------------------
 // Name: Preferences
@@ -68,7 +66,7 @@ bool Preferences::eventFilter(QObject *watched, QEvent *event) {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name: on_hue_valueChanged
 //------------------------------------------------------------------------------
 void Preferences::on_hue_valueChanged(int value) {
 	current_hue_ = static_cast<float>(value) / 1000.0;
@@ -76,7 +74,7 @@ void Preferences::on_hue_valueChanged(int value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name: on_saturation_valueChanged
 //------------------------------------------------------------------------------
 void Preferences::on_saturation_valueChanged(int value) {
 	current_saturation_ = static_cast<float>(value) / 100.0;
@@ -84,7 +82,7 @@ void Preferences::on_saturation_valueChanged(int value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name: on_contrast_valueChanged
 //------------------------------------------------------------------------------
 void Preferences::on_contrast_valueChanged(int value) {
 	current_contrast_ = static_cast<float>(value) / 100.0;
@@ -92,7 +90,7 @@ void Preferences::on_contrast_valueChanged(int value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name: on_brightness_valueChanged
 //------------------------------------------------------------------------------
 void Preferences::on_brightness_valueChanged(int value) {
 	current_brightness_ = static_cast<float>(value) / 100.0;
@@ -100,7 +98,7 @@ void Preferences::on_brightness_valueChanged(int value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name: on_gamma_valueChanged
 //------------------------------------------------------------------------------
 void Preferences::on_gamma_valueChanged(int value) {
 	current_gamma_ = static_cast<float>(value) / 100.0;
@@ -108,7 +106,7 @@ void Preferences::on_gamma_valueChanged(int value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
+// Name: on_buttonBox_clicked
 //------------------------------------------------------------------------------
 void Preferences::on_buttonBox_clicked(QAbstractButton *button) {
 
