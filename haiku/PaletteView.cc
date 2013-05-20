@@ -90,6 +90,7 @@ PaletteView::AttachedToWindow (void)
 	fSatMenu->AddItem(new BMenuItem("3.0", new BMessage('ST30')));
 	fSatMenu->AddItem(new BMenuItem("4.0", new BMessage('ST40')));
 	fSatMenu->AddItem(new BMenuItem("5.0", new BMessage('ST50')));
+	fSatMenu->ItemAt(2)->SetMarked(true);
 	fSatMenu->SetRadioMode(true);
 	
 	fContrastMenu->AddItem(new BMenuItem("0.5 (reduced)", new BMessage('CN05')));
@@ -98,6 +99,7 @@ PaletteView::AttachedToWindow (void)
 	fContrastMenu->AddItem(new BMenuItem("1.0 (normal)", new BMessage('CN10')));;
 	fContrastMenu->AddItem(new BMenuItem("1.5", new BMessage('CN15')));
 	fContrastMenu->AddItem(new BMenuItem("2.0", new BMessage('CN20')));
+	fContrastMenu->ItemAt(3)->SetMarked(true);
 	fContrastMenu->SetRadioMode(true);
 	
 	fBrightnessMenu->AddItem(new BMenuItem("0.5 (reduced)", new BMessage('BR05')));
@@ -106,6 +108,7 @@ PaletteView::AttachedToWindow (void)
 	fBrightnessMenu->AddItem(new BMenuItem("1.08", new BMessage('B108')));
 	fBrightnessMenu->AddItem(new BMenuItem("1.5", new BMessage('BR15')));
 	fBrightnessMenu->AddItem(new BMenuItem("2.0", new BMessage('BR20')));
+	fBrightnessMenu->ItemAt(1)->SetMarked(true);
 	fBrightnessMenu->SetRadioMode(true);
 	
 	fGammaMenu->AddItem(new BMenuItem("1.0", new BMessage('GM10')));
@@ -117,6 +120,7 @@ PaletteView::AttachedToWindow (void)
 	fGammaMenu->AddItem(new BMenuItem("2.1", new BMessage('GM21')));
 	fGammaMenu->AddItem(new BMenuItem("2.2", new BMessage('GM22')));
 	fGammaMenu->AddItem(new BMenuItem("2.5", new BMessage('GM25')));
+	fGammaMenu->ItemAt(5)->SetMarked(true);
 	fGammaMenu->SetRadioMode(true);
 	
 	BBox *box = new BBox(BRect(163, 126, 164, 256));
