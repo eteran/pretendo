@@ -379,13 +379,17 @@ void PPU::write2007(uint8_t value) {
 	const uint16_t temp_address = vram_address_ & 0x3fff;
 
 	if(rendering_ && screen_enabled()) {
-		if(address_increment() == 32) {
+		if(vertical_address_increment()) {
 			clock_y();
 		} else {
 			clock_x();
 		}
 	} else {
-		vram_address_ += address_increment();
+		if(vertical_address_increment()) {
+			vram_address_ += 32;
+		} else {
+			vram_address_ += 1;
+		}
 	}
 
 	nes::cart.mapper()->vram_change_hook(vram_address_);
@@ -421,7 +425,7 @@ uint8_t PPU::read2001() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: read2002
 //------------------------------------------------------------------------------
 uint8_t PPU::read2002() {
 	// upper 3 bits of status
@@ -440,14 +444,14 @@ uint8_t PPU::read2002() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: read2003
 //------------------------------------------------------------------------------
 uint8_t PPU::read2003() {
 	return latch_;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: read2004
 //------------------------------------------------------------------------------
 uint8_t PPU::read2004() {
 	if(sprite_init_) {
@@ -469,21 +473,21 @@ uint8_t PPU::read2004() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: read2005
 //------------------------------------------------------------------------------
 uint8_t PPU::read2005() {
 	return latch_;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: read2006
 //------------------------------------------------------------------------------
 uint8_t PPU::read2006() {
 	return latch_;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: read2007
 //------------------------------------------------------------------------------
 uint8_t PPU::read2007() {
 
@@ -494,13 +498,17 @@ uint8_t PPU::read2007() {
 	const uint16_t temp_address = vram_address_ & 0x3fff;
 
 	if(rendering_ && screen_enabled()) {
-		if(address_increment() == 32) {
+		if(vertical_address_increment()) {
 			clock_y();
 		} else {
 			clock_x();
 		}
 	} else {
-		vram_address_ += address_increment();
+		if(vertical_address_increment()) {
+			vram_address_ += 32;
+		} else {
+			vram_address_ += 1;
+		}
 	}
 
 	nes::cart.mapper()->vram_change_hook(vram_address_);
@@ -519,9 +527,9 @@ uint8_t PPU::read2007() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: write4014
 //------------------------------------------------------------------------------
-void PPU::sprite_dma(uint8_t value) {
+void PPU::write4014(uint8_t value) {
 	// drain current cycles, then go ahead and do the DMA
 	// the procedure takes 513 CPU cycles (+1 on odd CPU cycles):
 	// first one (or two) idle cycles, and then 256 pairs of alternating
@@ -546,7 +554,7 @@ void PPU::sprite_dma(uint8_t value) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: set_mirroring
 //------------------------------------------------------------------------------
 void PPU::set_mirroring(uint8_t mir) {
 
@@ -1527,8 +1535,8 @@ uint16_t PPU::background_pattern_table() const {
 }
 
 //------------------------------------------------------------------------------
-// Name: address_increment
+// Name: vertical_address_increment
 //------------------------------------------------------------------------------
-uint8_t PPU::address_increment() const {
-	return (ppu_control_ & 0x04) ? 32 : 1;
+bool PPU::vertical_address_increment() const {
+	return (ppu_control_ & 0x04);
 }

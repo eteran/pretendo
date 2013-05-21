@@ -48,6 +48,7 @@ private Q_SLOTS:
 	void on_action4x_triggered();
 	void on_action_Preferences_triggered();
 	void on_actionAbout_Qt_triggered();
+	void on_action_About_triggered();
 
 protected:
 	virtual void keyPressEvent(QKeyEvent *event);

@@ -72,6 +72,7 @@ public:
 	void write2005(uint8_t value);
 	void write2006(uint8_t value);
 	void write2007(uint8_t value);
+	void write4014(uint8_t value);
 
 public:
 	uint8_t read2000();
@@ -82,9 +83,6 @@ public:
 	uint8_t read2005();
 	uint8_t read2006();
 	uint8_t read2007();
-
-public:
-	void sprite_dma(uint8_t value);
 
 public:
 	void write_vram(uint16_t address, uint8_t value);
@@ -125,7 +123,7 @@ private:
 	int clock_cpu();	
 	uint16_t background_pattern_table() const;
 	uint16_t sprite_pattern_table() const;
-	uint8_t address_increment() const;
+	bool vertical_address_increment() const;
 	uint8_t select_blank_pixel() const;
 	uint8_t select_pixel(uint8_t index);
 	uint8_t sprite_size() const;
