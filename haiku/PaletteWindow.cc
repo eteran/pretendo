@@ -1,12 +1,10 @@
 
-#include <iostream>
-
 #include "PaletteWindow.h"
 #include "PaletteView.h"
 
 
 PaletteWindow::PaletteWindow()
-	: BWindow(BRect(0, 0, 0, 0), "Palette Info", B_FLOATING_WINDOW_LOOK, 						B_NORMAL_WINDOW_FEEL, B_NOT_RESIZABLE|B_NOT_ZOOMABLE)
+	: BWindow(BRect(0, 0, 0, 0), "Adjust Palette", B_FLOATING_WINDOW_LOOK, 						B_NORMAL_WINDOW_FEEL, B_NOT_RESIZABLE|B_NOT_ZOOMABLE)
 {
 	
 	ResizeTo(356, 292);
@@ -30,9 +28,15 @@ PaletteWindow::~PaletteWindow()
 
 void
 PaletteWindow::MessageReceived (BMessage *message)
-{
-	
+{	
 	BWindow::MessageReceived(message);
+}
+
+
+void
+PaletteWindow::MenusEnded (void)
+{
+	fPaletteView->Invalidate();	// update palette
 }
 
 

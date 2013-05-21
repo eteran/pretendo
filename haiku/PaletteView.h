@@ -16,10 +16,11 @@ class PaletteView : public BView
 	public:
 	virtual void AttachedToWindow (void);
 	virtual void Draw (BRect updateRect);
+	virtual void MessageReceived (BMessage *message);
 	
 	private:
 	void DrawSwatchRow (BPoint start, int32 size, int32 rowlen);
-	void SetPalette (rgb_color *palette);
+	void SetDefaultPalette (void);
 	void DrawSwatch (BPoint where, rgb_color fill);
 	void DrawSwatchMatrix (BPoint start, int32 size, int32 ncols, int32 nrows);
 	void DrawIndexes (void);
@@ -40,6 +41,12 @@ class PaletteView : public BView
 	BMenu *fContrastMenu;
 	BMenu *fBrightnessMenu;
 	BMenu *fGammaMenu;
+	
+	float fCurrentHue;
+	float fCurrentSaturation;
+	float fCurrentContrast;
+	float fCurrentBrightness;
+	float fCurrentGamma;
 
 };
 

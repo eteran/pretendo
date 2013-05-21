@@ -13,8 +13,9 @@ class PaletteWindow : public BWindow
 	virtual ~PaletteWindow();
 	
 	public:
-	virtual void MessageReceived (BMessage *message);
 	virtual bool QuitRequested (void);
+	virtual void MessageReceived (BMessage *message);
+	virtual void MenusEnded (void);
 	
 	private:
 	PaletteView *fPaletteView;
