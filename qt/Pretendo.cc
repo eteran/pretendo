@@ -421,7 +421,7 @@ void Pretendo::on_actionAbout_Qt_triggered() {
 // Desc: shows an About dialog box
 //------------------------------------------------------------------------------
 void Pretendo::on_action_About_triggered() {
-	QDialog *const dialog = new About(this);
+	static QDialog *const dialog = new About(this);
 	dialog->show();
 }
 
