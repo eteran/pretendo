@@ -212,7 +212,7 @@ void Mapper::write_4(uint16_t address, uint8_t value) {
 		nes::apu.write4013(value);
 		break;
 	case 0x4014:
-		nes::ppu.sprite_dma(value);
+		nes::ppu.write4014(value);
 		break;
 	case 0x4015:
 		nes::apu.write4015(value);
