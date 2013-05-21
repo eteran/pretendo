@@ -123,7 +123,7 @@ private:
 	int clock_cpu();	
 	uint16_t background_pattern_table() const;
 	uint16_t sprite_pattern_table() const;
-	uint8_t address_increment() const;
+	bool vertical_address_increment() const;
 	uint8_t select_blank_pixel() const;
 	uint8_t select_pixel(uint8_t index);
 	uint8_t sprite_size() const;
