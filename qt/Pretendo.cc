@@ -417,7 +417,7 @@ void Pretendo::on_actionAbout_Qt_triggered() {
 }
 
 //------------------------------------------------------------------------------
-// Name: on_actionAbout_triggered
+// Name: on_action_About_triggered
 // Desc: shows an About dialog box
 //------------------------------------------------------------------------------
 void Pretendo::on_action_About_triggered() {
