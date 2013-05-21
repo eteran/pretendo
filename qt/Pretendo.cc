@@ -421,7 +421,9 @@ void Pretendo::on_actionAbout_Qt_triggered() {
 // Desc: shows an About dialog box
 //------------------------------------------------------------------------------
 void Pretendo::on_action_About_triggered() {
-	static QDialog *const dialog = new About(this);
+	static About *const dialog = new About(this);
+	dialog->ui_.build_date->setText(tr("%1").arg(__TIMESTAMP__));
+	dialog->ui_.version->setText(tr("%1").arg("2.0.0"));
 	dialog->show();
 }
 
