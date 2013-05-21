@@ -1,6 +1,6 @@
 
-#ifndef MAPPER61_20080314_H_
-#define MAPPER61_20080314_H_
+#ifndef MAPPER061_20080314_H_
+#define MAPPER061_20080314_H_
 
 #include "Mapper.h"
 
