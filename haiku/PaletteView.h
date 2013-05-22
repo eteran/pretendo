@@ -7,10 +7,12 @@
 #include <Menu.h>
 #include <Button.h>
 
+class PretendoWindow;
+
 class PaletteView : public BView
 {
 	public:
-	PaletteView (BRect frame, int32 numcolors, int32 swatchSize);
+	PaletteView (PretendoWindow *window, BRect frame, int32 numcolors, int32 swatchSize);
 	virtual ~PaletteView();
 	
 	public:

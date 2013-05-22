@@ -125,6 +125,13 @@ PretendoWindow::PretendoWindow()
 	fMutex = new SimpleMutex("pretendo_mutex");
 	fMutex->Lock();
 	resume_thread(fThread);
+	
+	set_palette(Palette::intensity, Palette::NTSC(
+					Palette::default_saturation,
+					Palette::default_hue,
+					Palette::default_contrast,
+					Palette::default_brightness,
+					Palette::default_gamma));
 }
 
 
@@ -293,7 +300,7 @@ PretendoWindow::MessageReceived (BMessage *message)
 			
 		case MSG_ADJ_PALETTE:
 			if (fPaletteWindow == NULL) {
-				fPaletteWindow = new PaletteWindow;
+				fPaletteWindow = new PaletteWindow(this);
 			}
 			
 			fPaletteWindow->Show();
@@ -481,13 +488,6 @@ PretendoWindow::OnQuit (void)
 void
 PretendoWindow::OnRun (void)
 {
-	set_palette(Palette::intensity, Palette::NTSC(
-					Palette::default_saturation,
-					Palette::default_hue,
-					Palette::default_contrast,
-					Palette::default_brightness,
-					Palette::default_gamma));
-	
 	if (! fRunning) {
 		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 			reset(nes::HARD_RESET);

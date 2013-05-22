@@ -6,10 +6,13 @@
 
 #include "PaletteView.h"
 
+class PretendoWindow;
+
+
 class PaletteWindow : public BWindow
 {	
 	public:
-			PaletteWindow();
+			PaletteWindow(PretendoWindow *window);
 	virtual ~PaletteWindow();
 	
 	public:

@@ -7,7 +7,8 @@
 #include "PaletteView.h"
 #include "Palette.h"
 
-PaletteView::PaletteView (BRect frame, int32 numcolors, int32 swatchSize)
+
+PaletteView::PaletteView (PretendoWindow *window, BRect frame, int32 numcolors, int32 swatchSize)
 	: BView (frame, "palette", B_FOLLOW_NONE, B_WILL_DRAW),
 	fSwatchSize(swatchSize), fPalette(new rgb_color[numcolors])
 {
@@ -17,9 +18,8 @@ PaletteView::PaletteView (BRect frame, int32 numcolors, int32 swatchSize)
 	// if (......) {
 	//		read from config
 	// } else {
-		
-	fWorkPalette = fPalette;
-	SetDefaultPalette();
+		SetDefaultPalette();
+	//}
 }
 
 

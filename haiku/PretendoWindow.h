@@ -20,9 +20,6 @@
 #include "ROMFilePanel.h"
 #include "VideoInterface.h"
 #include "AudioStream.h"
-#include <RadioButton.h>
-#include <Slider.h>
-
 #include "VideoScreen.h"
 //#include "InputWindow.h"
 #include "PaletteWindow.h"
