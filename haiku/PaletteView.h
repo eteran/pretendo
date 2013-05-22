@@ -7,12 +7,12 @@
 #include <Menu.h>
 #include <Button.h>
 
-class PretendoWindow;
+
 
 class PaletteView : public BView
 {
 	public:
-	PaletteView (PretendoWindow *window, BRect frame, int32 numcolors, int32 swatchSize);
+	PaletteView ( BRect frame, int32 numcolors, int32 swatchSize);
 	virtual ~PaletteView();
 	
 	public:
@@ -49,6 +49,8 @@ class PaletteView : public BView
 	float fCurrentContrast;
 	float fCurrentBrightness;
 	float fCurrentGamma;
+	
+	//PretendoWindow *fPretendoWindow;
 
 };
 

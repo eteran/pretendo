@@ -30,6 +30,7 @@
 #include "blitters.h"
 #include "copies.h"
 
+
 #define MSG_ROM_LOADED 	'LOAD'
 #define MSG_SHOW_OPEN	'OPEN'
 #define MSG_LOAD_RECENT	'RCNT'

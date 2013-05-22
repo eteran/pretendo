@@ -12,7 +12,7 @@ class PretendoWindow;
 class PaletteWindow : public BWindow
 {	
 	public:
-			PaletteWindow(PretendoWindow *window);
+			PaletteWindow(PretendoWindow *parent);
 	virtual ~PaletteWindow();
 	
 	public:
@@ -22,6 +22,7 @@ class PaletteWindow : public BWindow
 	
 	private:
 	PaletteView *fPaletteView;
+	PretendoWindow *fPretendoWindow;
 };
 
 

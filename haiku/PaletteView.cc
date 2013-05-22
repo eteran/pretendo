@@ -4,13 +4,15 @@
 #include <Box.h>
 #include <Button.h>
 
-#include "PaletteView.h"
 #include "Palette.h"
+#include "PaletteView.h"
+
+class PretendoWindow;
 
 
-PaletteView::PaletteView (PretendoWindow *window, BRect frame, int32 numcolors, int32 swatchSize)
+PaletteView::PaletteView (BRect frame, int32 numcolors, int32 swatchSize)
 	: BView (frame, "palette", B_FOLLOW_NONE, B_WILL_DRAW),
-	fSwatchSize(swatchSize), fPalette(new rgb_color[numcolors])
+	fSwatchSize(swatchSize), fPalette(new rgb_color[numcolors])//, fPretendoWindow(window)
 {
 	// first try to read the palette from the config file.  if we can't
 	// then we'll use the defaults
@@ -207,6 +209,7 @@ PaletteView::Draw (BRect frame)
 					fCurrentContrast,
 					fCurrentBrightness,
 					fCurrentGamma);
+	
 	for (int32 i = 0; i < 64; i++) {
 		fPalette[i].red = ntscPalette[i].r;
 		fPalette[i].green = ntscPalette[i].g;
@@ -222,11 +225,19 @@ PaletteView::Draw (BRect frame)
 void
 PaletteView::SetDefaultPalette (void)
 {
-	fCurrentSaturation = Palette::default_saturation;
-	fCurrentHue = Palette::default_hue;
-	fCurrentContrast = Palette::default_contrast;
-	fCurrentBrightness = Palette::default_brightness;
-	fCurrentGamma = Palette::default_gamma;
+	//fPretendoWindow->set_palette(Palette::intensity,
+	//	Palette::NTSC(
+	//		fCurrentSaturation,
+	//		fCurrentHue,
+	//		fCurrentContrast,
+	//		fCurrentBrightness,
+	//		fCurrentGamma));
+
+//	fCurrentSaturation = Palette::default_saturation;
+//	fCurrentHue = Palette::default_hue;
+//	fCurrentContrast = Palette::default_contrast;
+//	fCurrentBrightness = Palette::default_brightness;
+//	fCurrentGamma = Palette::default_gamma;
 		
 	fWorkPalette = fPalette;
 	Invalidate();
