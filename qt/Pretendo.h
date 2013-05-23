@@ -62,6 +62,7 @@ private:
 	QSortFilterProxyModel *filter_model_;
 	QTimer                *timer_;
 	QLabel                *fps_label_;
+	Qt::Key                player_1_[8];
 	QTime                  time_;
 	quint64                framecount_;
 	bool                   paused_;
@@ -74,6 +75,7 @@ private:
 #else
 	NullAudio *audio_;
 #endif
+
 };
 
 #endif

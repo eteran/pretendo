@@ -86,6 +86,17 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 		Palette::default_gamma));
 
 	time_.start();
+	
+	// set the default player 1 controlls
+	player_1_[Controller::INDEX_A]      = Qt::Key_X;
+	player_1_[Controller::INDEX_B]      = Qt::Key_Z;
+	player_1_[Controller::INDEX_SELECT] = Qt::Key_A;
+	player_1_[Controller::INDEX_START]  = Qt::Key_S;
+	player_1_[Controller::INDEX_UP]     = Qt::Key_Up;
+	player_1_[Controller::INDEX_DOWN]   = Qt::Key_Down;
+	player_1_[Controller::INDEX_LEFT]   = Qt::Key_Left;
+	player_1_[Controller::INDEX_RIGHT]  = Qt::Key_Right;
+
 }
 
 //------------------------------------------------------------------------------
@@ -235,32 +246,26 @@ void Pretendo::on_action_Pause_triggered() {
 // Name: keyPressEvent
 //------------------------------------------------------------------------------
 void Pretendo::keyPressEvent(QKeyEvent *event) {
-	switch(event->key()) {
-	case Qt::Key_X:
-		nes::input.controller1().keystate_[Controller::INDEX_A]      = true;
-		break;
-	case Qt::Key_Z:
-		nes::input.controller1().keystate_[Controller::INDEX_B]      = true;
-		break;
-	case Qt::Key_A:
-		nes::input.controller1().keystate_[Controller::INDEX_SELECT] = true;
-		break;
-	case Qt::Key_S:
-		nes::input.controller1().keystate_[Controller::INDEX_START]  = true;
-		break;
-	case Qt::Key_Up:
-		nes::input.controller1().keystate_[Controller::INDEX_UP]     = true;
-		break;
-	case Qt::Key_Down:
-		nes::input.controller1().keystate_[Controller::INDEX_DOWN]   = true;
-		break;
-	case Qt::Key_Left:
-		nes::input.controller1().keystate_[Controller::INDEX_LEFT]   = true;
-		break;
-	case Qt::Key_Right:
-		nes::input.controller1().keystate_[Controller::INDEX_RIGHT]  = true;
-		break;
-	default:
+
+	const int key = event->key();
+	
+	if(key == player_1_[Controller::INDEX_A]) {
+		nes::input.controller1().keystate_[Controller::INDEX_A] = true;
+	} else if(key == player_1_[Controller::INDEX_B]) {
+		nes::input.controller1().keystate_[Controller::INDEX_B] = true;	
+	} else if(key == player_1_[Controller::INDEX_SELECT]) {
+		nes::input.controller1().keystate_[Controller::INDEX_SELECT] = true;	
+	} else if(key == player_1_[Controller::INDEX_START]) {
+		nes::input.controller1().keystate_[Controller::INDEX_START] = true;
+	} else if(key == player_1_[Controller::INDEX_UP]) {
+		nes::input.controller1().keystate_[Controller::INDEX_UP] = true;
+	} else if(key == player_1_[Controller::INDEX_DOWN]) {
+		nes::input.controller1().keystate_[Controller::INDEX_DOWN] = true;
+	} else if(key == player_1_[Controller::INDEX_LEFT]) {
+		nes::input.controller1().keystate_[Controller::INDEX_LEFT] = true;
+	} else if(key == player_1_[Controller::INDEX_RIGHT]) {
+		nes::input.controller1().keystate_[Controller::INDEX_RIGHT] = true;
+	} else {
 		event->ignore();
 	}
 }
@@ -269,32 +274,26 @@ void Pretendo::keyPressEvent(QKeyEvent *event) {
 // Name: keyReleaseEvent
 //------------------------------------------------------------------------------
 void Pretendo::keyReleaseEvent(QKeyEvent *event) {
-	switch(event->key()) {
-	case Qt::Key_X:
-		nes::input.controller1().keystate_[Controller::INDEX_A]      = false;
-		break;
-	case Qt::Key_Z:
-		nes::input.controller1().keystate_[Controller::INDEX_B]      = false;
-		break;
-	case Qt::Key_A:
-		nes::input.controller1().keystate_[Controller::INDEX_SELECT] = false;
-		break;
-	case Qt::Key_S:
-		nes::input.controller1().keystate_[Controller::INDEX_START]  = false;
-		break;
-	case Qt::Key_Up:
-		nes::input.controller1().keystate_[Controller::INDEX_UP]     = false;
-		break;
-	case Qt::Key_Down:
-		nes::input.controller1().keystate_[Controller::INDEX_DOWN]   = false;
-		break;
-	case Qt::Key_Left:
-		nes::input.controller1().keystate_[Controller::INDEX_LEFT]   = false;
-		break;
-	case Qt::Key_Right:
-		nes::input.controller1().keystate_[Controller::INDEX_RIGHT]  = false;
-		break;
-	default:
+
+	const int key = event->key();
+	
+	if(key == player_1_[Controller::INDEX_A]) {
+		nes::input.controller1().keystate_[Controller::INDEX_A] = false;
+	} else if(key == player_1_[Controller::INDEX_B]) {
+		nes::input.controller1().keystate_[Controller::INDEX_B] = false;	
+	} else if(key == player_1_[Controller::INDEX_SELECT]) {
+		nes::input.controller1().keystate_[Controller::INDEX_SELECT] = false;	
+	} else if(key == player_1_[Controller::INDEX_START]) {
+		nes::input.controller1().keystate_[Controller::INDEX_START] = false;
+	} else if(key == player_1_[Controller::INDEX_UP]) {
+		nes::input.controller1().keystate_[Controller::INDEX_UP] = false;
+	} else if(key == player_1_[Controller::INDEX_DOWN]) {
+		nes::input.controller1().keystate_[Controller::INDEX_DOWN] = false;
+	} else if(key == player_1_[Controller::INDEX_LEFT]) {
+		nes::input.controller1().keystate_[Controller::INDEX_LEFT] = false;
+	} else if(key == player_1_[Controller::INDEX_RIGHT]) {
+		nes::input.controller1().keystate_[Controller::INDEX_RIGHT] = false;
+	} else {
 		event->ignore();
 	}
 }
