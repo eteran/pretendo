@@ -2,26 +2,19 @@
 
 #include <MenuItem.h>
 #include <Box.h>
-#include <Button.h>
 
 #include "Palette.h"
 #include "PaletteView.h"
 
-class PretendoWindow;
 
 
-PaletteView::PaletteView (BRect frame, int32 numcolors, int32 swatchSize)
+PaletteView::PaletteView (PretendoWindow *parent, BRect frame, int32 numcolors, int32 swatchSize)
 	: BView (frame, "palette", B_FOLLOW_NONE, B_WILL_DRAW),
-	fSwatchSize(swatchSize), fPalette(new rgb_color[numcolors])//, fPretendoWindow(window)
+	fSwatchSize(swatchSize),
+	fPalette(new rgb_color[numcolors]),
+	fPretendoWindow(parent)
 {
-	// first try to read the palette from the config file.  if we can't
-	// then we'll use the defaults
 	
-	// if (......) {
-	//		read from config
-	// } else {
-		SetDefaultPalette();
-	//}
 }
 
 
@@ -138,6 +131,15 @@ PaletteView::AttachedToWindow (void)
 	BButton *cancel = new BButton(BRect(208, 216, 320, 244), "_cancel", "Cancel", new BMessage('CNCL'));
 	AddChild (cancel);
 	cancel->SetTarget(this);
+	
+	// first try to read the palette from the config file.  if we can't
+	// then we'll use the defaults
+	
+	// if (......) {
+	//		read from config
+	// } else {
+		SetDefaultPalette();
+	//}
 }
 
 
@@ -162,7 +164,7 @@ PaletteView::MessageReceived (BMessage *message)
 		case 'ST40':	fCurrentSaturation = 4.0f;	break;
 		case 'ST50':	fCurrentSaturation = 5.0f;	break;
 		
-		case 'CN05':	fCurrentContrast = 0.5f;	break;
+		case 'CN05':	fCurrentContrast = 0.5f; SetPalette();	break;
 		case 'CN92':	fCurrentContrast = 0.92f;	break;
 		case 'CN94':	fCurrentContrast = 0.94f;	break;
 		case 'CN10':	fCurrentContrast = 1.0f;	break;
@@ -225,19 +227,26 @@ PaletteView::Draw (BRect frame)
 void
 PaletteView::SetDefaultPalette (void)
 {
-	//fPretendoWindow->set_palette(Palette::intensity,
-	//	Palette::NTSC(
-	//		fCurrentSaturation,
-	//		fCurrentHue,
-	//		fCurrentContrast,
-	//		fCurrentBrightness,
-	//		fCurrentGamma));
-
-//	fCurrentSaturation = Palette::default_saturation;
-//	fCurrentHue = Palette::default_hue;
-//	fCurrentContrast = Palette::default_contrast;
-//	fCurrentBrightness = Palette::default_brightness;
-//	fCurrentGamma = Palette::default_gamma;
+	fCurrentSaturation = Palette::default_saturation;
+	fCurrentHue = Palette::default_hue;
+	fCurrentContrast = Palette::default_contrast;
+	fCurrentBrightness = Palette::default_brightness;
+	fCurrentGamma = Palette::default_gamma;
+	
+	
+	fPretendoWindow->set_palette(Palette::intensity,
+		Palette::NTSC(
+			fCurrentSaturation,
+			fCurrentHue,
+			fCurrentContrast,
+			fCurrentBrightness,
+			fCurrentGamma));
+			
+	fHueMenu->ItemAt(2)->SetMarked(true);
+	fSatMenu->ItemAt(2)->SetMarked(true);
+	fContrastMenu->ItemAt(3)->SetMarked(true);
+	fBrightnessMenu->ItemAt(1)->SetMarked(true);
+	fGammaMenu->ItemAt(5)->SetMarked(true);
 		
 	fWorkPalette = fPalette;
 	Invalidate();
@@ -328,4 +337,15 @@ PaletteView::DrawIndexes (void)
 		DrawChar(nybbles[i], p);
 		p.x += fSwatchSize+4;
 	}
+}
+
+void 
+PaletteView::SetPalette (void)
+{
+	fPretendoWindow->set_palette(Palette::intensity, Palette::NTSC(
+		fCurrentSaturation,
+		fCurrentHue,
+		fCurrentContrast,
+		fCurrentBrightness,
+		fCurrentGamma));
 }

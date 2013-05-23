@@ -3,7 +3,8 @@
 
 
 PaletteWindow::PaletteWindow (PretendoWindow *parent)
-	: BWindow(BRect(0, 0, 0, 0), "Adjust Palette", B_FLOATING_WINDOW_LOOK, 						B_NORMAL_WINDOW_FEEL, B_NOT_RESIZABLE|B_NOT_ZOOMABLE)
+	: BWindow(BRect(0, 0, 0, 0), "Adjust Palette", B_FLOATING_WINDOW_LOOK, 						B_NORMAL_WINDOW_FEEL, B_NOT_RESIZABLE|B_NOT_ZOOMABLE),
+	fPretendoWindow(parent)
 {
 	
 	ResizeTo(356, 292);
@@ -13,7 +14,7 @@ PaletteWindow::PaletteWindow (PretendoWindow *parent)
 	backView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	AddChild (backView);
 	
-	fPaletteView = new PaletteView( BRect(8, 8, 343, 296), 64, 16);
+	fPaletteView = new PaletteView(fPretendoWindow, BRect(8, 8, 343, 296), 64, 16);
 	backView->AddChild(fPaletteView);
 }
 

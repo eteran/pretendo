@@ -7,12 +7,13 @@
 #include <Menu.h>
 #include <Button.h>
 
+#include "PretendoWindow.h"
 
 
 class PaletteView : public BView
 {
 	public:
-	PaletteView ( BRect frame, int32 numcolors, int32 swatchSize);
+	PaletteView (PretendoWindow *parent, BRect frame, int32 numcolors, int32 swatchSize);
 	virtual ~PaletteView();
 	
 	public:
@@ -26,6 +27,7 @@ class PaletteView : public BView
 	void DrawSwatch (BPoint where, rgb_color fill);
 	void DrawSwatchMatrix (BPoint start, int32 size, int32 ncols, int32 nrows);
 	void DrawIndexes (void);
+	void SetPalette (void);
 	
 	int32 fSwatchSize;
 	rgb_color *const fPalette;
@@ -50,7 +52,7 @@ class PaletteView : public BView
 	float fCurrentBrightness;
 	float fCurrentGamma;
 	
-	//PretendoWindow *fPretendoWindow;
+	PretendoWindow *fPretendoWindow;
 
 };
 
