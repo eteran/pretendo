@@ -23,6 +23,13 @@ Preferences::Preferences(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f
 		
 	ui_.setupUi(this);
 	ui_.palette->installEventFilter(this);
+	
+	ui_.hue       ->setValue(current_hue_        * 1000);
+	ui_.saturation->setValue(current_saturation_ * 100);
+	ui_.contrast  ->setValue(current_contrast_   * 100);
+	ui_.brightness->setValue(current_brightness_ * 100);
+	ui_.gamma     ->setValue(current_gamma_      * 100);
+	
 }
 
 //------------------------------------------------------------------------------
