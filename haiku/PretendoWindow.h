@@ -22,7 +22,7 @@
 #include "AudioStream.h"
 #include "VideoScreen.h"
 //#include "InputWindow.h"
-//#include "PaletteWindow.h"
+#include "PaletteWindow.h"
 #include "CartInfoWindow.h"
 
 #include "SimpleMutex.h"
@@ -30,7 +30,6 @@
 #include "blitters.h"
 #include "copies.h"
 
-class PaletteWindow;
 
 #define MSG_ROM_LOADED 	'LOAD'
 #define MSG_SHOW_OPEN	'OPEN'

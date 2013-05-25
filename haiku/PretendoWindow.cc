@@ -216,9 +216,7 @@ PretendoWindow::DirectConnected (direct_buffer_info *info)
 			
 		case B_DIRECT_STOP:
 			fDirectConnected = false;
-			if (fClipInfo.clip_list != NULL) {
-				free (fClipInfo.clip_list);
-			}
+			free (fClipInfo.clip_list);
 			break;
 	}
 	
@@ -299,9 +297,9 @@ PretendoWindow::MessageReceived (BMessage *message)
 			break;
 			
 		case MSG_ADJ_PALETTE:
-			if (fPaletteWindow == NULL) {
-				fPaletteWindow = new PaletteWindow(this);
-			}
+			//if (fPaletteWindow == NULL) {
+			//	fPaletteWindow = new PaletteWindow(this);
+			//}
 			
 			fPaletteWindow->Show();
 			
