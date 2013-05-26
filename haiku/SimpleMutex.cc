@@ -1,8 +1,6 @@
 
 #include <OS.h>
-#include <iostream>
 #include <stdexcept>
-#include <string.h>
 
 #include "SimpleMutex.h"
 

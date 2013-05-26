@@ -89,10 +89,10 @@ PretendoWindow::PretendoWindow()
 		if (fOverlayBitmap) {
 			delete fOverlayBitmap;
 		}
+		
 		fView->SetViewColor(0, 0, 0);
 		ClearBitmap(false);
 		fVideoMenu->ItemAt(2)->SetEnabled(false);
-		
 	}
 	
 	fDirectConnected = 
@@ -117,7 +117,7 @@ PretendoWindow::PretendoWindow()
 	fClear = 0;
 	
 	if ((fThread = spawn_thread(emulation_thread, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
-			std::cout << "failed to spawn thread" << std::endl;
+			throw std::runtime_error("spawn_thread failed");
 	} else {
 		fRunning = false;
 	}
@@ -137,7 +137,6 @@ PretendoWindow::PretendoWindow()
 
 PretendoWindow::~PretendoWindow()
 {	
-	
 	fRunning = fDirectConnected = false;
 	fThread = B_BAD_THREAD_ID;
 
@@ -202,7 +201,8 @@ PretendoWindow::DirectConnected (direct_buffer_info *info)
 			fClear = 5;
 			fClipInfo.clip_count = info->clip_list_count;
 			fClipInfo.clip_list = 
-				reinterpret_cast<clipping_rect *>(realloc(fClipInfo.clip_list, 								fClipInfo.clip_count * sizeof(clipping_rect)));
+				reinterpret_cast<clipping_rect *>(realloc(fClipInfo.clip_list, 
+				fClipInfo.clip_count * sizeof(clipping_rect)));
 			memcpy (fClipInfo.clip_list, info->clip_list,
 				fClipInfo.clip_count * sizeof(clipping_rect));
 			
@@ -435,7 +435,7 @@ PretendoWindow::AddMenu (void)
 	fEmuMenu->AddSeparatorItem();
 	fEmuMenu->AddItem (new BMenuItem ("Adjust Palette"B_UTF8_ELLIPSIS, 
 		new BMessage (MSG_ADJ_PALETTE)));
-	fEmuMenu->AddItem (new BMenuItem ("Debug...", new BMessage(MSG_CPU_DEBUG)));
+	fEmuMenu->AddItem (new BMenuItem ("Debug"B_UTF8_ELLIPSIS, new BMessage(MSG_CPU_DEBUG)));
 	fMenuHeight = fMenu->Bounds().IntegerHeight();
 }
 
@@ -470,9 +470,11 @@ PretendoWindow::OnFreeCart (void)
 void
 PretendoWindow::OnCartInfo (void)
 {
-	if (nes::cart.prg() != NULL) {
+	if (nes::cart.prg() != NULL && ! fCartInfoWindow) {
 		fCartInfoWindow = new CartInfoWindow();
 		fCartInfoWindow->Show();
+	} else {
+		fCartInfoWindow = NULL;
 	}
 }
 
@@ -612,7 +614,8 @@ void
 PretendoWindow::ClearDirty (void)
 {
 	uint32 *start = reinterpret_cast<uint32 *>(fDirtyBuffer.bits);
-	uint32 *end = reinterpret_cast<uint32 *>(fDirtyBuffer.bits) + (SCREEN_WIDTH*2) * 				(SCREEN_HEIGHT*2);
+	uint32 *end = reinterpret_cast<uint32 *>(fDirtyBuffer.bits) + (SCREEN_WIDTH*2) * 
+		(SCREEN_HEIGHT*2);
 	
 	if (fClear > 0) {
 		while (start < end) {

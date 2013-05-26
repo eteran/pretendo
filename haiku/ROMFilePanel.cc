@@ -28,12 +28,15 @@ ROMFilePanel::~ROMFilePanel()
 void
 ROMFilePanel::Customize (void)
 {
+	
 	BWindow *window = this->Window();
+	/*
 	BView	*view = window->ChildAt (0);
 	BView	*files = view->FindView ("PoseView");
 	BView	*count = view->FindView ("CountVw");
 	BView	*hscr = view->FindView ("HScrollBar");
 	BView	*vscr = view->FindView ("VScrollBar");
+	*/
 
 	window->SetTitle ("Pretendo: Choose a ROM Image...");
 	SetButtonLabel (B_DEFAULT_BUTTON, "Load");
