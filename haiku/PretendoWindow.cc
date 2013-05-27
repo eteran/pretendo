@@ -112,7 +112,7 @@ PretendoWindow::PretendoWindow()
 
 	// other things we need
 	fOpenPanel = new ROMFilePanel;
-	fAudioStream = new AudioStream ("Pretendo", 44100.0, 8, 1, 44100.0 / 60);	
+	fAudioStream = new AudioStream ("Pretendo", 48000.0, 8, 1, 48000.0 / 60);	
 	
 	fDoubled = false;
 	fClear = 0;
@@ -1061,7 +1061,7 @@ void
 PretendoWindow::end_frame()
 {
 	const uint8 *buffer = nes::apu.buffer();
-	fAudioStream->Stream(buffer, 735);
+	fAudioStream->Stream(buffer, 800);
 	BlitScreen();
 	fMainLocker.Unlock();
 }
