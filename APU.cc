@@ -465,7 +465,10 @@ void APU::run(int cycles) {
 		if(sample_index_ != sizeof(sample_buffer_)) {
 
 			// 1.78977267Mhz / 44100Hz = 40.5844142857 clocks per sample
-			if((apu_cycles_ % 40) == 0) {
+			// 1.78977267Mhz / 48000Hz = 37.286930625 clocks per sample
+			// 1.78977267Mhz / 192000Hz = 9.32173265625 clocks per sample
+			//if((apu_cycles_ % 40) == 0) {
+			if((apu_cycles_ % 37) == 0) {
 				sample_buffer_[sample_index_++] = mix_channels();
 			}
 		}
