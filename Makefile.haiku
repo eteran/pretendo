@@ -146,8 +146,8 @@ H_FILES     := \
 	haiku/SimpleMutex.h \
 	haiku/CartInfoWindow.h \
 	haiku/CartInfoView.h \
-	#haiku/PaletteWindow.h \
-	#haiku/PaletteView.h \
+	haiku/PaletteWindow.h \
+	haiku/PaletteView.h \
 	 
 	
 
@@ -251,8 +251,8 @@ CXX_FILES   := \
 	haiku/SimpleMutex.cc \
 	haiku/CartInfoWindow.cc \
 	haiku/CartInfoView.cc \
-	#haiku/PaletteWindow.cc \
-	#haiku/PaletteView.cc
+	haiku/PaletteWindow.cc \
+	haiku/PaletteView.cc
 	
 	
 C_FILES     := \

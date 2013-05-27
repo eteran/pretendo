@@ -4,13 +4,8 @@
 
 #include <Window.h>
 
-class PaletteWindow;
 class PretendoWindow;
-
-#include "PaletteView.h"
-
-
-
+class PaletteView;
 
 class PaletteWindow : public BWindow
 {	

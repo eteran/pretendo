@@ -297,9 +297,9 @@ PretendoWindow::MessageReceived (BMessage *message)
 			break;
 			
 		case MSG_ADJ_PALETTE:
-			//if (fPaletteWindow == NULL) {
-			//	fPaletteWindow = new PaletteWindow(this);
-			//}
+			if (fPaletteWindow == NULL) {
+				fPaletteWindow = new PaletteWindow(this);
+			}
 			
 			fPaletteWindow->Show();
 			
