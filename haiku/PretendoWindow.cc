@@ -583,7 +583,7 @@ PretendoWindow::RenderLine16 (uint8 *dest, const uint8 *source, int intensity)
 {
 	int32 width = SCREEN_WIDTH / 4;
 	uint16 *palette = reinterpret_cast<uint16 *>(fMappedPalette[intensity]);
-	
+
 	while (width--) {
 		*(uint16 *)(dest+0) = palette[*source++];
 		*(uint16 *)(dest+2) = palette[*source++];
@@ -654,7 +654,7 @@ PretendoWindow::SetRenderer (color_space cs)
 			for (int32 i = 0; i < 8; i++) {
 				fMappedPalette[i] = reinterpret_cast<uint8 *>(&fPalette8[i]);
 			}
-			
+
 			LineRenderer = &PretendoWindow::RenderLine8;
 			break;
 			
@@ -689,7 +689,7 @@ void
 PretendoWindow::SetFrontBuffer (uint8 *bits, color_space cs, int32 pixel_width, 
 	int32 row_bytes)
 {
-	fFrontBuffer.bits = reinterpret_cast<uint8 *>(bits);
+	fFrontBuffer.bits = bits;
 	fFrontBuffer.pixel_format = cs;
 	fFrontBuffer.pixel_width = pixel_width;
 	fFrontBuffer.row_bytes = row_bytes;
@@ -874,7 +874,7 @@ PretendoWindow::BlitScreen (void)
 			
 		case BITMAP_FRAMEWORK:
 			source = reinterpret_cast<uint8 *>(fBackBuffer.bits);
-			dest = reinterpret_cast<uint8 *>(fBitmapBits);
+			dest = fBitmapBits;
 			size = PretendoWindow::SCREEN_WIDTH;
 		
 			for (int32 y = 0; y < SCREEN_HEIGHT; y++) {
@@ -1059,7 +1059,7 @@ PretendoWindow::start_frame()
 void
 PretendoWindow::end_frame()
 {
-	uint8 *buffer = const_cast<uint8 *>(nes::apu.buffer());
+	const uint8 *buffer = nes::apu.buffer();
 	fAudioStream->Stream(buffer, 735);
 	BlitScreen();
 	fMainLocker.Unlock();

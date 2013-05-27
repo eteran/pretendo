@@ -53,7 +53,7 @@ AudioStream::~AudioStream()
 }
 
 void
-AudioStream::Stream (uint8 *stream, size_t samples)
+AudioStream::Stream (const void *stream, size_t samples)
 {
 	if (! fSoundPlayer || fStreaming == false) {
 		return;
@@ -61,7 +61,7 @@ AudioStream::Stream (uint8 *stream, size_t samples)
 	
 	if (acquire_sem (fSemaphore) == B_OK) {
 		if (fSampleBits == 8) {
-			uint8 *out = reinterpret_cast<uint8 *>(stream);	
+			const uint8 *out = reinterpret_cast<const uint8 *>(stream);	
 			size_t len = samples * sizeof(uint8);
 			size_t pos = fWritePosition + len;
 			size_t space = fBufferTotal - fWritePosition;
