@@ -36,6 +36,14 @@ const int timer_interval = 0;
 //------------------------------------------------------------------------------
 Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(0), timer_(0), fps_label_(0), framecount_(0), paused_(false) {
 	ui_.setupUi(this);
+	
+	//
+	QActionGroup *const zoom_group = new QActionGroup(this);
+	zoom_group->addAction(ui_.action1x);
+	zoom_group->addAction(ui_.action2x);
+	zoom_group->addAction(ui_.action3x);
+	zoom_group->addAction(ui_.action4x);
+	ui_.action2x->setChecked(true);	
 
 	preferences_ = new Preferences(this);
 
