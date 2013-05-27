@@ -13,7 +13,7 @@ class AudioStream
 	virtual ~AudioStream();
 	
 	public:
-	void Stream (uint8 *stream, size_t numSamples);
+	void Stream (const void *stream, size_t numSamples);
 	void Start (void);
 	void Stop (void);
 	

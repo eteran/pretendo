@@ -1,9 +1,10 @@
 
 #include "PaletteWindow.h"
+#include "PaletteView.h"
 
 
 PaletteWindow::PaletteWindow (PretendoWindow *parent)
-	: BWindow(BRect(0, 0, 0, 0), "Adjust Palette", B_FLOATING_WINDOW_LOOK, 						B_NORMAL_WINDOW_FEEL, B_NOT_RESIZABLE|B_NOT_ZOOMABLE),
+	: BWindow(BRect(0, 0, 0, 0), "Adjust Palette", B_FLOATING_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL, B_NOT_RESIZABLE|B_NOT_ZOOMABLE),
 	fPretendoWindow(parent)
 {
 	
