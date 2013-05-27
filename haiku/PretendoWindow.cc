@@ -4,6 +4,7 @@
 #include "NES.h"
 #include "PretendoWindow.h"
 #include "CartInfoWindow.h"
+#include "PaletteWindow.h"
 
 
 PretendoWindow::PretendoWindow()
@@ -897,7 +898,7 @@ PretendoWindow::BlitScreen (void)
 		
 			#if 0
 			for (int32 y = 0; y < PretendoWindow::SCREEN_HEIGHT; y++) {
-				asm volatile ("pushl %%edi\n"
+				asm volatile  ("pushl %%edi\n"
 					  		  "pushl %%esi\n"
 				  			  "pushl %%ebx\n"
 				  			  "pushl %%ebp\n"
@@ -934,7 +935,7 @@ PretendoWindow::BlitScreen (void)
 				  		  	  : 
 				  		  	  : "D"(dest), "S"(source), "c"(size), 
 				  		  	  "a"((uint32 *)fPaletteY), "d" ((uint32 *)fPaletteYCbCr)
-				  		  	  : "%ebx", "%ebp"
+				  		  	  : "%ebp"
 				);
 				
 				

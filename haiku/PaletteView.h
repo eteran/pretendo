@@ -9,6 +9,7 @@
 
 #include "PretendoWindow.h"
 
+
 class PaletteView : public BView
 {
 	public:

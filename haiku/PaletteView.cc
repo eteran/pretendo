@@ -3,8 +3,8 @@
 #include <MenuItem.h>
 #include <Box.h>
 
-#include "Palette.h"
 #include "PaletteView.h"
+#include "Palette.h"
 
 
 

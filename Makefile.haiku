@@ -31,8 +31,8 @@ APPNAME := pretendo
 DEFINES  := -DLinux
 INCLUDES := -I. -I/boot/common/include/libxml2 -Ilibunif -Ip6502 -isystem boost
 ASMFLAGS :=
-CXXFLAGS := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
-CFLAGS   := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long
+CXXFLAGS := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long #-fomit-frame-pointer
+CFLAGS   := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long #-fomit-frame-pointer
 LDFLAGS  := -g -lbe -lroot -ltranslation -ltracker -lmedia -lgame -L/boot/common/lib -lxml2
 
 ASM_FILES   := \
@@ -146,8 +146,8 @@ H_FILES     := \
 	haiku/SimpleMutex.h \
 	haiku/CartInfoWindow.h \
 	haiku/CartInfoView.h \
-	#haiku/PaletteWindow.h \
-	#haiku/PaletteView.h \
+	haiku/PaletteWindow.h \
+	haiku/PaletteView.h \
 	 
 	
 
@@ -251,8 +251,8 @@ CXX_FILES   := \
 	haiku/SimpleMutex.cc \
 	haiku/CartInfoWindow.cc \
 	haiku/CartInfoView.cc \
-	#haiku/PaletteWindow.cc \
-	#haiku/PaletteView.cc
+	haiku/PaletteWindow.cc \
+	haiku/PaletteView.cc
 	
 	
 C_FILES     := \
