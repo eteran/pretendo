@@ -1061,7 +1061,7 @@ void
 PretendoWindow::end_frame()
 {
 	const uint8 *buffer = nes::apu.buffer();
-	fAudioStream->Stream(buffer, 800);
+	fAudioStream->Stream(buffer, APU::buffer_size);
 	BlitScreen();
 	fMainLocker.Unlock();
 }
