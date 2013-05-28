@@ -147,50 +147,195 @@ void
 PaletteView::MessageReceived (BMessage *message)
 {
 	switch (message->what) {
-		case 'HUM1':	fCurrentHue = -1.0f;	break;
-		case 'HU08':	fCurrentHue = -0.081f;	break;
-		case 'HUE0':	fCurrentHue = 0.0f;		break;
-		case 'HUP1':	fCurrentHue = +1.0f;	break;
+		case 'HUM1':	
+			fCurrentHue = -1.0f;
+			SetPalette();
+			break;
 		
-		case 'SAT0':	fCurrentSaturation = 0.0f;	break;
-		case 'ST05':	fCurrentSaturation = 0.5f;	break;
-		case 'SAT1':	fCurrentSaturation = 1.0f;	break;
-		case 'ST12':	fCurrentSaturation = 1.2f;	break;
-		case 'ST15':	fCurrentSaturation = 1.5f;	break;
-		case 'S153':	fCurrentSaturation = 1.53f; break;
-		case 'S154':	fCurrentSaturation = 1.54f;	break;
-		case 'ST20':	fCurrentSaturation = 2.0f;	break;
-		case 'ST30':	fCurrentSaturation = 3.0f;	break;
-		case 'ST40':	fCurrentSaturation = 4.0f;	break;
-		case 'ST50':	fCurrentSaturation = 5.0f;	break;
+		case 'HU08':
+			fCurrentHue = -0.081f;
+			SetPalette();
+			break;
 		
-		case 'CN05':	fCurrentContrast = 0.5f; SetPalette();	break;
-		case 'CN92':	fCurrentContrast = 0.92f;	break;
-		case 'CN94':	fCurrentContrast = 0.94f;	break;
-		case 'CN10':	fCurrentContrast = 1.0f;	break;
-		case 'CN15':	fCurrentContrast = 1.5f;	break;
-		case 'CN20':	fCurrentContrast = 2.0f;	break;
+		case 'HUE0':	
+			fCurrentHue = 0.0f;	
+			SetPalette();	
+			break;
 		
-		case 'BR05':	fCurrentBrightness = 0.5f;	break;
-		case 'BR10':	fCurrentBrightness = 1.0f;	break;
-		case 'B107':	fCurrentBrightness = 1.07f;	break;
-		case 'B108':	fCurrentBrightness = 1.08f;	break;
-		case 'BR15':	fCurrentBrightness = 1.5f;	break;
-		case 'BR20':	fCurrentBrightness = 2.0f;	break;
+		case 'HUP1':
+			fCurrentHue = +1.0f;
+			SetPalette();
+			break;
 		
-		case 'GM10':	fCurrentGamma = 1.0f;	break;
-		case 'GM15':	fCurrentGamma = 1.5f;	break;
-		case 'GM17':	fCurrentGamma = 1.7f;	break;
-		case 'GM18':	fCurrentGamma = 1.8f;	break;
-		case 'G199':	fCurrentGamma = 1.99f;	break;
-		case 'GM20':	fCurrentGamma = 2.0f;	break;
-		case 'GM21':	fCurrentGamma = 2.1f;	break;
-		case 'GM22':	fCurrentGamma = 2.2f;	break;
-		case 'GM25':	fCurrentGamma = 2.5f;	break;
+		case 'SAT0':
+			fCurrentSaturation = 0.0f; 
+			SetPalette();	
+			break;
 		
-		case 'DFLT':	SetDefaultPalette();	break;
-		case 'UPAL':							break;
-		case 'CNCL':							break;	
+		case 'ST05':
+			fCurrentSaturation = 0.5f;
+			SetPalette();
+			break;
+		
+		case 'SAT1':
+			fCurrentSaturation = 1.0f;
+			SetPalette();	
+			break;
+		
+		case 'ST12':	
+			fCurrentSaturation = 1.2f;
+			SetPalette();	
+			break;
+		
+		case 'ST15':
+			fCurrentSaturation = 1.5f;
+			SetPalette();
+			break;
+		
+		case 'S153':
+			fCurrentSaturation = 1.53f;
+			SetPalette(); 
+			break;
+		
+		case 'S154':
+			fCurrentSaturation = 1.54f;	
+			SetPalette();
+			break;
+		
+		case 'ST20':
+			fCurrentSaturation = 2.0f;	
+			SetPalette();
+			break;
+		
+		case 'ST30':
+			fCurrentSaturation = 3.0f;
+			SetPalette();	
+			break;
+		
+		case 'ST40':
+			fCurrentSaturation = 4.0f;	
+			SetPalette();
+			break;
+		
+		case 'ST50':
+			fCurrentSaturation = 5.0f;
+			SetPalette();
+			break;
+		
+		case 'CN05':
+			fCurrentContrast = 0.5f; 
+			SetPalette();	
+			break;
+		
+		case 'CN92':
+			fCurrentContrast = 0.92f;
+			SetPalette();	
+			break;
+		
+		case 'CN94':
+			fCurrentContrast = 0.94f;
+			SetPalette();	
+			break;
+		
+		case 'CN10':	
+			fCurrentContrast = 1.0f;
+			SetPalette();	
+			break;
+		
+		case 'CN15':
+			fCurrentContrast = 1.5f;
+			SetPalette();
+			break;
+		
+		case 'CN20':
+			fCurrentContrast = 2.0f;
+			SetPalette();
+			break;
+		
+		case 'BR05':	
+			fCurrentBrightness = 0.5f;
+			SetPalette();	
+			break;
+		
+		case 'BR10':
+			fCurrentBrightness = 1.0f;
+			SetPalette();	
+			break;
+		
+		case 'B107':
+			fCurrentBrightness = 1.07f;	
+			SetPalette();
+			break;
+		
+		case 'B108':
+			fCurrentBrightness = 1.08f;	
+			SetPalette();
+			break;
+		
+		case 'BR15':
+			fCurrentBrightness = 1.5f;
+			SetPalette();	
+			break;
+		
+		case 'BR20':
+		fCurrentBrightness = 2.0f;	
+			SetPalette();
+			break;
+		
+		case 'GM10':
+			fCurrentGamma = 1.0f;
+			SetPalette();	
+			break;
+		
+		case 'GM15':
+			fCurrentGamma = 1.5f;
+			SetPalette();
+			break;
+		
+		case 'GM17':	
+			fCurrentGamma = 1.7f;
+			SetPalette();
+			break;
+		
+		case 'GM18':	
+			fCurrentGamma = 1.8f;
+			SetPalette();	
+			break;
+		
+		case 'G199':
+			fCurrentGamma = 1.99f;
+			SetPalette();
+			break;
+		
+		case 'GM20':
+			fCurrentGamma = 2.0f;
+			SetPalette();	
+			break;
+		
+		case 'GM21':	
+			fCurrentGamma = 2.1f;
+			SetPalette();	
+			break;
+		
+		case 'GM22':
+			fCurrentGamma = 2.2f;
+			SetPalette();	
+			break;
+		
+		case 'GM25':
+			fCurrentGamma = 2.5f;
+			SetPalette();	
+			break;
+		
+		case 'DFLT':
+			SetDefaultPalette();	
+			break;
+		
+		case 'UPAL':
+			break;
+		
+		case 'CNCL':
+			break;	
 		
 		default:
 			BView::MessageReceived (message);
@@ -320,11 +465,12 @@ PaletteView::DrawIndexes (void)
 {
 	char const nybbles[] = "0123456789ABCDEF";
 	
+	SetHighColor(0,0,0);
+	SetFont(be_fixed_font);
+	
 	// y 
 	BPoint p(4, 28);
 	for (int32 i = 0; i < 4; i++) {
-		SetHighColor(0,0,0);
-		SetFont(be_fixed_font);
 		DrawChar(nybbles[i], p);
 		p.y += (fSwatchSize+4);
 	}
@@ -332,8 +478,6 @@ PaletteView::DrawIndexes (void)
 	// x
 	p.Set(20, 110);
 	for (int32 i = 0; i < 16; i++) {
-		SetHighColor (0, 0, 0);
-		SetFont (be_fixed_font);
 		DrawChar(nybbles[i], p);
 		p.x += fSwatchSize+4;
 	}
