@@ -465,11 +465,12 @@ PaletteView::DrawIndexes (void)
 {
 	char const nybbles[] = "0123456789ABCDEF";
 	
+	SetHighColor(0,0,0);
+	SetFont(be_fixed_font);
+	
 	// y 
 	BPoint p(4, 28);
 	for (int32 i = 0; i < 4; i++) {
-		SetHighColor(0,0,0);
-		SetFont(be_fixed_font);
 		DrawChar(nybbles[i], p);
 		p.y += (fSwatchSize+4);
 	}
@@ -477,8 +478,6 @@ PaletteView::DrawIndexes (void)
 	// x
 	p.Set(20, 110);
 	for (int32 i = 0; i < 16; i++) {
-		SetHighColor (0, 0, 0);
-		SetFont (be_fixed_font);
 		DrawChar(nybbles[i], p);
 		p.x += fSwatchSize+4;
 	}
