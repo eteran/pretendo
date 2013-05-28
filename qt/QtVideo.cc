@@ -40,7 +40,6 @@ QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags 
 	setFormat(QGLFormat(QGL::DoubleBuffer));
 	setMouseTracking(false);
 	setBaseSize(WIDTH, HEIGHT);
-	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 	connect(this, SIGNAL(render_frame()), this, SLOT(updateGL()));
 

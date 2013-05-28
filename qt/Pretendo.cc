@@ -37,13 +37,16 @@ const int timer_interval = 0;
 Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(0), timer_(0), fps_label_(0), framecount_(0), paused_(false) {
 	ui_.setupUi(this);
 	
-	//
+	// make only one of these selectable at a time
 	QActionGroup *const zoom_group = new QActionGroup(this);
 	zoom_group->addAction(ui_.action1x);
 	zoom_group->addAction(ui_.action2x);
 	zoom_group->addAction(ui_.action3x);
 	zoom_group->addAction(ui_.action4x);
-	ui_.action2x->setChecked(true);	
+	ui_.action2x->setChecked(true);
+	
+	// set the default zoom
+	zoom(2);
 
 	preferences_ = new Preferences(this);
 
@@ -362,39 +365,44 @@ void Pretendo::showEvent(QShowEvent *event) {
 }
 
 //------------------------------------------------------------------------------
+// Name: zoom
+//------------------------------------------------------------------------------
+void Pretendo::zoom(int scale) {
+	ui_.video->setFixedSize(256 * scale, 240 * scale);
+
+	QWidget *w = ui_.video->parentWidget();
+	while (w) {
+		w->adjustSize();
+		w = w->parentWidget();
+	}
+}
+
+//------------------------------------------------------------------------------
 // Name: on_action1x_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action1x_triggered() {
-	ui_.video->setFixedSize(256 * 1, 240 * 1);
-	//ui_.stackedWidget->setFixedSize(256 * 1, 240 * 1);
-	adjustSize();
+	zoom(1);
 }
 
 //------------------------------------------------------------------------------
 // Name: on_action2x_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action2x_triggered() {
-	ui_.video->setFixedSize(256 * 2, 240 * 2);
-	//ui_.stackedWidget->setFixedSize(256 * 2, 240 * 2);
-	adjustSize();
+	zoom(2);
 }
 
 //------------------------------------------------------------------------------
 // Name: on_action3x_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action3x_triggered() {
-	ui_.video->setFixedSize(256 * 3, 240 * 3);
-	//ui_.stackedWidget->setFixedSize(256 * 3, 240 * 3);
-	adjustSize();
+	zoom(3);
 }
 
 //------------------------------------------------------------------------------
 // Name: on_action4x_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action4x_triggered() {
-	ui_.video->setFixedSize(256 * 4, 240 * 4);
-	//ui_.stackedWidget->setFixedSize(256 * 4, 240 * 4);
-	adjustSize();
+	zoom(4);
 }
 
 //------------------------------------------------------------------------------
