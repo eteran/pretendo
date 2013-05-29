@@ -813,7 +813,7 @@ PretendoWindow::DrawDirect (void)
 	if (! fDoubled) {
 		for (int32 i = 0; i < fClipInfo.clip_count; i++, clip++) {
 			int32 x = (clip->left - fClipInfo.bounds.left) * fPixelWidth;
-			int32 y = (clip->top - fClipInfo.bounds.top);
+			int32 y = (clip->top - fClipInfo.bounds.top) + 1;
 			int32 w = clip->right - clip->left + 1;
 			int32 h = clip->bottom - clip->top + 1;
 			
