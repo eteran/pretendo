@@ -6,6 +6,7 @@
 #include "CartInfoWindow.h"
 #include "PaletteWindow.h"
 
+#include "ConfigManager.h"
 
 PretendoWindow::PretendoWindow()
 	: BDirectWindow (BRect (0, 0, 0, 0), "Pretendo", B_TITLED_WINDOW, B_NOT_RESIZABLE, 0),
@@ -133,6 +134,8 @@ PretendoWindow::PretendoWindow()
 					Palette::default_contrast,
 					Palette::default_brightness,
 					Palette::default_gamma));
+	
+	
 }
 
 
@@ -823,12 +826,11 @@ PretendoWindow::DrawDirect (void)
 			dirty = fDirtyBuffer.bits + y * fBackBuffer.row_bytes + x;
 			size = w * fPixelWidth;
 		
-			while (h > 0) {
+			while (h--) {
 				blit_windowed_dirty_mmx (source, dirty, dest, size, fPixelWidth);
 				source += fBackBuffer.row_bytes;
 				dirty += fBackBuffer.row_bytes;
 				dest += fFrontBuffer.row_bytes;
-				h--;
 			}
 		}
 	} else {
