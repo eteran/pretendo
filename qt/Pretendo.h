@@ -54,6 +54,9 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void keyReleaseEvent(QKeyEvent *event);
 	virtual void showEvent(QShowEvent *event);
+	
+private:
+	void zoom(int scale);
 
 private:
 	Ui::Pretendo           ui_;

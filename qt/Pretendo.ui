@@ -3,13 +3,11 @@
  <author>Evan Teran</author>
  <class>Pretendo</class>
  <widget class="QMainWindow" name="Pretendo">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>520</width>
-    <height>539</height>
-   </rect>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Pretendo</string>
@@ -61,8 +59,8 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>512</width>
-            <height>480</height>
+            <width>256</width>
+            <height>240</height>
            </size>
           </property>
          </widget>
@@ -264,9 +262,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>3x</string>
    </property>
@@ -275,9 +270,6 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>4x</string>
    </property>
@@ -285,9 +277,6 @@
   <action name="action1x">
    <property name="checkable">
     <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>false</bool>
    </property>
    <property name="text">
     <string>1x</string>
