@@ -18,7 +18,7 @@ CartInfoView::CartInfoView(BRect frame)
 	std::vector<uint8_t> image = cart.raw_image();
     BString stringSHA1 = StreamToSHA1 (&image[0], image.size());
 
-    if(xmlDoc *const file = xmlParseFile("/boot/home/Desktop/nescarts.xml")) {
+    if(xmlDoc *const file = xmlParseFile("nescarts.xml")) {
         // get the root element it should be <database>
 		if(const xmlNodePtr root = xmlDocGetRootElement(file)) {
 			if (xmlStrcmp(root->name, 

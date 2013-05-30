@@ -31,9 +31,9 @@ APPNAME := pretendo
 DEFINES  := -DLinux
 INCLUDES := -I. -I/boot/common/include/libxml2 -Ilibunif -Ip6502 -isystem boost
 ASMFLAGS :=
-CXXFLAGS := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long #-fomit-frame-pointer
-CFLAGS   := -g -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long #-fomit-frame-pointer
-LDFLAGS  := -g -lbe -lroot -ltranslation -ltracker -lmedia -lgame -L/boot/common/lib -lxml2
+CXXFLAGS := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long #-fomit-frame-pointer
+CFLAGS   := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long #-fomit-frame-pointer
+LDFLAGS  := -gdwarf-2 -gstrict-dwarf -lbe -lroot -ltranslation -ltracker -lmedia -lgame -L/boot/common/lib -lxml2
 
 ASM_FILES   := \
 	haiku/blitters.asm \

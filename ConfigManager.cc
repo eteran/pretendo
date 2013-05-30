@@ -1,7 +1,14 @@
 
 #include "ConfigManager.h"
 
-ConfigManager::ConfigManager() : filename_("pretendo.cfg") {
+ConfigManager::ConfigManager() 
+	: filename_("pretendo.cfg") 
+{
+}
+
+
+ConfigManager::~ConfigManager()
+{
 }
 
 
@@ -19,8 +26,7 @@ bool ConfigManager::Load() {
 		NewKey("App Settings", kv_pair("AutoRun", "false"));
 		NewKey("App Settings", kv_pair("SleepOnLoseFocus", "false"));
 		NewKey("App Settings", kv_pair("ROMDirectory", "./roms"));
-		NewKey("App Settings", kv_pair("UseROMDB", "false"));
-		NewKey("App Settings", kv_pair("DBFile", "./roms.db"));
+		
 		Save();
 
 		return false;

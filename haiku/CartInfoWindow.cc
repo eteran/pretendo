@@ -46,22 +46,15 @@ CartInfoWindow::~CartInfoWindow()
 void
 CartInfoWindow::MessageReceived (BMessage *message)
 {
-	switch (message->what) {
-		default:
-			BWindow::MessageReceived (message);
-			break;
-		
-		case 'OKAY':
-			Quit();
-			break;
-	}
+	BWindow::MessageReceived (message);
 }
 
 
 bool
 CartInfoWindow::QuitRequested (void)
 {
-	return true;
+	Hide();
+	return false;
 }
 
 

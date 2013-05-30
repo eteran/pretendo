@@ -11,7 +11,11 @@
 #include <map>
 
 class ConfigManager {
-
+	
+	public:
+	ConfigManager();
+	virtual ~ConfigManager();
+	
 	typedef std::pair<std::string, std::string> kv_pair;
 
 public:
@@ -20,9 +24,6 @@ public:
 	typedef kv_map::iterator                   kv_iterator;
 	typedef kv_map::const_iterator             kv_const_iterator;
 	typedef config_map::iterator               config_iterator;
-
-protected:
-	ConfigManager();
 
 public:
 	bool Load();
