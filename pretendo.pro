@@ -5,8 +5,8 @@ QT      += opengl
 
 HEADERS += \
 		APU.h \
-		BNROM.h \
-		Bandai.h \
+		mappers/BNROM.h \
+		mappers/Bandai.h \
 		Cart.h \
 		ConfigManager.h \
 		Controller.h \
@@ -16,72 +16,72 @@ HEADERS += \
 		Input.h \
 		LengthCounter.h \
 		LinearCounter.h \
-		MMC3.h \
+		mappers/MMC3.h \
 		Mapper.h \
-		Mapper000.h \
-		Mapper001.h \
-		Mapper002.h \
-		Mapper003.h \
-		Mapper004.h \
-		Mapper005.h \
-		Mapper007.h \
-		Mapper009.h \
-		Mapper010.h \
-		Mapper011.h \
-		Mapper013.h \
-		Mapper015.h \
-		Mapper016.h \
-		Mapper018.h \
-		Mapper019.h \
-		Mapper021.h \
-		Mapper022.h \
-		Mapper023.h \
-		Mapper024.h \
-		Mapper025.h \
-		Mapper026.h \
-		Mapper027.h \
-		Mapper032.h \
-		Mapper033.h \
-		Mapper034.h \
-		Mapper040.h \
-		Mapper041.h \
-		Mapper043.h \
-		Mapper046.h \
-		Mapper048.h \
-		Mapper050.h \
-		Mapper057.h \
-		Mapper058.h \
-		Mapper061.h \
-		Mapper064.h \
-		Mapper066.h \
-		Mapper068.h \
-		Mapper069.h \
-		Mapper071.h \
-		Mapper075.h \
-		Mapper076.h \
-		Mapper079.h \
-		Mapper086.h \
-		Mapper090.h \
-		Mapper113.h \
-		Mapper118.h \
-		Mapper144.h \
-		Mapper159.h \
-		Mapper163.h \
-		Mapper180.h \
-		Mapper201.h \
-		Mapper206.h \
-		Mapper218.h \
-		Mapper226.h \
-		Mapper228.h \
-		Mapper231.h \
-		Mapper232.h \
-		Mapper240.h \
-		Mapper241.h \
-		Mapper242.h \
-		Mapper243.h \
-		Mapper245.h \
+		mappers/Mapper000.h \
+		mappers/Mapper001.h \
+		mappers/Mapper002.h \
+		mappers/Mapper003.h \
+		mappers/Mapper004.h \
+		mappers/Mapper005.h \
+		mappers/Mapper007.h \
+		mappers/Mapper009.h \
+		mappers/Mapper010.h \
+		mappers/Mapper011.h \
+		mappers/Mapper013.h \
+		mappers/Mapper015.h \
+		mappers/Mapper016.h \
+		mappers/Mapper018.h \
+		mappers/Mapper019.h \
+		mappers/Mapper021.h \
+		mappers/Mapper022.h \
+		mappers/Mapper023.h \
+		mappers/Mapper024.h \
+		mappers/Mapper025.h \
+		mappers/Mapper026.h \
+		mappers/Mapper027.h \
+		mappers/Mapper032.h \
+		mappers/Mapper033.h \
+		mappers/Mapper034.h \
+		mappers/Mapper040.h \
+		mappers/Mapper041.h \
+		mappers/Mapper043.h \
+		mappers/Mapper046.h \
+		mappers/Mapper048.h \
+		mappers/Mapper050.h \
+		mappers/Mapper057.h \
+		mappers/Mapper058.h \
+		mappers/Mapper061.h \
+		mappers/Mapper064.h \
+		mappers/Mapper066.h \
+		mappers/Mapper068.h \
+		mappers/Mapper069.h \
+		mappers/Mapper071.h \
+		mappers/Mapper075.h \
+		mappers/Mapper076.h \
+		mappers/Mapper079.h \
+		mappers/Mapper086.h \
+		mappers/Mapper090.h \
+		mappers/Mapper113.h \
+		mappers/Mapper118.h \
+		mappers/Mapper144.h \
+		mappers/Mapper159.h \
+		mappers/Mapper163.h \
+		mappers/Mapper180.h \
+		mappers/Mapper201.h \
+		mappers/Mapper206.h \
+		mappers/Mapper218.h \
+		mappers/Mapper226.h \
+		mappers/Mapper228.h \
+		mappers/Mapper231.h \
+		mappers/Mapper232.h \
+		mappers/Mapper240.h \
+		mappers/Mapper241.h \
+		mappers/Mapper242.h \
+		mappers/Mapper243.h \
+		mappers/Mapper245.h \
 		NES.h \
-		NINA-001.h \
+		mappers/NINA-001.h \
 		Noise.h \
 		PPU.h \
 		Palette.h \
@@ -90,9 +90,9 @@ HEADERS += \
 		Triangle.h \
 		VRAMBank.h \
 		Timer.h \
-		VRC2.h \
-		VRC4.h \
-		VRC6.h \
+		mappers/VRC2.h \
+		mappers/VRC4.h \
+		mappers/VRC6.h \
 		libunif/ines_convert.h \
 		libunif/lib_ines.h \
 		libunif/lib_unif.h \
@@ -106,8 +106,8 @@ FORMS += qt/Pretendo.ui qt/Preferences.ui qt/About.ui
 
 SOURCES += \
 		APU.cc \
-		BNROM.cc \
-		Bandai.cc \
+		mappers/BNROM.cc \
+		mappers/Bandai.cc \
 		Cart.cc \
 		ConfigManager.cc \
 		Controller.cc \
@@ -117,81 +117,81 @@ SOURCES += \
 		Input.cc \
 		LengthCounter.cc \
 		LinearCounter.cc \
-		MMC3.cc \
+		mappers/MMC3.cc \
 		Mapper.cc \
-		Mapper000.cc \
-		Mapper001.cc \
-		Mapper002.cc \
-		Mapper003.cc \
-		Mapper004.cc \
-		Mapper005.cc \
-		Mapper007.cc \
-		Mapper009.cc \
-		Mapper010.cc \
-		Mapper011.cc \
-		Mapper013.cc \
-		Mapper015.cc \
-		Mapper016.cc \
-		Mapper018.cc \
-		Mapper019.cc \
-		Mapper021.cc \
-		Mapper022.cc \
-		Mapper023.cc \
-		Mapper024.cc \
-		Mapper025.cc \
-		Mapper026.cc \
-		Mapper027.cc \
-		Mapper032.cc \
-		Mapper033.cc \
-		Mapper034.cc \
-		Mapper040.cc \
-		Mapper041.cc \
-		Mapper043.cc \
-		Mapper046.cc \
-		Mapper048.cc \
-		Mapper050.cc \
-		Mapper057.cc \
-		Mapper058.cc \
-		Mapper061.cc \
-		Mapper064.cc \
-		Mapper066.cc \
-		Mapper068.cc \
-		Mapper069.cc \
-		Mapper071.cc \
-		Mapper075.cc \
-		Mapper076.cc \
-		Mapper079.cc \
-		Mapper086.cc \
-		Mapper090.cc \
-		Mapper113.cc \
-		Mapper118.cc \
-		Mapper144.cc \
-		Mapper159.cc \
-		Mapper163.cc \
-		Mapper180.cc \
-		Mapper201.cc \
-		Mapper206.cc \
-		Mapper218.cc \
-		Mapper226.cc \
-		Mapper228.cc \
-		Mapper231.cc \
-		Mapper232.cc \
-		Mapper240.cc \
-		Mapper241.cc \
-		Mapper242.cc \
-		Mapper243.cc \
-		Mapper245.cc \
+		mappers/Mapper000.cc \
+		mappers/Mapper001.cc \
+		mappers/Mapper002.cc \
+		mappers/Mapper003.cc \
+		mappers/Mapper004.cc \
+		mappers/Mapper005.cc \
+		mappers/Mapper007.cc \
+		mappers/Mapper009.cc \
+		mappers/Mapper010.cc \
+		mappers/Mapper011.cc \
+		mappers/Mapper013.cc \
+		mappers/Mapper015.cc \
+		mappers/Mapper016.cc \
+		mappers/Mapper018.cc \
+		mappers/Mapper019.cc \
+		mappers/Mapper021.cc \
+		mappers/Mapper022.cc \
+		mappers/Mapper023.cc \
+		mappers/Mapper024.cc \
+		mappers/Mapper025.cc \
+		mappers/Mapper026.cc \
+		mappers/Mapper027.cc \
+		mappers/Mapper032.cc \
+		mappers/Mapper033.cc \
+		mappers/Mapper034.cc \
+		mappers/Mapper040.cc \
+		mappers/Mapper041.cc \
+		mappers/Mapper043.cc \
+		mappers/Mapper046.cc \
+		mappers/Mapper048.cc \
+		mappers/Mapper050.cc \
+		mappers/Mapper057.cc \
+		mappers/Mapper058.cc \
+		mappers/Mapper061.cc \
+		mappers/Mapper064.cc \
+		mappers/Mapper066.cc \
+		mappers/Mapper068.cc \
+		mappers/Mapper069.cc \
+		mappers/Mapper071.cc \
+		mappers/Mapper075.cc \
+		mappers/Mapper076.cc \
+		mappers/Mapper079.cc \
+		mappers/Mapper086.cc \
+		mappers/Mapper090.cc \
+		mappers/Mapper113.cc \
+		mappers/Mapper118.cc \
+		mappers/Mapper144.cc \
+		mappers/Mapper159.cc \
+		mappers/Mapper163.cc \
+		mappers/Mapper180.cc \
+		mappers/Mapper201.cc \
+		mappers/Mapper206.cc \
+		mappers/Mapper218.cc \
+		mappers/Mapper226.cc \
+		mappers/Mapper228.cc \
+		mappers/Mapper231.cc \
+		mappers/Mapper232.cc \
+		mappers/Mapper240.cc \
+		mappers/Mapper241.cc \
+		mappers/Mapper242.cc \
+		mappers/Mapper243.cc \
+		mappers/Mapper245.cc \
 		NES.cc \
-		NINA-001.cc \
+		mappers/NINA-001.cc \
 		Noise.cc \
 		PPU.cc \
 		Palette.cc \
 		Square.cc \
 		Triangle.cc \
 		Timer.cc \
-		VRC2.cc \
-		VRC4.cc \
-		VRC6.cc \
+		mappers/VRC2.cc \
+		mappers/VRC4.cc \
+		mappers/VRC6.cc \
 		libunif/ines_convert.c \
 		libunif/lib_ines.c \
 		libunif/lib_unif.c \
