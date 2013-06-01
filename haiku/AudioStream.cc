@@ -14,7 +14,6 @@ AudioStream::AudioStream (const char *name, float sampleRate, int32 sampleBits,
 	
 	if (sampleBits == 16) {
 		format.format = media_raw_audio_format::B_AUDIO_SHORT;
-		// TODO: byte sex
 		format.byte_order = B_MEDIA_LITTLE_ENDIAN;
 	} else {
 		format.format = media_raw_audio_format::B_AUDIO_UCHAR;
@@ -26,12 +25,12 @@ AudioStream::AudioStream (const char *name, float sampleRate, int32 sampleBits,
 	format.buffer_size = bufferSize;
 	
 	fSoundPlayer = new BSoundPlayer (&format, name, &sync_hook, NULL, this);
-	fSemaphore = create_sem (0, NULL);
+	fSemaphore = create_sem (0, "sound_player");
 
 	fWritePosition = 0;
 	fPlayPosition = 0;
 	
-	fBufferTotal = bufferSize * 8;
+	fBufferTotal = bufferSize * sampleBits;
 	
 	fSoundBuffer = new uint8[fBufferTotal];
 	memset (fSoundBuffer, 0x80, fBufferTotal);
@@ -51,6 +50,8 @@ AudioStream::~AudioStream()
 	
 	delete[] fSoundBuffer;
 }
+
+#include <stdio.h>
 
 void
 AudioStream::Stream (const void *stream, size_t samples)
@@ -77,11 +78,26 @@ AudioStream::Stream (const void *stream, size_t samples)
 				fWritePosition = pos;
 			}
 		} else {
-			//uint16 *out = reinterpret_cast<uint16 *>(stream);
-			//size_t len = samples * sizeof(uint16);
+			const uint16 *out = reinterpret_cast<const uint16 *>(stream);
+			size_t len = samples;
+			size_t pos = fWritePosition + samples;
+			size_t space = fBufferTotal - fWritePosition;
+
+			if (pos > fBufferTotal) {
+				memcpy (fSoundBuffer + (fWritePosition * sizeof(uint16)), out, space * sizeof(uint16));
+				out += space;
+				len -= space;
+				memcpy(fSoundBuffer, out, len * sizeof(uint16));
+				fWritePosition = pos - fBufferTotal;
+			} else {
+				memcpy(fSoundBuffer + (fWritePosition * sizeof(uint16)), out, len * sizeof(uint16));
+				fWritePosition = pos;
+			}
 		}
+
 	}
 }
+
 
 
 void
