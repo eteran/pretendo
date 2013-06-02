@@ -6,7 +6,7 @@
 #include <boost/noncopyable.hpp>
 
 
-class AudioStream : public boost::noncopyable {
+class AudioStream : public boost::noncopyable 
 {
 	public:
 			AudioStream (float sampleRate, int32 sampleBits, int32 	channels, int32 bufferSize);
