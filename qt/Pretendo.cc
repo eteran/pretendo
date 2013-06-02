@@ -14,11 +14,11 @@
 #include <QLabel>
 #include <QMessageBox>
 
-#if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
+#if defined(QT_AUDIO)
 #include "QtAudio.h"
-#elif defined(ENABLE_SOUND) && defined(USE_SDLAUDIO)
+#elif defined(SDL_AUDIO)
 #include "SDLAudio.h"
-#elif defined(ENABLE_SOUND)
+#elif defined(ALSA_SOUND)
 #include "AlsaAudio.h"
 #else
 #include "NullAudio.h"
@@ -78,11 +78,11 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 	timer_ = new QTimer(this);
 	connect(timer_, SIGNAL(timeout()), this, SLOT(update()));
 
-#if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
+#if defined(QT_AUDIO)
 	audio_ = new QtAudio(this);
-#elif defined(ENABLE_SOUND) && defined(USE_SDLAUDIO)
+#elif defined(SDL_AUDIO)
 	audio_ = new SDLAudio();
-#elif defined(ENABLE_SOUND)
+#elif defined(ALSA_SOUND)
 	audio_ = new AlsaAudio();
 #else
 	audio_ = new NullAudio();

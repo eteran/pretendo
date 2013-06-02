@@ -320,12 +320,13 @@ UNIF_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 	}
 
 	if(chr_size != 0) {
+		uint8_t *p;
 		retcode = read_data_INES(file, cart->chr_rom, chr_size);
 		if(retcode != UNIF_OK) {
 			goto error;
 		}
 		
-		uint8_t *p = cart->chr_rom + chr_size;
+		p = cart->chr_rom + chr_size;
 		while(p != cart->chr_rom + chr_alloc_size) {
 			*p++ = 0xff;
 		}

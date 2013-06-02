@@ -13,11 +13,11 @@ class QLabel;
 class QSortFilterProxyModel;
 class QTimer;
 
-#if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
+#if defined(QT_AUDIO)
 	class QtAudio;
-#elif defined(ENABLE_SOUND) && defined(USE_SDLAUDIO)
+#elif defined(SDL_AUDIO)
 	class SDLAudio;
-#elif defined(ENABLE_SOUND)
+#elif defined(ALSA_SOUND)
 	class AlsaAudio;
 #else
 	class NullAudio;
@@ -69,11 +69,11 @@ private:
 	QTime                  time_;
 	quint64                framecount_;
 	bool                   paused_;
-#if defined(ENABLE_SOUND) && defined(USE_QAUDIO)
+#if defined(QT_AUDIO)
 	QtAudio *audio_;
-#elif defined(ENABLE_SOUND) && defined(USE_SDLAUDIO)
+#elif defined(SDL_AUDIO)
 	SDLAudio *audio_;
-#elif defined(ENABLE_SOUND)
+#elif defined(ALSA_SOUND)
 	AlsaAudio *audio_;
 #else
 	NullAudio *audio_;

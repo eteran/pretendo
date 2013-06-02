@@ -2,11 +2,11 @@
 #ifndef _AUDIO_STREAM_H_
 #define _AUDIO_STREAM_H_
 
-
 #include <SoundPlayer.h>
+#include <boost/noncopyable.hpp>
 
 
-class AudioStream
+class AudioStream : public boost::noncopyable {
 {
 	public:
 			AudioStream (float sampleRate, int32 sampleBits, int32 	channels, int32 bufferSize);

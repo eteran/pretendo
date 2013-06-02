@@ -3,21 +3,40 @@ TEMPLATE = app
 TARGET   = pretendo
 QT      += opengl
 
+INCLUDEPATH += qt
+
 HEADERS += \
 		APU.h \
-		mappers/BNROM.h \
-		mappers/Bandai.h \
 		Cart.h \
 		ConfigManager.h \
 		Controller.h \
 		DMC.h \
 		Envelope.h \
-		Sweep.h \
 		Input.h \
 		LengthCounter.h \
 		LinearCounter.h \
-		mappers/MMC3.h \
 		Mapper.h \
+		NES.h \
+		Noise.h \
+		PPU.h \
+		Palette.h \
+		Sprite.h \
+		Square.h \
+		Sweep.h \
+		Timer.h \
+		Triangle.h \
+		VRAMBank.h \
+		libunif/ines_convert.h \
+		libunif/lib_ines.h \
+		libunif/lib_unif.h \
+		libunif/load_ines.h \
+		libunif/load_unif.h \
+		libunif/std_func.h \
+		libunif/unif_crc32.h \
+		libunif/unif_types.h \
+		mappers/BNROM.h \
+		mappers/Bandai.h \
+		mappers/MMC3.h \
 		mappers/Mapper000.h \
 		mappers/Mapper001.h \
 		mappers/Mapper002.h \
@@ -80,45 +99,49 @@ HEADERS += \
 		mappers/Mapper242.h \
 		mappers/Mapper243.h \
 		mappers/Mapper245.h \
-		NES.h \
 		mappers/NINA-001.h \
-		Noise.h \
-		PPU.h \
-		Palette.h \
-		Sprite.h \
-		Square.h \
-		Triangle.h \
-		VRAMBank.h \
-		Timer.h \
 		mappers/VRC2.h \
 		mappers/VRC4.h \
 		mappers/VRC6.h \
-		libunif/ines_convert.h \
-		libunif/lib_ines.h \
-		libunif/lib_unif.h \
-		libunif/load_ines.h \
-		libunif/load_unif.h \
-		libunif/std_func.h \
-		libunif/unif_crc32.h \
-		libunif/unif_types.h
+		qt/About.h \
+		qt/NullAudio.h \
+		qt/Preferences.h \
+		qt/Pretendo.h \
+		qt/QtVideo.h \
+		qt/SortFilterProxyModel.h
+
 
 FORMS += qt/Pretendo.ui qt/Preferences.ui qt/About.ui
 
 SOURCES += \
 		APU.cc \
-		mappers/BNROM.cc \
-		mappers/Bandai.cc \
 		Cart.cc \
 		ConfigManager.cc \
 		Controller.cc \
 		DMC.cc \
 		Envelope.cc \
-		Sweep.cc \
 		Input.cc \
 		LengthCounter.cc \
 		LinearCounter.cc \
-		mappers/MMC3.cc \
 		Mapper.cc \
+		NES.cc \
+		Noise.cc \
+		PPU.cc \
+		Palette.cc \
+		Square.cc \
+		Sweep.cc \
+		Timer.cc \
+		Triangle.cc \
+		libunif/ines_convert.c \
+		libunif/lib_ines.c \
+		libunif/lib_unif.c \
+		libunif/load_ines.c \
+		libunif/load_unif.c \
+		libunif/std_func.c \
+		libunif/unif_crc32.c \
+		mappers/BNROM.cc \
+		mappers/Bandai.cc \
+		mappers/MMC3.cc \
 		mappers/Mapper000.cc \
 		mappers/Mapper001.cc \
 		mappers/Mapper002.cc \
@@ -181,24 +204,18 @@ SOURCES += \
 		mappers/Mapper242.cc \
 		mappers/Mapper243.cc \
 		mappers/Mapper245.cc \
-		NES.cc \
 		mappers/NINA-001.cc \
-		Noise.cc \
-		PPU.cc \
-		Palette.cc \
-		Square.cc \
-		Triangle.cc \
-		Timer.cc \
 		mappers/VRC2.cc \
 		mappers/VRC4.cc \
 		mappers/VRC6.cc \
-		libunif/ines_convert.c \
-		libunif/lib_ines.c \
-		libunif/lib_unif.c \
-		libunif/load_ines.c \
-		libunif/load_unif.c \
-		libunif/std_func.c \
-		libunif/unif_crc32.c 
+		qt/About.cc \
+		qt/NullAudio.cc \
+		qt/Preferences.cc \
+		qt/Pretendo.cc \
+		qt/QtVideo.cc \
+		qt/SortFilterProxyModel.cc \
+		qt/main.cc
+
 
 RESOURCES += qt/pretendo.qrc
 
@@ -328,51 +345,38 @@ bender {
 }
 
 asound {
-	DEFINES += ENABLE_SOUND 
+	DEFINES += ALSA_SOUND 
 	
 	SOURCES += qt/AlsaAudio.cc
 	HEADERS += qt/AlsaAudio.h
 	
 	LIBS    += -lasound
+	
+	SOURCES -= qt/NullAudio.cc
+	HEADERS -= qt/NullAudio.h	
 }
 
 sdlsound {
-	DEFINES += ENABLE_SOUND USE_SDLAUDIO
+	DEFINES += SDL_SOUND
 	
 	SOURCES += qt/SDLAudio.cc
 	HEADERS += qt/SDLAudio.h
 	
 	LIBS    += -lSDL
+	
+	SOURCES -= qt/NullAudio.cc
+	HEADERS -= qt/NullAudio.h
 }
 
 qsound {
 	QT      += multimedia
-	DEFINES += ENABLE_SOUND USE_QAUDIO
+	DEFINES += QT_SOUND
 	
 	SOURCES += qt/QtAudio.cc qt/AudioBuffer.cc
 	HEADERS += qt/QtAudio.h  qt/AudioBuffer.h
-}
-
-linux-* {
-	DEFINES += Linux
-	INCLUDEPATH += qt
-
-	SOURCES += \
-		qt/main.cc \
-		qt/NullAudio.cc \
-		qt/Pretendo.cc \
-		qt/QtVideo.cc \
-		qt/SortFilterProxyModel.cc \
-		qt/Preferences.cc \
-		qt/About.cc
-		
-	HEADERS += \
-		qt/NullAudio.h \
-		qt/Pretendo.h \
-		qt/QtVideo.h \
-		qt/SortFilterProxyModel.h \
-		qt/Preferences.h \
-		qt/About.h
+	
+	SOURCES -= qt/NullAudio.cc
+	HEADERS -= qt/NullAudio.h
 }
 
 win32-* {
@@ -383,7 +387,11 @@ win32-* {
 #QMAKE_CXX  = clang++ -ansi -pedantic -Wno-long-long
 #QMAKE_LINK = clang++
 
-*-g++*{
+linux-* {
+	DEFINES += Linux
+}
+
+*-g++* {
 	QMAKE_CFLAGS_DEBUG     += -g3 -W -Wall
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
 	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall
