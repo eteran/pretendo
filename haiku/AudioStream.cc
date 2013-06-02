@@ -5,7 +5,7 @@
 #include <MediaDefs.h>
 #include <string.h>
 
-AudioStream::AudioStream (const char *name, float sampleRate, int32 sampleBits, 
+AudioStream::AudioStream (float sampleRate, int32 sampleBits, 
 	int32 channels, int32 bufferSize)
 {	
 	media_raw_audio_format format;
@@ -24,13 +24,20 @@ AudioStream::AudioStream (const char *name, float sampleRate, int32 sampleBits,
 
 	format.buffer_size = bufferSize;
 	
-	fSoundPlayer = new BSoundPlayer (&format, name, &sync_hook, NULL, this);
+	fSoundPlayer = new BSoundPlayer (&format, "pretendo_audio", &sync_hook, NULL, this);
 	fSemaphore = create_sem (0, "sound_player");
 
 	fWritePosition = 0;
 	fPlayPosition = 0;
 	
-	fBufferTotal = bufferSize * sampleBits;
+	//fBufferTotal = bufferSize * sampleBits;
+	fBufferTotal = bufferSize * sampleBits / 8;
+/*
+<jessicah> i would do fBufferSize = bufferSize * samplesBits / 8;
+<jessicah> and add another field, fBufferLength = bufferSize;
+<jessicah> and replace fBufferTotal to fBufferLength for all your seeking code
+<jessicah> and replace fBufferTotal with fBufferSize for allocating the buffer
+*/
 	
 	fSoundBuffer = new uint8[fBufferTotal];
 	memset (fSoundBuffer, 0x80, fBufferTotal);
@@ -51,7 +58,6 @@ AudioStream::~AudioStream()
 	delete[] fSoundBuffer;
 }
 
-#include <stdio.h>
 
 void
 AudioStream::Stream (const void *stream, size_t samples)
@@ -78,23 +84,22 @@ AudioStream::Stream (const void *stream, size_t samples)
 				fWritePosition = pos;
 			}
 		} else {
-			const uint16 *out = reinterpret_cast<const uint16 *>(stream);
-			size_t len = samples;
-			size_t pos = fWritePosition + samples;
-			size_t space = fBufferTotal - fWritePosition;
-
-			if (pos > fBufferTotal) {
-				memcpy (fSoundBuffer + (fWritePosition * sizeof(uint16)), out, space * sizeof(uint16));
-				out += space;
-				len -= space;
-				memcpy(fSoundBuffer, out, len * sizeof(uint16));
-				fWritePosition = pos - fBufferTotal;
-			} else {
-				memcpy(fSoundBuffer + (fWritePosition * sizeof(uint16)), out, len * sizeof(uint16));
-				fWritePosition = pos;
-			}
+//			const uint16 *out = reinterpret_cast<const uint16 *>(stream);
+//			size_t len = samples;
+//			size_t pos = fWritePosition + samples;
+//			size_t space = fBufferTotal - fWritePosition;
+//
+//			if (pos > fBufferTotal) {
+//				memcpy (fSoundBuffer + (fWritePosition * sizeof(uint16)), out, space * sizeof(uint16));
+//				out += space;
+//				len -= space;
+//				memcpy(fSoundBuffer, out, len * sizeof(uint16));
+//				fWritePosition = pos - fBufferTotal;
+//			} else {
+//				memcpy(fSoundBuffer + (fWritePosition * sizeof(uint16)), out, len * sizeof(uint16));
+//				fWritePosition = pos;
+//			}
 		}
-
 	}
 }
 

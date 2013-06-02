@@ -9,7 +9,7 @@
 class AudioStream
 {
 	public:
-			AudioStream (const char *name, float sampleRate, int32 sampleBits, int32 						channels, int32 bufferSize);
+			AudioStream (float sampleRate, int32 sampleBits, int32 	channels, int32 bufferSize);
 	virtual ~AudioStream();
 	
 	public:
