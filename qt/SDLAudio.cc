@@ -3,6 +3,16 @@
 #include "../APU.h"
 #include <iostream>
 
+namespace {
+
+void audio_callback(void * userdata, Uint8* stream, int len) {
+	SDL_LockAudio();
+	
+	SDL_UnlockAudio();
+}
+
+}
+
 //------------------------------------------------------------------------------
 // Name: SDLAudio
 //------------------------------------------------------------------------------
@@ -10,12 +20,12 @@ SDLAudio::SDLAudio() {
 
 	SDL_Init(SDL_INIT_AUDIO);
 	SDL_AudioSpec spec;
-	spec.callback = 0;
+	spec.callback = audio_callback;
 	spec.userdata = this;
 	spec.channels = 1;
 	spec.format   = AUDIO_U8;
-	spec.freq     = 44100;
-	spec.samples  = 735;
+	spec.freq     = APU::frequency;
+	spec.samples  = APU::buffer_size;
 	
 	SDL_OpenAudio(&spec, 0);
 }
