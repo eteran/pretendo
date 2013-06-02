@@ -49,7 +49,7 @@ public:
 		}
 
 		const kv_map &kvm = map_[section];
-		for(kv_iterator kvi = kvm.begin(); kvi != kvm.end(); kvi++) {
+		for(kv_const_iterator kvi = kvm.begin(); kvi != kvm.end(); ++kvi) {
 			std::cout << key << ", " << kvi->first << std::endl;
 
 			if(key == kvi->first) {
@@ -81,7 +81,7 @@ public:
 		}
 
 		kv_map &kvm = map_[section];
-		for(kv_iterator kvi = kvm.begin(); kvi != kvm.end(); kvi++) {
+		for(kv_iterator kvi = kvm.begin(); kvi != kvm.end(); ++kvi) {
 			std::cout << key << ", " << kvi->first << std::endl;
 			if(key == kvi->first) {
 				kvi->second = oss.str();

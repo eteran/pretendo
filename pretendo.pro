@@ -328,29 +328,38 @@ bender {
 }
 
 asound {
-	DEFINES += ENABLE_SOUND 
+	DEFINES += ALSA_SOUND 
 	
 	SOURCES += qt/AlsaAudio.cc
 	HEADERS += qt/AlsaAudio.h
 	
 	LIBS    += -lasound
+	
+	SOURCES -= qt/NullAudio.cc
+	HEADERS -= qt/NullAudio.h	
 }
 
 sdlsound {
-	DEFINES += ENABLE_SOUND USE_SDLAUDIO
+	DEFINES += SDL_SOUND
 	
 	SOURCES += qt/SDLAudio.cc
 	HEADERS += qt/SDLAudio.h
 	
 	LIBS    += -lSDL
+	
+	SOURCES -= qt/NullAudio.cc
+	HEADERS -= qt/NullAudio.h
 }
 
 qsound {
 	QT      += multimedia
-	DEFINES += ENABLE_SOUND USE_QAUDIO
+	DEFINES += QT_SOUND
 	
 	SOURCES += qt/QtAudio.cc qt/AudioBuffer.cc
 	HEADERS += qt/QtAudio.h  qt/AudioBuffer.h
+	
+	SOURCES -= qt/NullAudio.cc
+	HEADERS -= qt/NullAudio.h
 }
 
 linux-* {
@@ -383,7 +392,7 @@ win32-* {
 #QMAKE_CXX  = clang++ -ansi -pedantic -Wno-long-long
 #QMAKE_LINK = clang++
 
-*-g++*{
+*-g++* {
 	QMAKE_CFLAGS_DEBUG     += -g3 -W -Wall
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
 	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall

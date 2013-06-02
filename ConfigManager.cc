@@ -92,11 +92,11 @@ bool ConfigManager::Save() {
 		return false;
 	}
 
-	for(config_iterator ci = map_.begin(); ci != map_.end(); ci++) {
+	for(config_iterator ci = map_.begin(); ci != map_.end(); ++ci) {
 
 		file << "\n[" << ci->first << "]" << std::endl;
 
-		for(kv_iterator ki = map_[ci->first].begin(); ki != map_[ci->first].end(); ki++) {
+		for(kv_iterator ki = map_[ci->first].begin(); ki != map_[ci->first].end(); ++ki) {
 			if(ki->first.empty() || ki->second.empty()) {
 				continue;
 			}
