@@ -129,13 +129,7 @@ PretendoWindow::PretendoWindow()
 	fMutex->Lock();
 	resume_thread(fThread);
 	
-	set_palette(Palette::intensity, Palette::NTSC(
-					Palette::default_saturation,
-					Palette::default_hue,
-					Palette::default_contrast,
-					Palette::default_brightness,
-					Palette::default_gamma));
-	
+	SetDefaultPalette();
 	
 }
 
@@ -1113,3 +1107,14 @@ PretendoWindow::ReadKeyStates (void)
 	CheckKey(Controller::INDEX_A, kKeyA);
 }
 
+
+void
+PretendoWindow::SetDefaultPalette (void)
+{
+	set_palette(Palette::intensity, Palette::NTSC(
+					Palette::default_saturation,
+					Palette::default_hue,
+					Palette::default_contrast,
+					Palette::default_brightness,
+					Palette::default_gamma));
+}

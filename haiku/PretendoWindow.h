@@ -150,6 +150,9 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	virtual void end_frame();
 	
 	private:
+	void SetDefaultPalette (void);
+	
+	private:
 	BView *fView;
 	BMenuBar *fMenu;
 	BMenu *fFileMenu;
