@@ -5,6 +5,13 @@
 #include "PretendoWindow.h"
 #include "CartInfoWindow.h"
 #include "PaletteWindow.h"
+#include "AudioStream.h"
+#include "VideoScreen.h"
+#include "ROMFilePanel.h"
+#include "PaletteWindow.h"
+#include "CartInfoWindow.h"
+#include "SimpleMutex.h"
+//#include "InputWindow.h"
 
 #include "ConfigManager.h"
 

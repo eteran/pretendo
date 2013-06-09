@@ -17,19 +17,10 @@
 
 #include <malloc.h>
 
-#include "ROMFilePanel.h"
 #include "VideoInterface.h"
-#include "AudioStream.h"
-#include "VideoScreen.h"
-//#include "InputWindow.h"
-#include "PaletteWindow.h"
-#include "CartInfoWindow.h"
-
-#include "SimpleMutex.h"
 
 #include "blitters.h"
 #include "copies.h"
-
 
 #define MSG_ROM_LOADED 	'LOAD'
 #define MSG_SHOW_OPEN	'OPEN'
@@ -54,6 +45,12 @@
 
 
 class VideoScreen;
+class AudioStream;
+class ROMFilePanel;
+class PaletteWindow;
+class CartInfoWindow;
+class SimpleMutex;
+class InputWindow;
 
 
 class PretendoWindow : public BDirectWindow, public VideoInterface
