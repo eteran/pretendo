@@ -8,8 +8,8 @@
 SimpleMutex::SimpleMutex (char const *debugname)
 {
 	fMutex = create_sem(1, debugname);
-	if(!fMutex) {
-		throw std::runtime_error("SimpleMutex::SimpleMutex() Failed");	
+	if(! fMutex) {
+		throw std::runtime_error("SimpleMutex::SimpleMutex() failed.");	
 	}
 }
 

@@ -12,7 +12,7 @@ class SimpleMutex
 //	status_t InitCheck (void);
 	status_t Lock (void);
 	status_t Unlock (void);
-//	sem_id Mutex (void) const { return fMutex; }
+	sem_id Mutex (void) const { return fMutex; }
 	
 	private:
 	sem_id fMutex;

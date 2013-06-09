@@ -868,7 +868,8 @@ PretendoWindow::BlitScreen (void)
 	
 	switch (fFramework) {
 		case NO_FRAMEWORK:
-			; // we should never be here
+			fVideoLocker->Unlock();
+			return; // we should never be here
 			
 		case BITMAP_FRAMEWORK:
 			source = reinterpret_cast<uint8 *>(fBackBuffer.bits);
@@ -876,7 +877,7 @@ PretendoWindow::BlitScreen (void)
 			size = PretendoWindow::SCREEN_WIDTH;
 		
 			for (int32 y = 0; y < SCREEN_HEIGHT; y++) {
-				sse_copy (dest, source, size);
+				sse_copy(dest, source, size);
 				source += fBackBuffer.row_bytes;
 				dest += fBitmap->BytesPerRow();
 			}
@@ -1067,18 +1068,18 @@ PretendoWindow::end_frame()
 status_t
 PretendoWindow::emulation_thread (void *data)
 {
-	PretendoWindow *w = reinterpret_cast<PretendoWindow *>(data);	
+	PretendoWindow *window = reinterpret_cast<PretendoWindow *>(data);	
 	
 		while (1) {
-			if (w->Mutex()->Lock() != B_NO_ERROR) {
+			if (window->Mutex()->Lock() != B_NO_ERROR) {
 				break;
 			}
 			
-			w->start_frame();
-			nes::run_frame(w);
-			w->end_frame();
-			w->ReadKeyStates();
-			w->Mutex()->Unlock();
+			window->start_frame();
+			nes::run_frame(window);
+			window->end_frame();
+			window->ReadKeyStates();
+			window->Mutex()->Unlock();
 		}	
 	
 	return B_OK;
