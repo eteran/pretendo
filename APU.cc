@@ -15,6 +15,12 @@ T bound(T min, T value, T max) {
 	return std::min(std::max(min,value), max);
 }
 
+
+// 1.78977267Mhz / 44100Hz  = 40.5844142857 clocks per sample
+// 1.78977267Mhz / 48000Hz  = 37.286930625  clocks per sample
+// 1.78977267Mhz / 192000Hz = 9.32173265625 clocks per sample
+static const int clocks_per_sample = 1789772.67 / APU::frequency;
+
 }
 
 //------------------------------------------------------------------------------
@@ -461,14 +467,8 @@ void APU::run(int cycles) {
 			}
 		}
 
-		// TODO: do this better, this is close to but not quite 735 samples per second
 		if(sample_index_ != sizeof(sample_buffer_)) {
-
-			// 1.78977267Mhz / 44100Hz = 40.5844142857 clocks per sample
-			// 1.78977267Mhz / 48000Hz = 37.286930625 clocks per sample
-			// 1.78977267Mhz / 192000Hz = 9.32173265625 clocks per sample
-			//if((apu_cycles_ % 40) == 0) {
-			if((apu_cycles_ % 37) == 0) {
+			if((apu_cycles_ % clocks_per_sample) == 0) {
 				sample_buffer_[sample_index_++] = mix_channels();
 			}
 		}

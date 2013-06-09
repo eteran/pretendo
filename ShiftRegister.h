@@ -2,15 +2,28 @@
 #ifndef SHIFTREGISTER_20080314_H_
 #define SHIFTREGISTER_20080314_H_
 
-#include <climits>
-
 template <class T>
 class ShiftRegister {
 public:
 	//-------------------------------------------------------------------
 	// Name: ShiftRegister
 	//-------------------------------------------------------------------
-	ShiftRegister(T value = 0) : data_(value) {
+	explicit ShiftRegister(T value = 0) : data_(value) {
+	}
+	
+	//-------------------------------------------------------------------
+	// Name: ShiftRegister
+	//-------------------------------------------------------------------
+	ShiftRegister(const ShiftRegister &other) : data_(other.data_) {
+	
+	}
+	
+	//-------------------------------------------------------------------
+	// Name: operator=
+	//-------------------------------------------------------------------
+	ShiftRegister &operator=(const ShiftRegister &rhs) {
+		data_ = rhs.data_;
+		return *this;
 	}
 
 	//-------------------------------------------------------------------

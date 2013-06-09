@@ -5,6 +5,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
 #include "Timer.h"
+#include "ShiftRegister.h"
 
 using boost::uint8_t;
 using boost::uint16_t;
@@ -32,22 +33,22 @@ public:
 public:
 	void tick();
 	uint8_t output() const;
-	
+
 private:
 	bool irq_enabled() const;
 	bool loop() const;
 
 private:
-	bool     muted_;
-	uint16_t sample_pointer_;
-	uint16_t sample_address_;
-	uint16_t bytes_remaining_;
-	uint16_t sample_length_;
-	uint8_t  bits_remaining_;
-	uint8_t  sample_buffer_;
-	Timer    timer_;
-	uint8_t  output_;
-	uint8_t  control_;
+	bool                   muted_;
+	uint16_t               sample_pointer_;
+	uint16_t               sample_address_;
+	uint16_t               bytes_remaining_;
+	uint16_t               sample_length_;
+	uint8_t                bits_remaining_;
+	ShiftRegister<uint8_t> sample_buffer_;
+	Timer                  timer_;
+	uint8_t                output_;
+	uint8_t                control_;
 };
 
 #endif
