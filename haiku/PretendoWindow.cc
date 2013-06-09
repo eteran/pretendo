@@ -121,7 +121,7 @@ PretendoWindow::PretendoWindow()
 	// other things we need
 	fOpenPanel = new ROMFilePanel;
 	//fAudioStream = new AudioStream ("pretendo_audio", 48000.0, 16, 1, (48000.0 / 60));	
-	fAudioStream = new AudioStream (48000.0, 8, 1, 48000.0 / 60);	
+	fAudioStream = new AudioStream (APU::frequency, 8, 1, APU::buffer_size);
 	
 	fDoubled = false;
 	fClear = 0;
