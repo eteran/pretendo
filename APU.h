@@ -34,8 +34,8 @@ public:
 		STATUS_ENABLE_ALL	   = STATUS_ENABLE_SQUARE_1 | STATUS_ENABLE_SQUARE_2 | STATUS_ENABLE_TRIANGLE | STATUS_ENABLE_NOISE | STATUS_ENABLE_DMC
 	};
 
-	static const int frequency   = 48000;
-	static const int buffer_size = frequency / 60;
+	static const int frequency         = 48000;
+	static const int buffer_size       = frequency / 60;
 
 public:
 	APU();

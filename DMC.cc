@@ -38,9 +38,8 @@ void DMC::enable() {
 	}
 
 	if(bits_remaining_ != 0) {
-		const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
+		const int delta = sample_buffer_.read() ? 2 : -2;
 		output_ += delta;
-		sample_buffer_ >>= 1;
 		--bits_remaining_;
 	}
 
@@ -52,7 +51,7 @@ void DMC::enable() {
 		//       not hardcoded to 3
 		nes::cpu.burn(3);
 		printf("BURN.1\n");
-		sample_buffer_ = nes::cart.mapper()->read_memory(sample_pointer_);
+		sample_buffer_.load(nes::cart.mapper()->read_memory(sample_pointer_));
 
 		sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
@@ -134,9 +133,8 @@ void DMC::tick() {
 	if(timer_.tick()) {
 
 		if(bits_remaining_ != 0) {
-			const int delta = (sample_buffer_ & 0x01) ? 2 : -2;
+			const int delta = sample_buffer_.read() ? 2 : -2;
 			output_ += delta;
-			sample_buffer_ >>= 1;
 			--bits_remaining_;
 		}
 
@@ -147,7 +145,7 @@ void DMC::tick() {
 			//       not hardcoded to 3
 			nes::cpu.burn(3);
 			printf("BURN.2\n");
-			sample_buffer_ = nes::cart.mapper()->read_memory(sample_pointer_);
+			sample_buffer_.load(nes::cart.mapper()->read_memory(sample_pointer_));
 
 			sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
