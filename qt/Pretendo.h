@@ -4,7 +4,7 @@
 
 #include <QMainWindow>
 #include <QTime>
-#include "Preferences.h"
+
 #include "ui_Pretendo.h"
 
 class QAudioOutput;
@@ -12,6 +12,7 @@ class QFileSystemModel;
 class QLabel;
 class QSortFilterProxyModel;
 class QTimer;
+class Preferences;
 
 #if defined(QT_AUDIO)
 	class QtAudio;
@@ -26,6 +27,7 @@ class QTimer;
 class Pretendo : public QMainWindow {
 	Q_OBJECT
 	friend class Preferences;
+	friend class AudioViewer;
 
 public:
 	Pretendo(QWidget *parent = 0, Qt::WindowFlags flags = 0);
@@ -49,6 +51,7 @@ private Q_SLOTS:
 	void on_action_Preferences_triggered();
 	void on_actionAbout_Qt_triggered();
 	void on_action_About_triggered();
+	void on_action_Audio_Viewer_triggered();
 
 protected:
 	virtual void keyPressEvent(QKeyEvent *event);
@@ -78,6 +81,7 @@ private:
 #else
 	NullAudio *audio_;
 #endif
+	const uint8_t *audio_buffer_;
 
 };
 

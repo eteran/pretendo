@@ -104,6 +104,7 @@ HEADERS += \
 		mappers/VRC4.h \
 		mappers/VRC6.h \
 		qt/About.h \
+		qt/AudioViewer.h \
 		qt/NullAudio.h \
 		qt/Preferences.h \
 		qt/Pretendo.h \
@@ -111,7 +112,7 @@ HEADERS += \
 		qt/SortFilterProxyModel.h
 
 
-FORMS += qt/Pretendo.ui qt/Preferences.ui qt/About.ui
+FORMS += qt/Pretendo.ui qt/Preferences.ui qt/About.ui qt/AudioViewer.ui
 
 SOURCES += \
 		APU.cc \
@@ -209,6 +210,7 @@ SOURCES += \
 		mappers/VRC4.cc \
 		mappers/VRC6.cc \
 		qt/About.cc \
+		qt/AudioViewer.cc \
 		qt/NullAudio.cc \
 		qt/Preferences.cc \
 		qt/Pretendo.cc \

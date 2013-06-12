@@ -1,11 +1,14 @@
 
 #include "Pretendo.h"
-#include "Controller.h"
 #include "About.h"
+#include "AudioViewer.h"
+#include "Controller.h"
 #include "Mapper.h"
-#include "Preferences.h"
 #include "NES.h"
+#include "Preferences.h"
+#include "Preferences.h"
 #include "SortFilterProxyModel.h"
+
 #include <QDebug>
 #include <QFileDialog>
 #include <QFileSystemModel>
@@ -34,7 +37,7 @@ const int timer_interval = 0;
 //------------------------------------------------------------------------------
 // Name: Pretendo
 //------------------------------------------------------------------------------
-Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(0), timer_(0), fps_label_(0), framecount_(0), paused_(false) {
+Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(0), timer_(0), fps_label_(0), framecount_(0), paused_(false), audio_buffer_(0) {
 	ui_.setupUi(this);
 	
 	// make only one of these selectable at a time
@@ -130,8 +133,8 @@ void Pretendo::update() {
 	ui_.video->end_frame();
 
 #if 1
-	const uint8_t *const b = nes::apu.buffer();
-	audio_->write(b, APU::buffer_size);
+	audio_buffer_ = nes::apu.buffer();
+	audio_->write(audio_buffer_, APU::buffer_size);
 #endif
 
 	// FPS calculation
@@ -442,3 +445,12 @@ void Pretendo::on_action_About_triggered() {
 	dialog->show();
 }
 
+//------------------------------------------------------------------------------
+// Name: 
+// Desc: 
+//------------------------------------------------------------------------------
+void Pretendo::on_action_Audio_Viewer_triggered() {
+	static AudioViewer *const dialog = new AudioViewer(this);
+	connect(timer_, SIGNAL(timeout()), dialog, SLOT(update()));
+	dialog->show();
+}
