@@ -132,7 +132,7 @@ void Preferences::on_buttonBox_clicked(QAbstractButton *button) {
 // Name: on_buttonBox_accepted
 //------------------------------------------------------------------------------
 void Preferences::on_buttonBox_accepted() {
-	if(Pretendo *p = qobject_cast<Pretendo *>(parent())) {
+	if(Pretendo *const p = qobject_cast<Pretendo *>(parent())) {
 		p->ui_.video->set_palette(Palette::intensity, Palette::NTSC(
 			current_saturation_,
 			current_hue_,

@@ -439,9 +439,12 @@ void Pretendo::on_actionAbout_Qt_triggered() {
 // Desc: shows an About dialog box
 //------------------------------------------------------------------------------
 void Pretendo::on_action_About_triggered() {
-	static About *const dialog = new About(this);
-	dialog->ui_.build_date->setText(tr("%1").arg(__TIMESTAMP__));
-	dialog->ui_.version->setText(tr("%1").arg("2.0.0"));
+	static About *dialog = 0;
+	if(!dialog) {
+		dialog = new About(this);
+		dialog->ui_.build_date->setText(tr("%1").arg(__TIMESTAMP__));
+		dialog->ui_.version->setText(tr("%1").arg("2.0.0"));
+	}
 	dialog->show();
 }
 
@@ -450,7 +453,10 @@ void Pretendo::on_action_About_triggered() {
 // Desc: 
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Audio_Viewer_triggered() {
-	static AudioViewer *const dialog = new AudioViewer(this);
-	connect(timer_, SIGNAL(timeout()), dialog, SLOT(update()));
+	static AudioViewer *dialog = 0;
+	if(!dialog) {
+		dialog = new AudioViewer(this);
+		connect(timer_, SIGNAL(timeout()), dialog, SLOT(update()));
+	}
 	dialog->show();
 }

@@ -27,7 +27,7 @@ AudioViewer::~AudioViewer() {
 //------------------------------------------------------------------------------
 void AudioViewer::update() {
 	using std::memcpy;
-	if(Pretendo *p = qobject_cast<Pretendo *>(parent())) {
+	if(Pretendo *const p = qobject_cast<Pretendo *>(parent())) {
 		memcpy(audio_buffer_, p->audio_buffer_, sizeof(audio_buffer_));
 		emit ui_.widget->repaint();
 	}
@@ -40,23 +40,35 @@ void AudioViewer::update() {
 bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 
 	if (watched == ui_.widget && event->type() == QEvent::Paint) {
-		QPainter painter;
-		painter.begin(ui_.widget);
+	
+		QPixmap back_buffer(sizeof(audio_buffer_), 300);
+		{	
+			QPainter painter(&back_buffer);
 
-		// draw stuff...
-		painter.fillRect(0, 0, ui_.widget->width(), ui_.widget->height(), Qt::blue);
-		painter.setPen(Qt::yellow);
-		int prev = -1;
-		for(size_t i = 0; i < sizeof(audio_buffer_); ++i) {
-			if(prev == -1) {
-				painter.drawPoint(i, audio_buffer_[i]);
-			} else {
-				painter.drawLine(i - 1, prev, i, audio_buffer_[i]);
+			// draw stuff...
+			painter.fillRect(back_buffer.rect(), Qt::blue);
+			
+			painter.setPen(Qt::red);
+			painter.drawLine(0, 0xff, sizeof(audio_buffer_), 0xff);
+			
+			painter.setPen(Qt::yellow);
+			int prev = -1;
+			for(size_t i = 0; i < sizeof(audio_buffer_); ++i) {
+
+				const int current_value = audio_buffer_[i];
+
+				if(prev == -1) {
+					painter.drawPoint(i, back_buffer.height() - current_value);
+				} else {
+					painter.drawLine(i - 1, 0xff - prev, i, 0xff - current_value);
+				}
+				
+				prev = current_value;
 			}
-			prev = audio_buffer_[i];
 		}
 		
-		painter.end();
+		QPainter painter(ui_.widget);
+		painter.drawPixmap(ui_.widget->rect(), back_buffer);
 		return true;
 	}
 	return false;

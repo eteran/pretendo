@@ -496,12 +496,13 @@ const uint8_t *APU::buffer() {
 //------------------------------------------------------------------------------
 uint8_t APU::mix_channels() const {
 
-
+	int           result;
 	const uint8_t pulse1   = square_0_.output();
 	const uint8_t pulse2   = square_1_.output();
 	const uint8_t triangle = triangle_.output();
 	const uint8_t noise    = noise_.output();
 	const uint8_t dmc      = dmc_.output();
+	
 #if 0
 	float pulse_volume = 0;
 	float tnd_volume   = 0;
@@ -514,8 +515,16 @@ uint8_t APU::mix_channels() const {
 		tnd_volume = 159.79 / ((1 / ((triangle / 8227.0) + (noise / 12241.0) + (dmc / 22638.0))) + 100.0);
 	}
 
-	return (pulse_volume + tnd_volume) * 0x100;
+	result = (pulse_volume + tnd_volume) * 0x100;
 #else
-	return (pulse1 + pulse2 + triangle + noise + dmc);
+	result = (
+		pulse1 +
+		pulse2 +
+		triangle +
+		noise +
+		//dmc +
+		0);
 #endif
+
+	return bound(0, result, 255);
 }
