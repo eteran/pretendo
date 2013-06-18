@@ -10,9 +10,15 @@ namespace {
 const int FRAME_MODE		 = 0x80;
 const int FRAME_INHIBIT_IRQ  = 0x40;
 
-template <class T>
-T bound(T min, T value, T max) {
-	return std::min(std::max(min,value), max);
+//------------------------------------------------------------------------------
+// Name: bound
+//------------------------------------------------------------------------------
+template<class T>
+const T &bound(const T &lower, const T &value, const T &upper) {
+	using std::min;
+	using std::max;
+
+	return max(lower, min(value, upper));
 }
 
 
@@ -30,7 +36,8 @@ APU::APU() : square_0_(0), square_1_(1), apu_cycles_(-1), next_clock_(-1),
 		clock_step_(0), status_(0), frame_counter_(0), last_frame_counter_(0),
 		sample_index_(0) {
 
-	std::memset(sample_buffer_, 0, sizeof(sample_buffer_));
+	using std::memset;
+	memset(sample_buffer_, 0, sizeof(sample_buffer_));
 
 }
 
@@ -522,7 +529,7 @@ uint8_t APU::mix_channels() const {
 		pulse2 +
 		triangle +
 		noise +
-		//dmc +
+		dmc +
 		0);
 #endif
 

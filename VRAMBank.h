@@ -29,18 +29,11 @@ public:
 
 public:
 	bool writeable() const   { return writeable_; }
-	uint8_t *pointer() const { return ptr_; }
 
 public:
 	void set_pointer(uint8_t *p, bool writeable) {
 		ptr_       = p;
 		writeable_ = writeable;
-	}
-
-public:
-	void reset() {
-		ptr_       = 0;
-		writeable_ = false;
 	}
 
 private:

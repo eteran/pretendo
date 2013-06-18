@@ -38,8 +38,15 @@ void DMC::enable() {
 	}
 
 	if(bits_remaining_ != 0) {
-		const int delta = sample_buffer_.read() ? 2 : -2;
-		output_ += delta;
+		if(sample_buffer_.read()) {
+			if(output_ < 0x7e) {
+				output_ += 2;
+			}
+		} else {
+			if(output_ > 0x01) {
+				output_ -= 2;
+			}
+		}
 		--bits_remaining_;
 	}
 
@@ -133,8 +140,15 @@ void DMC::tick() {
 	if(timer_.tick()) {
 
 		if(bits_remaining_ != 0) {
-			const int delta = sample_buffer_.read() ? 2 : -2;
-			output_ += delta;
+			if(sample_buffer_.read()) {
+				if(output_ < 0x7e) {
+					output_ += 2;
+				}
+			} else {
+				if(output_ > 0x01) {
+					output_ -= 2;
+				}
+			}
 			--bits_remaining_;
 		}
 
