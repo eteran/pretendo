@@ -116,7 +116,7 @@ UNIF_RETURN_CODE write_header(FILE *file) {
 //---------------------------------------------------------------------------*/
 UNIF_RETURN_CODE write_read(FILE *file){
 
-#ifdef ENABLE_READ
+#if 0
 	unif_chunk_t chunk_header_UNIF;
 	/* TODO: come up with a better solution than this */
 	char read_data[0x4000]; /* should be enough */
@@ -458,7 +458,7 @@ UNIF_RETURN_CODE write_dinf(FILE *file) {
 				return UNIF_INPUT_FAIL;
 			}
 
-			if(sscanf(numeric_line, "%u", &tmp_num) == 1) {
+			if(sscanf(numeric_line, "%255u", &tmp_num) == 1) {
 				break;
 			}
 
@@ -472,7 +472,7 @@ UNIF_RETURN_CODE write_dinf(FILE *file) {
 				return UNIF_INPUT_FAIL;
 			}
 
-			if(sscanf(numeric_line, "%u", &tmp_num) == 1) {
+			if(sscanf(numeric_line, "%255u", &tmp_num) == 1) {
 				break;
 			}
 		} while(1);
@@ -485,7 +485,7 @@ UNIF_RETURN_CODE write_dinf(FILE *file) {
 				return UNIF_INPUT_FAIL;
 			}
 
-			if(sscanf(numeric_line, "%u", &tmp_num) == 1) {
+			if(sscanf(numeric_line, "%255u", &tmp_num) == 1) {
 				break;
 			}
 		} while(1);

@@ -87,7 +87,7 @@ unsigned int display_menu(unsigned int n, const char *prompt, ...) {
 		}
 
 		/* read the user selection */
-		if(sscanf(buffer, "%u", &user_selection) == EOF) {
+		if(sscanf(buffer, "%255u", &user_selection) == EOF) {
 			continue;
 		}
 	} while(user_selection >= n);
