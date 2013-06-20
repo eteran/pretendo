@@ -49,10 +49,12 @@ extern "C"{
 	typedef uint16 uint16_t;
 	typedef uint32 uint32_t;
 	typedef uint64 uint64_t;
-#elif defined (Linux)
+#elif defined (__linux__) || defined(__linux) || defined(__gnu_linux__)
 	#include <stdint.h>
 #elif defined(SunOS)
 	#include <sys/types.h>
+#else
+	#include <stdint.h>
 #endif
 
 /* enum for return info */

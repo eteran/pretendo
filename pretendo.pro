@@ -389,10 +389,6 @@ win32-* {
 #QMAKE_CXX  = clang++ -ansi -pedantic -Wno-long-long
 #QMAKE_LINK = clang++
 
-linux-* {
-	DEFINES += Linux
-}
-
 *-g++* {
 	QMAKE_CFLAGS_DEBUG     += -g3 -W -Wall
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
