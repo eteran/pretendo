@@ -26,14 +26,10 @@ HEADERS += \
 		Timer.h \
 		Triangle.h \
 		VRAMBank.h \
-		libunif/ines_convert.h \
-		libunif/lib_ines.h \
-		libunif/lib_unif.h \
-		libunif/load_ines.h \
-		libunif/load_unif.h \
-		libunif/std_func.h \
-		libunif/unif_crc32.h \
-		libunif/unif_types.h \
+		libines/ines_crc32.h \
+		libines/ines_types.h \
+		libines/lib_ines.h \
+		libines/load_ines.h \
 		mappers/BNROM.h \
 		mappers/Bandai.h \
 		mappers/MMC3.h \
@@ -133,13 +129,9 @@ SOURCES += \
 		Sweep.cc \
 		Timer.cc \
 		Triangle.cc \
-		libunif/ines_convert.c \
-		libunif/lib_ines.c \
-		libunif/lib_unif.c \
-		libunif/load_ines.c \
-		libunif/load_unif.c \
-		libunif/std_func.c \
-		libunif/unif_crc32.c \
+		libines/ines_crc32.c \
+		libines/lib_ines.c \
+		libines/load_ines.c \
 		mappers/BNROM.cc \
 		mappers/Bandai.cc \
 		mappers/MMC3.cc \

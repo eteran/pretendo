@@ -2,7 +2,7 @@
 #ifndef CART_20120303_H_
 #define CART_20120303_H_
 
-#include "libunif/load_ines.h"
+#include "libines/load_ines.h"
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -27,8 +27,6 @@ public:
 public:
 	void load(const std::string &s);
 	void unload();
-	int prg_pages() const;
-	int chr_pages() const;
 	bool has_chr_rom() const;
 	uint32_t prg_mask() const;
 	uint32_t chr_mask() const;

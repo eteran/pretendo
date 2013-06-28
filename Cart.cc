@@ -54,18 +54,15 @@ void Cart::load(const std::string &s) {
 
 	std::cout << "[Cart::load] loading '" << s << "'...";
 
-	const UNIF_RETURN_CODE r = load_file_INES(s.c_str(), &cart_);
-	if(r == UNIF_OK) {
+	const INES_RETURN_CODE r = load_file_INES(s.c_str(), &cart_);
+	if(r == INES_OK) {
 		std::cout << " OK!" << std::endl;
 
-		const size_t prg_size = prg_pages() * (16 * 1024);
-		const size_t chr_size = chr_pages() * (8 * 1024);
-
 		// get mask values
-		prg_mask_ = create_mask(prg_size);
-		chr_mask_ = create_mask(chr_size);
+		prg_mask_ = create_mask(cart_.prg_size);
+		chr_mask_ = create_mask(cart_.chr_size);
 
-		switch(mirroring_INES(&cart_)) {
+		switch(cart_.mirroring) {
 		case MIRR_HORIZONTAL: mirroring_ = MIR_HORIZONTAL; break;
 		case MIRR_VERTICAL:   mirroring_ = MIR_VERTICAL;   break;
 		case MIRR_4SCREEN:    mirroring_ = MIR_4SCREEN;    break;
@@ -80,15 +77,15 @@ void Cart::load(const std::string &s) {
 		std::cout << "CHR HASH: " << std::hex << std::setw(8) << std::setfill('0') << chr_hash_ << std::dec << std::endl;
 		std::cout << "ROM HASH: " << std::hex << std::setw(8) << std::setfill('0') << rom_hash_ << std::dec << std::endl;
 
-		if((prg_size & (prg_size - 1)) != 0) {
+		if((cart_.prg_size & (cart_.prg_size - 1)) != 0) {
 			std::cout << "WARNING: PRG size is not a power of 2, this is unusual" << std::endl;
 		}
 
-		if((chr_size & (chr_size - 1)) != 0) {
+		if((cart_.chr_size & (cart_.chr_size - 1)) != 0) {
 			std::cout << "WARNING: CHR size is not a power of 2, this is unusual" << std::endl;
 		}
 
-		mapper_ = Mapper::create_mapper(mapper_INES(&cart_));
+		mapper_ = Mapper::create_mapper(cart_.mapper);
 	} else {
 		std::cout << " ERROR! (" << r << ")" << std::endl;
 		mapper_ = boost::shared_ptr<Mapper>();
@@ -108,24 +105,10 @@ void Cart::unload() {
 }
 
 //------------------------------------------------------------------------------
-// Name: prg_pages
-//------------------------------------------------------------------------------
-int Cart::prg_pages() const {
-	return prg_size_INES(&cart_);
-}
-
-//------------------------------------------------------------------------------
-// Name: chr_pages
-//------------------------------------------------------------------------------
-int Cart::chr_pages() const{
-	return chr_size_INES(&cart_);
-}
-
-//------------------------------------------------------------------------------
 // Name: has_chr_rom
 //------------------------------------------------------------------------------
 bool Cart::has_chr_rom() const {
-	return chr_pages() != 0;
+	return cart_.chr_rom != 0;
 }
 
 //------------------------------------------------------------------------------
@@ -198,15 +181,13 @@ std::vector<uint8_t> Cart::raw_image() const {
 
 	const uint8_t *const prg_rom  = prg();
 	const uint8_t *const chr_rom  = chr();
-	const size_t         prg_size = prg_pages() * (16 * 1024);
 
 	// create a vector and copy the PRG into it
-	std::vector<uint8_t> image(prg_rom, prg_rom + prg_size);
+	std::vector<uint8_t> image(prg_rom, prg_rom + cart_.prg_size);
 
 	// if there is CHR, insert it at the end of the vector
 	if(chr_rom) {
-		const size_t chr_size = chr_pages() * (8 * 1024);
-		image.insert(image.end(), chr_rom, chr_rom + chr_size);
+		image.insert(image.end(), chr_rom, chr_rom + cart_.chr_size);
 	}
 
  	return image;
