@@ -875,7 +875,7 @@ PretendoWindow::BlitScreen (void)
 	
 	switch (fFramework) {
 		case NO_FRAMEWORK:
-			fVideoLocker->Unlock();
+			fVideoLocker.Unlock();
 			return; // we should never be here
 			
 		case BITMAP_FRAMEWORK:

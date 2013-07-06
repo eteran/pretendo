@@ -1,6 +1,7 @@
 
 
 #include "PretendoApp.h"
+#include <Path.h>
 
 
 PretendoApp::PretendoApp()
@@ -23,7 +24,7 @@ PretendoApp::AboutRequested (void)
 
 void
 PretendoApp::RefsReceived (BMessage *message)
-{
+{	
 	switch (message->what) {
 	case B_REFS_RECEIVED:
          {
@@ -31,6 +32,7 @@ PretendoApp::RefsReceived (BMessage *message)
              if (message->FindRef ("refs", 0, &ref) == B_OK) {
                  BEntry entry;
                  BPath path;
+                 
                  entry.SetTo (&ref, true);
                  entry.GetRef (&ref);
                  entry.GetPath (&path);
