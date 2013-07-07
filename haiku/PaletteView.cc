@@ -35,26 +35,27 @@ PaletteView::AttachedToWindow (void)
 	fBrightnessMenu = new BMenu("Brightness");
 	fGammaMenu = new BMenu("Gamma");
 	
-	BRect r (8, 128, 120, 32);
-	fHueField = new BMenuField(r, "_hue_menu", B_EMPTY_STRING, fHueMenu, true);
+	BRect r (8, 128, 120, 148);
+	fHueField = new BMenuField(r, "_hue_menu", "Hue", fHueMenu, true);
 	fHueField->SetDivider(0);
-	
-	r.Set(8, 156, 120, 172);
+
+	r.Set(8, 156, 120, 176);
 	fSaturationField = new BMenuField(r, "_sat_menu", "Saturation", fSatMenu, true);
 	fSaturationField->SetDivider(0);
+
 	
-	r.Set(8, 184, 120, 312);
+	r.Set(8, 184, 120, 204);
 	fContrastField = new BMenuField(r, "_contrast_menu", "Contrast", fContrastMenu, true);
 	fContrastField->SetDivider(0);
 	
-	r.Set(8, 212, 120, 452);
+	r.Set(8, 212, 120, 232);
 	fBrightnessField = new BMenuField(r, "_bright_menu", "Brightness", fBrightnessMenu, true);
 	fBrightnessField->SetDivider(0);
 	
-	r.Set(8, 240, 120, 592);
+	r.Set(8, 240, 120, 260);
 	fGammaField = new BMenuField(r, "_gamma_menu", "Gamma", fGammaMenu, true);
 	fGammaField->SetDivider(0);
-	
+
 	AddChild(fHueField);
 	AddChild (fSaturationField);
 	AddChild(fContrastField);
