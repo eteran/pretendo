@@ -56,9 +56,6 @@ typedef struct {
 
 /* function prototypes */
 INES_RETURN_CODE check_header_INES(const ines_header_t *header, int version);
-INES_RETURN_CODE close_INES(FILE *file);
-INES_RETURN_CODE open_INES(const char *filename, FILE **file, INES_OPEN_MODE mode);
-INES_RETURN_CODE read_data_INES(FILE *file, uint8_t *dst, size_t len);
 INES_RETURN_CODE read_header_INES(FILE *file, ines_header_t *header);
 INES_RETURN_CODE write_header_INES(FILE *file, const ines_header_t *header);
 

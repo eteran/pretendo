@@ -224,19 +224,20 @@ INES_RETURN_CODE write_file_INES(const char *filename, const ines_cart_t *cart) 
 	assert(filename != 0);
 	assert(cart != 0);
 
-	if((retcode = open_INES(filename, &file, INES_OPEN_WRITE)) != INES_OK) {
-		return retcode;
+	file = fopen(filename, "wb");
+	if(!file) {
+		return INES_OPEN_FAILED;
 	}
 
 	if((retcode = write_header_INES(file, cart->header)) != INES_OK) {
-		close_INES(file);
+		fclose(file);
 		return retcode;
 	}
 
 	if(cart->trainer_size != 0) {
 		assert(cart->trainer);
 		if(fwrite(cart->trainer, cart->trainer_size, 1, file) != 1) {
-			close_INES(file);
+			fclose(file);
 			return INES_WRITE_FAILED;
 		}
 	}
@@ -244,7 +245,7 @@ INES_RETURN_CODE write_file_INES(const char *filename, const ines_cart_t *cart) 
 	if(cart->prg_size > 0) {
 		assert(cart->prg_rom);
 		if(fwrite(cart->prg_rom, cart->prg_size, 1, file) != 1) {
-			close_INES(file);
+			fclose(file);
 			return INES_WRITE_FAILED;
 		}
 	}
@@ -252,12 +253,12 @@ INES_RETURN_CODE write_file_INES(const char *filename, const ines_cart_t *cart) 
 	if(cart->chr_size > 0) {
 		assert(cart->chr_rom);
 		if(fwrite(cart->chr_rom, cart->chr_size, 1, file) != 1) {
-			close_INES(file);
+			fclose(file);
 			return INES_WRITE_FAILED;
 		}
 	}
 
-	close_INES(file);
+	fclose(file);
 	return retcode;
 }
 
@@ -286,22 +287,21 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 	cart->trainer = 0;
 	cart->prg_rom = 0;
 	cart->chr_rom = 0;
-
-	if((retcode = open_INES(filename, &file, INES_OPEN_READ)) != INES_OK) {
-		return retcode;
+	
+	file = fopen(filename, "rb");
+	if(!file) {
+		return INES_OPEN_FAILED;
 	}
 
 	if((retcode = read_header_INES(file, &header)) != INES_OK) {
-		close_INES(file);
-		return retcode;
+		goto error;
 	}
 
 	cart->version = ((header.ctrl2 & 0xc) == 0x8) ? 2 : 1;
 
 	retcode = check_header_INES(&header, cart->version);
 	if((retcode != INES_OK) && (retcode != INES_DIRTY_HEADER)) {
-		close_INES(file);
-		return retcode;
+		goto error;
 	}
 
 	cart->prg_size     = ines_prg_size    (&header, cart->version) * 0x4000;
@@ -337,15 +337,15 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 
 	memcpy(cart->header, &header, sizeof(ines_header_t));
 	if(cart->trainer_size != 0) {
-		retcode = read_data_INES(file, cart->trainer, cart->trainer_size);
-		if(retcode != INES_OK) {
+		if(fread(cart->trainer, cart->trainer_size, 1, file) != 1) {
+			retcode = INES_READ_FAILED;
 			goto error;
 		}
 	}
 
 	if(cart->prg_size != 0) {
-		retcode = read_data_INES(file, cart->prg_rom, cart->prg_size);
-		if(retcode != INES_OK) {
+		if(fread(cart->prg_rom, cart->prg_size, 1, file) != 1) {
+			retcode = INES_READ_FAILED;
 			goto error;
 		}
 		
@@ -362,8 +362,8 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 
 	if(cart->chr_size != 0) {
 		uint8_t *p;
-		retcode = read_data_INES(file, cart->chr_rom, cart->chr_size);
-		if(retcode != INES_OK) {
+		if(fread(cart->chr_rom, cart->chr_size, 1, file) != 1) {
+			retcode = INES_READ_FAILED;
 			goto error;
 		}
 		
@@ -373,7 +373,7 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 		}
 	}
 
-	close_INES(file);
+	fclose(file);
 	return retcode;
 
 error:
@@ -396,7 +396,7 @@ error:
 	cart->mapper       = 0;
 	cart->submapper    = 0;
 
-	close_INES(file);
+	fclose(file);
 	return retcode;
 }
 
@@ -441,7 +441,6 @@ uint32_t prg_hash_INES(const ines_cart_t *cart) {
 uint32_t chr_hash_INES(const ines_cart_t *cart) {
 	return ines_crc32(cart->chr_rom, cart->chr_size, 0);
 }
-
 
 /*-----------------------------------------------------------------------------
 // Name: rom_hash_INES

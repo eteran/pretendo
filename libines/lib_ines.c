@@ -27,44 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 
 /*-----------------------------------------------------------------------------
-// open_INES(const char *filename, FILE **file, INES_OPEN_MODE mode)
-//---------------------------------------------------------------------------*/
-INES_RETURN_CODE open_INES(const char *filename, FILE **file, INES_OPEN_MODE mode) {
-
-	/* check pointers */
-	assert(filename != 0);
-	assert(file != 0);
-
-	/* open the file */
-	if(mode == INES_OPEN_READ) *file = fopen(filename, "rb");
-	else                       *file = fopen(filename, "wb");
-
-	/* check if successful */
-	if(*file == 0) {
-		return INES_OPEN_FAILED;
-	}
-
-	return INES_OK;
-}
-
-/*-----------------------------------------------------------------------------
-// close_INES(FILE *file)
-//---------------------------------------------------------------------------*/
-INES_RETURN_CODE close_INES(FILE *file) {
-
-	/* check pointers */
-	assert(file != 0);
-
-	/* close file */
-	if(fclose(file) == EOF) {
-		return INES_CLOSE_FAILED;
-	}
-
-	return INES_OK;
-}
-
-/*-----------------------------------------------------------------------------
-// read_header_INES(FILE *file, ines_header_t *header)
+// read_header_INES
 //---------------------------------------------------------------------------*/
 INES_RETURN_CODE read_header_INES(FILE *file, ines_header_t *header) {
 
@@ -84,7 +47,7 @@ INES_RETURN_CODE read_header_INES(FILE *file, ines_header_t *header) {
 }
 
 /*-----------------------------------------------------------------------------
-// write_header_INES(FILE *file, const ines_header_t *header)
+// write_header_INES
 //---------------------------------------------------------------------------*/
 INES_RETURN_CODE write_header_INES(FILE *file, const ines_header_t *header) {
 	/* check pointers */
@@ -103,7 +66,7 @@ INES_RETURN_CODE write_header_INES(FILE *file, const ines_header_t *header) {
 }
 
 /*-----------------------------------------------------------------------------
-// check_header_INES(const ines_header_t *header, int version)
+// check_header_INES
 //---------------------------------------------------------------------------*/
 INES_RETURN_CODE check_header_INES(const ines_header_t *header, int version) {
 
@@ -117,20 +80,6 @@ INES_RETURN_CODE check_header_INES(const ines_header_t *header, int version) {
 		if(header->extended.ines1.reserved_2 != 0 || header->extended.ines1.reserved_1 != 0) {
 			return INES_DIRTY_HEADER;
 		}
-	}
-
-	return INES_OK;
-}
-
-/*-----------------------------------------------------------------------------
-// read_data_INES( FILE * file, uint8_t *dst, size_t len )
-//---------------------------------------------------------------------------*/
-INES_RETURN_CODE read_data_INES(FILE *file, uint8_t *dst, size_t len) {
-	assert(file != 0);
-	assert(dst != 0);
-
-	if(fread(dst, 1, len, file) != len) {
-		return INES_READ_FAILED;
 	}
 
 	return INES_OK;
