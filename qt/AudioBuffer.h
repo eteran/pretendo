@@ -4,6 +4,7 @@
 
 #include <QIODevice>
 #include <QMutex>
+#include "APU.h"
 
 class AudioBuffer : public QIODevice {
 	Q_OBJECT
@@ -23,7 +24,7 @@ private:
 	mutable QMutex mutex_;
 	quint64 read_pos_;
 	quint64 write_pos_;
-	char buffer_[735 * 30];
+	char buffer_[APU::buffer_size * 30];
 };
 
 #endif

@@ -29,6 +29,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define INES_TRAINER 0x04
 #define INES_4SCREEN 0x08
 
+#define PRG_BLOCK_SIZE 0x4000
+#define CHR_BLOCK_SIZE 0x2000
+#define TRAINER_SIZE   512
+
 
 /*-----------------------------------------------------------------------------
 // Name: ines_mapper
@@ -150,14 +154,14 @@ static INES_MIRRORING ines_mirroring(const ines_header_t *header, uint8_t versio
 
 
 /*-----------------------------------------------------------------------------
-// Name: ines_prg_size
+// Name: ines_trainer_present
 //---------------------------------------------------------------------------*/
-static uint32_t ines_trainer_size(const ines_header_t *header, uint8_t version) {
+static int ines_trainer_present(const ines_header_t *header, uint8_t version) {
 
 	assert(header);
 	(void)version;
 
-	return ((header->ctrl1 & INES_TRAINER) != 0) ? 512 : 0;
+	return ((header->ctrl1 & INES_TRAINER) != 0);
 }
 
 /*-----------------------------------------------------------------------------
@@ -234,9 +238,8 @@ INES_RETURN_CODE write_file_INES(const char *filename, const ines_cart_t *cart) 
 		return retcode;
 	}
 
-	if(cart->trainer_size != 0) {
-		assert(cart->trainer);
-		if(fwrite(cart->trainer, cart->trainer_size, 1, file) != 1) {
+	if(cart->trainer) {
+		if(fwrite(cart->trainer, TRAINER_SIZE, 1, file) != 1) {
 			fclose(file);
 			return INES_WRITE_FAILED;
 		}
@@ -270,9 +273,11 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 
 	INES_RETURN_CODE retcode = INES_OK;
 
-	FILE *file            = 0;
-	size_t prg_alloc_size = 0;
-	size_t chr_alloc_size = 0;
+	FILE *file             = 0;
+	size_t prg_alloc_size  = 0;
+	size_t chr_alloc_size  = 0;
+	int    has_trainer     = 0;
+	
 	ines_header_t header;
 
 	void *header_ptr       = 0;
@@ -304,9 +309,11 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 		goto error;
 	}
 
-	cart->prg_size     = ines_prg_size    (&header, cart->version) * 0x4000;
-	cart->chr_size     = ines_chr_size    (&header, cart->version) * 0x2000;
-	cart->trainer_size = ines_trainer_size(&header, cart->version);
+
+	has_trainer = ines_trainer_present(&header, cart->version);
+	
+	cart->prg_size     = ines_prg_size    (&header, cart->version) * PRG_BLOCK_SIZE;
+	cart->chr_size     = ines_chr_size    (&header, cart->version) * CHR_BLOCK_SIZE;
 	cart->mirroring    = ines_mirroring   (&header, cart->version);
 	cart->system       = ines_system      (&header, cart->version);
 	cart->display      = ines_display     (&header, cart->version);
@@ -319,12 +326,12 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 
 	/* allocate memory for the cart */
 	header_ptr  = malloc(sizeof(ines_header_t));
-	prg_ptr     = cart->prg_size     ? malloc(prg_alloc_size)     : 0;
-	chr_ptr     = cart->chr_size     ? malloc(chr_alloc_size)     : 0;
-	trainer_ptr = cart->trainer_size ? malloc(cart->trainer_size) : 0;
+	prg_ptr     = cart->prg_size ? malloc(prg_alloc_size) : 0;
+	chr_ptr     = cart->chr_size ? malloc(chr_alloc_size) : 0;
+	trainer_ptr = has_trainer    ? malloc(TRAINER_SIZE)   : 0;
 
 	/* make sure it all went smoothly */
-	if((!header_ptr) || (cart->prg_size & !prg_ptr) || (cart->chr_size & !chr_ptr) || (cart->trainer_size & !trainer_ptr)) {
+	if(!header_ptr || (cart->prg_size && !prg_ptr) || (cart->chr_size && !chr_ptr) || (has_trainer && !trainer_ptr)) {
 		retcode = INES_OUT_OF_MEMORY;
 		goto error;
 	}
@@ -336,8 +343,8 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 	cart->trainer = trainer_ptr;
 
 	memcpy(cart->header, &header, sizeof(ines_header_t));
-	if(cart->trainer_size != 0) {
-		if(fread(cart->trainer, cart->trainer_size, 1, file) != 1) {
+	if(has_trainer) {
+		if(fread(cart->trainer, TRAINER_SIZE, 1, file) != 1) {
 			retcode = INES_READ_FAILED;
 			goto error;
 		}
@@ -388,7 +395,6 @@ error:
 	cart->chr_rom      = 0;
 	cart->prg_size     = 0;
 	cart->chr_size     = 0;
-	cart->trainer_size = 0;
 	cart->mirroring    = 0;
 	cart->system       = 0;
 	cart->display      = 0;
@@ -417,7 +423,6 @@ INES_RETURN_CODE free_file_INES(ines_cart_t *cart) {
 	cart->chr_rom      = 0;
 	cart->prg_size     = 0;
 	cart->chr_size     = 0;
-	cart->trainer_size = 0;
 	cart->mirroring    = 0;
 	cart->system       = 0;
 	cart->display      = 0;
@@ -447,7 +452,7 @@ uint32_t chr_hash_INES(const ines_cart_t *cart) {
 //---------------------------------------------------------------------------*/
 uint32_t rom_hash_INES(const ines_cart_t *cart) {
 	
-	const uint32_t hash1 = cart->trainer ? ines_crc32(cart->trainer, cart->trainer_size, 0) : 0;
+	const uint32_t hash1 = cart->trainer ? ines_crc32(cart->trainer, TRAINER_SIZE, 0)       : 0;
 	const uint32_t hash2 = cart->prg_rom ? ines_crc32(cart->prg_rom, cart->prg_size, hash1) : hash1;
 	const uint32_t hash3 = cart->chr_rom ? ines_crc32(cart->chr_rom, cart->chr_size, hash2) : hash2;
 	

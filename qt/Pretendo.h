@@ -14,9 +14,9 @@ class QSortFilterProxyModel;
 class QTimer;
 class Preferences;
 
-#if defined(QT_AUDIO)
+#if defined(QT_SOUND)
 	class QtAudio;
-#elif defined(SDL_AUDIO)
+#elif defined(SDL_SOUND)
 	class SDLAudio;
 #elif defined(ALSA_SOUND)
 	class AlsaAudio;
@@ -72,9 +72,9 @@ private:
 	QTime                  time_;
 	quint64                framecount_;
 	bool                   paused_;
-#if defined(QT_AUDIO)
+#if defined(QT_SOUND)
 	QtAudio *audio_;
-#elif defined(SDL_AUDIO)
+#elif defined(SDL_SOUND)
 	SDLAudio *audio_;
 #elif defined(ALSA_SOUND)
 	AlsaAudio *audio_;

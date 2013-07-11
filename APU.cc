@@ -9,6 +9,7 @@ namespace {
 
 const int FRAME_MODE		 = 0x80;
 const int FRAME_INHIBIT_IRQ  = 0x40;
+const double CPU_FREQUENCY   = 1789772.67; // 1.78977267Mhz
 
 //------------------------------------------------------------------------------
 // Name: bound
@@ -22,10 +23,10 @@ const T &bound(const T &lower, const T &value, const T &upper) {
 }
 
 
-// 1.78977267Mhz / 44100Hz  = 40.5844142857 clocks per sample
-// 1.78977267Mhz / 48000Hz  = 37.286930625  clocks per sample
-// 1.78977267Mhz / 192000Hz = 9.32173265625 clocks per sample
-static const int clocks_per_sample = 1789772.67 / APU::frequency;
+// CPU_FREQUENCY / 44100Hz  = 40.5844142857 clocks per sample
+// CPU_FREQUENCY / 48000Hz  = 37.286930625  clocks per sample
+// CPU_FREQUENCY / 192000Hz = 9.32173265625 clocks per sample
+static const int clocks_per_sample = CPU_FREQUENCY / APU::frequency;
 
 }
 

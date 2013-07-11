@@ -17,9 +17,9 @@
 #include <QLabel>
 #include <QMessageBox>
 
-#if defined(QT_AUDIO)
+#if defined(QT_SOUND)
 #include "QtAudio.h"
-#elif defined(SDL_AUDIO)
+#elif defined(SDL_SOUND)
 #include "SDLAudio.h"
 #elif defined(ALSA_SOUND)
 #include "AlsaAudio.h"
@@ -81,9 +81,9 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 	timer_ = new QTimer(this);
 	connect(timer_, SIGNAL(timeout()), this, SLOT(update()));
 
-#if defined(QT_AUDIO)
+#if defined(QT_SOUND)
 	audio_ = new QtAudio(this);
-#elif defined(SDL_AUDIO)
+#elif defined(SDL_SOUND)
 	audio_ = new SDLAudio();
 #elif defined(ALSA_SOUND)
 	audio_ = new AlsaAudio();
@@ -132,10 +132,8 @@ void Pretendo::update() {
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
-#if 1
 	audio_buffer_ = nes::apu.buffer();
 	audio_->write(audio_buffer_, APU::buffer_size);
-#endif
 
 	// FPS calculation
 	if(time_.elapsed() > 1000) {

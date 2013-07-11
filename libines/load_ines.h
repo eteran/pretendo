@@ -66,11 +66,10 @@ typedef enum {
 /* abstract description of a iNES file */
 typedef struct {
 	ines_header_t *header;       /* raw iNES header */
-	uint8_t       *trainer;      /* pointer to trainer data or NULL */
+	uint8_t       *trainer;      /* pointer to 512 byte trainer data or NULL */
 	uint8_t       *prg_rom;      /* pointer to PRG data */
 	uint8_t       *chr_rom;      /* pointer to CHR data or NULL */
 	uint8_t        version;      /* iNES header version */
-	uint32_t       trainer_size; /* size of trainer data or 0 */
 	uint32_t       prg_size;     /* size of PRG data */
 	uint32_t       chr_size;     /* size of CHR data or 0 */
 	INES_MIRRORING mirroring;
