@@ -381,32 +381,38 @@ win32-* {
     INCLUDEPATH += "C:\\Program Files\\boost\\boost_1_51"
 }
 
-#QMAKE_CC   = clang   -ansi -pedantic -Wno-long-long
-#QMAKE_CXX  = clang++ -ansi -pedantic -Wno-long-long
-#QMAKE_LINK = clang++
-
 *-g++* {
 	QMAKE_CFLAGS_DEBUG     += -g3 -W -Wall
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
 	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall
 
-	QMAKE_CFLAGS_RELEASE   += -march=native -g3 -W -Wall -O3
-	QMAKE_CXXFLAGS_RELEASE += -march=native -g3 -W -Wall -O3
-	QMAKE_LFLAGS_RELEASE   += -march=native -g3
+	QMAKE_CFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3 -Wno-long-long
+	QMAKE_CXXFLAGS_RELEASE += -pedantic -march=native -g3 -W -Wall -O3 -Wno-long-long
+	QMAKE_LFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3 -Wno-long-long
+}
+
+*-g++*:lto {
+	QMAKE_CC   = gcc-4.8.1
+	QMAKE_CXX  = g++-4.8.1
+	QMAKE_LINK = g++-4.8.1
+	
+	QMAKE_CFLAGS_RELEASE   += -flto
+	QMAKE_CXXFLAGS_RELEASE += -flto
+	QMAKE_LFLAGS_RELEASE   += -flto
 }
 
 CONFIG(debug, debug|release) {
-	OBJECTS_DIR = $${OUT_PWD}/.debug-shared/obj
-	MOC_DIR     = $${OUT_PWD}/.debug-shared/moc
-	RCC_DIR     = $${OUT_PWD}/.debug-shared/rcc
-	UI_DIR      = $${OUT_PWD}/.debug-shared/uic
+	OBJECTS_DIR = $${OUT_PWD}/.debug/obj
+	MOC_DIR     = $${OUT_PWD}/.debug/moc
+	RCC_DIR     = $${OUT_PWD}/.debug/rcc
+	UI_DIR      = $${OUT_PWD}/.debug/uic
 	DEFINES    += QT_SHAREDPOINTER_TRACK_POINTERS
 }
 
 CONFIG(release, debug|release) {
-	OBJECTS_DIR = $${OUT_PWD}/.release-shared/obj
-	MOC_DIR     = $${OUT_PWD}/.release-shared/moc
-	RCC_DIR     = $${OUT_PWD}/.release-shared/rcc
-	UI_DIR      = $${OUT_PWD}/.release-shared/uic
+	OBJECTS_DIR = $${OUT_PWD}/.release/obj
+	MOC_DIR     = $${OUT_PWD}/.release/moc
+	RCC_DIR     = $${OUT_PWD}/.release/rcc
+	UI_DIR      = $${OUT_PWD}/.release/uic
 	DEFINES += NDEBUG
 }

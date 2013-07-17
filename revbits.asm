@@ -28,15 +28,28 @@ revbits:
 ;unsigned char b = x;
 ; b = ((b * 0x0802LU & 0x22110LU) | (b * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;
 ;
-	mov eax, [esp+4]
-	mov edx, eax
+	mov  eax, [esp+4]
+	mov  edx, eax
 	imul edx, 0x802
-	and edx, 0x22110
+	and  edx, 0x22110
 	imul eax, 0x8020
-	and eax, 0x88440
-	or edx, eax
+	and  eax, 0x88440
+	or   edx, eax
 	imul edx, 0x10101
-	shr edx, 16
-	mov al, dl
+	shr  edx, 16
+	mov  al, dl
 	ret
 
+
+; EMT: i believe that this verison is equivalent and is one instruction shorter
+;
+;mov  eax, [esp+4]
+;mov  edx, eax
+;imul edx, 0x0802
+;and  edx, 0x22110
+;imul eax, 0x8020
+;and  eax, 0x88440
+;or   eax, edx
+;imul eax, 0x10101
+;shr  eax, 16
+;ret

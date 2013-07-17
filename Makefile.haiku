@@ -28,8 +28,8 @@ RES	   := xres
 
 APPNAME := pretendo
 
-DEFINES  := -DLinux
-INCLUDES := -I. -Imappers -I/boot/common/include/libxml2 -Ilibunif -Ip6502 -isystem boost
+DEFINES  := 
+INCLUDES := -I. -Imappers -I/boot/common/include/libxml2 -Ilibines -Ip6502 -isystem boost
 ASMFLAGS :=
 CXXFLAGS := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long #-fomit-frame-pointer
 CFLAGS   := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long #-fomit-frame-pointer
@@ -147,9 +147,7 @@ H_FILES     := \
 	haiku/CartInfoWindow.h \
 	haiku/CartInfoView.h \
 	haiku/PaletteWindow.h \
-	haiku/PaletteView.h \
-	 
-	
+	haiku/PaletteView.h
 
 CXX_FILES   := \
 	APU.cc \
@@ -254,15 +252,10 @@ CXX_FILES   := \
 	haiku/PaletteWindow.cc \
 	haiku/PaletteView.cc
 	
-	
 C_FILES     := \
-	libunif/ines_convert.c \
-	libunif/lib_ines.c \
-	libunif/lib_unif.c \
-	libunif/load_ines.c \
-	libunif/load_unif.c \
-	libunif/std_func.c \
-	libunif/unif_crc32.c
+	libines/ines_crc32.c \
+	libines/lib_ines.c \
+	libines/load_ines.c
 	
 RES_FILES	:=  \
 	pretendo.rsrc
@@ -278,7 +271,7 @@ all: $(APPNAME)
 $(APPNAME): $(O_FILES)
 	@echo linking $@ ...
 	@$(LD) $(LDFLAGS) $(O_FILES) -o $@ 1>/dev/null
-	xres -o $@ $(RES_FILES)
+	$(RES) -o $@ $(RES_FILES)
 
 mrproper: clean
 	$(RM) makedep
