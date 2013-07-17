@@ -1,4 +1,4 @@
-.release-shared
-.debug-shared
+.release
+.debug
 Makefile
 pretendo
