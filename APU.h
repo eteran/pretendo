@@ -77,6 +77,13 @@ public:
 
 public:
 	const uint8_t *buffer();
+	
+public:
+	Square   &square_0() { return square_0_; }
+	Square   &square_1() { return square_1_; }
+	Triangle &triangle() { return triangle_; }
+	Noise    &noise()    { return noise_; }
+	DMC      &dmc()      { return dmc_; }
 
 private:
 	void clock_frame_mode_0();

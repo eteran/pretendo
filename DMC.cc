@@ -14,22 +14,36 @@ const uint16_t frequency_table[16] = {
 	0x06a, 0x054, 0x048, 0x036
 };
 
+//------------------------------------------------------------------------------
+// Name: dmc_dma_write
+//------------------------------------------------------------------------------
+void dmc_dma_write(uint8_t value) {
+	nes::apu.dmc().load_sample_buffer(value);
+}
+
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: DMC
 //------------------------------------------------------------------------------
 DMC::DMC() : muted_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), bits_remaining_(0), control_(0) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: ~DMC
 //------------------------------------------------------------------------------
 DMC::~DMC() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: load_sample_buffer
+//------------------------------------------------------------------------------
+void DMC::load_sample_buffer(uint8_t value) {
+	sample_buffer_.load(value);
+}
+
+//------------------------------------------------------------------------------
+// Name: enable
 //------------------------------------------------------------------------------
 void DMC::enable() {
 
@@ -54,12 +68,15 @@ void DMC::enable() {
 	if(bytes_remaining_ != 0 && bits_remaining_ == 0) {
 		bits_remaining_ = 8;
 
+#if 0
 		// TODO: hijack the CPU for appropriate number of cycles,
 		//       not hardcoded to 3
 		nes::cpu.burn(3);
 		printf("BURN.1\n");
 		sample_buffer_.load(nes::cart.mapper()->read_memory(sample_pointer_));
-
+#else
+		nes::cpu.schedule_dmc_dma(dmc_dma_write, sample_pointer_, 1);
+#endif
 		sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
 		if(--bytes_remaining_ == 0) {
@@ -155,12 +172,15 @@ void DMC::tick() {
 		if(bytes_remaining_ != 0 && bits_remaining_ == 0) {
 			bits_remaining_ = 8;
 
+#if 0
 			// TODO: hijack the CPU for appropriate number of cycles,
 			//       not hardcoded to 3
 			nes::cpu.burn(3);
 			printf("BURN.2\n");
 			sample_buffer_.load(nes::cart.mapper()->read_memory(sample_pointer_));
-
+#else
+			nes::cpu.schedule_dmc_dma(dmc_dma_write, sample_pointer_, 1);
+#endif
 			sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
 			if(--bytes_remaining_ == 0) {

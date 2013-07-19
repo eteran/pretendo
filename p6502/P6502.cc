@@ -114,7 +114,6 @@ bool     rst_executing        = false;
 bool     irq_asserted         = false;
 bool     nmi_asserted         = false;
 bool     rst_asserted         = false;
-int      burn_count           = 0;
 uint64_t executed_cycle_count = 0;
 uint16_t instruction          = 0;
 
@@ -518,7 +517,9 @@ void clock() {
 
 		// first cycle is always instruction fetch
 		// or do we force an interrupt?
-		if(spr_dma_count) {
+		if(dmc_dma_count) {
+			dmc_dma_executing = true;
+		} else if(spr_dma_count) {
 			spr_dma_executing = true;
 		} else if(rst_executing) {
 			read_byte(PC);
@@ -537,7 +538,24 @@ void clock() {
 
 	} else {
 	
-		if(spr_dma_executing) {
+		if(dmc_dma_executing) {
+		
+			if((dmc_dma_count & 1) == 0) {
+				// read cycle
+				dmc_dma_byte = read_byte(dmc_dma_source_address++);
+			} else {
+				// write cycle
+				dmc_dma_handler(dmc_dma_byte);
+			}
+			
+			--dmc_dma_count;
+			if(dmc_dma_count == 0) {
+				// we just finished DMC DMA, so let the CPU continue
+				dmc_dma_executing = false;
+				current_cycle     = 0;
+			}
+			return;
+		} else if(spr_dma_executing) {
 			
 			// the count will always be initially even (we multiply by 2)
 			// so, this forces us to idle for 1 cycle if
@@ -551,6 +569,7 @@ void clock() {
 					// write cycle
 					spr_dma_handler(spr_dma_byte);
 				}
+				
 				--spr_dma_count;
 				if(spr_dma_count == 0) {
 					// we just finished sprite DMA, so let the CPU continue
@@ -558,7 +577,6 @@ void clock() {
 					current_cycle     = 0;
 				}
 			}
-			
 			return;
 			
 		} else {	
@@ -579,13 +597,7 @@ void clock() {
 void run(int cycles) {
 
 	while(cycles-- > 0) {
-
-		if(burn_count != 0) {
-			assert(burn_count >= 0);
-			--burn_count;
-		} else {
-			clock();
-		}
+		clock();
 
 		if(sync_handler) {
 			(*sync_handler)();
@@ -702,17 +714,7 @@ void schedule_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t c
 		dmc_dma_count          = count * 2;
 		dmc_dma_executing      = false;
 		break;
-	default:
-		abort();
 	}
-}
-
-//------------------------------------------------------------------------------
-// Name: burn
-// Desc:
-//------------------------------------------------------------------------------
-void burn(int cycles) {
-	burn_count += cycles;
 }
 
 //------------------------------------------------------------------------------

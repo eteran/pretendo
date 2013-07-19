@@ -29,6 +29,7 @@ public:
 
 public:
 	uint16_t bytes_remaining() const;
+	void load_sample_buffer(uint8_t value);
 
 public:
 	void tick();

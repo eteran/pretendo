@@ -69,7 +69,6 @@ public:
 
 public:
 	uint64_t cycle_count() const { return P6502::executed_cycles(); }
-	void burn(int cycles)        { P6502::burn(cycles); }
 	void clear_irq(IRQ_SOURCE source);
 	void exec(int cycles);
 	void irq(IRQ_SOURCE source);

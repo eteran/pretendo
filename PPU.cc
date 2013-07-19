@@ -89,7 +89,9 @@ uint16_t tile_address(uint16_t vram_address) {
 	return 0x2000 | (vram_address & 0x0fff);
 }
 
-
+//------------------------------------------------------------------------------
+// Name: sprite_dma_write
+//------------------------------------------------------------------------------
 void sprite_dma_write(uint8_t value) {
 	nes::ppu.write2004(value);
 }

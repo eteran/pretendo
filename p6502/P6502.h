@@ -35,7 +35,6 @@ namespace P6502 {
 	void init(jam_handler_t jam, read_handler_t read, write_handler_t write, sync_handler_t sync);
 	void reset();
 	void stop();
-	void burn(int cycles);
 	void irq();
 	void nmi();
 	void reset_irq();
