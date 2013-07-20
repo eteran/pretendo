@@ -13,6 +13,9 @@ AudioViewer::AudioViewer(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f
 	ui_.widget->installEventFilter(this);
 	ui_.widget->resize(APU::buffer_size, ui_.widget->height());
 	
+	using std::memset;
+	memset(audio_buffer_, 0, sizeof(audio_buffer_));
+	
 }
 
 //------------------------------------------------------------------------------

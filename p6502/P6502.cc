@@ -65,13 +65,11 @@ dma_handler_t spr_dma_handler        = 0;
 uint16_t      spr_dma_source_address = 0;
 uint16_t      spr_dma_count          = 0;
 uint8_t       spr_dma_byte           = 0;
-bool          spr_dma_executing      = false;
 
 dma_handler_t dmc_dma_handler        = 0;
 uint16_t      dmc_dma_source_address = 0;
 uint16_t      dmc_dma_count          = 0;
 uint8_t       dmc_dma_byte           = 0;
-bool          dmc_dma_executing      = false;
 
 
 #define LAST_CYCLE                                   \
@@ -506,40 +504,14 @@ void execute_opcode() {
 void clock() {
 
 	assert(current_cycle < 10);
-
-	/*
-	spr_dma_handler 	   = 0;
-	spr_dma_source_address = 0;
-	spr_dma_count		   = 0;
-	*/
-
-	if(current_cycle == 0) {
-
-		// first cycle is always instruction fetch
-		// or do we force an interrupt?
-		if(dmc_dma_count) {
-			dmc_dma_executing = true;
-		} else if(spr_dma_count) {
-			spr_dma_executing = true;
-		} else if(rst_executing) {
-			read_byte(PC);
-			instruction = 0x100;
-		} else if(nmi_executing) {
-			read_byte(PC);
-			instruction = 0x101;
-		} else if(irq_executing) {
-			read_byte(PC);
-			instruction = 0x102;
-		} else {
-			instruction = read_byte(PC++);
-		}
-
-		TRACE;
-
-	} else {
 	
-		if(dmc_dma_executing) {
-		
+	if(dmc_dma_count) {
+
+		// the count will always be initially even (we multiply by 2)
+		// so, this forces us to idle for 1 cycle if
+		// the CPU starts DMA on an odd cycle
+		// after that, they should stay in sync
+		if((dmc_dma_count & 1) == (executed_cycle_count & 1)) {
 			if((dmc_dma_count & 1) == 0) {
 				// read cycle
 				dmc_dma_byte = read_byte(dmc_dma_source_address++);
@@ -547,45 +519,55 @@ void clock() {
 				// write cycle
 				dmc_dma_handler(dmc_dma_byte);
 			}
-			
+
 			--dmc_dma_count;
-			if(dmc_dma_count == 0) {
-				// we just finished DMC DMA, so let the CPU continue
-				dmc_dma_executing = false;
-				current_cycle     = 0;
+		}
+		
+	} else if(spr_dma_count) {
+
+		// the count will always be initially even (we multiply by 2)
+		// so, this forces us to idle for 1 cycle if
+		// the CPU starts DMA on an odd cycle
+		// after that, they should stay in sync
+		if((spr_dma_count & 1) == (executed_cycle_count & 1)) {
+			if((executed_cycle_count & 1) == 0) {
+				// read cycle
+				spr_dma_byte = read_byte(spr_dma_source_address++);
+			} else {
+				// write cycle
+				spr_dma_handler(spr_dma_byte);
 			}
-			return;
-		} else if(spr_dma_executing) {
-			
-			// the count will always be initially even (we multiply by 2)
-			// so, this forces us to idle for 1 cycle if
-			// the CPU starts DMA on an odd cycle
-			// after that, they should stay in sync
-			if((spr_dma_count & 1) == (executed_cycle_count & 1)) {
-				if((executed_cycle_count & 1) == 0) {
-					// read cycle
-					spr_dma_byte = read_byte(spr_dma_source_address++);
-				} else {
-					// write cycle
-					spr_dma_handler(spr_dma_byte);
-				}
-				
-				--spr_dma_count;
-				if(spr_dma_count == 0) {
-					// we just finished sprite DMA, so let the CPU continue
-					spr_dma_executing = false;
-					current_cycle     = 0;
-				}
+
+			--spr_dma_count;
+		}
+		
+	} else {
+		if(current_cycle == 0) {
+
+			// first cycle is always instruction fetch
+			// or do we force an interrupt?
+			if(rst_executing) {
+				read_byte(PC);
+				instruction = 0x100;
+			} else if(nmi_executing) {
+				read_byte(PC);
+				instruction = 0x101;
+			} else if(irq_executing) {
+				read_byte(PC);
+				instruction = 0x102;
+			} else {
+				instruction = read_byte(PC++);
 			}
-			return;
-			
-		} else {	
+
+			TRACE;
+
+		} else {
 			// execute the current part of the instruction
 			execute_opcode();
 		}
-	}
 
-	++current_cycle;
+		++current_cycle;
+	}
 }
 
 }
@@ -685,12 +667,10 @@ void stop() {
 	spr_dma_handler 	   = 0;
 	spr_dma_source_address = 0;
 	spr_dma_count		   = 0;
-	spr_dma_executing      = false;
 
 	dmc_dma_handler 	   = 0;
 	dmc_dma_source_address = 0;
 	dmc_dma_count		   = 0;
-	dmc_dma_executing      = false;
 }
 
 //------------------------------------------------------------------------------
@@ -706,13 +686,11 @@ void schedule_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t c
 		spr_dma_handler        = dma_handler;
 		spr_dma_source_address = source_address;
 		spr_dma_count          = count * 2;
-		spr_dma_executing      = false;
 		break;
 	case DMC_DMA:
 		dmc_dma_handler        = dma_handler;
 		dmc_dma_source_address = source_address;
 		dmc_dma_count          = count * 2;
-		dmc_dma_executing      = false;
 		break;
 	}
 }
