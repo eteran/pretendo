@@ -38,17 +38,8 @@ extern "C"{
 		typedef __int32 int32_t;
 		typedef __int64 int64_t;
 	#endif
-#elif defined (__BEOS__)
-	#include <support/SupportDefs.h>
-	typedef int8  int8_t;
-	typedef int16 int16_t;
-	typedef int32 int32_t;
-	typedef int64 int64_t;
-
-	typedef uint8  uint8_t;
-	typedef uint16 uint16_t;
-	typedef uint32 uint32_t;
-	typedef uint64 uint64_t;
+#elif defined (__HAIKU__)
+	#include <stdint.h>
 #elif defined (__linux__) || defined(__linux) || defined(__gnu_linux__)
 	#include <stdint.h>
 #elif defined(SunOS)
