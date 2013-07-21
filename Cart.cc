@@ -31,6 +31,13 @@ size_t create_mask(size_t size) {
 	return --size;
 }
 
+//------------------------------------------------------------------------------
+// Name: is_power_of_2
+//------------------------------------------------------------------------------
+bool is_power_of_2(size_t size) {
+	return (size & (size - 1)) == 0;
+}
+
 }
 
 //------------------------------------------------------------------------------
@@ -77,11 +84,11 @@ void Cart::load(const std::string &s) {
 		std::cout << "CHR HASH: " << std::hex << std::setw(8) << std::setfill('0') << chr_hash_ << std::dec << std::endl;
 		std::cout << "ROM HASH: " << std::hex << std::setw(8) << std::setfill('0') << rom_hash_ << std::dec << std::endl;
 
-		if((cart_.prg_size & (cart_.prg_size - 1)) != 0) {
+		if(!is_power_of_2(cart_.prg_size)) {
 			std::cout << "WARNING: PRG size is not a power of 2, this is unusual" << std::endl;
 		}
 
-		if((cart_.chr_size & (cart_.chr_size - 1)) != 0) {
+		if(!is_power_of_2(cart_.chr_size)) {
 			std::cout << "WARNING: CHR size is not a power of 2, this is unusual" << std::endl;
 		}
 
@@ -179,8 +186,8 @@ uint32_t Cart::rom_hash() const {
 //------------------------------------------------------------------------------
 std::vector<uint8_t> Cart::raw_image() const {
 
-	const uint8_t *const prg_rom  = prg();
-	const uint8_t *const chr_rom  = chr();
+	const uint8_t *const prg_rom = prg();
+	const uint8_t *const chr_rom = chr();
 
 	// create a vector and copy the PRG into it
 	std::vector<uint8_t> image(prg_rom, prg_rom + cart_.prg_size);
