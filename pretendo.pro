@@ -5,6 +5,7 @@ QT      += opengl
 
 greaterThan(QT_MAJOR_VERSION, 4) {
 	QT += widgets
+	CONFIG += c++11
 }
 
 INCLUDEPATH += qt
@@ -392,9 +393,9 @@ win32-* {
 }
 
 *-g++*:lto {
-	QMAKE_CC   = gcc-4.8.1 -std=c++11
-	QMAKE_CXX  = g++-4.8.1 -std=c++11
-	QMAKE_LINK = g++-4.8.1 -std=c++11
+#	QMAKE_CC   = gcc-4.8.1
+#	QMAKE_CXX  = g++-4.8.1 -std=c++11
+#	QMAKE_LINK = g++-4.8.1 -std=c++11
 	
 	QMAKE_CFLAGS_RELEASE   += -flto
 	QMAKE_CXXFLAGS_RELEASE += -flto
