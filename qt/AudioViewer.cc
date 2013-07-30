@@ -61,7 +61,7 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 				const int current_value = audio_buffer_[i];
 
 				if(prev == -1) {
-					painter.drawPoint(i, back_buffer.height() - current_value);
+					painter.drawPoint(i, 0xff - current_value);
 				} else {
 					painter.drawLine(i - 1, 0xff - prev, i, 0xff - current_value);
 				}
