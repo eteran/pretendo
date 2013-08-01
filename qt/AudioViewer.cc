@@ -42,11 +42,12 @@ void AudioViewer::update() {
 //------------------------------------------------------------------------------
 bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 
-	if (watched == ui_.widget && event->type() == QEvent::Paint) {
+	if(watched == ui_.widget && event->type() == QEvent::Paint) {
 	
 		QPixmap back_buffer(sizeof(audio_buffer_), 300);
-		{	
-			QPainter painter(&back_buffer);
+		QPainter painter;
+		if(painter.begin(&back_buffer)) {	
+			
 
 			// draw stuff...
 			painter.fillRect(back_buffer.rect(), Qt::blue);
@@ -68,9 +69,10 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 				
 				prev = current_value;
 			}
+			painter.end();
 		}
 		
-		QPainter painter(ui_.widget);
+		painter.begin(ui_.widget);
 		painter.drawPixmap(ui_.widget->rect(), back_buffer);
 		return true;
 	}
