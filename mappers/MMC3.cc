@@ -159,6 +159,15 @@ void MMC3::write_8(uint16_t address, uint8_t value) {
 		set_chr_1400_17ff(chr_bank(5));
 		set_chr_1800_1bff(chr_bank(6));
 		set_chr_1c00_1fff(chr_bank(7));
+	} else {
+		set_chr_0000_03ff_ram(chr_ram_, chr_bank(0));
+		set_chr_0400_07ff_ram(chr_ram_, chr_bank(1));
+		set_chr_0800_0bff_ram(chr_ram_, chr_bank(2));
+		set_chr_0c00_0fff_ram(chr_ram_, chr_bank(3));
+		set_chr_1000_13ff_ram(chr_ram_, chr_bank(4));
+		set_chr_1400_17ff_ram(chr_ram_, chr_bank(5));
+		set_chr_1800_1bff_ram(chr_ram_, chr_bank(6));
+		set_chr_1c00_1fff_ram(chr_ram_, chr_bank(7));
 	}
 }
 

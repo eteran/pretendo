@@ -7,7 +7,7 @@
 
 namespace {
 
-const int FRAME_MODE		 = 0x80;
+const int FRAME_MODE         = 0x80;
 const int FRAME_INHIBIT_IRQ  = 0x40;
 const double CPU_FREQUENCY   = 1789772.67; // 1.78977267Mhz
 
@@ -504,7 +504,6 @@ const uint8_t *APU::buffer() {
 //------------------------------------------------------------------------------
 uint8_t APU::mix_channels() const {
 
-	int           result;
 	const uint8_t pulse1   = square_0_.output();
 	const uint8_t pulse2   = square_1_.output();
 	const uint8_t triangle = triangle_.output();
@@ -523,9 +522,9 @@ uint8_t APU::mix_channels() const {
 		tnd_volume = 159.79 / ((1 / ((triangle / 8227.0) + (noise / 12241.0) + (dmc / 22638.0))) + 100.0);
 	}
 
-	result = (pulse_volume + tnd_volume) * 0x100;
+	int result = (pulse_volume + tnd_volume) * 0x100;
 #else
-	result = (
+	int result = (
 		pulse1 +
 		pulse2 +
 		triangle +

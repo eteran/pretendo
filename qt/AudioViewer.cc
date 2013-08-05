@@ -19,7 +19,7 @@ AudioViewer::AudioViewer(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f
 }
 
 //------------------------------------------------------------------------------
-// Name: ~Preferences
+// Name: ~AudioViewer
 //------------------------------------------------------------------------------
 AudioViewer::~AudioViewer() {
 
