@@ -56,6 +56,3 @@ CartInfoWindow::QuitRequested (void)
 	Hide();
 	return false;
 }
-
-
-// gcc -I/boot/common/include/libxml2 -I/pretendo/boost_1_50_0 rominfo.cc -o rominfo -lxml2 -lstdc++
