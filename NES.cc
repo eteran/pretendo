@@ -8,6 +8,7 @@ PPU   nes::ppu;
 APU   nes::apu;
 Cart  nes::cart;
 Input nes::input;
+ConfigManager nes::config;
 
 /*
  * Just some thoughts on timing:
