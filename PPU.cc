@@ -15,8 +15,8 @@
 
 namespace {
 
-const int cycles_per_scanline = 341;
-const int cpu_alignment       = 0;
+const unsigned int cycles_per_scanline = 341u;
+const unsigned int cpu_alignment       = 0u;
 
 enum {
 	STATUS_OVERFLOW = 0x20,
@@ -98,64 +98,63 @@ void sprite_dma_write(uint8_t value) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: vertical_flip
 //------------------------------------------------------------------------------
 bool PPU::SpriteEntry::vertical_flip() const {
 	return sprite_bytes[2] & SPRITE_VFLIP;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: horizontal_flip
 //------------------------------------------------------------------------------
 bool PPU::SpriteEntry::horizontal_flip() const {
 	return sprite_bytes[2] & SPRITE_HFLIP;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: is_sprite_zero
 //------------------------------------------------------------------------------
 bool PPU::SpriteEntry::is_sprite_zero() const {
 	return sprite_bytes[2] & SPRITE_ZERO;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: is_background
 //------------------------------------------------------------------------------
 bool PPU::SpriteEntry::is_background() const {
 	return sprite_bytes[2] & SPRITE_PRIORITY;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: palette
 //------------------------------------------------------------------------------
 uint8_t PPU::SpriteEntry::palette() const {
 	return sprite_bytes[2] & SPRITE_COLOR;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: index
 //------------------------------------------------------------------------------
 uint8_t PPU::SpriteEntry::index() const {
 	return sprite_bytes[1];
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: y
 //------------------------------------------------------------------------------
 uint8_t PPU::SpriteEntry::y() const {
 	return sprite_bytes[0];
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: x
 //------------------------------------------------------------------------------
 uint8_t PPU::SpriteEntry::x() const {
 	return sprite_bytes[3];
 }
 
-
 //------------------------------------------------------------------------------
-// Name:
+// Name: PPU
 //------------------------------------------------------------------------------
 PPU::PPU() :
 	ppu_cycle_(0),
@@ -188,7 +187,7 @@ PPU::PPU() :
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: ~PPU
 //------------------------------------------------------------------------------
 PPU::~PPU() {
 }
@@ -259,7 +258,7 @@ void PPU::write2000(uint8_t value) {
 	if(write_block_) {
 		return;
 	}
-	
+
 	const bool prev_nmi_on_vblank = nmi_on_vblank();
 
 	ppu_control_ = value;
@@ -901,20 +900,22 @@ uint8_t PPU::select_pixel(uint8_t index) {
 				const uint8_t p0 = p->pattern[0];
 				const uint8_t p1 = p->pattern[1];
 
-				uint8_t sprite_pixel;
-
+			#if 1
+				const uint8_t sprite_pixel = ((p0 >> (7 - x_offset)) & 0x01) | (((p1 >> (7 - x_offset)) & 0x01) << 0x01);
+			#else
 				switch(x_offset) {
-				case 0: sprite_pixel = ((p0 & 0x80) >> 7) | ((p1 & 0x80) >> 6); break;
-				case 1: sprite_pixel = ((p0 & 0x40) >> 6) | ((p1 & 0x40) >> 5); break;
-				case 2: sprite_pixel = ((p0 & 0x20) >> 5) | ((p1 & 0x20) >> 4); break;
-				case 3: sprite_pixel = ((p0 & 0x10) >> 4) | ((p1 & 0x10) >> 3); break;
-				case 4: sprite_pixel = ((p0 & 0x08) >> 3) | ((p1 & 0x08) >> 2); break;
-				case 5: sprite_pixel = ((p0 & 0x04) >> 2) | ((p1 & 0x04) >> 1); break;
-				case 6: sprite_pixel = ((p0 & 0x02) >> 1) | ((p1 & 0x02) >> 0); break;
-				case 7: sprite_pixel = ((p0 & 0x01) >> 0) | ((p1 & 0x01) << 1); break;
+				case 0: sprite_pixel = ((p0 >> 7) & 0x01) | ((p1 >> 6) & 0x02); break;
+				case 1: sprite_pixel = ((p0 >> 6) & 0x01) | ((p1 >> 5) & 0x02); break;
+				case 2: sprite_pixel = ((p0 >> 5) & 0x01) | ((p1 >> 4) & 0x02); break;
+				case 3: sprite_pixel = ((p0 >> 4) & 0x01) | ((p1 >> 3) & 0x02); break;
+				case 4: sprite_pixel = ((p0 >> 3) & 0x01) | ((p1 >> 2) & 0x02); break;
+				case 5: sprite_pixel = ((p0 >> 2) & 0x01) | ((p1 >> 1) & 0x02); break;
+				case 6: sprite_pixel = ((p0 >> 1) & 0x01) | ((p1 >> 0) & 0x02); break;
+				case 7: sprite_pixel = ((p0 >> 0) & 0x01) | ((p1 << 1) & 0x02); break;
 				default:
 					abort();
 				}
+			#endif
 
 				// this pixel is visible..
 				if(sprite_pixel & 0x03) {
@@ -1513,7 +1514,7 @@ bool PPU::greyscale() const {
 // Name: sprite_size
 //------------------------------------------------------------------------------
 uint8_t PPU::sprite_size() const {
-	// return (ppu_control_ & 0x20) ? 16 : 8;	
+	// return (ppu_control_ & 0x20) ? 16 : 8;
 	return ((ppu_control_ & 0x20) >> 2) + 8;
 }
 

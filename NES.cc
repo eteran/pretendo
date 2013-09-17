@@ -110,20 +110,12 @@ void execute_scanline_261() {
 // Name: run_frame
 //------------------------------------------------------------------------------
 void nes::run_frame(VideoInterface *video) {
-
-	// ppu
-
 	nes::ppu.start_frame();
 	execute_scanline_20();
 	execute_scanline_21_260(video);
 	nes::ppu.end_frame();
 	execute_scanline_261();
 	execute_scanline_0_19();
-
-	// sound
-#if 0
-	nes::apu.frame_update();
-#endif
 }
 
 //------------------------------------------------------------------------------
