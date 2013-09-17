@@ -13,7 +13,6 @@
 
 //#define SPRITE_ZERO_HACK
 
-
 namespace {
 
 const int cycles_per_scanline = 341;
@@ -218,34 +217,34 @@ void PPU::reset(nes::RESET reset_type) {
 		memcpy(palette_, powerup_palette, sizeof(palette_));
 	}
 
-	attribute_queue_[0]       = 0;
-	attribute_queue_[1]       = 0;
-	hpos_                     = 0;
-	latch_                    = 0;
-	nametable_                = 0x0000;
-	next_attribute_           = 0;
-	next_pattern_[0]          = 0;
-	next_pattern_[1]          = 0;
-	next_tile_index_          = 0;
-	odd_frame_                = false;
-	pattern_queue_[0]         = 0;
-	pattern_queue_[1]         = 0;
-	ppu_cycle_                = 0;
-	ppu_control_              = 0;
-	ppu_mask_                 = 0;
-	register_2007_buffer_     = 0;
-	rendering_                = false;
-	sprite_address_           = 0;
-	sprite_buffer_            = 0xff;
-	sprite_data_index_        = 0;
-	sprite_zero_found_curr_   = false;
-	sprite_zero_found_next_   = false;
-	status_                   = 0;
-	tile_offset_              = 0;
-	vpos_                     = 0;
-	vram_address_             = 0x0000;
-	write_latch_              = false;
-	write_block_              = true;
+	attribute_queue_[0]     = 0;
+	attribute_queue_[1]     = 0;
+	hpos_                   = 0;
+	latch_                  = 0;
+	nametable_              = 0x0000;
+	next_attribute_         = 0;
+	next_pattern_[0]        = 0;
+	next_pattern_[1]        = 0;
+	next_tile_index_        = 0;
+	odd_frame_              = false;
+	pattern_queue_[0]       = 0;
+	pattern_queue_[1]       = 0;
+	ppu_cycle_              = 0;
+	ppu_control_            = 0;
+	ppu_mask_               = 0;
+	register_2007_buffer_   = 0;
+	rendering_              = false;
+	sprite_address_         = 0;
+	sprite_buffer_          = 0xff;
+	sprite_data_index_      = 0;
+	sprite_zero_found_curr_ = false;
+	sprite_zero_found_next_ = false;
+	status_                 = 0;
+	tile_offset_            = 0;
+	vpos_                   = 0;
+	vram_address_           = 0x0000;
+	write_latch_            = false;
+	write_block_            = true;
 
 	std::cout << "[PPU::reset] reset complete" << std::endl;
 }
