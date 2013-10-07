@@ -361,7 +361,7 @@ sdlsound {
 	SOURCES += qt/SDLAudio.cc
 	HEADERS += qt/SDLAudio.h
 	
-	LIBS    += -lSDL
+	LIBS    += $$system(sdl-config --libs)
 	
 	SOURCES -= qt/NullAudio.cc
 	HEADERS -= qt/NullAudio.h
@@ -398,8 +398,14 @@ win32-* {
 #	QMAKE_LINK = g++-4.8.1 -std=c++11
 	
 	QMAKE_CFLAGS_RELEASE   += -flto
-	QMAKE_CXXFLAGS_RELEASE += -flto
-	QMAKE_LFLAGS_RELEASE   += -flto
+	QMAKE_CXXFLAGS_RELEASE += -flto -std=c++0x
+	QMAKE_LFLAGS_RELEASE   += -flto -std=c++0x
+}
+
+*-g++*:profile {
+	QMAKE_CFLAGS_RELEASE   += -pg
+	QMAKE_CXXFLAGS_RELEASE += -pg
+	QMAKE_LFLAGS_RELEASE   += -pg
 }
 
 CONFIG(debug, debug|release) {
