@@ -9,7 +9,7 @@
 class AudioView : public BView
 {
 	public:
-	AudioView();
+	AudioView(BRect frame);
 	virtual ~AudioView();
 	
 	public:
