@@ -1,5 +1,5 @@
 
-#ifndef _AUDIO_VIEW_H
+#ifndef _AUDIO_VIEW_H_
 #define _AUDIO_VIEW_H_
 
 #include <Window.h>
@@ -9,28 +9,13 @@
 class AudioView : public BView
 {
 	public:
-	AudioView(BRect frame);
+	AudioView();
 	virtual ~AudioView();
 	
 	public:
 	virtual void Draw (BRect updateaRect);
 	virtual void AttachedToWindow (void);
 };
-	
-
-class AudioViewWindow : public BWindow
-{
-	public:
-			 AudioViewWindow();
-	virtual ~AudioViewWindow();
-	
-	public:
-	virtual void MessageReceived (BMessage *message);
-	virtual bool QuitRequested (void);
-	
-	private:
-	AudioView *fAudioView;
-};
-	
+		
 
 #endif // AUDIO_VIEW_H
