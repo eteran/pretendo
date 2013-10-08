@@ -168,13 +168,6 @@ private:
 	uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) const;
 
 private:
-	uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
-									     // 4 nametables, each $03c0 bytes in
-									     // size plus 4 corresponding $40 byte
-									     // attribute tables
-									     // even though the real thing only has 2
-									     // tables, we currently simulate 4 for
-									     // simplicity
 	VRAMBank     vram_banks_[0x10];
 	uint8_t      sprite_ram_[0x100];
 	SpriteEntry  sprite_data_[8];
@@ -207,6 +200,15 @@ private:
 	bool         sprite_zero_found_curr_;
 	bool         write_latch_;
 	bool         write_block_;
+
+private:
+	uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
+									     // 4 nametables, each $03c0 bytes in
+									     // size plus 4 corresponding $40 byte
+									     // attribute tables
+									     // even though the real thing only has 2
+									     // tables, we currently simulate 4 for
+									     // simplicity
 
 public:
 	bool         show_sprites_;
