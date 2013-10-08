@@ -42,6 +42,7 @@
 #define MSG_CHANGE_RENDER 'CHRN'
 #define MSG_DRAW_BITMAP 'DRAW'
 #define MSG_ADJ_PALETTE 'ADJP'
+#define MSG_AUDIO_VIEW	'AUDV'
 
 
 class VideoScreen;
@@ -51,6 +52,7 @@ class PaletteWindow;
 class CartInfoWindow;
 class SimpleMutex;
 class InputWindow;
+class AudioViewWindow;
 
 
 class PretendoWindow : public BDirectWindow, public VideoInterface
@@ -159,6 +161,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	BMenu *RenderMenu;
 	ROMFilePanel *fOpenPanel;
 	int32 fMenuHeight;
+	AudioViewWindow *fAudioView;
 	
 	private:
 //	InputWindow *fInputWindow;

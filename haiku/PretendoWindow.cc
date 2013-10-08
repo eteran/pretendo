@@ -11,6 +11,7 @@
 #include "PaletteWindow.h"
 #include "CartInfoWindow.h"
 #include "SimpleMutex.h"
+#include "AudioView.h"
 //#include "InputWindow.h"
 
 #include "ConfigManager.h"
@@ -311,6 +312,9 @@ PretendoWindow::MessageReceived (BMessage *message)
 			
 			break;
 			
+		case MSG_AUDIO_VIEW:
+			break;
+			
 		default:
 			BDirectWindow::MessageReceived (message);
 	}
@@ -441,6 +445,7 @@ PretendoWindow::AddMenu (void)
 	fEmuMenu->AddSeparatorItem();
 	fEmuMenu->AddItem (new BMenuItem ("Adjust Palette"B_UTF8_ELLIPSIS, 
 		new BMessage (MSG_ADJ_PALETTE)));
+	fEmuMenu->AddItem (new BMenuItem ("Show Audio", new BMessage (MSG_AUDIO_VIEW)));
 	fEmuMenu->AddItem (new BMenuItem ("Debug"B_UTF8_ELLIPSIS, new BMessage(MSG_CPU_DEBUG)));
 	fMenuHeight = fMenu->Bounds().IntegerHeight();
 }
