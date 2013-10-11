@@ -16,6 +16,7 @@ class AudioStream : public boost::noncopyable
 	void Stream (const void *stream, size_t numSamples);
 	void Start (void);
 	void Stop (void);
+	uint8 *SoundBuffer (void) { return fSoundBuffer; };
 	
 	public:
 	void InternalSync (void *buffer, size_t size);

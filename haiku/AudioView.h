@@ -13,8 +13,11 @@ class AudioView : public BView
 	virtual ~AudioView();
 	
 	public:
-	virtual void Draw (BRect updateaRect);
+	virtual void Draw (BRect updateRect);
 	virtual void AttachedToWindow (void);
+	
+	private:
+	uint8 *fAudioBuffer;
 };
 		
 

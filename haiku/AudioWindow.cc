@@ -1,27 +1,38 @@
 
-#include <View.h>
+#include "AudioWindow.h"
+#include "AudioView.h"
+
+class AudioWindow;
 
 
-AudioWindow::AudioWindow()
+AudioWindow::AudioWindow(PretendoWindow *parent)
 	: BWindow(BRect(0,0,0,0),"Audio View", B_FLOATING_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL, B_NOT_RESIZABLE|B_NOT_ZOOMABLE),
 	fAudioView(NULL)
 {
+	ResizeTo(400, 100);
+	CenterOnScreen();
+	
+	fAudioView = new AudioView();
+	AddChild(fAudioView);
+	fAudioView->Invalidate();
 }
 
 
 
-AudiowWindow::~AudioWindow()
+AudioWindow::~AudioWindow()
 {
 }
 
 
 bool 
-AudiowWindow::QuitRequested (void)
+AudioWindow::QuitRequested (void)
 {
-	return true;
+	Hide();
+	return false;
 }
 
 void 
-AudioView::MessageReceived (BMessage *message)
+AudioWindow::MessageReceived (BMessage *message)
 {
+	BWindow::MessageReceived(message);
 }

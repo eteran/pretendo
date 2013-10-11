@@ -52,7 +52,7 @@ class PaletteWindow;
 class CartInfoWindow;
 class SimpleMutex;
 class InputWindow;
-class AudioViewWindow;
+class AudioWindow;
 
 
 class PretendoWindow : public BDirectWindow, public VideoInterface
@@ -125,6 +125,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	void OnDebug (void);
 	void OnSoftReset (void);
 	void OnHardReset (void);
+	void OnAudioWindow (void);
 	
 
 	// video stuff
@@ -161,7 +162,6 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	BMenu *RenderMenu;
 	ROMFilePanel *fOpenPanel;
 	int32 fMenuHeight;
-	AudioViewWindow *fAudioView;
 	
 	private:
 //	InputWindow *fInputWindow;
@@ -205,6 +205,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	PaletteWindow *fPaletteWindow;
+	AudioWindow *fAudioWindow;
 	
 	private:
 	bool fPaused;
