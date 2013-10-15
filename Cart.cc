@@ -95,7 +95,7 @@ void Cart::load(const std::string &s) {
 		mapper_ = Mapper::create_mapper(cart_.mapper);
 	} else {
 		std::cout << " ERROR! (" << r << ")" << std::endl;
-		mapper_ = boost::shared_ptr<Mapper>();
+		mapper_   = boost::shared_ptr<Mapper>();
 		prg_hash_ = 0;
 		chr_hash_ = 0;
 		rom_hash_ = 0;

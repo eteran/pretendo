@@ -45,7 +45,7 @@ H_FILES     := \
 	mappers/BNROM.h \
 	Bandai.h \
 	Cart.h \
-	ConfigManager.h \
+	Config.h \
 	Controller.h \
 	DMC.h \
 	Envelope.h \
@@ -238,7 +238,7 @@ CXX_FILES   := \
 	mappers/VRC6.cc \
 	p6502/CPU.cc \
 	p6502/P6502.cc \
-	ConfigManager.cc \
+	Config.cc \
 	haiku/AboutWindow.cc \
 	haiku/AudioStream.cc \
 	haiku/HaikuMain.cc \

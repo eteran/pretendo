@@ -13,7 +13,7 @@ INCLUDEPATH += qt
 HEADERS += \
 		APU.h \
 		Cart.h \
-		ConfigManager.h \
+		Config.h \
 		Controller.h \
 		DMC.h \
 		Envelope.h \
@@ -118,7 +118,7 @@ FORMS += qt/Pretendo.ui qt/Preferences.ui qt/About.ui qt/AudioViewer.ui
 SOURCES += \
 		APU.cc \
 		Cart.cc \
-		ConfigManager.cc \
+		Config.cc \
 		Controller.cc \
 		DMC.cc \
 		Envelope.cc \

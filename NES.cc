@@ -3,12 +3,12 @@
 #include "Mapper.h"
 #include "VideoInterface.h"
 
-CPU   nes::cpu;
-PPU   nes::ppu;
-APU   nes::apu;
-Cart  nes::cart;
-Input nes::input;
-ConfigManager nes::config;
+CPU    nes::cpu;
+PPU    nes::ppu;
+APU    nes::apu;
+Cart   nes::cart;
+Input  nes::input;
+Config nes::config;
 
 /*
  * Just some thoughts on timing:

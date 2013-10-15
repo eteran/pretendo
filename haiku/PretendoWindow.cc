@@ -14,7 +14,7 @@
 #include "AudioView.h"
 //#include "InputWindow.h"
 
-#include "ConfigManager.h"
+#include "Config.h"
 
 PretendoWindow::PretendoWindow()
 	: BDirectWindow (BRect (0, 0, 0, 0), "Pretendo", B_TITLED_WINDOW, B_NOT_RESIZABLE, 0),
