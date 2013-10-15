@@ -11,7 +11,7 @@
 #include "PaletteWindow.h"
 #include "CartInfoWindow.h"
 #include "SimpleMutex.h"
-#include "AudioView.h"
+#include "AudioWindow.h"
 //#include "InputWindow.h"
 
 #include "Config.h"
@@ -35,8 +35,10 @@ PretendoWindow::PretendoWindow()
 		fVideoScreen(NULL),
 		fAudioStream(NULL),
 		fPaletteWindow(NULL),
+		fAudioWindow(NULL),
 		fPaused(false),
 		fRunning(false)
+		
 {
 	BRect bounds (Bounds());
 	bounds.OffsetTo (B_ORIGIN);
@@ -179,6 +181,11 @@ PretendoWindow::~PretendoWindow()
 		fPaletteWindow->Quit();
 	}
 	
+	if (fAudioWindow != NULL) {
+		fAudioWindow->Lock();
+		fAudioWindow->Quit();
+	}
+	
 	Hide();
 	Sync();	
 }
@@ -313,6 +320,12 @@ PretendoWindow::MessageReceived (BMessage *message)
 			break;
 			
 		case MSG_AUDIO_VIEW:
+			if (fAudioWindow == NULL) {
+				fAudioWindow = new AudioWindow(this);
+			} 
+			
+			fAudioWindow->Show();
+			
 			break;
 			
 		default:

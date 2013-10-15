@@ -252,6 +252,7 @@ CXX_FILES   := \
 	haiku/CartInfoView.cc \
 	haiku/PaletteWindow.cc \
 	haiku/PaletteView.cc \
+	haiku/AudioWindow.cc \
 	haiku/AudioView.cc
 	
 C_FILES     := \
