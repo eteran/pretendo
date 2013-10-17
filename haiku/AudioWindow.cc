@@ -14,7 +14,6 @@ AudioWindow::AudioWindow(PretendoWindow *parent)
 	
 	fAudioView = new AudioView();
 	AddChild(fAudioView);
-	fAudioView->Invalidate();
 }
 
 

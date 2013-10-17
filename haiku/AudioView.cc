@@ -19,7 +19,7 @@ AudioView::~AudioView()
 void
 AudioView::AttachedToWindow (void)
 {
-	ResizeTo(400, 300);
+	ResizeTo(400, 100);
 	SetViewColor (0, 0, 0);
 	
 }

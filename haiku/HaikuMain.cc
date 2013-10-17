@@ -8,7 +8,7 @@ int
 main (void)
 {
 	srand(static_cast<unsigned int>(time(0)));
-	PretendoApp *app = new PretendoApp();
+	PretendoApp *app = new PretendoApp;
 	app->Run();
 	delete be_app;
 	
