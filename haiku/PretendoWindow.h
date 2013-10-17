@@ -43,6 +43,7 @@
 #define MSG_DRAW_BITMAP 'DRAW'
 #define MSG_ADJ_PALETTE 'ADJP'
 #define MSG_AUDIO_VIEW	'AUDV'
+#define MSG_AUDIO_ENABLE 'AUEN'
 
 
 class VideoScreen;
@@ -159,6 +160,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	BMenu *fLoadMenu;
 	BMenu *fEmuMenu;
 	BMenu *fVideoMenu;
+	BMenu *fAudioMenu;
 	BMenu *RenderMenu;
 	ROMFilePanel *fOpenPanel;
 	int32 fMenuHeight;
@@ -209,7 +211,6 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	bool fPaused;
-	//sem_id fMutex;
 	
 	private:
 	thread_id fThread;
@@ -218,8 +219,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	
 	private:
 	bool Running (void) { return fRunning; }
-	//sem_id Mutex (void) { return fMutex; }
-	
+
 	private:
 	key_info fKeyStates;
 	inline void CheckKey (int32 index, int32 key);

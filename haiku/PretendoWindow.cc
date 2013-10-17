@@ -23,7 +23,7 @@ PretendoWindow::PretendoWindow()
 		fFileMenu(NULL),
 		fEmuMenu(NULL),
 		fVideoMenu(NULL),
-//		fAudioMenu(NULL),
+		fAudioMenu(NULL),
 		fOpenPanel(NULL),
 		fCartInfoWindow(NULL),
 		fBitmap(NULL),
@@ -366,7 +366,7 @@ bool
 PretendoWindow::QuitRequested()
 {	
 	// do not touch this code.
-	// do not even look at it.
+	// do not look at it.
 	// do not even breathe on it.		
 	status_t ret;
 
