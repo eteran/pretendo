@@ -12,7 +12,7 @@ PretendoApp::PretendoApp()
 void
 PretendoApp::ReadyToRun()
 {
-	fWindow = new PretendoWindow();
+	fWindow = new PretendoWindow;
 	fWindow->Show();
 }
 
