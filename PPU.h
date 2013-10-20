@@ -126,6 +126,7 @@ private:
 	bool vertical_address_increment() const;
 	uint8_t select_blank_pixel() const;
 	uint8_t select_pixel(uint8_t index);
+	uint8_t select_bg_pixel(uint8_t index);
 	uint8_t sprite_size() const;
 	void clock_x();
 	void clock_y();

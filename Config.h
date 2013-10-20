@@ -17,8 +17,8 @@ public:
 	Config();
 	virtual ~Config();
 
-public:
-	typedef  std::map<std::string, std::string> section_type;
+private:
+	typedef std::map<std::string, std::string> section_type;
 
 public:
 	bool Load();

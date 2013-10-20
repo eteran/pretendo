@@ -3,20 +3,86 @@
 #include <functional> 
 #include <cctype>
 #include <locale>
+#include <vector>
 
 namespace {
 
+//------------------------------------------------------------------------------
+// Name: ltrim
+//------------------------------------------------------------------------------
 void ltrim(std::string &s) {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 }
 
+//------------------------------------------------------------------------------
+// Name: ltrim
+//------------------------------------------------------------------------------
 void rtrim(std::string &s) {
 	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
 }
 
+//------------------------------------------------------------------------------
+// Name: trim
+//------------------------------------------------------------------------------
 void trim(std::string &s) {
 	ltrim(s);
 	rtrim(s);
+}
+
+//------------------------------------------------------------------------------
+// Name: explode
+//------------------------------------------------------------------------------
+std::vector<std::string> explode(const std::string &delimeter, const std::string &string, int limit) {
+	std::vector<std::string> r;
+
+	if(!string.empty()) {
+		if(limit >= 0) {
+			if(limit == 0) {
+				limit = 1;
+			}
+
+			std::size_t first = 0;
+			std::size_t last  = string.find(delimeter);
+
+			while(last != std::string::npos) {
+
+				if(--limit == 0) {
+					break;
+				}
+
+				r.push_back(string.substr(first, last - first));
+				first = last + delimeter.size();
+				last  = string.find(delimeter, last + delimeter.size());
+			}
+
+			r.push_back(string.substr(first));
+		} else {
+			std::size_t first = 0;
+			std::size_t last  = string.find(delimeter);
+
+			while(last != std::string::npos) {
+				r.push_back(string.substr(first, last - first));
+				first = last + delimeter.size();
+				last  = string.find(delimeter, last + delimeter.size());
+			}
+
+			r.push_back(string.substr(first));
+			
+			while(limit < 0) {
+				r.pop_back();
+				++limit;
+			}
+		}
+	}
+	
+	return r;
+}
+
+//------------------------------------------------------------------------------
+// Name: explode
+//------------------------------------------------------------------------------
+inline std::vector<std::string> explode(const std::string &delimeter, const std::string &string) {
+	return explode(delimeter, string, std::numeric_limits<int>::max());
 }
 
 }
@@ -27,6 +93,7 @@ Config::Config() : filename_("pretendo.config") {
 
 
 Config::~Config() {
+	Save();
 }
 
 
@@ -64,37 +131,45 @@ bool Config::Load() {
 		}
 
 		if(linebuffer[0] == '[') {
+		
+			// TODO: handle if there is junk after the closing ']' character
 			const size_t end = linebuffer.find_last_of(']');
 
 			if(end != std::string::npos) {
 				current_section = linebuffer.substr(1, end - 1);
 				NewSection(current_section);
 			} else {
-				std::cout << "ConfigFile: error on line " << line_number << std::endl;
+				std::cerr << "[Config::Load] Error on line " << line_number << std::endl;
 				continue;
 			}
 		} else if(linebuffer[0] == '#') {
 			// skip comments
 			continue;
-		} else {
-			const size_t eqPos = linebuffer.find_first_of("=");
-			if(eqPos == std::string::npos) {
-				std::cout << "Error loading config file, line " << line_number << std::endl;
+		} else {			
+			if(current_section.empty()) {
+				std::cerr << "Error: every configuration option must be in a section" << std::endl;
+				continue;
+			}
+			
+			const std::vector<std::string> values = explode("=", linebuffer);
+			
+			if(values.size() != 2) {
+				std::cerr << "Error: Every key must have exactly one value" << line_number << std::endl;
 				continue;
 			}
 
-			std::string key   = linebuffer;
-			std::string value = linebuffer;
-
-			key.erase(eqPos);
-			value.erase(0, eqPos + 1);
+			std::string key   = values[0];
+			std::string value = values[1];
+			
+			trim(key);
+			trim(value);
 
 			if(key.empty()) {
-				std::cout << "config file: bad key on line " << line_number << std::endl;
+				std::cerr << "Error: bad key on line " << line_number << std::endl;
 				continue;
 			}
 
-			NewKey(current_section, std::pair<std::string, std::string>(key, value));
+			NewKey(current_section, std::make_pair(key, value));
 		}
 	}
 
@@ -108,8 +183,8 @@ bool Config::Save() {
 	std::ofstream file(filename_.c_str(), std::ios::trunc);
 
 	if(!file) {
-		std::cout << "Error:  Config::Save() couldn't open file for writing" << std::endl;
-		//FIXME: throw exception or something equally creative
+		std::cerr << "[Config::Save] Error: couldn't open file for writing" << std::endl;
+		// TODO: throw exception or something equally creative
 		return false;
 	}
 
@@ -139,9 +214,6 @@ bool Config::DeleteSection(const std::string &section) {
 		return false;
 	}
 	
-	it->second.clear();
-
-
 	sections_.erase(it);
 	return true;
 }
@@ -174,15 +246,12 @@ bool Config::NewKey(const std::string &section, const std::pair<std::string, std
 		return false;
 	}
 
-	for(section_type::const_iterator it = sections_[section].begin(); it != sections_[section].end(); ++it) {
-		if(it->first == key.first) {
-			std::cout << "key " << key.first << " already exists." << std::endl;
-			return false;
-		}
-	}
-
 	std::cout << "NewKey -> adding: " << key.first << ", " << key.second << std::endl;
-	sections_[section].insert(key);
+	
+	std::pair<section_type::iterator, bool> it = sections_[section].insert(key);
+	if(!it.second) {
+		std::cout << "key " << key.first << " already exists." << std::endl;
+	}
 	return true;
 }
 

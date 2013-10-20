@@ -657,7 +657,7 @@ uint16_t PPU::sprite_pattern_address(uint8_t index, uint8_t sprite_line) const {
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
 void PPU::open_sprite_pattern() {
-	SpriteEntry *const sprite_entry = &sprite_data_[((hpos_ - 1) >> 3) & 0x07];
+	const SpriteEntry *const sprite_entry = &sprite_data_[((hpos_ - 1) >> 3) & 0x07];
 
 	if(sprite_entry->y() != 0xff) {
 		const uint8_t index = sprite_entry->index();
@@ -862,6 +862,33 @@ uint8_t PPU::select_blank_pixel() const {
 }
 
 //------------------------------------------------------------------------------
+// Name: select_bg_pixel
+// Note: the screen is *always* enabled when this is called
+//------------------------------------------------------------------------------
+uint8_t PPU::select_bg_pixel(uint8_t index) {
+
+	assert(screen_enabled());
+
+	// first identify what the BG pixel would be
+	if((background_clipping() || index >= 8) && background_visible()) {
+		switch(tile_offset_) {
+		case 0: return ((pattern_queue_[0] & 0x8000) >> 0x0f) | ((pattern_queue_[1] & 0x8000) >> 0x0e) | ((attribute_queue_[0] & 0x8000) >> 0x0d) | ((attribute_queue_[1] & 0x8000) >> 0x0c); break;
+		case 1: return ((pattern_queue_[0] & 0x4000) >> 0x0e) | ((pattern_queue_[1] & 0x4000) >> 0x0d) | ((attribute_queue_[0] & 0x4000) >> 0x0c) | ((attribute_queue_[1] & 0x4000) >> 0x0b); break;
+		case 2: return ((pattern_queue_[0] & 0x2000) >> 0x0d) | ((pattern_queue_[1] & 0x2000) >> 0x0c) | ((attribute_queue_[0] & 0x2000) >> 0x0b) | ((attribute_queue_[1] & 0x2000) >> 0x0a); break;
+		case 3: return ((pattern_queue_[0] & 0x1000) >> 0x0c) | ((pattern_queue_[1] & 0x1000) >> 0x0b) | ((attribute_queue_[0] & 0x1000) >> 0x0a) | ((attribute_queue_[1] & 0x1000) >> 0x09); break;
+		case 4: return ((pattern_queue_[0] & 0x0800) >> 0x0b) | ((pattern_queue_[1] & 0x0800) >> 0x0a) | ((attribute_queue_[0] & 0x0800) >> 0x09) | ((attribute_queue_[1] & 0x0800) >> 0x08); break;
+		case 5: return ((pattern_queue_[0] & 0x0400) >> 0x0a) | ((pattern_queue_[1] & 0x0400) >> 0x09) | ((attribute_queue_[0] & 0x0400) >> 0x08) | ((attribute_queue_[1] & 0x0400) >> 0x07); break;
+		case 6: return ((pattern_queue_[0] & 0x0200) >> 0x09) | ((pattern_queue_[1] & 0x0200) >> 0x08) | ((attribute_queue_[0] & 0x0200) >> 0x07) | ((attribute_queue_[1] & 0x0200) >> 0x06); break;
+		case 7: return ((pattern_queue_[0] & 0x0100) >> 0x08) | ((pattern_queue_[1] & 0x0100) >> 0x07) | ((attribute_queue_[0] & 0x0100) >> 0x06) | ((attribute_queue_[1] & 0x0100) >> 0x05); break;
+		default:
+			abort();
+		}
+	} else {
+		return 0x00;
+	}
+}
+
+//------------------------------------------------------------------------------
 // Name: select_pixel
 // Note: the screen is *always* enabled when this is called
 //------------------------------------------------------------------------------
@@ -869,29 +896,15 @@ uint8_t PPU::select_pixel(uint8_t index) {
 
 	assert(screen_enabled());
 
-	uint8_t pixel;
-
-	// first identify what the BG pixel would be
-	if((background_clipping() || index >= 8) && background_visible()) {
-		switch(tile_offset_) {
-		case 0: pixel = ((pattern_queue_[0] & 0x8000) >> 0x0f) | ((pattern_queue_[1] & 0x8000) >> 0x0e) | ((attribute_queue_[0] & 0x8000) >> 0x0d) | ((attribute_queue_[1] & 0x8000) >> 0x0c); break;
-		case 1: pixel = ((pattern_queue_[0] & 0x4000) >> 0x0e) | ((pattern_queue_[1] & 0x4000) >> 0x0d) | ((attribute_queue_[0] & 0x4000) >> 0x0c) | ((attribute_queue_[1] & 0x4000) >> 0x0b); break;
-		case 2: pixel = ((pattern_queue_[0] & 0x2000) >> 0x0d) | ((pattern_queue_[1] & 0x2000) >> 0x0c) | ((attribute_queue_[0] & 0x2000) >> 0x0b) | ((attribute_queue_[1] & 0x2000) >> 0x0a); break;
-		case 3: pixel = ((pattern_queue_[0] & 0x1000) >> 0x0c) | ((pattern_queue_[1] & 0x1000) >> 0x0b) | ((attribute_queue_[0] & 0x1000) >> 0x0a) | ((attribute_queue_[1] & 0x1000) >> 0x09); break;
-		case 4: pixel = ((pattern_queue_[0] & 0x0800) >> 0x0b) | ((pattern_queue_[1] & 0x0800) >> 0x0a) | ((attribute_queue_[0] & 0x0800) >> 0x09) | ((attribute_queue_[1] & 0x0800) >> 0x08); break;
-		case 5: pixel = ((pattern_queue_[0] & 0x0400) >> 0x0a) | ((pattern_queue_[1] & 0x0400) >> 0x09) | ((attribute_queue_[0] & 0x0400) >> 0x08) | ((attribute_queue_[1] & 0x0400) >> 0x07); break;
-		case 6: pixel = ((pattern_queue_[0] & 0x0200) >> 0x09) | ((pattern_queue_[1] & 0x0200) >> 0x08) | ((attribute_queue_[0] & 0x0200) >> 0x07) | ((attribute_queue_[1] & 0x0200) >> 0x06); break;
-		case 7: pixel = ((pattern_queue_[0] & 0x0100) >> 0x08) | ((pattern_queue_[1] & 0x0100) >> 0x07) | ((attribute_queue_[0] & 0x0100) >> 0x06) | ((attribute_queue_[1] & 0x0100) >> 0x05); break;
-		default:
-			abort();
-		}
-	} else {
-		pixel = 0x00;
-	}
+	uint8_t pixel = select_bg_pixel(index);
 
 	// then see if any of the sprites belong..
 	if((sprite_clipping() || index >= 8) && sprites_visible()) {
-		for(const SpriteEntry *p = sprite_data_; p != &sprite_data_[sprite_data_index_]; ++p) {
+	
+		const SpriteEntry *const first = sprite_data_;
+		const SpriteEntry *const last  = &sprite_data_[sprite_data_index_];
+	
+		for(const SpriteEntry *p = first; p != last; ++p) {
 			const uint16_t x_offset = index - p->x();
 
 			// is this sprite visible on this pixel?
@@ -901,7 +914,9 @@ uint8_t PPU::select_pixel(uint8_t index) {
 				const uint8_t p1 = p->pattern[1];
 
 			#if 1
-				const uint8_t sprite_pixel = ((p0 >> (7 - x_offset)) & 0x01) | (((p1 >> (7 - x_offset)) & 0x01) << 0x01);
+				const uint8_t sprite_pixel = 
+						(((p0 >> (7 - x_offset)) & 0x01) << 0x00) | 
+						(((p1 >> (7 - x_offset)) & 0x01) << 0x01);
 			#else
 				switch(x_offset) {
 				case 0: sprite_pixel = ((p0 >> 7) & 0x01) | ((p1 >> 6) & 0x02); break;
@@ -912,8 +927,6 @@ uint8_t PPU::select_pixel(uint8_t index) {
 				case 5: sprite_pixel = ((p0 >> 2) & 0x01) | ((p1 >> 1) & 0x02); break;
 				case 6: sprite_pixel = ((p0 >> 1) & 0x01) | ((p1 >> 0) & 0x02); break;
 				case 7: sprite_pixel = ((p0 >> 0) & 0x01) | ((p1 << 1) & 0x02); break;
-				default:
-					abort();
 				}
 			#endif
 
@@ -1514,8 +1527,11 @@ bool PPU::greyscale() const {
 // Name: sprite_size
 //------------------------------------------------------------------------------
 uint8_t PPU::sprite_size() const {
-	// return (ppu_control_ & 0x20) ? 16 : 8;
+#if 1
 	return ((ppu_control_ & 0x20) >> 2) + 8;
+#else
+	return (ppu_control_ & 0x20) ? 16 : 8;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1523,8 +1539,11 @@ uint8_t PPU::sprite_size() const {
 // Desc: returns 0x0000 or 0x1000 depending on bit 3 of ppu_control_
 //------------------------------------------------------------------------------
 uint16_t PPU::sprite_pattern_table() const {
-	// return (ppu_control_ & 0x08) ? 0x1000 : 0x0000;
+#if 1
 	return (ppu_control_ & 0x08) << 9;
+#else
+	return (ppu_control_ & 0x08) ? 0x1000 : 0x0000;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1532,13 +1551,16 @@ uint16_t PPU::sprite_pattern_table() const {
 // Desc: returns 0x0000 or 0x1000 depending on bit 4 of ppu_control_
 //------------------------------------------------------------------------------
 uint16_t PPU::background_pattern_table() const {
-	// return (ppu_control_ & 0x10) ? 0x1000 : 0x0000;
+#if 1
 	return (ppu_control_ & 0x10) << 8;
+#else
+	return (ppu_control_ & 0x10) ? 0x1000 : 0x0000;
+#endif
 }
 
 //------------------------------------------------------------------------------
 // Name: vertical_address_increment
 //------------------------------------------------------------------------------
 bool PPU::vertical_address_increment() const {
-	return (ppu_control_ & 0x04);
+	return ppu_control_ & 0x04;
 }
