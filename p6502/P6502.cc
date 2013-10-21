@@ -186,7 +186,7 @@ inline void set_flag_condition(bool cond) {
 // Name: update_nz_flags
 // Desc: sets the Negative and Zero flags based on the value given
 //------------------------------------------------------------------------------
-inline void update_nz_flags(uint8_t value) {
+void update_nz_flags(uint8_t value) {
 
 	// basically no bits set = 0x02
 	// high bit set = 0x80

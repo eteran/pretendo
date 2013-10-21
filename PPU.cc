@@ -1133,10 +1133,7 @@ void PPU::update_shift_registers_idle() {
 	attribute_queue_[0] <<= 8;
 	attribute_queue_[1] <<= 8;
 
-	pattern_queue_[0]   |= (next_pattern_[0] & 0x00ff);
-	pattern_queue_[1]   |= (next_pattern_[1] & 0x00ff);
-	attribute_queue_[0] |= (((next_attribute_ >> 0) & 0x01) * 0xff); // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
-	attribute_queue_[1] |= (((next_attribute_ >> 1) & 0x01) * 0xff); // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+	update_shift_registers_render();
 }
 
 //------------------------------------------------------------------------------

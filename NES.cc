@@ -23,7 +23,7 @@ Config nes::config;
  * 1 PPU      cycle =  5 "master cycles"
  *
  * using such a system would allow there to be a single absolute
- * timestamp system which would be possibly be very beneficial
+ * timestamp system which would possibly be very beneficial
  */
 
 namespace {
