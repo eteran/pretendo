@@ -533,7 +533,7 @@ void make_unif_file_from_nes(const char *unif_file, const char *ines_file) {
 	mirroring = mirroring_INES(&cart);
 
 	printf("source filename     - %s\n", ines_file);
-	printf("iNES mapper #       - %d.%d\n", mapper_INES(&cart), submapper_INES(&cart));
+	printf("iNES mapper #       - %u.%u\n", mapper_INES(&cart), submapper_INES(&cart));
 
 
 	switch(mirroring) {
@@ -550,8 +550,8 @@ void make_unif_file_from_nes(const char *unif_file, const char *ines_file) {
 
 	printf("sram enabled        - %d\n", (cart.header->ctrl1 & INES_SRAM) != 0);
 	printf("trainer present     - %d\n", (cart.header->ctrl1 & INES_TRAINER) != 0);
-	printf("# of 16k PRG Pages  - %d\n", prg_size_INES(&cart));
-	printf("# of 8k CHR Pages   - %d\n", chr_size_INES(&cart));
+	printf("# of 16k PRG Pages  - %u\n", prg_size_INES(&cart));
+	printf("# of 8k CHR Pages   - %u\n", chr_size_INES(&cart));
 	recommend_board(&cart);
 
 	open_UNIF(unif_file, &file_dest, UNIF_OPEN_WRITE);

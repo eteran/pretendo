@@ -119,6 +119,7 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 Pretendo::~Pretendo() {
 	on_action_Stop_triggered();
 	on_action_Free_ROM_triggered();
+	delete audio_;
 }
 
 //------------------------------------------------------------------------------
