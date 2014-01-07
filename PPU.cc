@@ -872,14 +872,14 @@ uint8_t PPU::select_bg_pixel(uint8_t index) {
 	// first identify what the BG pixel would be
 	if((background_clipping() || index >= 8) && background_visible()) {
 		switch(tile_offset_) {
-		case 0: return ((pattern_queue_[0] & 0x8000) >> 0x0f) | ((pattern_queue_[1] & 0x8000) >> 0x0e) | ((attribute_queue_[0] & 0x8000) >> 0x0d) | ((attribute_queue_[1] & 0x8000) >> 0x0c); break;
-		case 1: return ((pattern_queue_[0] & 0x4000) >> 0x0e) | ((pattern_queue_[1] & 0x4000) >> 0x0d) | ((attribute_queue_[0] & 0x4000) >> 0x0c) | ((attribute_queue_[1] & 0x4000) >> 0x0b); break;
-		case 2: return ((pattern_queue_[0] & 0x2000) >> 0x0d) | ((pattern_queue_[1] & 0x2000) >> 0x0c) | ((attribute_queue_[0] & 0x2000) >> 0x0b) | ((attribute_queue_[1] & 0x2000) >> 0x0a); break;
-		case 3: return ((pattern_queue_[0] & 0x1000) >> 0x0c) | ((pattern_queue_[1] & 0x1000) >> 0x0b) | ((attribute_queue_[0] & 0x1000) >> 0x0a) | ((attribute_queue_[1] & 0x1000) >> 0x09); break;
-		case 4: return ((pattern_queue_[0] & 0x0800) >> 0x0b) | ((pattern_queue_[1] & 0x0800) >> 0x0a) | ((attribute_queue_[0] & 0x0800) >> 0x09) | ((attribute_queue_[1] & 0x0800) >> 0x08); break;
-		case 5: return ((pattern_queue_[0] & 0x0400) >> 0x0a) | ((pattern_queue_[1] & 0x0400) >> 0x09) | ((attribute_queue_[0] & 0x0400) >> 0x08) | ((attribute_queue_[1] & 0x0400) >> 0x07); break;
-		case 6: return ((pattern_queue_[0] & 0x0200) >> 0x09) | ((pattern_queue_[1] & 0x0200) >> 0x08) | ((attribute_queue_[0] & 0x0200) >> 0x07) | ((attribute_queue_[1] & 0x0200) >> 0x06); break;
-		case 7: return ((pattern_queue_[0] & 0x0100) >> 0x08) | ((pattern_queue_[1] & 0x0100) >> 0x07) | ((attribute_queue_[0] & 0x0100) >> 0x06) | ((attribute_queue_[1] & 0x0100) >> 0x05); break;
+		case 0: return ((pattern_queue_[0] & 0x8000) >> 0x0f) | ((pattern_queue_[1] & 0x8000) >> 0x0e) | ((attribute_queue_[0] & 0x8000) >> 0x0d) | ((attribute_queue_[1] & 0x8000) >> 0x0c);
+		case 1: return ((pattern_queue_[0] & 0x4000) >> 0x0e) | ((pattern_queue_[1] & 0x4000) >> 0x0d) | ((attribute_queue_[0] & 0x4000) >> 0x0c) | ((attribute_queue_[1] & 0x4000) >> 0x0b);
+		case 2: return ((pattern_queue_[0] & 0x2000) >> 0x0d) | ((pattern_queue_[1] & 0x2000) >> 0x0c) | ((attribute_queue_[0] & 0x2000) >> 0x0b) | ((attribute_queue_[1] & 0x2000) >> 0x0a);
+		case 3: return ((pattern_queue_[0] & 0x1000) >> 0x0c) | ((pattern_queue_[1] & 0x1000) >> 0x0b) | ((attribute_queue_[0] & 0x1000) >> 0x0a) | ((attribute_queue_[1] & 0x1000) >> 0x09);
+		case 4: return ((pattern_queue_[0] & 0x0800) >> 0x0b) | ((pattern_queue_[1] & 0x0800) >> 0x0a) | ((attribute_queue_[0] & 0x0800) >> 0x09) | ((attribute_queue_[1] & 0x0800) >> 0x08);
+		case 5: return ((pattern_queue_[0] & 0x0400) >> 0x0a) | ((pattern_queue_[1] & 0x0400) >> 0x09) | ((attribute_queue_[0] & 0x0400) >> 0x08) | ((attribute_queue_[1] & 0x0400) >> 0x07);
+		case 6: return ((pattern_queue_[0] & 0x0200) >> 0x09) | ((pattern_queue_[1] & 0x0200) >> 0x08) | ((attribute_queue_[0] & 0x0200) >> 0x07) | ((attribute_queue_[1] & 0x0200) >> 0x06);
+		case 7: return ((pattern_queue_[0] & 0x0100) >> 0x08) | ((pattern_queue_[1] & 0x0100) >> 0x07) | ((attribute_queue_[0] & 0x0100) >> 0x06) | ((attribute_queue_[1] & 0x0100) >> 0x05);
 		default:
 			abort();
 		}

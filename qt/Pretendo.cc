@@ -260,6 +260,10 @@ void Pretendo::on_action_Pause_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::keyPressEvent(QKeyEvent *event) {
 
+	if(event->isAutoRepeat()) {
+		return;	
+	}
+
 	const int key = event->key();
 	
 	if(key == player_1_[Controller::INDEX_A]) {
@@ -289,6 +293,10 @@ void Pretendo::keyPressEvent(QKeyEvent *event) {
 void Pretendo::keyReleaseEvent(QKeyEvent *event) {
 
 	const int key = event->key();
+	
+	if(event->isAutoRepeat()) {
+		return;	
+	}
 	
 	if(key == player_1_[Controller::INDEX_A]) {
 		nes::input.controller1().keystate_[Controller::INDEX_A] = false;
