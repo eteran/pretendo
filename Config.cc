@@ -188,11 +188,11 @@ bool Config::Save() {
 		return false;
 	}
 
-	for(std::map<std::string, section_type>::iterator ci = sections_.begin(); ci != sections_.end(); ++ci) {
+	for(auto ci = sections_.begin(); ci != sections_.end(); ++ci) {
 
 		file << "\n[" << ci->first << "]" << std::endl;
 
-		for(section_type::const_iterator ki = sections_[ci->first].begin(); ki != sections_[ci->first].end(); ++ki) {
+		for(auto ki = sections_[ci->first].begin(); ki != sections_[ci->first].end(); ++ki) {
 			if(ki->first.empty() || ki->second.empty()) {
 				continue;
 			}
@@ -208,7 +208,7 @@ bool Config::Save() {
 bool Config::DeleteSection(const std::string &section) {
 
 	std::cout << "DeleteSection -> " << section << std::endl;
-	std::map<std::string, section_type>::iterator it = sections_.find(section);
+	auto it = sections_.find(section);
 
 	if(it == sections_.end()) {
 		return false;
@@ -226,7 +226,7 @@ bool Config::NewSection(const std::string &section) {
 		return false;
 	}
 	
-	std::pair<std::map<std::string, section_type>::iterator, bool> it = sections_.insert(std::make_pair(section, section_type()));
+	auto it = sections_.insert(std::make_pair(section, section_type()));
 
 	if(!it.second) {
 		std::cout << "Section: " << section << " already in list." << std::endl;
@@ -248,7 +248,7 @@ bool Config::NewKey(const std::string &section, const std::pair<std::string, std
 
 	std::cout << "NewKey -> adding: " << key.first << ", " << key.second << std::endl;
 	
-	std::pair<section_type::iterator, bool> it = sections_[section].insert(key);
+	auto it = sections_[section].insert(key);
 	if(!it.second) {
 		std::cout << "key " << key.first << " already exists." << std::endl;
 	}
@@ -261,7 +261,7 @@ bool Config::DeleteKey(const std::string &section, const std::string &keyName) {
 		return false;
 	}
 
-	for(section_type::iterator it = sections_[section].begin(); it != sections_[section].end(); ++it){
+	for(auto it = sections_[section].begin(); it != sections_[section].end(); ++it){
 		if(it->first == keyName) {
 			std::cout << "DeleteKey -> " << keyName << std::endl;
 			sections_[section].erase(it);

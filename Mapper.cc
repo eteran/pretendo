@@ -54,7 +54,7 @@ boost::shared_ptr<Mapper> Mapper::create_mapper(int num) {
 	create_ptr f = 0;;
 
 	const std::map<int, create_ptr> &mappers = registered_mappers_ines();
-	std::map<int, create_ptr>::const_iterator it = mappers.find(num);
+	auto it = mappers.find(num);
 	if(it != mappers.end() && (f = it->second) != 0) {
 		ret = (*f)();
 	} else {

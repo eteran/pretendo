@@ -38,7 +38,7 @@ public:
 			return false;
 		}
 				
-		std::map<std::string, section_type>::const_iterator it = sections_.find(section);
+		auto it = sections_.find(section);
 
 		if(it == sections_.end()) {
 			std::cout << "cant find section" << std::endl;
@@ -46,7 +46,7 @@ public:
 		}
 
 		const section_type &kvm = it->second;
-		for(section_type::const_iterator kvi = kvm.begin(); kvi != kvm.end(); ++kvi) {
+		for(auto kvi = kvm.begin(); kvi != kvm.end(); ++kvi) {
 			std::cout << key << ", " << kvi->first << std::endl;
 
 			if(key == kvi->first) {
@@ -65,7 +65,7 @@ public:
 			return false;
 		}
 		
-		std::map<std::string, section_type>::iterator it = sections_.find(section);
+		auto it = sections_.find(section);
 
 		if(it == sections_.end()) {
 			return false;
@@ -79,7 +79,7 @@ public:
 		}
 
 		section_type &kvm = it->second;
-		for(section_type::iterator kvi = kvm.begin(); kvi != kvm.end(); ++kvi) {
+		for(auto kvi = kvm.begin(); kvi != kvm.end(); ++kvi) {
 			std::cout << key << ", " << kvi->first << std::endl;
 			if(key == kvi->first) {
 				kvi->second = oss.str();
