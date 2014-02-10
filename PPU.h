@@ -91,10 +91,10 @@ public:
 public:
 	uint8_t color_intensity() const;
 	void end_frame();
-	void execute_scanline(const scanline_vblank &target);
-	void execute_scanline(const scanline_prerender &target);
-	void execute_scanline(const scanline_postrender &target);
-	void execute_scanline(const scanline_render &target);
+	
+	template <class T>
+	void execute_scanline(const T &target);
+
 	void set_mirroring(uint8_t mir);
 	void set_vram_bank(uint8_t bank, uint8_t *p, bool writeable);
 	void start_frame();
@@ -172,6 +172,7 @@ private:
 	VRAMBank     vram_banks_[0x10];
 	uint8_t      sprite_ram_[0x100];
 	SpriteEntry  sprite_data_[8];
+	uint8_t      left_most_sprite_x_;
 	uint8_t      palette_[0x20];
 	uint64_t     ppu_cycle_;
 	uint64_t     ppu_read_2002_cycle_;

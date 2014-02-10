@@ -8,6 +8,11 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 	CONFIG += c++11
 }
 
+lessThan(QT_MAJOR_VERSION, 5) {
+	QMAKE_CFLAGS   += -std=c++0x
+	QMAKE_CXXFLAGS += -std=c++0x
+}
+
 INCLUDEPATH += qt
 
 HEADERS += \
@@ -260,7 +265,6 @@ bender {
 		p6502/memory.h \
 		p6502/opcodes.h \
 		p6502/address_modes.h \
-		p6502/opcodes/brk.h \
 		p6502/opcodes/tsx.h \
 		p6502/opcodes/lsr.h \
 		p6502/opcodes/ldx.h \
@@ -387,25 +391,21 @@ win32-* {
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
 	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall
 
-	QMAKE_CFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3 -Wno-long-long
-	QMAKE_CXXFLAGS_RELEASE += -pedantic -march=native -g3 -W -Wall -O3 -Wno-long-long
-	QMAKE_LFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3 -Wno-long-long
+	QMAKE_CFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3
+	QMAKE_CXXFLAGS_RELEASE += -pedantic -march=native -g3 -W -Wall -O3
+	QMAKE_LFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3
 }
 
 *-g++*:lto {
-#	QMAKE_CC   = gcc-4.8.1
-#	QMAKE_CXX  = g++-4.8.1 -std=c++11
-#	QMAKE_LINK = g++-4.8.1 -std=c++11
-	
 	QMAKE_CFLAGS_RELEASE   += -flto
-	QMAKE_CXXFLAGS_RELEASE += -flto -std=c++0x
-	QMAKE_LFLAGS_RELEASE   += -flto -std=c++0x
+	QMAKE_CXXFLAGS_RELEASE += -flto
+	QMAKE_LFLAGS_RELEASE   += -flto
 }
 
 *-g++*:profile {
-	QMAKE_CFLAGS_RELEASE   += -pg
-	QMAKE_CXXFLAGS_RELEASE += -pg
-	QMAKE_LFLAGS_RELEASE   += -pg
+	QMAKE_CFLAGS_RELEASE   += -pg -O0
+	QMAKE_CXXFLAGS_RELEASE += -pg -O0
+	QMAKE_LFLAGS_RELEASE   += -pg -O0
 }
 
 CONFIG(debug, debug|release) {

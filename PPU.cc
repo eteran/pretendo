@@ -157,6 +157,7 @@ uint8_t PPU::SpriteEntry::x() const {
 // Name: PPU
 //------------------------------------------------------------------------------
 PPU::PPU() :
+	left_most_sprite_x_(0xff),
 	ppu_cycle_(0),
 	ppu_read_2002_cycle_(0),
 	next_ppu_fetch_address_(0),
@@ -236,6 +237,7 @@ void PPU::reset(nes::RESET reset_type) {
 	sprite_address_         = 0;
 	sprite_buffer_          = 0xff;
 	sprite_data_index_      = 0;
+	left_most_sprite_x_     = 0xff;
 	sprite_zero_found_curr_ = false;
 	sprite_zero_found_next_ = false;
 	status_                 = 0;
@@ -787,6 +789,8 @@ void PPU::evaluate_sprites() {
 						sprite_data_[sprite_data_index_].sprite_bytes[2] |= SPRITE_ZERO;
 						sprite_zero_found_next_ = true;
 					}
+					
+					left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_data_[sprite_data_index_].sprite_bytes[3]);
 
 					++sprite_data_index_;
 				}
@@ -897,59 +901,64 @@ uint8_t PPU::select_pixel(uint8_t index) {
 	assert(screen_enabled());
 
 	uint8_t pixel = select_bg_pixel(index);
-
-	// then see if any of the sprites belong..
-	if((sprite_clipping() || index >= 8) && sprites_visible()) {
 	
-		const SpriteEntry *const first = sprite_data_;
-		const SpriteEntry *const last  = &sprite_data_[sprite_data_index_];
+	// are ANY sprites possibly in range?
+	if(left_most_sprite_x_ < index) {
+
+		// then see if any of the sprites belong..
+		if((sprite_clipping() || index >= 8) && sprites_visible()) {
+		
+			const SpriteEntry *const first = sprite_data_;
+			const SpriteEntry *const last  = &sprite_data_[sprite_data_index_];
 	
-		for(const SpriteEntry *p = first; p != last; ++p) {
-			const uint16_t x_offset = index - p->x();
 
-			// is this sprite visible on this pixel?
-			if(x_offset < 8) {
+			for(const SpriteEntry *p = first; p != last; ++p) {
+				const uint16_t x_offset = index - p->x();
 
-				const uint8_t p0 = p->pattern[0];
-				const uint8_t p1 = p->pattern[1];
+				// is this sprite visible on this pixel?
+				if(x_offset < 8) {
 
-			#if 1
-				const uint8_t sprite_pixel = 
-						(((p0 >> (7 - x_offset)) & 0x01) << 0x00) | 
-						(((p1 >> (7 - x_offset)) & 0x01) << 0x01);
-			#else
-				switch(x_offset) {
-				case 0: sprite_pixel = ((p0 >> 7) & 0x01) | ((p1 >> 6) & 0x02); break;
-				case 1: sprite_pixel = ((p0 >> 6) & 0x01) | ((p1 >> 5) & 0x02); break;
-				case 2: sprite_pixel = ((p0 >> 5) & 0x01) | ((p1 >> 4) & 0x02); break;
-				case 3: sprite_pixel = ((p0 >> 4) & 0x01) | ((p1 >> 3) & 0x02); break;
-				case 4: sprite_pixel = ((p0 >> 3) & 0x01) | ((p1 >> 2) & 0x02); break;
-				case 5: sprite_pixel = ((p0 >> 2) & 0x01) | ((p1 >> 1) & 0x02); break;
-				case 6: sprite_pixel = ((p0 >> 1) & 0x01) | ((p1 >> 0) & 0x02); break;
-				case 7: sprite_pixel = ((p0 >> 0) & 0x01) | ((p1 << 1) & 0x02); break;
-				}
-			#endif
+					const uint8_t p0 = p->pattern[0];
+					const uint8_t p1 = p->pattern[1];
 
-				// this pixel is visible..
-				if(sprite_pixel & 0x03) {
-					// we rendered a sprite0 pixel which collided with a BG pixel
-					// NOTE: according to blargg's tests, a collision doesn't seem
-					//       possible to occur on the rightmost pixel
-				#ifndef SPRITE_ZERO_HACK
-					if(p->is_sprite_zero() && (pixel & 0x03) && (index < 255)) {
+				#if 1
+					const uint8_t sprite_pixel = 
+							(((p0 >> (7 - x_offset)) & 0x01) << 0x00) | 
+							(((p1 >> (7 - x_offset)) & 0x01) << 0x01);
 				#else
-					if(p->is_sprite_zero() && (index < 255)) {
+					switch(x_offset) {
+					case 0: sprite_pixel = ((p0 >> 7) & 0x01) | ((p1 >> 6) & 0x02); break;
+					case 1: sprite_pixel = ((p0 >> 6) & 0x01) | ((p1 >> 5) & 0x02); break;
+					case 2: sprite_pixel = ((p0 >> 5) & 0x01) | ((p1 >> 4) & 0x02); break;
+					case 3: sprite_pixel = ((p0 >> 4) & 0x01) | ((p1 >> 3) & 0x02); break;
+					case 4: sprite_pixel = ((p0 >> 3) & 0x01) | ((p1 >> 2) & 0x02); break;
+					case 5: sprite_pixel = ((p0 >> 2) & 0x01) | ((p1 >> 1) & 0x02); break;
+					case 6: sprite_pixel = ((p0 >> 1) & 0x01) | ((p1 >> 0) & 0x02); break;
+					case 7: sprite_pixel = ((p0 >> 0) & 0x01) | ((p1 << 1) & 0x02); break;
+					}
 				#endif
-						status_ |= STATUS_SPRITE0;
-						sprite_zero_found_curr_ = false;
-					}
 
-					if((!p->is_background() || ((pixel & 0x03) == 0x00)) && show_sprites_) {
-						pixel = 0x10 | sprite_pixel | (p->palette() << 2);
-					}
+					// this pixel is visible..
+					if(sprite_pixel & 0x03) {
+						// we rendered a sprite0 pixel which collided with a BG pixel
+						// NOTE: according to blargg's tests, a collision doesn't seem
+						//       possible to occur on the rightmost pixel
+					#ifndef SPRITE_ZERO_HACK
+						if(p->is_sprite_zero() && (pixel & 0x03) && (index < 255)) {
+					#else
+						if(p->is_sprite_zero() && (index < 255)) {
+					#endif
+							status_ |= STATUS_SPRITE0;
+							sprite_zero_found_curr_ = false;
+						}
 
-					// don't process any more sprites
-					break;
+						if((!p->is_background() || ((pixel & 0x03) == 0x00)) && show_sprites_) {
+							pixel = 0x10 | sprite_pixel | (p->palette() << 2);
+						}
+
+						// don't process any more sprites
+						break;
+					}
 				}
 			}
 		}
@@ -1384,86 +1393,6 @@ void PPU::execute_cycle(const scanline_vblank &target) {
 }
 
 //------------------------------------------------------------------------------
-// Name: execute_scanline
-//------------------------------------------------------------------------------
-void PPU::execute_scanline(const scanline_vblank &target) {
-
-	// NOTE: MMC3 isn't quite right in "FAST_CPU" mode
-	// (but likely good enough for most games)
-	// this is because when executing many cycles at a time
-	// the CPU can cause writes which manually toggle A12
-	// BUT, the PPU cycle count isn't incremented in step
-	// so the MMC3 filtering based on PPU cycles doesn't
-	// see the manual toggles :-/
-
-	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-		execute_cycle(target);
-		cycles += clock_cpu();
-	}
-
-#ifdef FAST_CPU
-	nes::cpu.exec(cycles);
-	nes::cart.mapper()->hsync();
-#endif
-	++vpos_;
-}
-
-//------------------------------------------------------------------------------
-// Name: execute_scanline
-//------------------------------------------------------------------------------
-void PPU::execute_scanline(const scanline_postrender &target) {
-
-	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-		execute_cycle(target);
-		cycles += clock_cpu();
-	}
-
-#ifdef FAST_CPU
-	nes::cpu.exec(cycles);
-	nes::cart.mapper()->hsync();
-#endif
-	++vpos_;
-}
-
-//------------------------------------------------------------------------------
-// Name: execute_scanline
-//------------------------------------------------------------------------------
-void PPU::execute_scanline(const scanline_prerender &target) {
-
-	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-		execute_cycle(target);
-		cycles += clock_cpu();
-	}
-
-#ifdef FAST_CPU
-	nes::cpu.exec(cycles);
-	nes::cart.mapper()->hsync();
-#endif
-	++vpos_;
-}
-
-//------------------------------------------------------------------------------
-// Name: execute_scanline
-//------------------------------------------------------------------------------
-void PPU::execute_scanline(const scanline_render &target) {
-
-	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-		execute_cycle(target);
-		cycles += clock_cpu();
-	}
-
-#ifdef FAST_CPU
-	nes::cpu.exec(cycles);
-	nes::cart.mapper()->hsync();
-#endif
-	++vpos_;
-}
-
-//------------------------------------------------------------------------------
 // Name: clock_cpu
 // Desc: optionally executes a CPU cycle returns the number of CPU cycles
 //       executed
@@ -1561,3 +1490,41 @@ uint16_t PPU::background_pattern_table() const {
 bool PPU::vertical_address_increment() const {
 	return ppu_control_ & 0x04;
 }
+
+//------------------------------------------------------------------------------
+// Name: execute_scanline
+//------------------------------------------------------------------------------
+template <class T>
+void PPU::execute_scanline(const T &target) {
+	// NOTE: MMC3 isn't quite right in "FAST_CPU" mode
+	// (but likely good enough for most games)
+	// this is because when executing many cycles at a time
+	// the CPU can cause writes which manually toggle A12
+	// BUT, the PPU cycle count isn't incremented in step
+	// so the MMC3 filtering based on PPU cycles doesn't
+	// see the manual toggles :-/
+
+#ifdef FAST_CPU
+	int cycles = 0;
+	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
+		execute_cycle(target);
+		cycles += clock_cpu();
+	}
+
+	nes::cpu.exec(cycles);
+	nes::cart.mapper()->hsync();
+#else
+	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
+		execute_cycle(target);
+		clock_cpu();
+	}
+#endif
+	++vpos_;
+}
+
+// explicitly instantiate the types we use for this function,
+// we don't want to have to put this code in the header
+template void PPU::execute_scanline<scanline_vblank>(const scanline_vblank &target);
+template void PPU::execute_scanline<scanline_prerender>(const scanline_prerender &target);
+template void PPU::execute_scanline<scanline_postrender>(const scanline_postrender &target);
+template void PPU::execute_scanline<scanline_render>(const scanline_render &target);
