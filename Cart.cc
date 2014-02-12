@@ -95,7 +95,7 @@ void Cart::load(const std::string &s) {
 		mapper_ = Mapper::create_mapper(cart_.mapper);
 	} else {
 		std::cout << " ERROR! (" << r << ")" << std::endl;
-		mapper_   = boost::shared_ptr<Mapper>();
+		mapper_   = std::shared_ptr<Mapper>();
 		prg_hash_ = 0;
 		chr_hash_ = 0;
 		rom_hash_ = 0;
@@ -115,7 +115,7 @@ void Cart::unload() {
 // Name: has_chr_rom
 //------------------------------------------------------------------------------
 bool Cart::has_chr_rom() const {
-	return cart_.chr_rom != 0;
+	return cart_.chr_rom;
 }
 
 //------------------------------------------------------------------------------
@@ -156,7 +156,7 @@ Cart::MIRRORING Cart::mirroring() const {
 //------------------------------------------------------------------------------
 // Name: mapper
 //------------------------------------------------------------------------------
-const boost::shared_ptr<Mapper> &Cart::mapper() const {
+const std::shared_ptr<Mapper> &Cart::mapper() const {
 	return mapper_;
 }
 

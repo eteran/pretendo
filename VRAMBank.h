@@ -2,13 +2,14 @@
 #ifndef VRAM_BANK_20110314_H_
 #define VRAM_BANK_20110314_H_
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
+#include <cstddef>
 
-using boost::uint8_t;
+using std::uint8_t;
 
 class VRAMBank {
 public:
-	VRAMBank() : ptr_(0), writeable_(false) {
+	VRAMBank() : ptr_(nullptr), writeable_(false) {
 	}
 
 	VRAMBank(uint8_t *p, bool writeable) : ptr_(p), writeable_(writeable) {
@@ -25,7 +26,7 @@ public:
 
 	uint8_t operator[](size_t n) const { return ptr_[n]; }
 	uint8_t &operator[](size_t n)      { return ptr_[n]; }
-	operator void*() const             { return reinterpret_cast<void *>(ptr_ != 0); }
+	operator void*() const             { return reinterpret_cast<void *>(ptr_ != nullptr); }
 
 public:
 	bool writeable() const   { return writeable_; }

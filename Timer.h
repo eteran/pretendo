@@ -2,11 +2,11 @@
 #ifndef TIMER_20130424_H_
 #define TIMER_20130424_H_
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <boost/noncopyable.hpp>
 
-using boost::uint8_t;
-using boost::uint16_t;
+using std::uint8_t;
+using std::uint16_t;
 
 class Timer : public boost::noncopyable {
 public:

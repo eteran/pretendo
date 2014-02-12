@@ -875,6 +875,15 @@ uint8_t PPU::select_bg_pixel(uint8_t index) {
 
 	// first identify what the BG pixel would be
 	if((background_clipping() || index >= 8) && background_visible()) {
+	#if 1
+		const uint16_t mask  = (0x8000 >> tile_offset_);
+		const uint8_t  shift = (0x0f - tile_offset_);
+		return
+				((pattern_queue_[0]   & mask) >> (shift - 0)) | 
+				((pattern_queue_[1]   & mask) >> (shift - 1)) | 
+				((attribute_queue_[0] & mask) >> (shift - 2)) |
+				((attribute_queue_[1] & mask) >> (shift - 3));
+	#else
 		switch(tile_offset_) {
 		case 0: return ((pattern_queue_[0] & 0x8000) >> 0x0f) | ((pattern_queue_[1] & 0x8000) >> 0x0e) | ((attribute_queue_[0] & 0x8000) >> 0x0d) | ((attribute_queue_[1] & 0x8000) >> 0x0c);
 		case 1: return ((pattern_queue_[0] & 0x4000) >> 0x0e) | ((pattern_queue_[1] & 0x4000) >> 0x0d) | ((attribute_queue_[0] & 0x4000) >> 0x0c) | ((attribute_queue_[1] & 0x4000) >> 0x0b);
@@ -887,6 +896,7 @@ uint8_t PPU::select_bg_pixel(uint8_t index) {
 		default:
 			abort();
 		}
+	#endif
 	} else {
 		return 0x00;
 	}
@@ -903,7 +913,7 @@ uint8_t PPU::select_pixel(uint8_t index) {
 	uint8_t pixel = select_bg_pixel(index);
 	
 	// are ANY sprites possibly in range?
-	if(left_most_sprite_x_ < index) {
+	if(left_most_sprite_x_ <= index) {
 
 		// then see if any of the sprites belong..
 		if((sprite_clipping() || index >= 8) && sprites_visible()) {
@@ -911,7 +921,6 @@ uint8_t PPU::select_pixel(uint8_t index) {
 			const SpriteEntry *const first = sprite_data_;
 			const SpriteEntry *const last  = &sprite_data_[sprite_data_index_];
 	
-
 			for(const SpriteEntry *p = first; p != last; ++p) {
 				const uint16_t x_offset = index - p->x();
 
@@ -1313,20 +1322,13 @@ void PPU::execute_cycle(const scanline_render &target) {
 			case 5: render_pixel(target.buffer); evaluate_sprites_odd();  open_background_pattern<pattern_0>(); break;
 			case 6: render_pixel(target.buffer); evaluate_sprites_even(); read_background_pattern<pattern_0>(); break;
 			case 7: render_pixel(target.buffer); evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
-			case 0: render_pixel(target.buffer); evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+			case 0: render_pixel(target.buffer); evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); if(hpos_ == 256) { clock_y(); } break;
 			}
 
-			if(hpos_ == 256) {
-				clock_y();
-			}
 		} else if(hpos_ < 321) {
 
-			if(hpos_ == 257) {
-				update_x_scroll();
-			}
-
 			switch(hpos_ & 0x07) {
-			case 1: update_sprite_registers(); open_tile_index(); break;           // open the bus for nametable fetch (garbage)
+			case 1: if(hpos_ == 257) { update_x_scroll(); } update_sprite_registers(); open_tile_index(); break;           // open the bus for nametable fetch (garbage)
 			case 2: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
 			case 3: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
 			case 4: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)

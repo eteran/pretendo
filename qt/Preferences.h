@@ -8,7 +8,7 @@
 class Preferences : public QDialog {
 	Q_OBJECT
 public:
-	Preferences(QWidget *parent = 0, Qt::WindowFlags f = 0);
+	Preferences(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 	virtual ~Preferences();
 	
 protected Q_SLOTS:

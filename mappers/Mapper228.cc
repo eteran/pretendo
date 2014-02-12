@@ -21,7 +21,7 @@ Mapper228::Mapper228() {
 
 	prg_chips[0] = nes::cart.prg() + 0x000000;
 	prg_chips[1] = nes::cart.prg() + 0x080000;
-	prg_chips[2] = 0; // TODO: implement open bus effect here...
+	prg_chips[2] = nullptr; // TODO: implement open bus effect here...
 	prg_chips[3] = nes::cart.prg() + 0x100000;
 
 	write_hander(0x8000, 0x00);

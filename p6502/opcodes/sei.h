@@ -9,8 +9,8 @@ struct opcode_sei {
 
 	typedef operation_none memory_access;
 
-	void operator()() const {
-		set_flag<I_MASK>();
+	void operator()(Context &ctx) const {
+		set_flag<I_MASK>(ctx);
 	}
 };
 

@@ -10,12 +10,12 @@ struct opcode_sya {
 
 	typedef operation_write memory_access;
 
-	uint8_t operator()(uint16_t &address) const {
+	uint8_t operator()(Context &ctx, uint16_t &address) const {
 		
 		const uint8_t high_byte = ((address >> 8) & 0xff) + 1;
-		const uint8_t value     = (Y & high_byte);
+		const uint8_t value     = (ctx.Y & high_byte);
 		address = (address & 0x00ff) | (value << 8);
-		return Y & high_byte;
+		return ctx.Y & high_byte;
 	}
 };
 

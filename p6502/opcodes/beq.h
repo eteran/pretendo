@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 struct opcode_beq : branch {
 
-	bool operator()() const {
-		return do_branch(zero_set());
+	bool operator()(Context &ctx) const {
+		return do_branch(ctx, zero_set());
 	}
 };
 

@@ -9,10 +9,10 @@ struct opcode_aac {
 
 	typedef operation_read memory_access;
 
-	void operator()(uint8_t data) const {
-		A &= data;
-		update_nz_flags(A);
-		P = (P & ~C_MASK) | ((P & N_MASK) >> 7);
+	void operator()(Context &ctx, uint8_t data) const {
+		ctx.A &= data;
+		update_nz_flags(ctx, ctx.A);
+		ctx.P = (ctx.P & ~C_MASK) | ((ctx.P & N_MASK) >> 7);
 	}
 };
 

@@ -9,7 +9,6 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 }
 
 lessThan(QT_MAJOR_VERSION, 5) {
-	QMAKE_CFLAGS   += -std=c++0x
 	QMAKE_CXXFLAGS += -std=c++0x
 }
 
@@ -391,7 +390,7 @@ win32-* {
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
 	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall
 
-	QMAKE_CFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3
+	QMAKE_CFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3 
 	QMAKE_CXXFLAGS_RELEASE += -pedantic -march=native -g3 -W -Wall -O3
 	QMAKE_LFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3
 }

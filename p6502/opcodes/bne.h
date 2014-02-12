@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 struct opcode_bne : branch {
 
-	bool operator()() const {
-		return do_branch(zero_clear());
+	bool operator()(Context &ctx) const {
+		return do_branch(ctx, zero_clear());
 	}
 };
 

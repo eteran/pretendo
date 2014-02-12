@@ -9,8 +9,8 @@ struct opcode_dey {
 
 	typedef operation_none memory_access;
 
-	void operator()() const {
-		update_nz_flags(--Y);
+	void operator()(Context &ctx) const {
+		update_nz_flags(ctx, --ctx.Y);
 	}
 };
 

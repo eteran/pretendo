@@ -9,18 +9,6 @@
 
 namespace {
 
-struct palette_entry {
-	palette_entry(const uint32_t *p) : palette_(p) {
-	}
-
-	uint32_t operator()(uint8_t index) const {
-		return palette_[index];
-	}
-
-private:
-	const uint32_t *const palette_;
-};
-
 const int WIDTH  = 256;
 const int HEIGHT = 240;
 
@@ -88,7 +76,11 @@ void QtVideo::initializeGL() {
 //------------------------------------------------------------------------------
 void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source) {
 	uint32_t *const s = scanlines_[scanline];
-	std::transform(source, source + WIDTH, s, palette_entry(palette_[intensity]));
+	const uint32_t *const palette = palette_[intensity];
+	
+	std::transform(source, source + WIDTH, s, [palette](uint8_t index) {
+		return palette[index];
+	});
 }
 
 //------------------------------------------------------------------------------

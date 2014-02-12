@@ -9,11 +9,11 @@ struct opcode_asr {
 
 	typedef operation_read memory_access;
 
-	void operator()(uint8_t data) const {
-		A &= data;
-		set_flag_condition<C_MASK>(A & 0x01);
-		A >>= 1;
-		update_nz_flags(A);
+	void operator()(Context &ctx, uint8_t data) const {
+		ctx.A &= data;
+		set_flag_condition<C_MASK>(ctx, ctx.A & 0x01);
+		ctx.A >>= 1;
+		update_nz_flags(ctx, ctx.A);
 	}
 };
 

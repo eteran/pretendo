@@ -1,3 +1,4 @@
+
 #ifndef RST_20140417_H_
 #define RST_20140417_H_
 
@@ -5,35 +6,44 @@
 // Name: opcode_rst
 // Desc: Reset
 //------------------------------------------------------------------------------
-struct opcode_rst {
+class opcode_rst {
+public:
+	opcode_rst() {
+	}
+	
+public:
+	void operator()(Context &ctx) {
+		execute(ctx);
+	}
 
-	void operator()(int cycle) {
-		switch(cycle) {
+private:
+	void execute(Context &ctx) {
+		switch(ctx.cycle) {
 		case 1:
-			// read from current PC
-			read_byte(PC);
+			// read from current ctx.PC
+			read_byte(ctx, ctx.PC);
 			break;
 		case 2:
-			// push PCH on stack, decrement S (fake)
-			read_byte(S-- + STACK_ADDRESS);
+			// push PCH on stack, decrement ctx.S (fake)
+			read_byte(ctx, ctx.S-- + STACK_ADDRESS);
 			break;
 		case 3:
-			// push PCL on stack, decrement S (fake)
-			read_byte(S-- + STACK_ADDRESS);
+			// push PCL on stack, decrement ctx.S (fake)
+			read_byte(ctx, ctx.S-- + STACK_ADDRESS);
 			break;
 		case 4:
-			// push P on stack, decrement S (fake)
-			read_byte(S-- + STACK_ADDRESS);		
+			// push ctx.P on stack, decrement ctx.S (fake)
+			read_byte(ctx, ctx.S-- + STACK_ADDRESS);		
 			break;
 		case 5:
-			set_flag<I_MASK>();
+			set_flag<I_MASK>(ctx);
 			// fetch PCL
-			set_pc_lo(read_byte(RST_VECTOR_ADDRESS + 0));
+			set_pc_lo(ctx, read_byte(ctx, RST_VECTOR_ADDRESS + 0));
 			break;
 		case 6:
 			// fetch PCH
 			LAST_CYCLE;
-			set_pc_hi(read_byte(RST_VECTOR_ADDRESS + 1));
+			set_pc_hi(ctx, read_byte(ctx, RST_VECTOR_ADDRESS + 1));
 			OPCODE_COMPLETE;
 		default:
 			abort();

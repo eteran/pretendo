@@ -5,7 +5,7 @@
 #include "libines/load_ines.h"
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class Mapper;
 
@@ -36,7 +36,7 @@ public:
 	uint8_t *prg() const;
 	uint8_t *chr() const;
 	MIRRORING mirroring() const;
-	const boost::shared_ptr<Mapper> &mapper() const;
+	const std::shared_ptr<Mapper> &mapper() const;
 	std::vector<uint8_t> raw_image() const;
 
 private:
@@ -47,7 +47,7 @@ private:
 	uint32_t                  chr_hash_;
 	uint32_t                  rom_hash_;
 	MIRRORING                 mirroring_;
-	boost::shared_ptr<Mapper> mapper_;
+	std::shared_ptr<Mapper> mapper_;
 };
 
 #endif

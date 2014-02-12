@@ -3,17 +3,17 @@
 
 //------------------------------------------------------------------------------
 // Name: opcode_axs
-// Desc: Transfer Accumulator to X
+// Desc: Transfer A to X
 //------------------------------------------------------------------------------
 struct opcode_axs {
 	typedef operation_read memory_access;
 	
-	void operator()(uint8_t data) const {
-		const uint16_t new_x = (X & A) - data;
+	void operator()(Context &ctx, uint8_t data) const {
+		const uint16_t new_x = (ctx.X & ctx.A) - data;
 		const bool carry     = (new_x < 0x100);
-		X = new_x & 0xff;
-		update_nz_flags(X);
-		set_flag_condition<C_MASK>(carry);
+		ctx.X = new_x & 0xff;
+		update_nz_flags(ctx, ctx.X);
+		set_flag_condition<C_MASK>(ctx, carry);
 	}
 };
 

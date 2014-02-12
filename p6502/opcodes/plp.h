@@ -9,8 +9,8 @@ struct opcode_plp {
 
 	typedef operation_stack_read memory_access;
 
-	void operator()(uint8_t data) const {
-		P = ((data & ~B_MASK) | R_MASK);
+	void operator()(Context &ctx, uint8_t data) const {
+		ctx.P = ((data & ~B_MASK) | R_MASK);
 	}
 };
 

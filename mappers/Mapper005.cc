@@ -60,22 +60,22 @@ Mapper5::Mapper5() :
 	bg_chr_banks_[7] = 0;
 
 	// entries will be NULL if ROM
-	prg_ram_banks_[0x00] = 0;
-	prg_ram_banks_[0x01] = 0;
-	prg_ram_banks_[0x02] = 0;
-	prg_ram_banks_[0x03] = 0;
-	prg_ram_banks_[0x04] = 0;
-	prg_ram_banks_[0x05] = 0;
-	prg_ram_banks_[0x06] = 0;
-	prg_ram_banks_[0x07] = 0;
-	prg_ram_banks_[0x08] = 0;
-	prg_ram_banks_[0x09] = 0;
-	prg_ram_banks_[0x0a] = 0;
-	prg_ram_banks_[0x0b] = 0;
-	prg_ram_banks_[0x0c] = 0;
-	prg_ram_banks_[0x0d] = 0;
-	prg_ram_banks_[0x0e] = 0;
-	prg_ram_banks_[0x0f] = 0;
+	prg_ram_banks_[0x00] = nullptr;
+	prg_ram_banks_[0x01] = nullptr;
+	prg_ram_banks_[0x02] = nullptr;
+	prg_ram_banks_[0x03] = nullptr;
+	prg_ram_banks_[0x04] = nullptr;
+	prg_ram_banks_[0x05] = nullptr;
+	prg_ram_banks_[0x06] = nullptr;
+	prg_ram_banks_[0x07] = nullptr;
+	prg_ram_banks_[0x08] = nullptr;
+	prg_ram_banks_[0x09] = nullptr;
+	prg_ram_banks_[0x0a] = nullptr;
+	prg_ram_banks_[0x0b] = nullptr;
+	prg_ram_banks_[0x0c] = nullptr;
+	prg_ram_banks_[0x0d] = nullptr;
+	prg_ram_banks_[0x0e] = nullptr;
+	prg_ram_banks_[0x0f] = nullptr;
 }
 
 //------------------------------------------------------------------------------
@@ -139,8 +139,8 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 		case 0x03:
 			if(value & 0x80) {
 				set_prg_89(value & 0x7f);
-				prg_ram_banks_[0x08] = 0;
-				prg_ram_banks_[0x09] = 0;
+				prg_ram_banks_[0x08] = nullptr;
+				prg_ram_banks_[0x09] = nullptr;
 			} else {
 				prg_ram_banks_[0x08] = prg_ram_[(value >> 2) & 0x01] + (((value & 0x03) * 0x2000) & 0x7fff) + 0x0000;
 				prg_ram_banks_[0x09] = prg_ram_[(value >> 2) & 0x01] + (((value & 0x03) * 0x2000) & 0x7fff) + 0x0000;
@@ -157,10 +157,10 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 		case 0x02:
 			if(value & 0x80) {
 				set_prg_89ab((value & 0x7f) >> 1);
-				prg_ram_banks_[0x08] = 0;
-				prg_ram_banks_[0x09] = 0;
-				prg_ram_banks_[0x0a] = 0;
-				prg_ram_banks_[0x0b] = 0;
+				prg_ram_banks_[0x08] = nullptr;
+				prg_ram_banks_[0x09] = nullptr;
+				prg_ram_banks_[0x0a] = nullptr;
+				prg_ram_banks_[0x0b] = nullptr;
 			} else {
 				prg_ram_banks_[0x08] = prg_ram_[(value >> 2) & 0x01] + (((value & 0x03) * 0x4000) & 0x7fff) + 0x0000;
 				prg_ram_banks_[0x09] = prg_ram_[(value >> 2) & 0x01] + (((value & 0x03) * 0x4000) & 0x7fff) + 0x1000;
@@ -171,8 +171,8 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 		case 0x03:
 			if(value & 0x80) {
 				set_prg_ab(value & 0x7f);
-				prg_ram_banks_[0x0a] = 0;
-				prg_ram_banks_[0x0b] = 0;
+				prg_ram_banks_[0x0a] = nullptr;
+				prg_ram_banks_[0x0b] = nullptr;
 			} else {
 				prg_ram_banks_[0x0a] = prg_ram_[(value >> 2) & 0x01] + (((value & 0x03) * 0x2000) & 0x7fff) + 0x0000;
 				prg_ram_banks_[0x0b] = prg_ram_[(value >> 2) & 0x01] + (((value & 0x03) * 0x2000) & 0x7fff) + 0x0000;
@@ -190,8 +190,8 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 		case 0x03:
 			if(value & 0x80) {
 				set_prg_cd(value & 0x7f);
-				prg_ram_banks_[0x0c] = 0;
-				prg_ram_banks_[0x0d] = 0;
+				prg_ram_banks_[0x0c] = nullptr;
+				prg_ram_banks_[0x0d] = nullptr;
 			} else {
 				prg_ram_banks_[0x0c] = prg_ram_[(value >> 2) & 0x01] + (((value & 0x03) * 0x2000) & 0x7fff) + 0x0000;
 				prg_ram_banks_[0x0d] = prg_ram_[(value >> 2) & 0x01] + (((value & 0x03) * 0x2000) & 0x7fff) + 0x0000;
@@ -205,17 +205,17 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 		switch(prg_mode_) {
 		case 0x00:
 			set_prg_89abcdef((value & 0x7f) >> 2);
-			prg_ram_banks_[0x08] = 0;
-			prg_ram_banks_[0x09] = 0;
-			prg_ram_banks_[0x0a] = 0;
-			prg_ram_banks_[0x0b] = 0;
-			prg_ram_banks_[0x0c] = 0;
-			prg_ram_banks_[0x0d] = 0;
+			prg_ram_banks_[0x08] = nullptr;
+			prg_ram_banks_[0x09] = nullptr;
+			prg_ram_banks_[0x0a] = nullptr;
+			prg_ram_banks_[0x0b] = nullptr;
+			prg_ram_banks_[0x0c] = nullptr;
+			prg_ram_banks_[0x0d] = nullptr;
 			break;
 		case 0x01:
 			set_prg_cdef((value & 0x7f) >> 1);
-			prg_ram_banks_[0x0c] = 0;
-			prg_ram_banks_[0x0d] = 0;
+			prg_ram_banks_[0x0c] = nullptr;
+			prg_ram_banks_[0x0d] = nullptr;
 			break;
 		case 0x02:
 		case 0x03:

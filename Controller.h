@@ -3,10 +3,10 @@
 #define CONTROLLER_20080314_H_
 
 #include "ShiftRegister.h"
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <bitset>
 
-using boost::uint8_t;
+using std::uint8_t;
 
 class Controller {
 public:

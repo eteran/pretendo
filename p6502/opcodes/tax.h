@@ -3,14 +3,14 @@
 
 //------------------------------------------------------------------------------
 // Name: opcode_tax
-// Desc: Transfer Accumulator to X
+// Desc: Transfer A to X
 //------------------------------------------------------------------------------
 struct opcode_tax {
 	typedef operation_none memory_access;
 	
-	void operator()() const {
-		X = A;
-		update_nz_flags(X);
+	void operator()(Context &ctx) const {
+		ctx.X = ctx.A;
+		update_nz_flags(ctx, ctx.X);
 	}
 };
 

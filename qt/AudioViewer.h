@@ -11,7 +11,7 @@ class AudioViewer : public QDialog {
 	Q_OBJECT
 
 public:
-	AudioViewer(QWidget *parent = 0, Qt::WindowFlags f = 0);
+	AudioViewer(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 	virtual ~AudioViewer();
 
 protected Q_SLOTS:

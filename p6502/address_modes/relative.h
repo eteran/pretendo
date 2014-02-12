@@ -2,48 +2,51 @@
 #ifndef RELATIVE_H_
 #define RELATIVE_H_
 
-#define LAST_CYCLE_0                                 \
-do {                                                 \
-	rst_executing = false;                           \
-	irq_executing = false;                           \
-													 \
-	if(rst_asserted) {                               \
-		rst_executing = true;                        \
-	} else if(irq_asserted && ((P & I_MASK) == 0)) { \
-		irq_executing = true;                        \
-	}                                                \
-	rst_asserted = false;                            \
+#define LAST_CYCLE_0                                         \
+do {                                                         \
+	ctx.rst_executing = false;                               \
+	ctx.irq_executing = false;                               \
+													         \
+	if(ctx.rst_asserted) {                                   \
+		ctx.rst_executing = true;                            \
+	} else if(ctx.irq_asserted && ((ctx.P & I_MASK) == 0)) { \
+		ctx.irq_executing = true;                            \
+	}                                                        \
+	ctx.rst_asserted = false;                                \
 } while(0)
 
 
-struct relative {
-
+class relative {
+public:
+	relative() {
+	}
+	
+public:
 	// dispatch to the appropriate version of the address mode
 	template <class Op>
-	void operator()(int cycle, Op op) {
-		execute(cycle, op, typename Op::memory_access());
+	void operator()(Context &ctx, Op op) {
+		execute(ctx, op, typename Op::memory_access());
 	}
 
 private:
-
 	// this addressing mode is annoying because the CPU does
 	// pipelining. This means we can't use the normal "end of opcode"
 	// logic, we need to load up the next instruction and fake the
 	// end of opcode sequence
 
 	template <class Op>
-	void execute(int cycle, Op op, const operation_branch &) {
-		switch(cycle) {
+	void execute(Context &ctx, Op op, const operation_branch &) {
+		switch(ctx.cycle) {
 		case 1:
 			LAST_CYCLE;
-			// fetch operand, increment PC
-			data = read_byte(PC++);
+			// fetch operand, increment ctx.PC
+			data = read_byte(ctx, ctx.PC++);
 			break;
 		case 2:
 			// Fetch opcode of next instruction,
 			// If branch is taken, add operand to PCL.
-			// Otherwise increment PC.
-			new_op = read_byte(PC);
+			// Otherwise increment ctx.PC.
+			new_op = read_byte(ctx, ctx.PC);
 
 			// ------
 			// A taken non-page-crossing branch ignores IRQ during
@@ -53,60 +56,57 @@ private:
 			// ------
 			// Therefore, we DON'T check for IRQ/NMI/RESET here
 
-			if(op()) {
-				old_pc = PC;
-				new_pc = (PC + static_cast<int8_t>(data));
-				set_pc_lo(new_pc & 0xff);
+			if(op(ctx)) {
+				old_pc = ctx.PC;
+				new_pc = (ctx.PC + static_cast<int8_t>(data));
+				set_pc_lo(ctx, new_pc & 0xff);
 			} else {
-				if(rst_executing) {
-					instruction = 0x100;
-				} else if(nmi_executing) {
-					instruction = 0x101;
-				} else if(irq_executing) {
-					instruction = 0x102;
+				if(ctx.rst_executing) {
+					ctx.instruction = 0x100;
+				} else if(ctx.nmi_executing) {
+					ctx.instruction = 0x101;
+				} else if(ctx.irq_executing) {
+					ctx.instruction = 0x102;
 				} else {
-					instruction = new_op; ++PC;
+					ctx.instruction = new_op; ++ctx.PC;
 				}
-				TRACE;
-				current_cycle = 0;
+				ctx.cycle = 0;
 			}
 			break;
 		case 3:
 			// Fetch opcode of next instruction.
-			// Fix PCH. If it did not change, increment PC.
-			new_op = read_byte(PC);
+			// Fix PCH. If it did not change, increment ctx.PC.
+			new_op = read_byte(ctx, ctx.PC);
 
 			if((new_pc & 0xff00) != (old_pc & 0xff00)) {
 				LAST_CYCLE_0;
-				PC = new_pc;
+				ctx.PC = new_pc;
 			} else {
-				if(rst_executing) {
-					instruction = 0x100;
-				} else if(nmi_executing) {
-					instruction = 0x101;
-				} else if(irq_executing) {
-					instruction = 0x102;
+				if(ctx.rst_executing) {
+					ctx.instruction = 0x100;
+				} else if(ctx.nmi_executing) {
+					ctx.instruction = 0x101;
+				} else if(ctx.irq_executing) {
+					ctx.instruction = 0x102;
 				} else {
-					instruction = new_op; ++PC;
+					ctx.instruction = new_op; ++ctx.PC;
 				}
-				TRACE;
-				current_cycle = 0;
+				ctx.cycle = 0;
 			}
 			break;
 		case 4:
-			new_op = read_byte(PC);
+			new_op = read_byte(ctx, ctx.PC);
 
-			if(rst_executing) {
-				instruction = 0x100;
-			} else if(nmi_executing) {
-				instruction = 0x101;
-			} else if(irq_executing) {
-				instruction = 0x102;
+			if(ctx.rst_executing) {
+				ctx.instruction = 0x100;
+			} else if(ctx.nmi_executing) {
+				ctx.instruction = 0x101;
+			} else if(ctx.irq_executing) {
+				ctx.instruction = 0x102;
 			} else {
-				instruction = new_op; ++PC;
+				ctx.instruction = new_op; ++ctx.PC;
 			}
-			TRACE;
-			current_cycle = 0;
+			ctx.cycle = 0;
 			break;
 		default:
 			abort();

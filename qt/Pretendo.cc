@@ -37,7 +37,7 @@ const int timer_interval = 0;
 //------------------------------------------------------------------------------
 // Name: Pretendo
 //------------------------------------------------------------------------------
-Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(0), timer_(0), fps_label_(0), framecount_(0), paused_(false), audio_buffer_(0) {
+Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(nullptr), timer_(nullptr), fps_label_(nullptr), framecount_(0), paused_(false), audio_buffer_(nullptr) {
 	ui_.setupUi(this);
 	
 	// make only one of these selectable at a time
@@ -209,7 +209,7 @@ void Pretendo::on_action_Run_triggered() {
 		if(!timer_->isActive()) {
 
 			// we test mapper, it's a good metric for "did we load the cart correctly"
-			if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
+			if(const std::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 
 				ui_.stackedWidget->setCurrentIndex(1);
 
@@ -246,7 +246,7 @@ void Pretendo::on_action_Pause_triggered() {
 		timer_->stop();
 		audio_->stop();
 	} else if(paused_) {
-		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
+		if(const std::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 			timer_->start();
 			audio_->start();
 		}
@@ -446,7 +446,7 @@ void Pretendo::on_actionAbout_Qt_triggered() {
 // Desc: shows an About dialog box
 //------------------------------------------------------------------------------
 void Pretendo::on_action_About_triggered() {
-	static About *dialog = 0;
+	static About *dialog = nullptr;
 	if(!dialog) {
 		dialog = new About(this);
 		dialog->ui_.build_date->setText(tr("%1").arg(__TIMESTAMP__));
@@ -460,7 +460,7 @@ void Pretendo::on_action_About_triggered() {
 // Desc: 
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Audio_Viewer_triggered() {
-	static AudioViewer *dialog = 0;
+	static AudioViewer *dialog = nullptr;
 	if(!dialog) {
 		dialog = new AudioViewer(this);
 		connect(timer_, SIGNAL(timeout()), dialog, SLOT(update()));

@@ -513,7 +513,7 @@ void
 PretendoWindow::OnRun (void)
 {
 	if (! fRunning) {
-		if(const boost::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
+		if(const std::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 			reset(nes::HARD_RESET);
 			fMutex->Unlock();
 			fRunning = true;

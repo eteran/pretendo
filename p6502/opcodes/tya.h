@@ -3,14 +3,14 @@
 
 //------------------------------------------------------------------------------
 // Name: opcode_tya
-// Desc: Transfer Y to Accumulator
+// Desc: Transfer Y to A
 //------------------------------------------------------------------------------
 struct opcode_tya {
 	typedef operation_none memory_access;
 	
-	void operator()() const {
-		A = Y;
-		update_nz_flags(A);
+	void operator()(Context &ctx) const {
+		ctx.A = ctx.Y;
+		update_nz_flags(ctx, ctx.A);
 	}
 };
 

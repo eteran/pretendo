@@ -48,18 +48,18 @@ Mapper::~Mapper() {
 //------------------------------------------------------------------------------
 // Name: create_mapper
 //------------------------------------------------------------------------------
-boost::shared_ptr<Mapper> Mapper::create_mapper(int num) {
+std::shared_ptr<Mapper> Mapper::create_mapper(int num) {
 
-	boost::shared_ptr<Mapper> ret;
-	create_ptr f = 0;;
+	std::shared_ptr<Mapper> ret;
+	create_ptr f = nullptr;;
 
 	const std::map<int, create_ptr> &mappers = registered_mappers_ines();
 	auto it = mappers.find(num);
-	if(it != mappers.end() && (f = it->second) != 0) {
+	if(it != mappers.end() && (f = it->second)) {
 		ret = (*f)();
 	} else {
 		std::cout << "unsupported mapper hardware - iNES number: " << num << std::endl;
-		return boost::shared_ptr<Mapper>();
+		return std::shared_ptr<Mapper>();
 	}
 
 	std::cout << "[Mapper::create_mapper] mapper #" << num << " loaded, type: " << ret->name() << std::endl;
@@ -154,7 +154,6 @@ void Mapper::write_3(uint16_t address, uint8_t value) {
 // Name: Write4
 //------------------------------------------------------------------------------
 void Mapper::write_4(uint16_t address, uint8_t value) {
-
 
 	switch(address) {
 	case 0x4000:

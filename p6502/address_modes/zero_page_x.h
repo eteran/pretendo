@@ -2,31 +2,35 @@
 #ifndef ZERO_PAGE_X_H_
 #define ZERO_PAGE_X_H_
 
-struct zero_page_x {
-
+class zero_page_x {
+public:
+	zero_page_x() {
+	}
+	
+public:
 	// dispatch to the appropriate version of the address mode
 	template <class Op>
-	void operator()(int cycle, Op op) {
-		execute(cycle, op, typename Op::memory_access());
+	void operator()(Context &ctx, Op op) {
+		execute(ctx, op, typename Op::memory_access());
 	}
 	
 private:
 	template <class Op>
-	void execute(int cycle, Op op, const operation_read &) {
+	void execute(Context &ctx, Op op, const operation_read &) {
 
-		switch(cycle) {
+		switch(ctx.cycle) {
 		case 1:
-			// fetch address, increment PC
-			effective_address_ = PC++;
+			// fetch address, increment ctx.PC
+			effective_address_ = ctx.PC++;
 			break;
 		case 2:
 			// read from address, add index register to it
-			effective_address_ = read_byte(effective_address_) + X;
+			effective_address_ = read_byte(ctx, effective_address_) + ctx.X;
 			break;
 		case 3:
 			LAST_CYCLE;
 			// read from effective address
-            op(read_byte_zp(effective_address_ & 0xff));
+            op(ctx, read_byte_zp(ctx, effective_address_ & 0xff));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -34,31 +38,31 @@ private:
 	}
 
 	template <class Op>
-	void execute(int cycle, Op op, const operation_modify &) {
+	void execute(Context &ctx, Op op, const operation_modify &) {
 
-		switch(cycle) {
+		switch(ctx.cycle) {
 		case 1:
-			// fetch address, increment PC
-			effective_address_ = PC++;
+			// fetch address, increment ctx.PC
+			effective_address_ = ctx.PC++;
 			break;
 		case 2:
-			// read from address, add index register X to it
-			effective_address_ = read_byte(effective_address_) + X;
+			// read from address, add index register ctx.X to it
+			effective_address_ = read_byte(ctx, effective_address_) + ctx.X;
 			break;
 		case 3:
 			// read from effective address
-            data_ = read_byte_zp(effective_address_ & 0xff);
+            data_ = read_byte_zp(ctx, effective_address_ & 0xff);
 			break;
 		case 4:
 			// write the value back to effective address,
 			// and do the operation on it
-            write_byte_zp(effective_address_ & 0xff, data_);
-			op(data_);
+            write_byte_zp(ctx, effective_address_ & 0xff, data_);
+			op(ctx, data_);
 			break;
 		case 5:
 			LAST_CYCLE;
 			// write the new value to effective address
-            write_byte_zp(effective_address_ & 0xff, data_);
+            write_byte_zp(ctx, effective_address_ & 0xff, data_);
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -66,24 +70,24 @@ private:
 	}
 
 	template <class Op>
-	void execute(int cycle, Op op, const operation_write &) {
+	void execute(Context &ctx, Op op, const operation_write &) {
 
-		switch(cycle) {
+		switch(ctx.cycle) {
 		case 1:
-			// fetch address, increment PC
-			effective_address_ = PC++;
+			// fetch address, increment ctx.PC
+			effective_address_ = ctx.PC++;
 			break;
 		case 2:
 			// read from address, add index register to it
-			effective_address_ = read_byte(effective_address_) + X;
+			effective_address_ = read_byte(ctx, effective_address_) + ctx.X;
 			break;
 		case 3:
 			LAST_CYCLE;
 			// write to effective address
 			{
 				uint16_t address = effective_address_ & 0xff;
-				uint8_t  value   = op(address);
-            	write_byte_zp(address, value);
+				uint8_t  value   = op(ctx, address);
+            	write_byte_zp(ctx, address, value);
 			}
 			OPCODE_COMPLETE;
 		default:

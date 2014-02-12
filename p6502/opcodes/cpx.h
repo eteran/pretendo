@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 struct opcode_cpx : compare {
 
-	void operator()(uint8_t data) const {
-		do_compare(X, data);
+	void operator()(Context &ctx, uint8_t data) const {
+		do_compare(ctx, ctx.X, data);
 	}
 };
 

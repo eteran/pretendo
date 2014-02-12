@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 struct opcode_bvs : branch {
 
-	bool operator()() const {
-		return do_branch(overflow_set());
+	bool operator()(Context &ctx) const {
+		return do_branch(ctx, overflow_set());
 	}
 };
 

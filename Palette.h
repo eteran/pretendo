@@ -2,10 +2,10 @@
 #ifndef PALETTE_20080314_H_
 #define PALETTE_20080314_H_
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
-using boost::uint8_t;
-using boost::uint16_t;
+using std::uint8_t;
+using std::uint16_t;
 
 struct rgb_color_t {
 	uint8_t r;

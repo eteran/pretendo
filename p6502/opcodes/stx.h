@@ -9,9 +9,9 @@ struct opcode_stx {
 
 	typedef operation_write memory_access;
 
-	uint8_t operator()(uint16_t address) const {
+	uint8_t operator()(Context &ctx, uint16_t address) const {
 		(void)address;
-		return X;
+		return ctx.X;
 	}
 };
 

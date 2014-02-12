@@ -9,8 +9,8 @@ struct opcode_sed {
 
 	typedef operation_none memory_access;
 
-	void operator()() const {
-		set_flag<D_MASK>();
+	void operator()(Context &ctx) const {
+		set_flag<D_MASK>(ctx);
 	}
 };
 

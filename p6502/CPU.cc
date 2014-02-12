@@ -43,6 +43,7 @@ void write_handler(uint16_t address, uint8_t value) {
 CPU::CPU() : irq_sources_(0x00) {
 
 	P6502::init(
+		context_,
 		&jam_handler,
 		&read_handler,
 		&write_handler,
@@ -94,11 +95,11 @@ CPU::~CPU() {
 void CPU::reset(nes::RESET reset_type) {
 
 	if(reset_type == nes::HARD_RESET) {
-		P6502::stop();
+		P6502::stop(context_);
 		trash_ram();
 	}
 
-	P6502::reset();
+	P6502::reset(context_);
 	std::cout << "[CPU::reset] reset complete" << std::endl;
 }
 
@@ -130,7 +131,7 @@ uint8_t CPU::read(uint16_t address) const {
 // Name: exec
 //-------------------------------------------------------------------
 void CPU::exec(int cycles) {
-	P6502::run(cycles);
+	P6502::run(context_, cycles);
 	nes::apu.run(cycles);
 }
 
@@ -151,7 +152,7 @@ void CPU::irq(IRQ_SOURCE source) {
 	irq_sources_ |= source;
 
 	if(irq_sources_) {
-		P6502::irq();
+		P6502::irq(context_);
 	}
 }
 
@@ -163,7 +164,7 @@ void CPU::clear_irq(IRQ_SOURCE source) {
 	irq_sources_ &= ~source;
 
 	if(!irq_sources_) {
-		P6502::reset_irq();
+		P6502::reset_irq(context_);
 	}
 }
 
@@ -171,7 +172,7 @@ void CPU::clear_irq(IRQ_SOURCE source) {
 // Name: schedule_spr_dma
 //-------------------------------------------------------------------
 void CPU::schedule_spr_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count) {
-	P6502::schedule_dma(dma_handler, source_address, count, P6502::SPR_DMA);
+	P6502::schedule_dma(context_, dma_handler, source_address, count, P6502::SPR_DMA);
 }
 
 
@@ -179,5 +180,5 @@ void CPU::schedule_spr_dma(P6502::dma_handler_t dma_handler, uint16_t source_add
 // Name: schedule_dmc_dma
 //-------------------------------------------------------------------
 void CPU::schedule_dmc_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count) {
-	P6502::schedule_dma(dma_handler, source_address, count, P6502::DMC_DMA);
+	P6502::schedule_dma(context_, dma_handler, source_address, count, P6502::DMC_DMA);
 }

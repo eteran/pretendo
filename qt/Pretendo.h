@@ -30,7 +30,7 @@ class Pretendo : public QMainWindow {
 	friend class AudioViewer;
 
 public:
-	Pretendo(QWidget *parent = 0, Qt::WindowFlags flags = 0);
+	Pretendo(QWidget *parent = nullptr, Qt::WindowFlags flags = 0);
 	virtual ~Pretendo();
 
 private Q_SLOTS:

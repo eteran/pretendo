@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 struct opcode_bpl : branch {
 
-	bool operator()() const {
-		return do_branch(negative_clear());
+	bool operator()(Context &ctx) const {
+		return do_branch(ctx, negative_clear());
 	}
 };
 

@@ -26,7 +26,7 @@ const T &bound(const T &lower, const T &value, const T &upper) {
 // CPU_FREQUENCY / 44100Hz  = 40.5844142857 clocks per sample
 // CPU_FREQUENCY / 48000Hz  = 37.286930625  clocks per sample
 // CPU_FREQUENCY / 192000Hz = 9.32173265625 clocks per sample
-static const int clocks_per_sample = CPU_FREQUENCY / APU::frequency;
+const int clocks_per_sample = CPU_FREQUENCY / APU::frequency;
 
 }
 
@@ -525,11 +525,11 @@ uint8_t APU::mix_channels() const {
 	int result = (pulse_volume + tnd_volume) * 0x100;
 #else
 	int result = (
-		pulse1 +
-		pulse2 +
+		pulse1   +
+		pulse2   +
 		triangle +
-		noise +
-		dmc +
+		noise    +
+		dmc      +
 		0);
 #endif
 

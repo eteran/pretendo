@@ -9,13 +9,13 @@ struct opcode_lar {
 
 	typedef operation_read memory_access;
 	
-	void operator()(uint8_t data) const {
+	void operator()(Context &ctx, uint8_t data) const {
 
-		data &= S;
-		A = data;
-		X = data;
-		S = data;
-		update_nz_flags(A);
+		data &= ctx.S;
+		ctx.A = data;
+		ctx.X = data;
+		ctx.S = data;
+		update_nz_flags(ctx, ctx.A);
 	}
 };
 

@@ -9,9 +9,9 @@ struct opcode_ldy {
 
 	typedef operation_read memory_access;
 
-	void operator()(uint8_t data) const {
-		Y = data;
-		update_nz_flags(Y);
+	void operator()(Context &ctx, uint8_t data) const {
+		ctx.Y = data;
+		update_nz_flags(ctx, ctx.Y);
 	}
 };
 

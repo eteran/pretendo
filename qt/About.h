@@ -9,7 +9,7 @@ class About : public QDialog {
 	Q_OBJECT
 	friend class Pretendo;
 public:
-	About(QWidget *parent = 0, Qt::WindowFlags f = 0);
+	About(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
 	virtual ~About();
 	
 private:

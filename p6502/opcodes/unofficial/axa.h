@@ -10,11 +10,11 @@ struct opcode_axa {
 
 	typedef operation_write memory_access;
 
-	uint8_t operator()(uint16_t address) const {
+	uint8_t operator()(Context &ctx, uint16_t address) const {
 		(void)address;
-		X &= A;
-		X &= 7;
-		return X;
+		ctx.X &= ctx.A;
+		ctx.X &= 7;
+		return ctx.X;
 	}
 };
 

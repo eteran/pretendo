@@ -5,22 +5,22 @@
 #include <string>
 #include <map>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/cstdint.hpp>
+#include <memory>
+#include <cstdint>
 #include "NES.h"
 
-using boost::uint8_t;
-using boost::uint16_t;
-using boost::uint32_t;
-using boost::uint64_t;
+using std::uint8_t;
+using std::uint16_t;
+using std::uint32_t;
+using std::uint64_t;
 
 class Mapper;
 
-typedef boost::shared_ptr<Mapper> (*create_ptr)();
+typedef std::shared_ptr<Mapper> (*create_ptr)();
 
 class Mapper : public boost::noncopyable {
 public:
-	static boost::shared_ptr<Mapper> create_mapper(int num);
+	static std::shared_ptr<Mapper> create_mapper(int num);
 	static void register_mapper(int num, create_ptr create_ptr);
 
 	void write_memory(uint16_t address, uint8_t value);
@@ -180,8 +180,8 @@ struct MapperRegisterObject {
 		Mapper::register_mapper(n, MapperCreate);
 	}
 
-	static boost::shared_ptr<Mapper> MapperCreate() {
-		return boost::shared_ptr<Mapper>(new T());
+	static std::shared_ptr<Mapper> MapperCreate() {
+		return std::shared_ptr<Mapper>(new T());
 	}
 };
 

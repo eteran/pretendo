@@ -3,14 +3,14 @@
 
 //------------------------------------------------------------------------------
 // Name: opcode_tsx
-// Desc: Transfer Stack Pointer to X
+// Desc: Transfer S to X
 //------------------------------------------------------------------------------
 struct opcode_tsx {
 	typedef operation_none memory_access;
 	
-	void operator()() const {
-		X = S;
-		update_nz_flags(X);
+	void operator()(Context &ctx) const {
+		ctx.X = ctx.S;
+		update_nz_flags(ctx, ctx.X);
 	}
 };
 

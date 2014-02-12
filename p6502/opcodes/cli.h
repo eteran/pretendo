@@ -9,8 +9,8 @@ struct opcode_cli {
 
 	typedef operation_none memory_access;
 
-	void operator()() const {
-		clear_flag<I_MASK>();
+	void operator()(Context &ctx) const {
+		clear_flag<I_MASK>(ctx);
 	}
 };
 

@@ -12,19 +12,6 @@ struct operation_stack_write : operation_type {};
 struct operation_jump        : operation_type {};
 struct operation_branch      : operation_type {};
 
-//------------------------------------------------------------------------------
-// Name: opcode_jam
-// Desc: stall the CPU
-//------------------------------------------------------------------------------
-void opcode_jam() {
-	// make sure we spin forever
-	--PC;
-	if(jam_handler) {
-		(*jam_handler)();
-	}
-	OPCODE_COMPLETE;
-}
-
 #include "opcodes/adc.h"
 #include "opcodes/and.h"
 #include "opcodes/asl.h"
@@ -35,7 +22,6 @@ void opcode_jam() {
 #include "opcodes/bmi.h"
 #include "opcodes/bne.h"
 #include "opcodes/bpl.h"
-#include "opcodes/brk.h"
 #include "opcodes/bvc.h"
 #include "opcodes/bvs.h"
 #include "opcodes/clc.h"
@@ -90,6 +76,7 @@ void opcode_jam() {
 #include "opcodes/special/rti.h"
 #include "opcodes/special/rst.h"
 #include "opcodes/special/rts.h"
+#include "opcodes/special/jam.h"
 
 // unofficial
 #include "opcodes/unofficial/asr.h"

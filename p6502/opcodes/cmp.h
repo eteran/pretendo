@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 struct opcode_cmp : compare {
 
-	void operator()(uint8_t data) const {
-		do_compare(A, data);
+	void operator()(Context &ctx, uint8_t data) const {
+		do_compare(ctx, ctx.A, data);
 	}
 };
 

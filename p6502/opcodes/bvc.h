@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 struct opcode_bvc : branch {
 
-	bool operator()() const {
-		return do_branch(overflow_clear());
+	bool operator()(Context &ctx) const {
+		return do_branch(ctx, overflow_clear());
 	}
 };
 
