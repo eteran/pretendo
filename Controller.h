@@ -5,10 +5,11 @@
 #include "ShiftRegister.h"
 #include <cstdint>
 #include <bitset>
+#include <boost/noncopyable.hpp>
 
 using std::uint8_t;
 
-class Controller {
+class Controller : public boost::noncopyable {
 public:
 	Controller();
 

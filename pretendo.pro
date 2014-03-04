@@ -29,7 +29,6 @@ HEADERS += \
 		Noise.h \
 		PPU.h \
 		Palette.h \
-		Sprite.h \
 		Square.h \
 		Sweep.h \
 		Timer.h \

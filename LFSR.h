@@ -3,11 +3,12 @@
 #define LFSR_20110314_H_
 
 #include <cstdint>
+#include <boost/noncopyable.hpp>
 
 using std::uint8_t;
 using std::uint16_t;
 
-class LFSR {
+class LFSR : public boost::noncopyable {
 public:
 	//-------------------------------------------------------------------
 	// Name: ShiftRegister

@@ -6,10 +6,11 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <boost/noncopyable.hpp>
 
 class Mapper;
 
-class Cart {
+class Cart : public boost::noncopyable {
 public:
 	Cart();
 	~Cart();

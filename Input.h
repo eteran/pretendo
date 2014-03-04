@@ -3,8 +3,9 @@
 #define INPUT_20080314_H_
 
 #include "Controller.h"
+#include <boost/noncopyable.hpp>
 
-class Input {
+class Input : public boost::noncopyable {
 public:
 	Input();
 
