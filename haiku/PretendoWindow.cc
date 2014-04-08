@@ -539,24 +539,22 @@ PretendoWindow::OnRun (void)
 void
 PretendoWindow::OnStop (void)
 {		
-	if (fRunning) {
+	if (fRunning || fPaused) {
+		fMutex->Unlock();
 		fRunning = false;
-		fMutex->Lock();
-		
+		fPaused = false;
 		fAudioStream->Stop();
-		
-		if (fFramework == OVERLAY_FRAMEWORK) {
+		fMutex->Lock();
+	}
+	
+	fEmuMenu->ItemAt(1)->SetMarked(false);
+	
+	if (fFramework == OVERLAY_FRAMEWORK) {
 			ClearBitmap (true);
 		} else {
 			fView->SetViewColor (0, 0, 0);
 			fView->Invalidate();
-		}
-	}
-	
-	fPaused = false; 
-	fEmuMenu->ItemAt(1)->SetMarked(false);
-	
-	
+		}	
 }
 
 
@@ -569,7 +567,7 @@ PretendoWindow::OnPause (void)
 			fEmuMenu->ItemAt(1)->SetMarked(false);
 			fAudioStream->Start();
 		} else {
-			fMutex->Unlock();
+			fMutex->Lock();
 			fEmuMenu->ItemAt(1)->SetMarked(true);
 			fAudioStream->Stop();
 		}
