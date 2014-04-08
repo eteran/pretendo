@@ -7,6 +7,7 @@
 #include <string>
 #include <boost/uuid/sha1.hpp>
 #include <libxml/parser.h>
+#include <Alert.h>
 #include <String.h>
 #include "NES.h"
 
@@ -17,19 +18,25 @@ CartInfoView::CartInfoView(BRect frame)
 {
 	std::vector<uint8_t> image = cart.raw_image();
     BString stringSHA1 = StreamToSHA1 (&image[0], image.size());
-
-    if(xmlDoc *const file = xmlParseFile("nescarts.xml")) {
+	xmlDoc *const file = xmlParseFile("nescarts.xml");
+	
+    if(xmlParseFile("nescarts.xml")) {
         // get the root element it should be <database>
 		if(const xmlNodePtr root = xmlDocGetRootElement(file)) {
 			if (xmlStrcmp(root->name, 
 				reinterpret_cast<const xmlChar *>("database")) == 0) {
-				if(rom_match *const rom = ProcessDatabase(root, 
+				if (rom_match *const rom = ProcessDatabase(root, 
 					reinterpret_cast<const xmlChar *>("sha1"), 
 					reinterpret_cast<const xmlChar *>(stringSHA1.String()))) {
 					// goto work!
 					PrintInfo(rom);
+				} else {
+					(new BAlert(0, "Couldn't find a match.", "Sorry"))->Go();
 				}
 			}
+		} else {
+			(new BAlert("Error", "Can't open 'nescarts.xml'.  ROM information will not be available",
+				"Okay"))->Go();
 		}
 		
 		xmlFreeDoc(file);
@@ -50,7 +57,8 @@ void
 CartInfoView::AttachedToWindow (void)
 {	
 	SetFont(be_fixed_font);
-	SetFontSize(10.0f);
+	SetViewColor(216, 216, 216);
+	SetFontSize(11.0f);
 	
 	BOutlineListView::AttachedToWindow();
 }
@@ -79,7 +87,7 @@ CartInfoView::ProcessGame(xmlNodePtr game, const xmlChar *search_key, const xmlC
 			if(xmlChar *const value = xmlGetProp(cartridge, search_key)) {
 				if (xmlStrcmp(value, search_value) == 0) {
 					BString buffer;
-					buffer << "Process Game: " << " " << reinterpret_cast<char *>(value) << " " << reinterpret_cast<const char *>(search_value);
+					buffer << "Cart Info: " << " " << reinterpret_cast<char *>(value) << " " << reinterpret_cast<const char *>(search_value);
 					BListItem *processGame = new BStringItem(buffer);
 					AddItem (processGame);
 					return cartridge;
@@ -267,7 +275,7 @@ CartInfoView::StreamToSHA1 (const uint8 *stream, int32 length)
 
   	char buffer[32*4];
   	
-  	sprintf(buffer, "%08X%08X%08X%08X%08X", hash[0], hash[1], hash[2], hash[3], hash[4]);
+  	snprintf(buffer, sizeof(buffer), "%08X%08X%08X%08X%08X", hash[0], hash[1], hash[2], hash[3], hash[4]);
   	
   	BString bstHash;
   	bstHash += buffer;

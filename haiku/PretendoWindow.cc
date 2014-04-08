@@ -11,7 +11,7 @@
 #include "PaletteWindow.h"
 #include "CartInfoWindow.h"
 #include "SimpleMutex.h"
-#include "AudioWindow.h"
+//#include "AudioWindow.h"
 //#include "InputWindow.h"
 
 #include "Config.h"
@@ -35,7 +35,7 @@ PretendoWindow::PretendoWindow()
 		fVideoScreen(NULL),
 		fAudioStream(NULL),
 		fPaletteWindow(NULL),
-		fAudioWindow(NULL),
+		//fAudioWindow(NULL),
 		fPaused(false),
 		fRunning(false)
 		
@@ -141,6 +141,8 @@ PretendoWindow::PretendoWindow()
 	
 	SetDefaultPalette();
 	
+	//fFileMenu->ItemAt(1)->SetEnabled(false);
+	
 }
 
 
@@ -181,10 +183,10 @@ PretendoWindow::~PretendoWindow()
 		fPaletteWindow->Quit();
 	}
 	
-	if (fAudioWindow != NULL) {
-		fAudioWindow->Lock();
-		fAudioWindow->Quit();
-	}
+	//if (fAudioWindow != NULL) {
+	//	fAudioWindow->Lock();
+	//	fAudioWindow->Quit();
+	//}
 	
 	Hide();
 	Sync();	
@@ -320,11 +322,11 @@ PretendoWindow::MessageReceived (BMessage *message)
 			break;
 			
 		case MSG_AUDIO_VIEW:
-			if (fAudioWindow == NULL) {
-				fAudioWindow = new AudioWindow(this);
-			} 
+			//if (fAudioWindow == NULL) {
+			//	fAudioWindow = new AudioWindow(this);
+			//} 
 			
-			fAudioWindow->Show();
+			//fAudioWindow->Show();
 			
 			break;
 			
@@ -344,7 +346,7 @@ PretendoWindow::WindowActivated (bool flag)
 void
 PretendoWindow::MenusBeginning (void)
 {	
-	BMenu *menu = BRecentFilesList::NewFileListMenu ("Load ROM"B_UTF8_ELLIPSIS,
+	BMenu *menu = BRecentFilesList::NewFileListMenu ("Load ROM" B_UTF8_ELLIPSIS,
 		NULL, NULL, this->PreferredHandler(), 10, false, NULL, 0, 
 		"application/x-vnd.scanty-Pretendo");
 	
@@ -445,7 +447,7 @@ PretendoWindow::AddMenu (void)
 	fFileMenu->AddItem (new BMenuItem ("Free ROM", new BMessage (MSG_FREE_ROM)));
 	fFileMenu->AddItem(new BMenuItem("ROM Info", new BMessage(MSG_CART_INFO)));
 	fFileMenu->AddSeparatorItem();
-	fFileMenu->AddItem (new BMenuItem ("About"B_UTF8_ELLIPSIS, new BMessage(MSG_ABOUT)));
+	fFileMenu->AddItem (new BMenuItem ("About" B_UTF8_ELLIPSIS, new BMessage(MSG_ABOUT)));
 	fFileMenu->AddSeparatorItem();
 	fFileMenu->AddItem (new BMenuItem ("Quit", new BMessage (MSG_QUIT)));
 	
@@ -456,10 +458,10 @@ PretendoWindow::AddMenu (void)
 	fEmuMenu->AddItem (new BMenuItem ("Reset (soft)", new BMessage (MSG_RST_SOFT)));
 	fEmuMenu->AddItem (new BMenuItem ("Reset (hard)", new BMessage (MSG_RST_HARD)));
 	fEmuMenu->AddSeparatorItem();
-	fEmuMenu->AddItem (new BMenuItem ("Adjust Palette"B_UTF8_ELLIPSIS, 
+	fEmuMenu->AddItem (new BMenuItem ("Adjust Palette" B_UTF8_ELLIPSIS, 
 		new BMessage (MSG_ADJ_PALETTE)));
 	fEmuMenu->AddItem (new BMenuItem ("Show Audio", new BMessage (MSG_AUDIO_VIEW)));
-	fEmuMenu->AddItem (new BMenuItem ("Debug"B_UTF8_ELLIPSIS, new BMessage(MSG_CPU_DEBUG)));
+	fEmuMenu->AddItem (new BMenuItem ("Debug" B_UTF8_ELLIPSIS, new BMessage(MSG_CPU_DEBUG)));
 	fMenuHeight = fMenu->Bounds().IntegerHeight();
 }
 
@@ -480,6 +482,8 @@ PretendoWindow::OnLoadCart (BMessage *message)
 			fView->Invalidate();
 		}
 	}
+	
+	//fFileMenu->ItemAt(1)->SetEnabled(true);
 }
 
 
@@ -488,24 +492,33 @@ PretendoWindow::OnFreeCart (void)
 {	
 	OnStop();
 	nes::cart.unload();
+	//fFileMenu->ItemAt(2)->SetEnabled(false);
 }
 
 
 void
 PretendoWindow::OnCartInfo (void)
 {
-	if (nes::cart.prg() != NULL && ! fCartInfoWindow) {
+	if (fCartInfoWindow && fCartInfoWindow->Lock()) {
+		fCartInfoWindow->Quit();
+		fCartInfoWindow = NULL;
+	}
+	
+	if (nes::cart.prg() != NULL) { // && ! fCartInfoWindow) {
 		fCartInfoWindow = new CartInfoWindow();
 		fCartInfoWindow->Show();
-	} else {
-		fCartInfoWindow = NULL;
 	}
 }
 
 void
 PretendoWindow::OnQuit (void)
 {
-	QuitRequested();
+	//if (fCartInfoWindow) {
+	//	fCartInfoWindow->LockLooper();
+	//	fCartInfoWindow->Quit();
+	//}
+	
+	this->QuitRequested();
 }
 
 
@@ -583,6 +596,7 @@ PretendoWindow::OnHardReset (void)
 void
 PretendoWindow::OnDebug (void)
 {
+	(new BAlert(0, "Patience...", "Okay"))->Go();
 }
 
 
@@ -919,12 +933,11 @@ PretendoWindow::BlitScreen (void)
 			
 	//		blit_overlay(dest, source, size, fPaletteY, fPaletteYCbCr);
 		
-			#if 0
 			for (int32 y = 0; y < PretendoWindow::SCREEN_HEIGHT; y++) {
 				asm volatile  ("pushl %%edi\n"
 					  		  "pushl %%esi\n"
 				  			  "pushl %%ebx\n"
-				  			  "pushl %%ebp\n"
+				  			  //"pushl %%ebp\n"
 				  	
 				  			  "movl %0, %%edi\n"	//dest
 				 	 		  "movl %1, %%esi\n"	//src
@@ -938,35 +951,36 @@ PretendoWindow::BlitScreen (void)
 				  		  	  "movl (%%eax,%%ebx,4), %%ebx\n"
 				  		  	  "shll $16, %%ebx\n"
 				  
-				  		  	  "movl (%%esi), %%ebp\n"
-				  		  	  "andl $0xffff, %%ebp\n"
-				  		  	  "movl (%%edx,%%ebp,4), %%ebp\n"
+				  		  	  "pushl %%ecx\n"
+				  		  	  
+				  		  	  "movl (%%esi), %%ecx\n"
+				  		  	  "andl $0xffff, %%ecx\n"
+				  		  	  "movl (%%edx,%%ecx,4), %%ecx\n"
 		  
-		  				  	  "orl %%ebx, %%ebp\n"
+		  				  	  "orl %%ebx, %%ecx\n"
 				  
-				  		  	  "movl %%ebp, (%%edi)\n"
+				  		  	  "movl %%ecx, (%%edi)\n"
 				  		  	  "addl $4, %%edi\n" 
 				  		  	  "addl $4, %%esi\n"
-				  
+				  			  
+				  			  "popl %%ecx\n"
+				  			  	
 				  		  	  "subl $1, %%ecx\n"
 				  		  	  "jnz 1b\n"
 				  
-				  	  		  "popl %%ebp\n"
+				  	  		  //"popl %%ebp\n"
 				  		  	  "popl %%ebx\n"
 				  		  	  "popl %%esi\n"
 				  		  	  "popl %%edi\n"
 				  		  	  : 
 				  		  	  : "D"(dest), "S"(source), "c"(size), 
 				  		  	  "a"((uint32 *)fPaletteY), "d" ((uint32 *)fPaletteYCbCr)
-				  		  	  : "%ebp"
+				  		  	  :
 				);
 				
-				
-			
 				source += fBackBuffer.row_bytes;
 				dest += fOverlayBitmap->BytesPerRow();
 			}
-			#endif
 		
 			fVideoLocker.Unlock();
 			return;

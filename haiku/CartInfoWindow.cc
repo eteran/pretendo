@@ -1,21 +1,7 @@
 
-#include "CartInfoWindow.h"
-
-#include <String.h>
-#include <Alert.h>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <string>
-#include <boost/uuid/sha1.hpp>
 #include <libxml/parser.h>
-#include <stdio.h>
 
-
-#include "NES.h"
-
-
-using nes::cart;
+#include "CartInfoWindow.h"
 
 
 CartInfoWindow::CartInfoWindow()
@@ -25,7 +11,7 @@ CartInfoWindow::CartInfoWindow()
 {
 	LIBXML_TEST_VERSION;
 	
-	ResizeTo(640, 320);
+	ResizeTo(720, 320);
 	CenterOnScreen();
 	
 	BRect r = Bounds();

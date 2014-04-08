@@ -18,7 +18,7 @@ SHELL = /bin/sh
 	@$(ASM) $(ASMFLAGS) $(DEFINES) $< -o $@ 1>/dev/null
 	
 	
-ASM    := yasm -f elf
+ASM    := nasm -f elf
 CXX    := g++ -march=native -ansi
 CC     := gcc -march=native -ansi
 LD     := g++
@@ -29,10 +29,10 @@ RES	   := xres
 APPNAME := pretendo
 
 DEFINES  := 
-INCLUDES := -I. -Imappers -I/boot/common/include/libxml2 -Ilibines -Ip6502 -isystem boost
+INCLUDES := -I. -Imappers -I/boot/system/develop/headers/libxml2 -Ilibines -Ip6502 -isystem boost
 ASMFLAGS :=
-CXXFLAGS := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long #-fomit-frame-pointer
-CFLAGS   := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long #-fomit-frame-pointer
+CXXFLAGS := -std=c++11 -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -fomit-frame-pointer
+CFLAGS   := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -fomit-frame-pointer
 LDFLAGS  := -gdwarf-2 -gstrict-dwarf -lbe -lroot -ltranslation -ltracker -lmedia -lgame -L/boot/common/lib -lxml2
 
 ASM_FILES   := \
@@ -252,8 +252,8 @@ CXX_FILES   := \
 	haiku/CartInfoView.cc \
 	haiku/PaletteWindow.cc \
 	haiku/PaletteView.cc \
-	haiku/AudioWindow.cc \
-	haiku/AudioView.cc
+#	haiku/AudioWindow.cc \
+#	haiku/AudioView.cc
 	
 C_FILES     := \
 	libines/ines_crc32.c \

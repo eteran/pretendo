@@ -141,7 +141,7 @@ blit_windowed_dirty_mmx:
 	movq [edi], mm0
 	movq [edi+8], mm2
 	
-.skip32
+.skip32:
 	add esi, 16
 	add eax, 16
 	add edi, 16
@@ -173,7 +173,7 @@ blit_windowed_dirty_mmx:
 	movq [edi], mm0
 	movq [edi+8], mm2
 	
-.skip16
+.skip16:
 	add esi, 16
 	add eax, 16
 	add edi, 16
@@ -204,15 +204,14 @@ blit_windowed_dirty_mmx:
 	movq [edi], mm0
 	movq [edi+8], mm2
 	
-.skip8
+.skip8:
 	add esi, 16
 	add eax, 16
 	add edi, 16
 	dec ecx
 	jnz .loop8
 	
-.finish
-	
+.finish:
 	pop ebx
 	pop esi
 	pop edi
@@ -267,7 +266,7 @@ blit_2x_windowed_dirty_mmx:
 	movq [edi+edx], mm0 ; remove for scanlines
 	movq [edi+edx+8], mm1 ; remove for scanlines
 
-.skip32
+.skip32:
 	add esi, 8
 	add eax, 8
 	add edi, 16
@@ -296,7 +295,7 @@ blit_2x_windowed_dirty_mmx:
 	movq [edi+edx], mm0 ; remove for scanlines
 	movq [edi+edx+8], mm1 ; remove for scanlines
 	
-.skip16
+.skip16:
 	add esi, 8
 	add eax, 8
 	add edi, 16
@@ -325,15 +324,14 @@ blit_2x_windowed_dirty_mmx:
 	movq [edi+edx], mm0 ; remove for scanlines
 	movq [edi+edx+8], mm1 ; remove for scanlines
 	
-.skip8
+.skip8:
 	add esi, 8
 	add eax, 8
 	add edi, 16
 	dec ecx
 	jnz .loop8
 	
-.finish
-	
+.finish:
 	pop edx
 	pop ebx
 	pop esi

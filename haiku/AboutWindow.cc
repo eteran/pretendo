@@ -62,7 +62,7 @@ AboutView::AttachedToWindow (void)
 	textview->ResizeBy(0,-20);
 	button->MoveBy(0, -10);
 	AddChild(button);
-	
+
 	BView::AttachedToWindow();
 }
 
@@ -77,7 +77,7 @@ AboutView::Draw (BRect updateRect)
     SetDrawingMode(B_OP_OVER); 
     DrawBitmap (fIcon, BPoint(18, 6));
     DrawBitmap(fLogo, BPoint((Bounds().Width() - 196) / 2, 11));
-    
+
     BView::Draw(updateRect);
 }
 
@@ -86,9 +86,9 @@ AboutWindow::AboutWindow()
 	: BWindow (BRect (0,0,0,0), "About Window", B_MODAL_WINDOW, 
 		B_NOT_CLOSABLE | B_NOT_RESIZABLE)
 {
+
 	ResizeTo (340, 300);
-	MoveTo ((BScreen().Frame().Width() - Frame().Width()) / 2,
-		     (BScreen().Frame().Height() - Frame().Height()) / 2);
+	CenterOnScreen();
 	
 	fAboutView = new AboutView(Bounds());
 	AddChild(fAboutView);
@@ -101,8 +101,7 @@ AboutWindow::AboutWindow()
 	fAboutView->AddChild(new LinkView(r, "Eli's website", "http://shell.reverse.net/~eli"));
 	
 	r.Set(53, 225, 140, 240);
-	fAboutView->AddChild(new LinkView(r, "Evan's website", "http://www.codef00.com"));
-	
+	fAboutView->AddChild(new LinkView(r, "Evan's website", "http://www.codef00.com"));	
 }
 
 
