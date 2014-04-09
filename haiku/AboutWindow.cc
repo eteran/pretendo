@@ -50,7 +50,7 @@ AboutView::AttachedToWindow (void)
 	textview->MakeSelectable(false);
 	
 	char const *text = "A freeware, portable Nintendo NES emulator\n\n"
-	"Version:\t\t000000\n"
+	"Version:\t\t" __VERSION__ "\n"
 	"Built on:\t\t" __DATE__ " " __TIME__
 	"\nWritten by: \tEli Dayan and Evan Teran\n\n"
 	"\"Nintendo\" and \"Nintendo Entertainment System\" are registered trademarks of "

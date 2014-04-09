@@ -8,6 +8,8 @@
 #include <View.h>
 #include <Button.h>
 
+//#include "version.h"
+
 
 class AboutView : public BView
 {

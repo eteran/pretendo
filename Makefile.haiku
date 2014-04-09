@@ -148,7 +148,7 @@ H_FILES     := \
 	haiku/CartInfoView.h \
 	haiku/PaletteWindow.h \
 	haiku/PaletteView.h \
-	AudioView.h
+	version.h
 
 CXX_FILES   := \
 	APU.cc \
@@ -252,8 +252,6 @@ CXX_FILES   := \
 	haiku/CartInfoView.cc \
 	haiku/PaletteWindow.cc \
 	haiku/PaletteView.cc \
-#	haiku/AudioWindow.cc \
-#	haiku/AudioView.cc
 	
 C_FILES     := \
 	libines/ines_crc32.c \
