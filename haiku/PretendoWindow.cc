@@ -66,12 +66,11 @@ PretendoWindow::PretendoWindow()
 	
 	fBitsArea = create_area ("frame buffer", &areaBits, B_ANY_ADDRESS,
 					((SCREEN_WIDTH * 2) * (SCREEN_HEIGHT * 2) * 4 + B_PAGE_SIZE-1) & 
-					((uint32)-1 ^ (B_PAGE_SIZE-1)), B_NO_LOCK, 													B_READ_AREA | B_WRITE_AREA);
+					((uint32)-1 ^ (B_PAGE_SIZE-1)), B_NO_LOCK, B_READ_AREA | B_WRITE_AREA);
 	
 	fDirtyArea = create_area ("dirty buffer", &dirtyBits, B_ANY_ADDRESS,
 					((SCREEN_WIDTH * 2) * (SCREEN_HEIGHT * 2) * 4 + B_PAGE_SIZE-1) & 
-					((uint32)-1 ^ (B_PAGE_SIZE-1)), B_NO_LOCK, 
-					B_READ_AREA | B_WRITE_AREA);
+					((uint32)-1 ^ (B_PAGE_SIZE-1)), B_NO_LOCK, B_READ_AREA | B_WRITE_AREA);
 					
 	if (fBitsArea < B_OK || fDirtyArea < B_OK) {
 		(new BAlert ("Error", "Not enough memory for video buffers.  Quitting.",
@@ -460,8 +459,8 @@ PretendoWindow::AddMenu (void)
 	fEmuMenu->AddSeparatorItem();
 	fEmuMenu->AddItem (new BMenuItem ("Adjust Palette" B_UTF8_ELLIPSIS, 
 		new BMessage (MSG_ADJ_PALETTE)));
-	fEmuMenu->AddItem (new BMenuItem ("Show Audio", new BMessage (MSG_AUDIO_VIEW)));
-	fEmuMenu->AddItem (new BMenuItem ("Debug" B_UTF8_ELLIPSIS, new BMessage(MSG_CPU_DEBUG)));
+	///fEmuMenu->AddItem (new BMenuItem ("Show Audio", new BMessage (MSG_AUDIO_VIEW)));
+	//fEmuMenu->AddItem (new BMenuItem ("Debug" B_UTF8_ELLIPSIS, new BMessage(MSG_CPU_DEBUG)));
 	fMenuHeight = fMenu->Bounds().IntegerHeight();
 }
 
@@ -482,8 +481,6 @@ PretendoWindow::OnLoadCart (BMessage *message)
 			fView->Invalidate();
 		}
 	}
-	
-	//fFileMenu->ItemAt(1)->SetEnabled(true);
 }
 
 
@@ -492,7 +489,6 @@ PretendoWindow::OnFreeCart (void)
 {	
 	OnStop();
 	nes::cart.unload();
-	//fFileMenu->ItemAt(2)->SetEnabled(false);
 }
 
 
@@ -512,12 +508,7 @@ PretendoWindow::OnCartInfo (void)
 
 void
 PretendoWindow::OnQuit (void)
-{
-	//if (fCartInfoWindow) {
-	//	fCartInfoWindow->LockLooper();
-	//	fCartInfoWindow->Quit();
-	//}
-	
+{	
 	this->QuitRequested();
 }
 
