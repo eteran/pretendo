@@ -87,7 +87,13 @@ inline std::vector<std::string> explode(const std::string &delimeter, const std:
 
 }
 
-Config::Config() : filename_("pretendo.config") {
+Config::Config() : 
+	#if (__HAIKU__)
+		filename_("/boot/home/config/settings/pretendo/pretendo.config") {
+	#else
+		filename_("pretendo.config")
+	#endif // __HAIKU__
+	
 	Load();
 }
 

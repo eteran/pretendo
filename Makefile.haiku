@@ -30,9 +30,9 @@ APPNAME := pretendo
 
 DEFINES  := 
 INCLUDES := -I. -Imappers -I/boot/system/develop/headers/libxml2 -Ilibines -Ip6502 -isystem boost
-ASMFLAGS :=
-CXXFLAGS := -std=c++11 -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -fomit-frame-pointer
-CFLAGS   := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -fomit-frame-pointer
+ASMFLAGS := -f elf
+CXXFLAGS := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -fomit-frame-pointer -flto -std=c++11 -flto
+CFLAGS   := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -fomit-frame-pointer -flto
 LDFLAGS  := -gdwarf-2 -gstrict-dwarf -lbe -lroot -ltranslation -ltracker -lmedia -lgame -L/boot/common/lib -lxml2
 
 ASM_FILES   := \
@@ -133,7 +133,6 @@ H_FILES     := \
 	mappers/VRC4.h \
 	mappers/VRC6.h \
 	VideoInterface.h \
-	glext.h \
 	haiku/AboutWindow.h \
 	haiku/AudioStream.h \
 	haiku/LinkView.h \

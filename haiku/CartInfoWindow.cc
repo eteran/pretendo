@@ -9,8 +9,6 @@ CartInfoWindow::CartInfoWindow()
 	B_NOT_RESIZABLE|B_NOT_ZOOMABLE),
 	fCartInfoView(NULL)
 {
-	LIBXML_TEST_VERSION;
-	
 	ResizeTo(720, 320);
 	CenterOnScreen();
 	

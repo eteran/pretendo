@@ -9,6 +9,8 @@
 #include "AboutWindow.h"
 #include "LinkView.h"
 
+#include "version.h"
+
 
 AboutView::AboutView(BRect frame)
 	: BView (frame, "_about_view", B_FOLLOW_ALL, B_WILL_DRAW)
@@ -50,7 +52,7 @@ AboutView::AttachedToWindow (void)
 	textview->MakeSelectable(false);
 	
 	char const *text = "A freeware, portable Nintendo NES emulator\n\n"
-	"Version:\t\t" __VERSION__ "\n"
+	"Version:\t\t" __PRETENDO_VERSION__ "\n"
 	"Built on:\t\t" __DATE__ " " __TIME__
 	"\nWritten by: \tEli Dayan and Evan Teran\n\n"
 	"\"Nintendo\" and \"Nintendo Entertainment System\" are registered trademarks of "
