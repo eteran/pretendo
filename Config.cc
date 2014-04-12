@@ -98,7 +98,7 @@ Config::Config() :
 	#if __HAIKU__
 		filename_("/boot/home/config/settings/pretendo/pretendo.config")
 	#else
-		filename_("~/.pretendo.config");
+		filename_("~/.pretendo/pretendo.config");
 	#endif //__HAIKU__
 {	
 	Load();
