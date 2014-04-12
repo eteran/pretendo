@@ -9,6 +9,9 @@
 #include <libxml/parser.h>
 #include <Alert.h>
 #include <String.h>
+#include <Application.h>
+#include <Roster.h>
+#include <Path.h>
 #include "NES.h"
 
 using nes::cart;
@@ -33,9 +36,17 @@ CartInfoView::AttachedToWindow (void)
 	SetViewColor(216, 216, 216);
 	SetFontSize(11.0f);
 	
+	app_info ai;
+	be_app->GetAppInfo(&ai);
+	entry_ref ref = ai.ref;
+	BPath path(&ref);
+	path.GetParent(&path);
+	path.Append("nescarts.xml");
+	
 	std::vector<uint8_t> image = cart.raw_image();
     BString stringSHA1 = StreamToSHA1 (&image[0], image.size());
-	xmlDoc *const file = xmlParseFile("/boot/home/config/settings/pretendo/nescarts.xml");
+	
+	xmlDoc *const file = xmlParseFile(path.Path());
 	
     if (file) {
         // get the root element it should be <database>
@@ -134,7 +145,6 @@ void
 CartInfoView::PrintInfo(rom_match *rom)
 {	
 	char buffer[1024];
-	(new BAlert(0,"apples", "okay"))->Go();
 	BListItem *gameInfo = new BStringItem("Game Info");
 	AddItem (gameInfo);
 	for(xmlAttr *properties = rom->game->properties; properties; properties = properties->next) {

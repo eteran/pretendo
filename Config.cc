@@ -5,7 +5,14 @@
 #include <locale>
 #include <vector>
 
+#include <sys/stat.h>
+
 namespace {
+	#ifdef __HAIKU__
+		#define CONFIG_PATH "/boot/home/config/settings/pretendo"
+	#else
+		#define CONFIG_PATH "~/"
+	#endif // __HAIKU__
 
 //------------------------------------------------------------------------------
 // Name: ltrim
@@ -88,12 +95,12 @@ inline std::vector<std::string> explode(const std::string &delimeter, const std:
 }
 
 Config::Config() : 
-	#if (__HAIKU__)
-		filename_("/boot/home/config/settings/pretendo/pretendo.config") {
+	#if __HAIKU__
+		filename_("/boot/home/config/settings/pretendo/pretendo.config")
 	#else
-		filename_("pretendo.config")
-	#endif // __HAIKU__
-	
+		filename_("~/.pretendo.config");
+	#endif //__HAIKU__
+{	
 	Load();
 }
 
@@ -103,15 +110,23 @@ Config::~Config() {
 }
 
 
-bool Config::Load() {
+bool 
+Config::Load() {
 
 	std::cout << "Loading config from file..." << std::endl;
+	
+	// first see if the directory exists
+	struct stat st;
+	if (stat(CONFIG_PATH, &st) != 0 && ! (S_ISDIR(st.st_mode))) {
+		mkdir(CONFIG_PATH, 0777);
+	}
+	
 	std::ifstream file(filename_.c_str());
-
-	if(!file) {
+		
+	if(! file) {
 		// file does not exist, make a new one with some defaults
 		std::cout << "Couldn't load file. Creating new one..." << std::endl;
-
+		
 		NewSection("App Settings");
 		NewKey("App Settings", std::make_pair("ShowOpenOnLoad", "false"));
 		NewKey("App Settings", std::make_pair("AutoRun", "false"));
@@ -119,7 +134,6 @@ bool Config::Load() {
 		NewKey("App Settings", std::make_pair("ROMDirectory", "./roms"));
 		
 		Save();
-
 		return false;
 	}
 
@@ -178,7 +192,7 @@ bool Config::Load() {
 			NewKey(current_section, std::make_pair(key, value));
 		}
 	}
-
+	
 	return true;
 }
 
