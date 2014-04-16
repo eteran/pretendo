@@ -29,7 +29,7 @@ RES	   := xres
 APPNAME := pretendo
 
 DEFINES  := 
-INCLUDES := -I. -Imappers -I/boot/system/develop/headers/libxml2 -Ilibines -Ip6502 -isystem boost
+INCLUDES := -I. -Imappers -I/boot/system/develop/headers/x86/libxml2 -Ilibines -Ip6502 -isystem boost
 ASMFLAGS := -f elf
 CXXFLAGS := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -fomit-frame-pointer -flto -std=c++11 -flto
 CFLAGS   := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -fomit-frame-pointer -flto
