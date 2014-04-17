@@ -1,6 +1,6 @@
 name				pretendo
 version				0.5a1-1
-architecture		x86
+architecture		x86_gcc2
 summary				"Freeware portable NES emulator"
 description			"Pretendo is a Haiku-native, cycle accurate Nitendo NES emulator"
 packager			"Eli Dayan <eli.dayan@gmail.com>"
