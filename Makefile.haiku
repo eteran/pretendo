@@ -19,8 +19,8 @@ SHELL = /bin/sh
 	
 	
 ASM    := nasm -f elf
-CXX    := g++ -march=native -ansi
-CC     := gcc -march=native -ansi
+CXX    := g++ -march=i686 -ansi
+CC     := gcc -march=i686 -ansi
 LD     := g++
 RM     := rm -f
 ED     := ed
