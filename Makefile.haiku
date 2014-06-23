@@ -25,8 +25,9 @@ LD     := g++
 RM     := rm -f
 ED     := ed
 RES	   := xres
+STRIP  := strip
 
-APPNAME := pretendo
+APPNAME := Pretendo
 
 DEFINES  := 
 INCLUDES := -I. -Imappers -I/boot/system/develop/headers/x86/libxml2 -Ilibines -Ip6502 -isystem boost
@@ -271,6 +272,7 @@ all: $(APPNAME)
 $(APPNAME): $(O_FILES)
 	@echo linking $@ ...
 	@$(LD) $(LDFLAGS) $(O_FILES) -o $@ 1>/dev/null
+	@$(STRIP) $@
 	$(RES) -o $@ $(RES_FILES)
 
 mrproper: clean
