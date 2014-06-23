@@ -112,7 +112,7 @@ Config::Config()
 		
 		find_directory(B_USER_SETTINGS_DIRECTORY, &path, false);
 		filename_ = path.Path();
-		dir = new BDirectory(path.Path());
+		dir = new BDirectory(filename_.c_str());
 		dir->CreateDirectory("Pretendo", NULL);
 		filename_ += "/Pretendo/pretendo.config";
 #else
