@@ -91,7 +91,7 @@ public:
 	}
 
 private:
-	const std::string                   filename_;
+	std::string                   filename_;
 	std::map<std::string, section_type> sections_;
 };
 

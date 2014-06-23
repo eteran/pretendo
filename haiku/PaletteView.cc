@@ -467,6 +467,7 @@ PaletteView::DrawIndexes (void)
 	char const nybbles[] = "0123456789ABCDEF";
 	
 	SetHighColor(0,0,0);
+	SetLowColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	SetFont(be_fixed_font);
 	
 	// y 

@@ -1,11 +1,19 @@
 
 #include "Config.h"
+
 #include <functional> 
 #include <cctype>
 #include <locale>
 #include <vector>
-
 #include <sys/stat.h>
+
+#ifdef __HAIKU__
+	#include <FindDirectory.h>
+	#include <fs_info.h>
+	#include <Path.h>
+	#include <Directory.h>
+#endif
+
 
 namespace {
 	#ifdef __HAIKU__
@@ -94,13 +102,29 @@ inline std::vector<std::string> explode(const std::string &delimeter, const std:
 
 }
 
-Config::Config() : 
-	#if __HAIKU__
-		filename_("/boot/home/config/settings/pretendo/pretendo.config")
-	#else
-		filename_("~/.pretendo/pretendo.config");
-	#endif //__HAIKU__
-{	
+#include <iostream>
+
+Config::Config() 
+{
+#ifdef __HAIKU__
+		BPath path;
+		BDirectory *dir;
+		
+		find_directory(B_USER_SETTINGS_DIRECTORY, &path, false);
+		filename_ = path.Path();
+		dir = new BDirectory(path.Path());
+		dir->CreateDirectory("Pretendo", NULL);
+		filename_ += "/Pretendo/pretendo.config";
+#else
+	filename_ = ("~/.pretendo");
+	struct stat st;
+	
+	if (stat(filename_.c_str(), &st) != 0 && ! (S_ISDIR(st.st_mode))) {
+		mkdir(filename_.c_str(), 0777);
+		filename_ += "/pretendo.conf";
+	}	
+#endif //__HAIKU__
+	
 	Load();
 }
 
@@ -114,13 +138,6 @@ bool
 Config::Load() {
 
 	std::cout << "Loading config from file..." << std::endl;
-	
-	// first see if the directory exists
-	struct stat st;
-	if (stat(CONFIG_PATH, &st) != 0 && ! (S_ISDIR(st.st_mode))) {
-		mkdir(CONFIG_PATH, 0777);
-	}
-	
 	std::ifstream file(filename_.c_str());
 		
 	if(! file) {
