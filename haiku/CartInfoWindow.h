@@ -6,7 +6,7 @@
 #include <TabView.h>
 #include <ListView.h>
 #include <ScrollView.h>
-#include <libxml/parser.h>
+#include <libxml2/libxml/parser.h>
 #include <string>
 
 #include "CartInfoView.h"

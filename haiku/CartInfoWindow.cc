@@ -1,5 +1,5 @@
 
-#include <libxml/parser.h>
+#include <libxml2/libxml/parser.h>
 
 #include "CartInfoWindow.h"
 

@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <string>
 #include <boost/uuid/sha1.hpp>
-#include <libxml/parser.h>
+#include <libxml2/libxml/parser.h>
 #include <Alert.h>
 #include <String.h>
 #include <Application.h>
