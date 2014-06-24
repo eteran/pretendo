@@ -100,10 +100,6 @@ inline std::vector<std::string> explode(const std::string &delimeter, const std:
 	return explode(delimeter, string, std::numeric_limits<int>::max());
 }
 
-}
-
-#include <iostream>
-
 Config::Config() 
 {
 #ifdef __HAIKU__
