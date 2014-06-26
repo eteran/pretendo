@@ -7,9 +7,9 @@
 
 namespace {
 
-const int FRAME_MODE         = 0x80;
-const int FRAME_INHIBIT_IRQ  = 0x40;
-const double CPU_FREQUENCY   = 1789772.67; // 1.78977267Mhz
+const int FrameMode        = 0x80;
+const int FrameInhibitIRQ  = 0x40;
+const double CPUFrequency  = 1789772.67; // 1.78977267Mhz
 
 //------------------------------------------------------------------------------
 // Name: bound
@@ -23,10 +23,10 @@ const T &bound(const T &lower, const T &value, const T &upper) {
 }
 
 
-// CPU_FREQUENCY / 44100Hz  = 40.5844142857 clocks per sample
-// CPU_FREQUENCY / 48000Hz  = 37.286930625  clocks per sample
-// CPU_FREQUENCY / 192000Hz = 9.32173265625 clocks per sample
-const int clocks_per_sample = CPU_FREQUENCY / APU::frequency;
+// CPUFrequency / 44100Hz  = 40.5844142857 clocks per sample
+// CPUFrequency / 48000Hz  = 37.286930625  clocks per sample
+// CPUFrequency / 192000Hz = 9.32173265625 clocks per sample
+const int ClocksPerSample = CPUFrequency / APU::frequency;
 
 }
 
@@ -326,7 +326,7 @@ void APU::write4017(uint8_t value) {
 	frame_counter_      = value;
 	last_frame_counter_ = value;
 
-	if(frame_counter_ & FRAME_INHIBIT_IRQ) {
+	if(frame_counter_ & FrameInhibitIRQ) {
 		status_ &= ~STATUS_FRAME_IRQ;
 		if(!(status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ))) {
 			nes::cpu.clear_irq(CPU::APU_IRQ);
@@ -337,7 +337,7 @@ void APU::write4017(uint8_t value) {
 
 	clock_step_ = 0;
 
-	if(!(frame_counter_ & FRAME_MODE)) {
+	if(!(frame_counter_ & FrameMode)) {
 		next_clock_ += 7458;
 	}
 }
@@ -390,7 +390,7 @@ void APU::clock_frame_mode_0() {
 		break;
 
 	case 3:
-		if(!(frame_counter_ & FRAME_INHIBIT_IRQ)) {
+		if(!(frame_counter_ & FrameInhibitIRQ)) {
 			status_ |= STATUS_FRAME_IRQ;
 		}
 
@@ -400,7 +400,7 @@ void APU::clock_frame_mode_0() {
 	case 4:
 		clock_linear();
 		clock_length();
-		if(!(frame_counter_ & FRAME_INHIBIT_IRQ)) {
+		if(!(frame_counter_ & FrameInhibitIRQ)) {
 			status_ |= STATUS_FRAME_IRQ;
 		}
 
@@ -408,7 +408,7 @@ void APU::clock_frame_mode_0() {
 		break;
 
 	case 5:
-		if(!(frame_counter_ & FRAME_INHIBIT_IRQ)) {
+		if(!(frame_counter_ & FrameInhibitIRQ)) {
 			status_ |= STATUS_FRAME_IRQ;
 		}
 
@@ -463,12 +463,12 @@ void APU::run(int cycles) {
 
 	while(cycles-- > 0) {
 
-		if(!(frame_counter_ & FRAME_INHIBIT_IRQ) && (status_ & STATUS_FRAME_IRQ)) {
+		if(!(frame_counter_ & FrameInhibitIRQ) && (status_ & STATUS_FRAME_IRQ)) {
 			nes::cpu.irq(CPU::APU_IRQ);
 		}
 
 		if(apu_cycles_ == next_clock_) {
-			if(frame_counter_ & FRAME_MODE) {
+			if(frame_counter_ & FrameMode) {
 				clock_frame_mode_1();
 			} else {
 				clock_frame_mode_0();
@@ -476,7 +476,7 @@ void APU::run(int cycles) {
 		}
 
 		if(sample_index_ != sizeof(sample_buffer_)) {
-			if((apu_cycles_ % clocks_per_sample) == 0) {
+			if((apu_cycles_ % ClocksPerSample) == 0) {
 				sample_buffer_[sample_index_++] = mix_channels();
 			}
 		}
