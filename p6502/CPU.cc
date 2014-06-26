@@ -6,37 +6,6 @@
 #include <cstdlib>
 #include <cstring>
 
-namespace {
-
-//-------------------------------------------------------------------
-// Name: read_handler
-//-------------------------------------------------------------------
-uint8_t read_handler(uint16_t address) {
-	return nes::cart.mapper()->read_memory(address);
-}
-
-//-------------------------------------------------------------------
-// Name: jam_handler
-//-------------------------------------------------------------------
-void jam_handler() {
-}
-
-//-------------------------------------------------------------------
-// Name: sync_handler
-//-------------------------------------------------------------------
-void sync_handler() {
-	return nes::cart.mapper()->cpu_sync();
-}
-
-//-------------------------------------------------------------------
-// Name: write_handler
-//-------------------------------------------------------------------
-void write_handler(uint16_t address, uint8_t value) {
-	return nes::cart.mapper()->write_memory(address, value);
-}
-
-}
-
 //-------------------------------------------------------------------
 // Name: CPU
 //-------------------------------------------------------------------
@@ -44,10 +13,21 @@ CPU::CPU() : irq_sources_(0x00) {
 
 	P6502::init(
 		context_,
-		&jam_handler,
-		&read_handler,
-		&write_handler,
-		&sync_handler);
+		[]() {
+			// JAM handler
+		},
+		[](uint16_t address) {
+			// read handler
+			return nes::cart.mapper()->read_memory(address);
+		},
+		[](uint16_t address, uint8_t value) {
+			// write handler
+			return nes::cart.mapper()->write_memory(address, value);
+		},
+		[]() {
+			// sync handler
+			return nes::cart.mapper()->cpu_sync();
+		});
 
 	page_[0x00] = ram_;
 	page_[0x01] = ram_;

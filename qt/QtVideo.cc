@@ -9,8 +9,8 @@
 
 namespace {
 
-const int WIDTH  = 256;
-const int HEIGHT = 240;
+const int Width  = 256;
+const int Height = 240;
 
 }
 
@@ -19,15 +19,15 @@ const int HEIGHT = 240;
 //------------------------------------------------------------------------------
 QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f) : QGLWidget(parent, shareWidget, f), buffer_(0), texture_(0) {
 
-	buffer_ = new uint32_t[WIDTH * HEIGHT]();
-	for(int i = 0; i < HEIGHT; ++i) {
-		scanlines_[i] = &buffer_[i * WIDTH];
+	buffer_ = new uint32_t[Width * Height]();
+	for(int i = 0; i < Height; ++i) {
+		scanlines_[i] = &buffer_[i * Width];
 	}
 
 	setAutoBufferSwap(true);
 	setFormat(QGLFormat(QGL::DoubleBuffer));
 	setMouseTracking(false);
-	setBaseSize(WIDTH, HEIGHT);
+	setBaseSize(Width, Height);
 
 	connect(this, SIGNAL(render_frame()), this, SLOT(updateGL()));
 
@@ -65,10 +65,10 @@ void QtVideo::initializeGL() {
 
 	glGenTextures(1, &texture_);
 	glBindTexture(GL_TEXTURE_2D, texture_);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, WIDTH);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, Width);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer_);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer_);
 }
 
 //------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source
 	uint32_t *const s = scanlines_[scanline];
 	const uint32_t *const palette = palette_[intensity];
 	
-	std::transform(source, source + WIDTH, s, [palette](uint8_t index) {
+	std::transform(source, source + Width, s, [palette](uint8_t index) {
 		return palette[index];
 	});
 }
@@ -112,7 +112,7 @@ void QtVideo::start_frame() {
 // Name: end_frame
 //------------------------------------------------------------------------------
 void QtVideo::end_frame() {
-	emit render_frame();
+	Q_EMIT render_frame();
 }
 
 //------------------------------------------------------------------------------
@@ -133,7 +133,7 @@ void QtVideo::paintGL() {
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, false ? GL_NEAREST : GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, false ? GL_NEAREST : GL_LINEAR);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, WIDTH, HEIGHT, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer_);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer_);
 
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(0.0, 0.0); glVertex3i(0, output_height, 0);
