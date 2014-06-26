@@ -473,7 +473,10 @@ PretendoWindow::OnLoadCart (BMessage *message)
 	
 	if (message->FindString ("path", &path) == B_OK) {
 		OnFreeCart();
-		nes::cart.load(path.String());
+		if (nes::cart.load(path.String()) == false) {
+			(new BAlert("Error", "Error, Invalid ROM Image", "Okay", NULL, NULL,
+				B_WIDTH_AS_USUAL, B_STOP_ALERT))->Go();
+		}
 		
 		if (fFramework == OVERLAY_FRAMEWORK) {
 			ClearBitmap (true);
