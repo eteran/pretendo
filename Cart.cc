@@ -57,7 +57,8 @@ Cart::~Cart() {
 //------------------------------------------------------------------------------
 // Name: load
 //------------------------------------------------------------------------------
-void Cart::load(const std::string &s) {
+bool
+Cart::load(const std::string &s) {
 
 	std::cout << "[Cart::load] loading '" << s << "'...";
 
@@ -93,6 +94,7 @@ void Cart::load(const std::string &s) {
 		}
 
 		mapper_ = Mapper::create_mapper(cart_.mapper);
+		return true;
 	} else {
 		std::cout << " ERROR! (" << r << ")" << std::endl;
 		mapper_   = std::shared_ptr<Mapper>();
@@ -100,6 +102,8 @@ void Cart::load(const std::string &s) {
 		chr_hash_ = 0;
 		rom_hash_ = 0;
 	}
+	
+	return false;
 }
 
 //------------------------------------------------------------------------------

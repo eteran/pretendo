@@ -148,6 +148,7 @@ H_FILES     := \
 	haiku/CartInfoView.h \
 	haiku/PaletteWindow.h \
 	haiku/PaletteView.h \
+	haiku/PretendoView.h \
 	version.h
 
 CXX_FILES   := \
@@ -252,6 +253,7 @@ CXX_FILES   := \
 	haiku/CartInfoView.cc \
 	haiku/PaletteWindow.cc \
 	haiku/PaletteView.cc \
+	haiku/PretendoView.cc \
 	
 C_FILES     := \
 	libines/ines_crc32.c \

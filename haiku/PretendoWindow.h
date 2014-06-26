@@ -54,6 +54,7 @@ class CartInfoWindow;
 class SimpleMutex;
 class InputWindow;
 class AudioWindow;
+class PretendoView;
 
 
 class PretendoWindow : public BDirectWindow, public VideoInterface
@@ -154,6 +155,7 @@ class PretendoWindow : public BDirectWindow, public VideoInterface
 	void SetDefaultPalette (void);
 	
 	private:
+	//PretendoView *fView;
 	BView *fView;
 	BMenuBar *fMenu;
 	BMenu *fFileMenu;

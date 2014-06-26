@@ -16,12 +16,6 @@
 
 
 namespace {
-	#ifdef __HAIKU__
-		#define CONFIG_PATH "/boot/home/config/settings/pretendo"
-	#else
-		#define CONFIG_PATH "~/"
-	#endif // __HAIKU__
-
 //------------------------------------------------------------------------------
 // Name: ltrim
 //------------------------------------------------------------------------------
@@ -98,6 +92,8 @@ std::vector<std::string> explode(const std::string &delimeter, const std::string
 //------------------------------------------------------------------------------
 inline std::vector<std::string> explode(const std::string &delimeter, const std::string &string) {
 	return explode(delimeter, string, std::numeric_limits<int>::max());
+}
+
 }
 
 Config::Config() 

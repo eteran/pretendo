@@ -26,7 +26,7 @@ public:
 	};
 
 public:
-	void load(const std::string &s);
+	bool load(const std::string &s);
 	void unload();
 	bool has_chr_rom() const;
 	uint32_t prg_mask() const;

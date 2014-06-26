@@ -11,6 +11,7 @@
 #include "PaletteWindow.h"
 #include "CartInfoWindow.h"
 #include "SimpleMutex.h"
+#include "PretendoView.h"
 //#include "AudioWindow.h"
 //#include "InputWindow.h"
 
@@ -45,7 +46,7 @@ PretendoWindow::PretendoWindow()
 	AddMenu();
 	bounds.top = fMenuHeight;
 	
-	fView = new BView (bounds, "main_view", B_FOLLOW_ALL, 0);
+	fView = new PretendoView(bounds, this);
 	AddChild (fView);
 	
 	ResizeTo (SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -515,7 +516,8 @@ PretendoWindow::OnQuit (void)
 
 void
 PretendoWindow::OnRun (void)
-{
+{	
+
 	if (! fRunning) {
 		if(const std::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 			reset(nes::HARD_RESET);
@@ -523,6 +525,8 @@ PretendoWindow::OnRun (void)
 			fRunning = true;
 			fAudioStream->Start();
 		}
+	} else if (fPaused) {
+		OnPause();
 	}
 }
 
@@ -530,22 +534,25 @@ PretendoWindow::OnRun (void)
 void
 PretendoWindow::OnStop (void)
 {		
-	if (fRunning || fPaused) {
-		fMutex->Unlock();
+	if (fRunning) {
 		fRunning = false;
-		fPaused = false;
-		fAudioStream->Stop();
-		fMutex->Lock();
+		if (! fPaused) {
+			fMutex->Lock();
+			fAudioStream->Stop();
+		}
+		
+		
+		if (fFramework == OVERLAY_FRAMEWORK) {
+			ClearBitmap(true);
+		} else {
+			ClearBitmap(false);
+			fView->SetViewColor(0, 0, 0);
+			fView->Invalidate();
+		}
 	}
 	
+	fPaused = false;
 	fEmuMenu->ItemAt(1)->SetMarked(false);
-	
-	if (fFramework == OVERLAY_FRAMEWORK) {
-			ClearBitmap (true);
-		} else {
-			fView->SetViewColor (0, 0, 0);
-			fView->Invalidate();
-		}	
 }
 
 
