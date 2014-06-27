@@ -58,6 +58,14 @@ union PPUMask {
 	BitField<3,2> screenEnabled;
 };
 
+
+union PPUStatus {
+	uint8_t raw;
+	BitField<5> overflow;
+	BitField<6> sprite0;
+	BitField<7> vblank;
+};
+
 class PPU : public boost::noncopyable {
 public:
 	class SpriteEntry {
@@ -211,7 +219,7 @@ private:
 	uint8_t      register_2007_buffer_;
 	uint8_t      sprite_address_;
 	uint8_t      sprite_data_index_;
-	uint8_t      status_;
+	PPUStatus    status_;
 	uint8_t      tile_offset_;           // loopy's "x"
 	uint8_t      sprite_buffer_;
 	bool         odd_frame_;

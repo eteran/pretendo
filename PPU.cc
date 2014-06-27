@@ -173,7 +173,7 @@ PPU::PPU() :
 	register_2007_buffer_(0),
 	sprite_address_(0),
 	sprite_data_index_(0),
-	status_(0),
+	status_({0}),
 	tile_offset_(0),
 	sprite_buffer_(0xff),
 	odd_frame_(false),
@@ -240,7 +240,7 @@ void PPU::reset(nes::RESET reset_type) {
 	left_most_sprite_x_     = 0xff;
 	sprite_zero_found_curr_ = false;
 	sprite_zero_found_next_ = false;
-	status_                 = 0;
+	status_.raw             = 0;
 	tile_offset_            = 0;
 	vpos_                   = 0;
 	vram_address_           = 0x0000;
@@ -271,7 +271,7 @@ void PPU::write2000(uint8_t value) {
 	nametable_ |= (value & 0x03) << 10;
 
 	// we can re-trigger an NMI ...
-	if(!prev_nmi_on_vblank && ppu_control_.nmiOnVBlank && (status_ & STATUS_VBLANK)) {
+	if(!prev_nmi_on_vblank && ppu_control_.nmiOnVBlank && status_.vblank) {
 		nes::cpu.nmi();
 	}
 }
@@ -432,13 +432,13 @@ uint8_t PPU::read2001() {
 uint8_t PPU::read2002() {
 	// upper 3 bits of status
 	// lower 5 bits of garbage (latch)
-	const uint8_t ret = (status_ & 0xe0) | (latch_ & 0x1f);
+	const uint8_t ret = (status_.raw & (STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK)) | (latch_ & 0x1f);
 
 	// reset scroll/write latch
 	write_latch_ = false;
 
 	// clear vblank flag
-	status_ &= ~STATUS_VBLANK;
+	status_.vblank = false;
 
 	ppu_read_2002_cycle_ = ppu_cycle_;
 
@@ -831,7 +831,7 @@ void PPU::evaluate_sprites() {
 				//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
 				//     'n' when 'm' overflows); if m = 3, increment n
 				if(sprite_line < Size) {
-					status_ |= STATUS_OVERFLOW;
+					status_.overflow = true;
 					++index;
 				} else {
 					// 3b. If the value is not in range, increment n AND m (without carry). If n overflows
@@ -957,7 +957,7 @@ uint8_t PPU::select_pixel(uint8_t index) {
 					#else
 						if(p->is_sprite_zero() && (index < 255)) {
 					#endif
-							status_ |= STATUS_SPRITE0;
+							status_.sprite0         = true;
 							sprite_zero_found_curr_ = false;
 						}
 
@@ -1094,7 +1094,7 @@ void PPU::enter_vblank() {
 	// Reading one PPU clock before reads it as clear and never sets the flag
 	// or generates NMI for that frame.
 	if(ppu_cycle_ != (ppu_read_2002_cycle_ + 1)) {
-		status_ |= STATUS_VBLANK;
+		status_.vblank = true;
 	}
 }
 
@@ -1103,7 +1103,7 @@ void PPU::enter_vblank() {
 //------------------------------------------------------------------------------
 void PPU::exit_vblank() {
 	// clear all the relevant status bits
-	status_ &= ~(STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK);
+	status_.raw &= ~(STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK);
 	write_block_ = false;
 }
 
@@ -1372,7 +1372,7 @@ void PPU::execute_cycle(const scanline_vblank &target) {
 			enter_vblank();
 			break;
 		case 3:
-			if(ppu_control_.nmiOnVBlank && (status_ & STATUS_VBLANK)) {
+			if(ppu_control_.nmiOnVBlank && status_.vblank) {
 				nes::cpu.nmi();
 			}
 			break;

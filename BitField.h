@@ -127,9 +127,6 @@ public:
 	}
 
 	operator bool() const  { return (value_ >> Index) & Mask; }
-	void set()             { value_ = (value_ & ~(Mask << Index)) | (1 << Index); }
-	void unset()           { value_ = (value_ & ~(Mask << Index));                }
-	void flip()            { value_ = (value_ ^ (1 << Index)); }
 	
 private:
 	T value_;

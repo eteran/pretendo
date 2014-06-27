@@ -7,6 +7,7 @@
 #include "Triangle.h"
 #include "Noise.h"
 #include "DMC.h"
+#include "BitField.h"
 
 #include <cstdint>
 #include <cstddef>
@@ -16,6 +17,21 @@ using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
+
+union APUStatus {
+	uint8_t raw;
+	BitField<0> square1Enabled;
+	BitField<1> square2Enabled;
+	BitField<2> triangleEnabled;
+	BitField<3> noiseEnabled;
+	BitField<4> dmcEnabled;
+
+	BitField<6> frameIRQ;
+	BitField<7> dmcIRQ;
+	
+	// meta field
+	BitField<6,2> irqFiring;
+};
 
 class APU : public boost::noncopyable {
 	friend class DMC;
@@ -32,7 +48,6 @@ public:
 		STATUS_ENABLE_TRIANGLE = 0x04,
 		STATUS_ENABLE_SQUARE_2 = 0x02,
 		STATUS_ENABLE_SQUARE_1 = 0x01,
-		STATUS_ENABLE_ALL	   = STATUS_ENABLE_SQUARE_1 | STATUS_ENABLE_SQUARE_2 | STATUS_ENABLE_TRIANGLE | STATUS_ENABLE_NOISE | STATUS_ENABLE_DMC
 	};
 
 	static const int frequency         = 48000;
@@ -94,18 +109,18 @@ private:
 	uint8_t mix_channels() const;
 
 private:
-	Square   square_0_;
-	Square   square_1_;
-	Triangle triangle_;
-	Noise    noise_;
-	DMC      dmc_;
+	Square    square_0_;
+	Square    square_1_;
+	Triangle  triangle_;
+	Noise     noise_;
+	DMC       dmc_;
 
-	uint64_t apu_cycles_;
-	uint64_t next_clock_;
-	uint8_t  clock_step_;
-	uint8_t  status_;
-	uint8_t  frame_counter_;
-	uint8_t  last_frame_counter_;
+	uint64_t  apu_cycles_;
+	uint64_t  next_clock_;
+	uint8_t   clock_step_;
+	APUStatus status_;
+	uint8_t   frame_counter_;
+	uint8_t   last_frame_counter_;
 
 private:
 	uint8_t sample_buffer_[buffer_size];

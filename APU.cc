@@ -34,7 +34,7 @@ const int ClocksPerSample = CPUFrequency / APU::frequency;
 // Name: APU
 //------------------------------------------------------------------------------
 APU::APU() : square_0_(0), square_1_(1), apu_cycles_(-1), next_clock_(-1),
-		clock_step_(0), status_(0), frame_counter_(0), last_frame_counter_(0),
+		clock_step_(0), status_({0}), frame_counter_(0), last_frame_counter_(0),
 		sample_index_(0) {
 
 	using std::memset;
@@ -54,7 +54,7 @@ APU::~APU() {
 //------------------------------------------------------------------------------
 void APU::reset(nes::RESET reset_type) {
 
-	status_        = 0;
+	status_.raw    = 0;
 	frame_counter_ = 0;
 	apu_cycles_    = 0;
 	next_clock_    = 0;
@@ -245,7 +245,7 @@ void APU::write4013(uint8_t value) {
 void APU::write4015(uint8_t value) {
 
 	// Writing to this register clears the DMC interrupt flag.
-	status_ &= ~STATUS_DMC_IRQ;
+	status_.dmcIRQ = false;
 
 	if(value & STATUS_ENABLE_SQUARE_1) {
 		square_0_.enable();
@@ -277,7 +277,7 @@ void APU::write4015(uint8_t value) {
 		dmc_.disable();
 	}
 
-	if(!(status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ))) {
+	if(!status_.irqFiring) {
 		nes::cpu.clear_irq(CPU::APU_IRQ);
 	}
 }
@@ -286,10 +286,10 @@ void APU::write4015(uint8_t value) {
 // Name: read4015
 //------------------------------------------------------------------------------
 uint8_t APU::read4015() {
-	uint8_t ret = status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ);
+	uint8_t ret = status_.raw & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ);
 
 	// reading this register clears the Frame interrupt flag.
-	status_ &= ~STATUS_FRAME_IRQ;
+	status_.frameIRQ = false;
 
 	if(square_0_.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_SQUARE_1;
@@ -311,7 +311,7 @@ uint8_t APU::read4015() {
 		ret |= STATUS_ENABLE_DMC;
 	}
 
-	if(!(status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ))) {
+	if(!status_.irqFiring) {
 		nes::cpu.clear_irq(CPU::APU_IRQ);
 	}
 
@@ -327,8 +327,8 @@ void APU::write4017(uint8_t value) {
 	last_frame_counter_ = value;
 
 	if(frame_counter_ & FrameInhibitIRQ) {
-		status_ &= ~STATUS_FRAME_IRQ;
-		if(!(status_ & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ))) {
+		status_.frameIRQ = false;
+		if(!status_.irqFiring) {
 			nes::cpu.clear_irq(CPU::APU_IRQ);
 		}
 	}
@@ -391,7 +391,7 @@ void APU::clock_frame_mode_0() {
 
 	case 3:
 		if(!(frame_counter_ & FrameInhibitIRQ)) {
-			status_ |= STATUS_FRAME_IRQ;
+			status_.frameIRQ = true;
 		}
 
 		++next_clock_;
@@ -401,7 +401,7 @@ void APU::clock_frame_mode_0() {
 		clock_linear();
 		clock_length();
 		if(!(frame_counter_ & FrameInhibitIRQ)) {
-			status_ |= STATUS_FRAME_IRQ;
+			status_.frameIRQ = true;
 		}
 
 		++next_clock_;
@@ -409,7 +409,7 @@ void APU::clock_frame_mode_0() {
 
 	case 5:
 		if(!(frame_counter_ & FrameInhibitIRQ)) {
-			status_ |= STATUS_FRAME_IRQ;
+			status_.frameIRQ = true;
 		}
 
 		next_clock_ += 7457;
@@ -463,7 +463,7 @@ void APU::run(int cycles) {
 
 	while(cycles-- > 0) {
 
-		if(!(frame_counter_ & FrameInhibitIRQ) && (status_ & STATUS_FRAME_IRQ)) {
+		if(!(frame_counter_ & FrameInhibitIRQ) && (status_.frameIRQ)) {
 			nes::cpu.irq(CPU::APU_IRQ);
 		}
 
