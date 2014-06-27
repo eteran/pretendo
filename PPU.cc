@@ -70,21 +70,21 @@ const uint8_t powerup_palette[32] = {
 //------------------------------------------------------------------------------
 // Name: attribute_bits
 //------------------------------------------------------------------------------
-uint8_t attribute_bits(uint16_t vram_address, uint8_t attr_byte) {
+constexpr uint8_t attribute_bits(uint16_t vram_address, uint8_t attr_byte) {
 	return (attr_byte >> (((vram_address & 0x40) >> 4) | (vram_address & 0x02))) & 0x03;
 }
 
 //------------------------------------------------------------------------------
 // Name: attribute_address
 //------------------------------------------------------------------------------
-uint16_t attribute_address(uint16_t vram_address) {
+constexpr uint16_t attribute_address(uint16_t vram_address) {
 	return 0x23c0 | (vram_address & 0x0c00) | ((vram_address >> 4) & 0x38) | ((vram_address >> 2) & 0x07);
 }
 
 //------------------------------------------------------------------------------
 // Name: tile_address
 //------------------------------------------------------------------------------
-uint16_t tile_address(uint16_t vram_address) {
+constexpr uint16_t tile_address(uint16_t vram_address) {
 	return 0x2000 | (vram_address & 0x0fff);
 }
 

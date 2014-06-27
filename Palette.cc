@@ -23,7 +23,7 @@ const T &bound(const T &lower, const T &value, const T &upper) {
 //------------------------------------------------------------------------------
 // Name: wave
 //------------------------------------------------------------------------------
-int wave(int p, int color) {
+constexpr int wave(int p, int color) {
 	return (color + p + 8) % 12 < 6;
 }
 
@@ -31,7 +31,8 @@ int wave(int p, int color) {
 // Name: gamma_fix
 //------------------------------------------------------------------------------
 float gamma_fix(float f, float gamma) {
-	return f < 0.f ? 0.f : std::pow(f, 2.2f / gamma);
+	using std::pow;
+	return f < 0.f ? 0.f : pow(f, 2.2f / gamma);
 }
 
 //------------------------------------------------------------------------------

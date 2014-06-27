@@ -34,7 +34,7 @@ size_t create_mask(size_t size) {
 //------------------------------------------------------------------------------
 // Name: is_power_of_2
 //------------------------------------------------------------------------------
-bool is_power_of_2(size_t size) {
+constexpr bool is_power_of_2(size_t size) {
 	return (size & (size - 1)) == 0;
 }
 

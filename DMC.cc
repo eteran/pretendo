@@ -14,13 +14,6 @@ const uint16_t frequency_table[16] = {
 	0x06a, 0x054, 0x048, 0x036
 };
 
-//------------------------------------------------------------------------------
-// Name: dmc_dma_write
-//------------------------------------------------------------------------------
-void dmc_dma_write(uint8_t value) {
-	nes::apu.dmc().load_sample_buffer(value);
-}
-
 }
 
 //------------------------------------------------------------------------------
@@ -75,7 +68,7 @@ void DMC::enable() {
 		printf("BURN.1\n");
 		sample_buffer_.load(nes::cart.mapper()->read_memory(sample_pointer_));
 #else
-		nes::cpu.schedule_dmc_dma(dmc_dma_write, sample_pointer_, 1);
+		nes::cpu.schedule_dmc_dma([](uint8_t value){ nes::apu.dmc().load_sample_buffer(value); }, sample_pointer_, 1);
 #endif
 		sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
@@ -179,7 +172,7 @@ void DMC::tick() {
 			printf("BURN.2\n");
 			sample_buffer_.load(nes::cart.mapper()->read_memory(sample_pointer_));
 #else
-			nes::cpu.schedule_dmc_dma(dmc_dma_write, sample_pointer_, 1);
+			nes::cpu.schedule_dmc_dma([](uint8_t value){ nes::apu.dmc().load_sample_buffer(value); }, sample_pointer_, 1);
 #endif
 			sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
