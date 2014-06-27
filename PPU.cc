@@ -168,8 +168,8 @@ PPU::PPU() :
 	latch_(0),
 	next_attribute_(0),
 	next_tile_index_(0),
-	ppu_control_(0),
-	ppu_mask_(0),
+	ppu_control_({0}),
+	ppu_mask_({0}),
 	register_2007_buffer_(0),
 	sprite_address_(0),
 	sprite_data_index_(0),
@@ -230,8 +230,8 @@ void PPU::reset(nes::RESET reset_type) {
 	pattern_queue_[0]       = 0;
 	pattern_queue_[1]       = 0;
 	ppu_cycle_              = 0;
-	ppu_control_            = 0;
-	ppu_mask_               = 0;
+	ppu_control_.raw        = 0;
+	ppu_mask_.raw           = 0;
 	register_2007_buffer_   = 0;
 	rendering_              = false;
 	sprite_address_         = 0;
@@ -261,9 +261,9 @@ void PPU::write2000(uint8_t value) {
 		return;
 	}
 
-	const bool prev_nmi_on_vblank = nmi_on_vblank();
+	const bool prev_nmi_on_vblank = ppu_control_.nmiOnVBlank;
 
-	ppu_control_ = value;
+	ppu_control_.raw = value;
 
 	// name table address
 	// t:0000110000000000=d:00000011
@@ -271,7 +271,7 @@ void PPU::write2000(uint8_t value) {
 	nametable_ |= (value & 0x03) << 10;
 
 	// we can re-trigger an NMI ...
-	if(!prev_nmi_on_vblank && nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
+	if(!prev_nmi_on_vblank && ppu_control_.nmiOnVBlank && (status_ & STATUS_VBLANK)) {
 		nes::cpu.nmi();
 	}
 }
@@ -286,7 +286,7 @@ void PPU::write2001(uint8_t value) {
 		return;
 	}
 
-	ppu_mask_ = value;
+	ppu_mask_.raw = value;
 }
 
 //------------------------------------------------------------------------------
@@ -380,14 +380,14 @@ void PPU::write2007(uint8_t value) {
 
 	const uint16_t temp_address = vram_address_ & 0x3fff;
 
-	if(rendering_ && screen_enabled()) {
-		if(vertical_address_increment()) {
+	if(rendering_ && ppu_mask_.screenEnabled) {
+		if(ppu_control_.addressIncrement) {
 			clock_y();
 		} else {
 			clock_x();
 		}
 	} else {
-		if(vertical_address_increment()) {
+		if(ppu_control_.addressIncrement) {
 			vram_address_ += 32;
 		} else {
 			vram_address_ += 1;
@@ -460,7 +460,7 @@ uint8_t PPU::read2004() {
 		return 0xff;
 	}
 
-	if(!rendering_ || !screen_enabled()) {
+	if(!rendering_ || !ppu_mask_.screenEnabled) {
 		switch(sprite_address_ & 0x03) {
 		case 0x00: latch_ = sprite_ram_[sprite_address_] & 0xff; break;
 		case 0x01: latch_ = sprite_ram_[sprite_address_] & 0xff; break;
@@ -499,14 +499,14 @@ uint8_t PPU::read2007() {
 
 	const uint16_t temp_address = vram_address_ & 0x3fff;
 
-	if(rendering_ && screen_enabled()) {
-		if(vertical_address_increment()) {
+	if(rendering_ && ppu_mask_.screenEnabled) {
+		if(ppu_control_.addressIncrement) {
 			clock_y();
 		} else {
 			clock_x();
 		}
 	} else {
-		if(vertical_address_increment()) {
+		if(ppu_control_.addressIncrement) {
 			vram_address_ += 32;
 		} else {
 			vram_address_ += 1;
@@ -520,7 +520,7 @@ uint8_t PPU::read2007() {
 
 	if((temp_address & 0x3f00) == 0x3f00) {
 		latch_ = palette_[temp_address & 0x1f];
-		if(greyscale()) {
+		if(ppu_mask_.monochrome) {
 			latch_ &= 0x30;
 		}
 	}
@@ -718,7 +718,7 @@ void PPU::evaluate_sprites_even() {
 //		printf("SETTING: S-OAM[%d][%d] = %02x\n", (index >> 2) & 0x07, index & 0x03, sprite_buffer_);
 	} else if(hpos_ == 256) {
 		// TODO: do this part incrementally during cycles 0-255 like the real thing
-		if(sprite_size() == 16) {
+		if(ppu_control_.largeSprites) {
 			evaluate_sprites<16>();
 		} else {
 			evaluate_sprites<8>();
@@ -856,7 +856,7 @@ void PPU::evaluate_sprites() {
 //------------------------------------------------------------------------------
 uint8_t PPU::select_blank_pixel() const {
 
-	assert(!screen_enabled());
+	assert(!ppu_mask_.screenEnabled);
 
 	if((vram_address_ & 0x3f00) == 0x3f00) {
 		return vram_address_ & 0x1f;
@@ -871,10 +871,10 @@ uint8_t PPU::select_blank_pixel() const {
 //------------------------------------------------------------------------------
 uint8_t PPU::select_bg_pixel(uint8_t index) {
 
-	assert(screen_enabled());
+	assert(ppu_mask_.screenEnabled);
 
 	// first identify what the BG pixel would be
-	if((background_clipping() || index >= 8) && background_visible()) {
+	if((ppu_mask_.backgroundClipping || index >= 8) && ppu_mask_.backgroundVisible) {
 	#if 1
 		const uint16_t mask  = (0x8000 >> tile_offset_);
 		const uint8_t  shift = (0x0f - tile_offset_);
@@ -908,7 +908,7 @@ uint8_t PPU::select_bg_pixel(uint8_t index) {
 //------------------------------------------------------------------------------
 uint8_t PPU::select_pixel(uint8_t index) {
 
-	assert(screen_enabled());
+	assert(ppu_mask_.screenEnabled);
 
 	uint8_t pixel = select_bg_pixel(index);
 	
@@ -916,7 +916,7 @@ uint8_t PPU::select_pixel(uint8_t index) {
 	if(left_most_sprite_x_ <= index) {
 
 		// then see if any of the sprites belong..
-		if((sprite_clipping() || index >= 8) && sprites_visible()) {
+		if((ppu_mask_.spriteClipping || index >= 8) && ppu_mask_.spritesVisible) {
 		
 			const SpriteEntry *const first = sprite_data_;
 			const SpriteEntry *const last  = &sprite_data_[sprite_data_index_];
@@ -1108,20 +1108,6 @@ void PPU::exit_vblank() {
 }
 
 //------------------------------------------------------------------------------
-// Name: screen_enabled
-//------------------------------------------------------------------------------
-bool PPU::screen_enabled() const {
-	return sprites_visible() || background_visible();
-}
-
-//------------------------------------------------------------------------------
-// Name: nmi_on_vblank
-//------------------------------------------------------------------------------
-bool PPU::nmi_on_vblank() const {
-	return ppu_control_ & 0x80;
-}
-
-//------------------------------------------------------------------------------
 // Name: render_pixel
 //------------------------------------------------------------------------------
 void PPU::render_pixel(uint8_t *dest_buffer) {
@@ -1129,7 +1115,7 @@ void PPU::render_pixel(uint8_t *dest_buffer) {
 	const uint8_t index = hpos_ - 1;
 	const uint8_t pixel = select_pixel(index);
 
-	if(greyscale()) {
+	if(ppu_mask_.monochrome) {
 		dest_buffer[index] = palette_[pixel & 0x03 ? pixel : 0x00] & 0x30;
 	} else {
 		dest_buffer[index] = palette_[pixel & 0x03 ? pixel : 0x00];
@@ -1203,7 +1189,7 @@ void PPU::execute_cycle(const scanline_prerender &) {
 		exit_vblank();
 	}
 
-	if(screen_enabled()) {
+	if(ppu_mask_.screenEnabled) {
 		if(hpos_ < 1) {
 			// idle
 		} else if(hpos_ < 257) {
@@ -1232,10 +1218,10 @@ void PPU::execute_cycle(const scanline_prerender &) {
 			case 2: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
 			case 3: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
 			case 4: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: update_sprite_registers(); if(sprite_size() == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: update_sprite_registers(); if(sprite_size() == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: update_sprite_registers(); if(sprite_size() == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 8: update_sprite_registers(); if(sprite_size() == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 5: update_sprite_registers(); if(ppu_control_.largeSprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+			case 6: update_sprite_registers(); if(ppu_control_.largeSprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+			case 7: update_sprite_registers(); if(ppu_control_.largeSprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+			case 8: update_sprite_registers(); if(ppu_control_.largeSprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 305) {
 			switch(hpos_ & 0x07) {
@@ -1243,10 +1229,10 @@ void PPU::execute_cycle(const scanline_prerender &) {
 			case 2: update_vram_address(); update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
 			case 3: update_vram_address(); update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
 			case 4: update_vram_address(); update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: update_vram_address(); update_sprite_registers(); if(sprite_size() == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: update_vram_address(); update_sprite_registers(); if(sprite_size() == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: update_vram_address(); update_sprite_registers(); if(sprite_size() == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 0: update_vram_address(); update_sprite_registers(); if(sprite_size() == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 5: update_vram_address(); update_sprite_registers(); if(ppu_control_.largeSprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+			case 6: update_vram_address(); update_sprite_registers(); if(ppu_control_.largeSprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+			case 7: update_vram_address(); update_sprite_registers(); if(ppu_control_.largeSprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+			case 0: update_vram_address(); update_sprite_registers(); if(ppu_control_.largeSprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 321) {
 			switch(hpos_ & 0x07) {
@@ -1254,10 +1240,10 @@ void PPU::execute_cycle(const scanline_prerender &) {
 			case 2: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
 			case 3: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
 			case 4: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: update_sprite_registers(); if(sprite_size() == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: update_sprite_registers(); if(sprite_size() == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: update_sprite_registers(); if(sprite_size() == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 0: update_sprite_registers(); if(sprite_size() == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 5: update_sprite_registers(); if(ppu_control_.largeSprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+			case 6: update_sprite_registers(); if(ppu_control_.largeSprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+			case 7: update_sprite_registers(); if(ppu_control_.largeSprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+			case 0: update_sprite_registers(); if(ppu_control_.largeSprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 337) {
 			// fetch first 2 tiles of NEXT scanline
@@ -1290,13 +1276,13 @@ void PPU::execute_cycle(const scanline_prerender &) {
 //------------------------------------------------------------------------------
 void PPU::execute_cycle(const scanline_render &target) {
 
-	if(!screen_enabled()) {
+	if(!ppu_mask_.screenEnabled) {
 
 		if(hpos_ < 1) {
 			// idle
 		} else if(hpos_ < 257) {
 			const uint8_t pixel = select_blank_pixel();
-			if(greyscale()) {
+			if(ppu_mask_.monochrome) {
 				target.buffer[hpos_ - 1] = palette_[pixel] & 0x30;
 			} else {
 				target.buffer[hpos_ - 1] = palette_[pixel];
@@ -1332,10 +1318,10 @@ void PPU::execute_cycle(const scanline_render &target) {
 			case 2: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
 			case 3: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
 			case 4: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: update_sprite_registers(); if(sprite_size() == 16) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: update_sprite_registers(); if(sprite_size() == 16) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: update_sprite_registers(); if(sprite_size() == 16) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 0: update_sprite_registers(); if(sprite_size() == 16) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 5: update_sprite_registers(); if(ppu_control_.largeSprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+			case 6: update_sprite_registers(); if(ppu_control_.largeSprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+			case 7: update_sprite_registers(); if(ppu_control_.largeSprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+			case 0: update_sprite_registers(); if(ppu_control_.largeSprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 337) {
 
@@ -1386,7 +1372,7 @@ void PPU::execute_cycle(const scanline_vblank &target) {
 			enter_vblank();
 			break;
 		case 3:
-			if(nmi_on_vblank() && (status_ & STATUS_VBLANK)) {
+			if(ppu_control_.nmiOnVBlank && (status_ & STATUS_VBLANK)) {
 				nes::cpu.nmi();
 			}
 			break;
@@ -1410,68 +1396,11 @@ int PPU::clock_cpu() {
 }
 
 //------------------------------------------------------------------------------
-// Name: color_intensity
-//------------------------------------------------------------------------------
-uint8_t PPU::color_intensity() const {
-	return (ppu_mask_ >> 5) & 0x07;
-}
-
-//------------------------------------------------------------------------------
-// Name: sprites_visible
-//------------------------------------------------------------------------------
-bool PPU::sprites_visible() const {
-	return ppu_mask_ & 0x10;
-}
-
-//------------------------------------------------------------------------------
-// Name: background_visible
-//------------------------------------------------------------------------------
-bool PPU::background_visible() const {
-	return ppu_mask_ & 0x08;
-}
-
-//------------------------------------------------------------------------------
-// Name: sprite_clipping
-//------------------------------------------------------------------------------
-bool PPU::sprite_clipping() const {
-	return ppu_mask_ & 0x04;
-}
-
-//------------------------------------------------------------------------------
-// Name: background_clipping
-//------------------------------------------------------------------------------
-bool PPU::background_clipping() const {
-	return ppu_mask_ & 0x02;
-}
-
-//------------------------------------------------------------------------------
-// Name: greyscale
-//------------------------------------------------------------------------------
-bool PPU::greyscale() const {
-	return ppu_mask_ & 0x01;
-}
-
-//------------------------------------------------------------------------------
-// Name: sprite_size
-//------------------------------------------------------------------------------
-uint8_t PPU::sprite_size() const {
-#if 1
-	return ((ppu_control_ & 0x20) >> 2) + 8;
-#else
-	return (ppu_control_ & 0x20) ? 16 : 8;
-#endif
-}
-
-//------------------------------------------------------------------------------
 // Name: sprite_pattern_table
 // Desc: returns 0x0000 or 0x1000 depending on bit 3 of ppu_control_
 //------------------------------------------------------------------------------
 uint16_t PPU::sprite_pattern_table() const {
-#if 1
-	return (ppu_control_ & 0x08) << 9;
-#else
-	return (ppu_control_ & 0x08) ? 0x1000 : 0x0000;
-#endif
+	return ppu_control_.spritePatternTable ? 0x1000 : 0x0000;
 }
 
 //------------------------------------------------------------------------------
@@ -1479,18 +1408,7 @@ uint16_t PPU::sprite_pattern_table() const {
 // Desc: returns 0x0000 or 0x1000 depending on bit 4 of ppu_control_
 //------------------------------------------------------------------------------
 uint16_t PPU::background_pattern_table() const {
-#if 1
-	return (ppu_control_ & 0x10) << 8;
-#else
-	return (ppu_control_ & 0x10) ? 0x1000 : 0x0000;
-#endif
-}
-
-//------------------------------------------------------------------------------
-// Name: vertical_address_increment
-//------------------------------------------------------------------------------
-bool PPU::vertical_address_increment() const {
-	return ppu_control_ & 0x04;
+	return ppu_control_.backgroundPatternTable ? 0x1000 : 0x0000;
 }
 
 //------------------------------------------------------------------------------

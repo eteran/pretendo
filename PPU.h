@@ -4,6 +4,7 @@
 
 #include "Reset.h"
 #include "VRAMBank.h"
+#include "BitField.h"
 #include <cstdint>
 #include <boost/noncopyable.hpp>
 
@@ -30,6 +31,31 @@ struct scanline_render : scanline {
 	explicit scanline_render(uint8_t *p) : buffer(p) {
 	}
 	uint8_t *const buffer;
+};
+
+
+union PPUControl {
+	uint8_t raw;
+	BitField<0,2> nametable;
+	BitField<2>   addressIncrement;
+	BitField<3>   spritePatternTable;
+	BitField<4>   backgroundPatternTable;
+	BitField<5>   largeSprites;
+	BitField<6>   ppuMaster;
+	BitField<7>   nmiOnVBlank;
+};
+
+union PPUMask {
+	uint8_t raw;
+	BitField<0>   monochrome;
+	BitField<1>   backgroundClipping;
+	BitField<2>   spriteClipping;
+	BitField<3>   backgroundVisible;
+	BitField<4>   spritesVisible;
+	BitField<5,2> intensity;
+	
+	// meta-fields which don't occupy any space :-)
+	BitField<3,2> screenEnabled;
 };
 
 class PPU : public boost::noncopyable {
@@ -89,8 +115,10 @@ public:
 	uint8_t read_vram(uint16_t address);
 
 public:
-	uint8_t color_intensity() const;
 	void end_frame();
+	
+	const PPUMask &mask() const       { return ppu_mask_; }
+	const PPUControl &control() const { return ppu_control_; }
 	
 	template <class T>
 	void execute_scanline(const T &target);
@@ -113,21 +141,12 @@ public:
 	}
 
 private:
-	bool background_clipping() const;
-	bool background_visible() const;
-	bool greyscale() const;	
-	bool nmi_on_vblank() const;
-	bool screen_enabled() const;
-	bool sprite_clipping() const;
-	bool sprites_visible() const;
 	int clock_cpu();	
 	uint16_t background_pattern_table() const;
 	uint16_t sprite_pattern_table() const;
-	bool vertical_address_increment() const;
 	uint8_t select_blank_pixel() const;
 	uint8_t select_pixel(uint8_t index);
 	uint8_t select_bg_pixel(uint8_t index);
-	uint8_t sprite_size() const;
 	void clock_x();
 	void clock_y();
 	void enter_vblank();
@@ -187,8 +206,8 @@ private:
 	uint8_t      latch_;
 	uint8_t      next_attribute_;
 	uint8_t      next_tile_index_;
-	uint8_t      ppu_control_;
-	uint8_t      ppu_mask_;
+	PPUControl   ppu_control_;
+	PPUMask      ppu_mask_;
 	uint8_t      register_2007_buffer_;
 	uint8_t      sprite_address_;
 	uint8_t      sprite_data_index_;
@@ -211,7 +230,6 @@ private:
 									     // even though the real thing only has 2
 									     // tables, we currently simulate 4 for
 									     // simplicity
-
 public:
 	bool         show_sprites_;
 };
