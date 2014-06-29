@@ -3,16 +3,10 @@
 #include "CPU.h"
 #include <cstring>
 
-enum {
-	IRQ_A = 0x01,
-	IRQ_E = 0x02,
-	IRQ_M = 0x04
-};
-
 //------------------------------------------------------------------------------
 // Name: VRC6
 //------------------------------------------------------------------------------
-VRC6::VRC6() : irq_latch_(0), irq_control_(0), irq_counter_(0), irq_prescaler_(341) {
+VRC6::VRC6() : irq_latch_(0), irq_control_({0}), irq_counter_(0), irq_prescaler_(341) {
 
 
 	set_prg_89ab(0);
@@ -159,8 +153,8 @@ void VRC6::write_f(uint16_t address, uint8_t value) {
 
 	case 0xf001:
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
-		irq_control_ = value;
-		if(irq_control_ & IRQ_E) {
+		irq_control_.raw = value;
+		if(irq_control_.enabled) {
 			irq_counter_   = irq_latch_;
 			irq_prescaler_ = 341;
 		}
@@ -168,7 +162,7 @@ void VRC6::write_f(uint16_t address, uint8_t value) {
 
 	case 0xf002:
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
-		irq_control_ = (irq_control_ & ~IRQ_E) | ((irq_control_ & IRQ_A) << 1);
+		irq_control_.enabled = irq_control_.a;
 		break;
 	}
 }
@@ -178,8 +172,8 @@ void VRC6::write_f(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void VRC6::cpu_sync() {
 
-	if(irq_control_ & IRQ_E) {
-		if(irq_control_ & IRQ_M) {
+	if(irq_control_.enabled) {
+		if(irq_control_.mode) {
 			clock_irq();
 		} else {
 			irq_prescaler_ -= 3;

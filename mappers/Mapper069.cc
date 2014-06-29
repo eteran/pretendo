@@ -4,19 +4,10 @@
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(69);
 
-namespace {
-
-enum {
-	IRQ_C = 0x80,
-	IRQ_T = 0x01
-};
-
-}
-
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper69::Mapper69() : irq_counter_(0), irq_control_(0), command_8000_(0), command_c000_(0), prg_mode_(0) {
+Mapper69::Mapper69() : irq_counter_(0), irq_control_({0}), command_8000_(0), command_c000_(0), prg_mode_(0) {
 
 	memset(chr_ram_, 0, sizeof(chr_ram_));
 	memset(prg_ram_, 0, sizeof(prg_ram_));
@@ -125,8 +116,8 @@ void Mapper69::write_a(uint16_t address, uint8_t value) {
 		break;
 
 	case 0x0d:
-		irq_control_ = value;
-		if(!(irq_control_ & IRQ_T)) {
+		irq_control_.raw = value;
+		if(!irq_control_.enabled) {
 			nes::cpu.clear_irq(CPU::MAPPER_IRQ);
 		}
 		break;
@@ -161,9 +152,9 @@ void Mapper69::write_e(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper69::cpu_sync() {
-	if(irq_control_ & IRQ_C) {
+	if(irq_control_.counter_enabled) {
 		--irq_counter_;
-		if(irq_counter_ == 0xffff && (irq_control_ & IRQ_T)) {
+		if(irq_counter_ == 0xffff && irq_control_.enabled) {
 			nes::cpu.irq(CPU::MAPPER_IRQ);
 		}
 	}

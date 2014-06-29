@@ -7,8 +7,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(5);
 namespace {
 
 enum {
-	IRQ_PENDING   = 0x80,
-	IN_FRAME      = 0x40,
 	VSPLIT_ENABLE = 0x80,
 	VSPLIT_RIGHT  = 0x40,
 	VSPLIT_TILE   = 0x1f
@@ -22,7 +20,7 @@ enum {
 Mapper5::Mapper5() :
 		irq_enabled_(false), bg_char_upper_(0x00), fetch_count_(0),
 		chr_mode_(0), exram_mode_(0), fill_mode_attr_(0), fill_mode_tile_(0),
-		irq_counter_(0), irq_status_(0), irq_target_(0), mirroring_mode_(0),
+		irq_counter_(0), irq_status_({0}), irq_target_(0), mirroring_mode_(0),
 		multiplier_1_(0), multiplier_2_(0), prg_mode_(0x03), prg_ram_protect1_(0),
 		prg_ram_protect2_(0), sprite_size_(8), vertical_split_mode_(0),
 		vertical_split_scroll_(0), vertical_split_bank_(0), last_chr_write_(CHR_BANK_A) {
@@ -367,9 +365,9 @@ uint8_t Mapper5::read_5(uint16_t address) {
 
 	switch(address) {
 	case 0x5204:
-		ret = irq_status_;
+		ret = irq_status_.raw;
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
-		irq_status_ &= ~IRQ_PENDING;
+		irq_status_.pending = false;
 		break;
 
 	case 0x5205:
@@ -687,7 +685,7 @@ void Mapper5::write_2(uint16_t address, uint8_t value) {
 	case 0x01:
 		// sprites and background disabled
 		if(!(value & 0x18)) {
-			irq_status_ &= ~IN_FRAME;
+			irq_status_.in_frame = false;
 		}
 		break;
 	}
@@ -707,7 +705,7 @@ void Mapper5::write_3(uint16_t address, uint8_t value) {
 	case 0x01:
 		// sprites and background disabled
 		if(!(value & 0x18)) {
-			irq_status_ &= ~IN_FRAME;
+			irq_status_.in_frame = false;
 		}
 		break;
 	}
@@ -742,10 +740,11 @@ void Mapper5::vram_change_hook(uint16_t vram_address) {
 void Mapper5::clock_irq() {
 
 	// if the In Frame signal is clear
-	if(!(irq_status_ & IN_FRAME)) {
+	if(!irq_status_.in_frame) {
 
 		// set it, reset the IRQ counter to 0, and clear the IRQ Pending flag
-		irq_status_  = (irq_status_ & ~IRQ_PENDING) | IN_FRAME;
+		irq_status_.in_frame = true;
+		irq_status_.pending  = false;
 		irq_counter_ = 0;
 	} else {
 
@@ -756,7 +755,7 @@ void Mapper5::clock_irq() {
 				nes::cpu.irq(CPU::MAPPER_IRQ);
 			}
 
-			irq_status_ |= IRQ_PENDING;
+			irq_status_.pending = true;
 		}
 	}
 }
@@ -767,5 +766,5 @@ void Mapper5::clock_irq() {
 void Mapper5::ppu_end_frame() {
 	// since we have no idea how MMC5 detects the end of the frame,
 	// we use this hook for now
-	irq_status_ &= ~IN_FRAME;
+	irq_status_.in_frame = false;
 }

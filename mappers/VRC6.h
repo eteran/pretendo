@@ -3,8 +3,16 @@
 #define VRC6_20120121_H_
 
 #include "Mapper.h"
+#include "BitField.h"
 
 class VRC6 : public Mapper {
+private:
+	union IRQControl {
+		uint8_t raw;
+		BitField<0> a;
+		BitField<1> enabled;
+		BitField<2> mode;
+	};
 public:
 	VRC6();
 
@@ -28,10 +36,10 @@ private:
 	void clock_irq();
 
 private:
-	uint8_t irq_latch_;
-	uint8_t irq_control_;
-	uint8_t irq_counter_;
-	int     irq_prescaler_;
+	uint8_t    irq_latch_;
+	IRQControl irq_control_;
+	uint8_t    irq_counter_;
+	int        irq_prescaler_;
 };
 
 #endif

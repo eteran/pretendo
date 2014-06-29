@@ -3,8 +3,15 @@
 #define BANDAIR_20080314_H_
 
 #include "Mapper.h"
+#include "BitField.h"
 
 class Bandai : public Mapper {
+private:
+	union IRQCounter {
+		uint16_t raw;
+		BitField<0,8> lo;
+		BitField<8,8> hi;
+	};
 public:
 	Bandai();
 
@@ -35,9 +42,9 @@ private:
 	uint8_t read_eeprom(uint16_t address);
 
 private:
-	uint8_t  chr_ram_[0x2000];
-	uint16_t irq_counter_;
-	bool     irq_enabled_;
+	uint8_t    chr_ram_[0x2000];
+	IRQCounter irq_counter_;
+	bool       irq_enabled_;
 
 };
 

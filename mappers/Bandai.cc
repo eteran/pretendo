@@ -5,7 +5,7 @@
 //------------------------------------------------------------------------------
 // Name: Bandai
 //------------------------------------------------------------------------------
-Bandai::Bandai() : irq_counter_(0), irq_enabled_(false) {
+Bandai::Bandai() : irq_counter_({0}), irq_enabled_(false) {
 
 	memset(chr_ram_, 0, sizeof(chr_ram_));
 
@@ -143,10 +143,10 @@ void Bandai::write_handler(uint16_t address, uint8_t value) {
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
 		break;
 	case 0x0b:
-		irq_counter_ = (irq_counter_ & 0xff00) | value;
+		irq_counter_.lo = value;
 		break;
 	case 0x0c:
-		irq_counter_ = (irq_counter_ & 0x00ff) | (value << 8);
+		irq_counter_.hi = value;
 		break;
 	case 0x0d:
 		// TODO: implement the EEPROM stuff
@@ -159,7 +159,7 @@ void Bandai::write_handler(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Bandai::cpu_sync() {
 	if(irq_enabled_) {
-		if(--irq_counter_ == 0x0000) {
+		if(--irq_counter_.raw == 0x0000) {
 			nes::cpu.irq(CPU::MAPPER_IRQ);
 		}
 	}

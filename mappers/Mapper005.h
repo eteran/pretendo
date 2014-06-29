@@ -3,8 +3,15 @@
 #define MAPPER0005_20080314_H_
 
 #include "Mapper.h"
+#include "BitField.h"
 
 class Mapper5 : public Mapper {
+private:
+	union IRQStatus {
+		uint8_t raw;
+		BitField<6> in_frame;
+		BitField<7> pending;
+	};
 public:
 	Mapper5();
 
@@ -50,33 +57,33 @@ private:
 
 private:
 
-	uint8_t  prg_ram_[2][0x8000];
-	uint8_t  exram_[0x400];
-	uint8_t  bg_chr_banks_[8];
-	uint8_t  sp_chr_banks_[8];
-	uint16_t prev_vram_address_[2];
-	uint8_t *prg_ram_banks_[0x10];
+	uint8_t   prg_ram_[2][0x8000];
+	uint8_t   exram_[0x400];
+	uint8_t   bg_chr_banks_[8];
+	uint8_t   sp_chr_banks_[8];
+	uint16_t  prev_vram_address_[2];
+	uint8_t * prg_ram_banks_[0x10];
 
-	bool     irq_enabled_;
-	uint16_t bg_char_upper_;
-	uint16_t fetch_count_;
-	uint8_t  chr_mode_;
-	uint8_t  exram_mode_;
-	uint8_t  fill_mode_attr_;
-	uint8_t  fill_mode_tile_;
-	uint8_t  irq_counter_;
-	uint8_t  irq_status_;
-	uint8_t  irq_target_;
-	uint8_t  mirroring_mode_;
-	uint8_t  multiplier_1_;
-	uint8_t  multiplier_2_;
-	uint8_t  prg_mode_;
-	uint8_t  prg_ram_protect1_;
-	uint8_t  prg_ram_protect2_;
-	uint8_t  sprite_size_;
-	uint8_t  vertical_split_mode_;
-	uint8_t  vertical_split_scroll_;
-	uint8_t  vertical_split_bank_;
+	bool      irq_enabled_;
+	uint16_t  bg_char_upper_;
+	uint16_t  fetch_count_;
+	uint8_t   chr_mode_;
+	uint8_t   exram_mode_;
+	uint8_t   fill_mode_attr_;
+	uint8_t   fill_mode_tile_;
+	uint8_t   irq_counter_;
+	IRQStatus irq_status_;
+	uint8_t   irq_target_;
+	uint8_t   mirroring_mode_;
+	uint8_t   multiplier_1_;
+	uint8_t   multiplier_2_;
+	uint8_t   prg_mode_;
+	uint8_t   prg_ram_protect1_;
+	uint8_t   prg_ram_protect2_;
+	uint8_t   sprite_size_;
+	uint8_t   vertical_split_mode_;
+	uint8_t   vertical_split_scroll_;
+	uint8_t   vertical_split_bank_;
 
 	enum {
 		CHR_BANK_A,
