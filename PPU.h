@@ -37,27 +37,26 @@ struct scanline_render : scanline {
 union PPUControl {
 	uint8_t raw;
 	BitField<0,2> nametable;
-	BitField<2>   addressIncrement;
-	BitField<3>   spritePatternTable;
-	BitField<4>   backgroundPatternTable;
-	BitField<5>   largeSprites;
-	BitField<6>   ppuMaster;
-	BitField<7>   nmiOnVBlank;
+	BitField<2>   address_increment;
+	BitField<3>   sprite_pattern_table;
+	BitField<4>   background_pattern_table;
+	BitField<5>   large_sprites;
+	BitField<6>   master;
+	BitField<7>   nmi_on_vblank;
 };
 
 union PPUMask {
 	uint8_t raw;
 	BitField<0>   monochrome;
-	BitField<1>   backgroundClipping;
-	BitField<2>   spriteClipping;
-	BitField<3>   backgroundVisible;
-	BitField<4>   spritesVisible;
+	BitField<1>   background_clipping;
+	BitField<2>   sprite_clipping;
+	BitField<3>   background_visible;
+	BitField<4>   sprites_visible;
 	BitField<5,2> intensity;
 	
 	// meta-fields which don't occupy any space :-)
-	BitField<3,2> screenEnabled;
+	BitField<3,2> screen_enabled;
 };
-
 
 union PPUStatus {
 	uint8_t raw;

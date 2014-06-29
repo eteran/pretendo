@@ -78,7 +78,7 @@ void DMC::enable() {
 				sample_pointer_  = sample_address_;
 			} else if(irq_enabled()) {
 				nes::cpu.irq(CPU::APU_IRQ);
-				nes::apu.status_.dmcIRQ = true;
+				nes::apu.status_.dmc_irq = true;
 			}
 		}
 	}
@@ -103,8 +103,8 @@ void DMC::write_reg0(uint8_t value) {
 	timer_.reset();
 
 	if(!irq_enabled()) {
-		nes::apu.status_.dmcIRQ = false;
-		if(!nes::apu.status_.irqFiring) {
+		nes::apu.status_.dmc_irq = false;
+		if(!nes::apu.status_.irq_firing) {
 			nes::cpu.clear_irq(CPU::APU_IRQ);
 		}
 	}
@@ -182,7 +182,7 @@ void DMC::tick() {
 					sample_pointer_  = sample_address_;
 				} else if(irq_enabled()) {
 					nes::cpu.irq(CPU::APU_IRQ);
-					nes::apu.status_.dmcIRQ = true;
+					nes::apu.status_.dmc_irq = true;
 				}
 			}
 		}
