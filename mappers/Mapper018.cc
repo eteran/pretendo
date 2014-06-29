@@ -7,7 +7,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(18);
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper18::Mapper18() : irq_counter_(0), irq_latch_(0), irq_mask_(0), irq_control_(0) {
+Mapper18::Mapper18() : irq_counter_({0}), irq_latch_({0}), irq_control_({0}) {
 
 	memset(prg_, 0, sizeof(prg_));
 	memset(chr_, 0, sizeof(chr_));
@@ -105,16 +105,16 @@ void Mapper18::write_d(uint16_t address, uint8_t value) {
 void Mapper18::write_e(uint16_t address, uint8_t value) {
 	switch(address & 0x000f) {
 	case 0x0000:
-		irq_latch_ = (irq_latch_ & 0xfff0) | (value & 0x0f);
+		irq_latch_.byte1 = (value & 0x0f);
 		break;
 	case 0x0001:
-		irq_latch_ = (irq_latch_ & 0xff0f) | ((value & 0x0f) << 4);
+		irq_latch_.byte2 = (value & 0x0f);
 		break;
 	case 0x0002:
-		irq_latch_ = (irq_latch_ & 0xf0ff) | ((value & 0x0f) << 8);
+		irq_latch_.byte3 = (value & 0x0f);
 		break;
 	case 0x0003:
-		irq_latch_ = (irq_latch_ & 0x0fff) | ((value & 0x0f) << 12);
+		irq_latch_.byte4 = (value & 0x0f);
 		break;
 	}
 }
@@ -125,30 +125,12 @@ void Mapper18::write_e(uint16_t address, uint8_t value) {
 void Mapper18::write_f(uint16_t address, uint8_t value) {
 	switch(address & 0x0fff) {
 	case 0x0000:
-		irq_counter_ = irq_latch_;
+		irq_counter_.raw = irq_latch_.raw;
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
 		break;
 
 	case 0x0001:
-		irq_control_ = value;
-
-		switch(value & 0x0e) {
-		case 0x00:
-			irq_mask_ = 0xffff;
-			break;
-		case 0x04:
-		case 0x06:
-			irq_mask_ = 0x00ff;
-			break;
-		case 0x08:
-		case 0x0a:
-		case 0x0c:
-		case 0x0e:
-			irq_mask_ = 0x000f;
-			break;
-		default:
-			irq_mask_ = 0x0000;
-		}
+		irq_control_.raw = value;
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
 		break;
 
@@ -167,10 +149,20 @@ void Mapper18::write_f(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper18::cpu_sync() {
-	const bool wrap = (irq_counter_ & irq_mask_) == 0;
-	irq_counter_ = (irq_counter_ & ~irq_mask_) | ((irq_counter_ & irq_mask_) - 1);
 
-	if(wrap && (irq_control_ & 0x01)) {
+	bool wrap = false;
+	
+	if(irq_control_.mode_4bit) {
+		wrap = (--irq_counter_.counter_4bit == 0);
+	} else 	if(irq_control_.mode_8bit) {
+		wrap = (--irq_counter_.counter_8bit == 0);
+	} else 	if(irq_control_.mode_12bit) {
+		wrap = (--irq_counter_.counter_12bit == 0);
+	} else {
+		wrap = (--irq_counter_.counter_16bit == 0);
+	}
+
+	if(wrap && irq_control_.enabled) {
 		nes::cpu.irq(CPU::MAPPER_IRQ);
 	}
 }

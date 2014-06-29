@@ -9,7 +9,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(19);
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper19::Mapper19() : irq_counter_(0), mirroring_(0), irq_enabled_(false) {
+Mapper19::Mapper19() : irq_control_({0}), mirroring_(0) {
 
 	memset(prg_ram_, 0, sizeof(prg_ram_));
 	memset(chr_ram_, 0, sizeof(chr_ram_));
@@ -51,10 +51,10 @@ uint8_t Mapper19::read_5(uint16_t address) {
 	switch(address & 0xf800) {
 	case 0x5000:
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
-		return irq_counter_ & 0x00ff;
+		return irq_control_.lo;
 	case 0x5800:
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
-		return ((irq_counter_ & (0xff00 >> 8)) & 0x7f) | (irq_enabled_ ? 0x80 : 0x00);
+		return irq_control_.hi;
 	default:
 		return Mapper::read_5(address);
 	}
@@ -95,13 +95,12 @@ void Mapper19::write_5(uint16_t address, uint8_t value) {
 	switch(address & 0xf800) {
 	case 0x5000:
 		// Low byte of IRQ counter
-		irq_counter_ = (irq_counter_ & 0xff00) | value;
+		irq_control_.hi = value;
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
 		break;
 	case 0x5800:
 		// High bits of IRQ counter
-		irq_counter_ = (irq_counter_ & 0x00ff) | ((value << 8) & 0x7f00);
-		irq_enabled_ = (value & 0x80);
+		irq_control_.hi = value;
 		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
 		break;
 	default:
@@ -240,8 +239,11 @@ void Mapper19::write_f(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper19::cpu_sync() {
-	if(irq_counter_ == 0x7fff) {
-		nes::cpu.irq(CPU::MAPPER_IRQ);
+	if(irq_control_.enabled) {
+		if(irq_control_.counter == 0x7fff) {
+			nes::cpu.irq(CPU::MAPPER_IRQ);
+		} else {
+			++irq_control_.counter;
+		}
 	}
-	irq_counter_ = (irq_counter_ + 1) & 0x7fff;
 }

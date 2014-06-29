@@ -103,6 +103,8 @@ public:
 	operator T() const     { return (value_ >> Index) & Mask; }
 	BitField &operator++() { return *this = *this + 1; }
 	T operator++(int)      { T r = *this; ++*this; return r; }
+	BitField &operator--() { return *this = *this - 1; }
+	T operator--(int)      { T r = *this; ++*this; return r; }
 
 private:
 	T value_;

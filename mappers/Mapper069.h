@@ -12,6 +12,12 @@ public:
 		BitField<0> enabled;
 		BitField<7> counter_enabled;
 	};
+
+	union IRQCounter {
+		uint16_t raw;
+		BitField<0,8> lo;
+		BitField<8,8> hi;
+	};
 	
 public:
 	Mapper69();
@@ -35,7 +41,7 @@ public:
 private:
 	uint8_t    chr_ram_[0x2000];
 	uint8_t    prg_ram_[0x2000];
-	uint16_t   irq_counter_;
+	IRQCounter irq_counter_;
 	IRQControl irq_control_;
 	uint8_t    command_8000_;
 	uint8_t    command_c000_;

@@ -3,8 +3,20 @@
 #define MAPPER019_20080314_H_
 
 #include "Mapper.h"
+#include "BitField.h"
 
 class Mapper19 : public Mapper {
+private:
+	union IRQControl {
+		uint16_t raw;
+		BitField<0,15> counter;
+		BitField<15>   enabled;	
+		
+		// meta-fields
+		BitField<0,8> lo;
+		BitField<8,8> hi;			
+	};
+	
 public:
 	Mapper19();
 
@@ -34,11 +46,10 @@ public:
 	virtual void cpu_sync();
 
 private:
-	uint8_t  prg_ram_[0x2000];
-	uint8_t  chr_ram_[0x2000];
-	uint16_t irq_counter_;
-	uint8_t  mirroring_;
-	bool     irq_enabled_;
+	uint8_t    prg_ram_[0x2000];
+	uint8_t    chr_ram_[0x2000];
+	IRQControl irq_control_;
+	uint8_t    mirroring_;
 };
 
 #endif
