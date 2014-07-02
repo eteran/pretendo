@@ -6,14 +6,17 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <boost/noncopyable.hpp>
 
 class Mapper;
 
-class Cart : public boost::noncopyable {
+class Cart {
 public:
 	Cart();
 	~Cart();
+	
+private:
+	Cart(const Cart &) = delete;
+	Cart &operator=(const Cart &) = delete;
 
 public:
 	enum MIRRORING {

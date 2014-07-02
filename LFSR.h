@@ -3,12 +3,15 @@
 #define LFSR_20110314_H_
 
 #include <cstdint>
-#include <boost/noncopyable.hpp>
 
 using std::uint8_t;
 using std::uint16_t;
 
-class LFSR : public boost::noncopyable {
+class LFSR {
+private:
+	LFSR(const LFSR &) = delete;
+	LFSR &operator=(const LFSR &) = delete;
+
 public:
 	//-------------------------------------------------------------------
 	// Name: ShiftRegister
@@ -34,7 +37,6 @@ public:
 	// Name: clock
 	//-------------------------------------------------------------------
 	void clock() {
-
 		const uint16_t f = feedback();
 		value_ >>= 1;
 		value_ = (value_ & ~0x4000) | (f << 14);

@@ -26,7 +26,7 @@ public:
 
 	uint8_t operator[](size_t n) const { return ptr_[n]; }
 	uint8_t &operator[](size_t n)      { return ptr_[n]; }
-	operator void*() const             { return reinterpret_cast<void *>(ptr_ != nullptr); }
+	explicit operator bool() const     { return ptr_; }
 
 public:
 	bool writeable() const   { return writeable_; }

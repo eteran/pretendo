@@ -2,7 +2,9 @@
 #ifndef BITREV_H_
 #define BITREV_H_
 
-#include <stdint.h>
+#include <cstdint>
+
+using std::uint8_t;
 
 #ifdef __cplusplus
 extern "C" {

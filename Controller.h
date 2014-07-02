@@ -3,15 +3,18 @@
 #define CONTROLLER_20080314_H_
 
 #include "ShiftRegister.h"
-#include <cstdint>
 #include <bitset>
-#include <boost/noncopyable.hpp>
+#include <cstdint>
 
 using std::uint8_t;
 
-class Controller : public boost::noncopyable {
+class Controller {
 public:
 	Controller();
+	
+private:
+	Controller(const Controller &) = delete;
+	Controller &operator=(const Controller &) = delete;
 
 public:
 	uint8_t read();

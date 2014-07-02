@@ -1,6 +1,7 @@
 
 #include "PPU.h"
 #include "CPU.h"
+#include "NES.h"
 #include "Cart.h"
 #include "Mapper.h"
 #include "VRAMBank.h"

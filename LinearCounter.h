@@ -3,17 +3,20 @@
 #define LINEAR_COUNTER_20130206_H_
 
 #include <cstdint>
-#include <boost/noncopyable.hpp>
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 
-class LinearCounter : public boost::noncopyable {
+class LinearCounter {
 public:
 	LinearCounter();
 	~LinearCounter();
+	
+private:
+	LinearCounter(const LinearCounter &) = delete;
+	LinearCounter &operator=(const LinearCounter &) = delete;
 
 public:
 	uint8_t value() const;

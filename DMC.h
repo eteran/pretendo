@@ -2,20 +2,23 @@
 #ifndef DMC_20130206_H_
 #define DMC_20130206_H_
 
-#include <cstdint>
-#include <boost/noncopyable.hpp>
-#include "Timer.h"
 #include "ShiftRegister.h"
+#include "Timer.h"
+#include <cstdint>
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 
-class DMC : public boost::noncopyable {
+class DMC {
 public:
 	DMC();
 	~DMC();
+
+private:
+	DMC(const DMC &) = delete;
+	DMC &operator=(const DMC &) = delete;
 
 public:
 	void enable();

@@ -4,7 +4,6 @@
 
 #include "Mapper.h"
 
-
 class Mapper34 : public Mapper {
 public:
 	Mapper34();

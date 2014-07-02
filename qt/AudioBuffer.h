@@ -2,9 +2,9 @@
 #ifndef AUDIO_BUFFER_20121217_H_
 #define AUDIO_BUFFER_20121217_H_
 
+#include "APU.h"
 #include <QIODevice>
 #include <QMutex>
-#include "APU.h"
 
 class AudioBuffer : public QIODevice {
 	Q_OBJECT

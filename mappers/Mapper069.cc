@@ -1,6 +1,7 @@
 
 #include "Mapper069.h"
 #include "PPU.h"
+#include "NES.h"
 #include "Cart.h"
 #include <cstring>
 

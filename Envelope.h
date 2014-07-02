@@ -3,17 +3,20 @@
 #define ENVELOPE_20130501_H_
 
 #include <cstdint>
-#include <boost/noncopyable.hpp>
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 
-class Envelope : public boost::noncopyable {
+class Envelope {
 public:
 	Envelope();
 	~Envelope();
+	
+private:
+	Envelope(const Envelope &) = delete;
+	Envelope &operator=(const Envelope &) = delete;
 
 public:
 	void clock();

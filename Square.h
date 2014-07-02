@@ -2,11 +2,11 @@
 #ifndef SQUARE_20130206_H_
 #define SQUARE_20130206_H_
 
-#include <cstdint>
-#include "LengthCounter.h"
 #include "Envelope.h"
+#include "LengthCounter.h"
 #include "Sweep.h"
 #include "Timer.h"
+#include <cstdint>
 
 using std::uint8_t;
 using std::uint16_t;

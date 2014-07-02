@@ -2,6 +2,7 @@
 #include "MMC3.h"
 #include "PPU.h"
 #include "Cart.h"
+#include "NES.h"
 #include <cstring>
 
 //------------------------------------------------------------------------------

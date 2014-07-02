@@ -1,13 +1,15 @@
 
 #include "Mapper.h"
-#include "PPU.h"
-#include "CPU.h"
 #include "APU.h"
+#include "CPU.h"
 #include "Cart.h"
 #include "Input.h"
-#include <iostream>
-#include <cstring>
+#include "NES.h"
+#include "PPU.h"
 #include <cassert>
+#include <cstring>
+#include <iostream>
+
 
 //------------------------------------------------------------------------------
 // Name: Mapper

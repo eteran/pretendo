@@ -2,7 +2,11 @@
 #ifndef INPUT_20080314_H_
 #define INPUT_20080314_H_
 
-#include "Controller.h"
+#include <cstdint>
+
+using std::uint8_t;
+
+class Controller;
 
 namespace nes {
 namespace input {

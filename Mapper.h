@@ -3,12 +3,11 @@
 #define MAPPER_20080314_H_
 
 #include "CPU.h"
-#include "NES.h"
-#include <string>
-#include <map>
-#include <boost/noncopyable.hpp>
-#include <memory>
+#include "Cart.h"
 #include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
 
 using std::uint8_t;
 using std::uint16_t;
@@ -19,7 +18,7 @@ class Mapper;
 
 typedef std::shared_ptr<Mapper> (*create_ptr)();
 
-class Mapper : public boost::noncopyable {
+class Mapper {
 public:
 	static std::shared_ptr<Mapper> create_mapper(int num);
 	static void register_mapper(int num, create_ptr create_ptr);
@@ -37,6 +36,10 @@ public:
 
 protected:
 	Mapper();
+	
+private:
+	Mapper(const Mapper &) = delete;
+	Mapper &operator=(const Mapper &) = delete;
 
 public:
 	virtual ~Mapper();

@@ -9,13 +9,16 @@
 #include <iomanip>
 #include <typeinfo>
 #include <map>
-#include <boost/noncopyable.hpp>
 #include <boost/lexical_cast.hpp>
 
-class Config : boost::noncopyable {
+class Config {
 public:
 	Config();
-	virtual ~Config();
+	~Config();
+	
+private:
+	Config(const Config &) = delete;
+	Config &operator=(const Config &) = delete;
 
 private:
 	typedef std::map<std::string, std::string> section_type;
@@ -91,7 +94,7 @@ public:
 	}
 
 private:
-	std::string                   filename_;
+	std::string                         filename_;
 	std::map<std::string, section_type> sections_;
 };
 

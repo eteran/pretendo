@@ -2,11 +2,9 @@
 #ifndef QGLVIDEO_20080314_H_
 #define QGLVIDEO_20080314_H_
 
-#include <QGLWidget>
 #include "Palette.h"
 #include "VideoInterface.h"
-
-class Mediator;
+#include <QGLWidget>
 
 class QtVideo : public QGLWidget, public VideoInterface {
 	Q_OBJECT

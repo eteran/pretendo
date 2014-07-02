@@ -4,7 +4,6 @@
 
 #include "Mapper.h"
 
-
 class Mapper64 : public Mapper {
 public:
 	Mapper64();

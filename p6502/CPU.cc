@@ -1,6 +1,7 @@
 
 #include "CPU.h"
 #include "../APU.h"
+#include "../NES.h"
 #include "../Cart.h"
 #include "../Mapper.h"
 #include <iostream>

@@ -1,14 +1,12 @@
 
 #include "APU.h"
 #include "CPU.h"
-#include "NES.h"
+#include "DMC.h"
+#include "Noise.h"
 #include "Square.h"
 #include "Triangle.h"
-#include "Noise.h"
-#include "DMC.h"
+#include <algorithm>
 #include <iostream>
-#include <cassert>
-#include <cstring>
 
 namespace nes {
 namespace apu {

@@ -3,17 +3,20 @@
 #define LENGTH_COUNTER_20130206_H_
 
 #include <cstdint>
-#include <boost/noncopyable.hpp>
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 
-class LengthCounter : public boost::noncopyable {
+class LengthCounter {
 public:
 	LengthCounter();
 	~LengthCounter();
+	
+private:
+	LengthCounter(const LengthCounter &) = delete;
+	LengthCounter &operator=(const LengthCounter &) = delete;
 
 public:
 	void clear();

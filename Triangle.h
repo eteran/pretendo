@@ -2,22 +2,25 @@
 #ifndef TRIANGLE_20130206_H_
 #define TRIANGLE_20130206_H_
 
-#include <cstdint>
-#include <cstddef>
-#include <boost/noncopyable.hpp>
 #include "LengthCounter.h"
 #include "LinearCounter.h"
 #include "Timer.h"
+#include <cstddef>
+#include <cstdint>
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 
-class Triangle : public boost::noncopyable {
+class Triangle {
 public:
 	Triangle();
 	~Triangle();
+	
+private:
+	Triangle(const Triangle &) = delete;
+	Triangle &operator=(const Triangle &) = delete;
 
 public:
 	void enable();

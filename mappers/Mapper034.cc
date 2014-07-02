@@ -1,6 +1,7 @@
 
 #include "Mapper034.h"
 #include "BNROM.h"
+#include "NES.h"
 #include "NINA-001.h"
 #include "Cart.h"
 

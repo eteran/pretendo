@@ -2,22 +2,25 @@
 #ifndef NOISE_20130206_H_
 #define NOISE_20130206_H_
 
-#include <cstdint>
-#include <boost/noncopyable.hpp>
+#include "Envelope.h"
+#include "LFSR.h"
 #include "LengthCounter.h"
 #include "Timer.h"
-#include "LFSR.h"
-#include "Envelope.h"
+#include <cstdint>
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 
-class Noise : public boost::noncopyable {
+class Noise {
 public:
 	Noise();
 	~Noise();
+	
+private:
+	Noise(const Noise &) = delete;
+	Noise &operator=(const Noise &) = delete;
 
 public:
 	void enable();
@@ -30,6 +33,7 @@ public:
 
 public:
 	bool enabled() const;
+
 public:
 	void tick();
 	uint8_t output() const;
