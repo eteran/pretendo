@@ -1,6 +1,6 @@
 
 #include "LengthCounter.h"
-#include "NES.h"
+#include "APU.h"
 
 namespace {
 const uint8_t length_table[32] = {
@@ -49,7 +49,7 @@ void LengthCounter::load(uint8_t index) {
 
 	reload_value_ = length_table[index & 0x1f];
 	reload_       = true;
-	reload_cycle_ = nes::apu.cycle_count();
+	reload_cycle_ = nes::apu::cycle_count();
 }
 
 //------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ void LengthCounter::clear() {
 void LengthCounter::halt() {
 	prev_halt_  = halt_;
 	halt_       = true;
-	halt_cycle_ = nes::apu.cycle_count();
+	halt_cycle_ = nes::apu::cycle_count();
 }
 
 //------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ void LengthCounter::halt() {
 void LengthCounter::resume() {
 	prev_halt_  = halt_;
 	halt_       = false;
-	halt_cycle_ = nes::apu.cycle_count();
+	halt_cycle_ = nes::apu::cycle_count();
 }
 
 //------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ uint8_t LengthCounter::value() const{
 void LengthCounter::clock() {
 
 	bool prevent_decrement     = false;
-	const uint64_t cycle_count = nes::apu.cycle_count();
+	const uint64_t cycle_count = nes::apu::cycle_count();
 
 	if(reload_) {
 		if(reload_cycle_ == cycle_count && value_ == 0) {
@@ -113,7 +113,7 @@ void LengthCounter::clock() {
 		bool halted;
 
 		// delay the halt 1 cycle
-		if(halt_cycle_ == nes::apu.cycle_count()) {
+		if(halt_cycle_ == nes::apu::cycle_count()) {
 			halted = prev_halt_;
 		} else {
 			halted = halt_;

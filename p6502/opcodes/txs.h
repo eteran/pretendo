@@ -9,8 +9,8 @@ struct opcode_txs {
 
 	typedef operation_none memory_access;
 
-	void operator()(Context &ctx) const {
-		ctx.S = ctx.X;
+	void operator()() const {
+		S = X;
 	}
 };
 

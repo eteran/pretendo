@@ -9,8 +9,8 @@ struct opcode_jmp {
 
 	typedef operation_jump memory_access;
 
-	void operator()(Context &ctx, uint16_t data) const {
-		ctx.PC = data;
+	void operator()(uint16_t data) const {
+		PC = data;
 	}
 };
 

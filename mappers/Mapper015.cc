@@ -1,5 +1,6 @@
 
 #include "Mapper015.h"
+#include "PPU.h"
 #include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(15);
@@ -128,8 +129,8 @@ void Mapper15::write_handler(uint16_t address, uint8_t value) {
 	set_prg_ef(pageEF);
 
 	if(value & 0x40) {
-		nes::ppu.set_mirroring(PPU::mirror_horizontal);
+		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 	} else {
-		nes::ppu.set_mirroring(PPU::mirror_vertical);
+		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 	}
 }

@@ -1,5 +1,7 @@
 
 #include "Mapper068.h"
+#include "PPU.h"
+#include "Cart.h"
 #include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(68);
@@ -84,10 +86,10 @@ void Mapper68::write_e(uint16_t address, uint8_t value) {
 
 	switch(value & 0x01) {
 	case 0x00:
-		nes::ppu.set_mirroring(PPU::mirror_horizontal);
+		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 		break;
 	case 0x01:
-		nes::ppu.set_mirroring(PPU::mirror_vertical);
+		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 		break;
 	}
 }

@@ -1,5 +1,7 @@
 
 #include "Mapper090.h"
+#include "PPU.h"
+#include "Cart.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(90);
 
@@ -198,10 +200,10 @@ void Mapper90::write_d(uint16_t address, uint8_t value) {
 		break;
 	case 0x01:
 		switch(value & 0x03) {
-		case 0x00: nes::ppu.set_mirroring(PPU::mirror_vertical);    break;
-		case 0x01: nes::ppu.set_mirroring(PPU::mirror_horizontal);  break;
-		case 0x02: nes::ppu.set_mirroring(PPU::mirror_single_low);  break;
-		case 0x03: nes::ppu.set_mirroring(PPU::mirror_single_high); break;
+		case 0x00: nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
+		case 0x01: nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
+		case 0x02: nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
+		case 0x03: nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
 		}
 		break;
 	case 0x02:
@@ -273,7 +275,7 @@ void Mapper90::sync_prg() {
 	}
 
 	if(!map_67_) {
-		nes::cpu.unmap_67();
+		nes::cpu::unmap_67();
 	}
 }
 

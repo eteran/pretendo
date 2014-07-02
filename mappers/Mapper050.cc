@@ -1,5 +1,6 @@
 
 #include "Mapper050.h"
+#include "Cart.h"
 #include <cstring>
 #include <cassert>
 
@@ -75,7 +76,7 @@ void Mapper50::write_handler(uint16_t address, uint8_t value) {
 		if(value == 0) {
 			irq_enabled_ = false;
 			irq_counter_ = 0;
-			nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+			nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		} else {
 			irq_enabled_ = true;
 		}
@@ -90,7 +91,7 @@ void Mapper50::cpu_sync() {
 	if(irq_enabled_) {
 		irq_counter_ = (irq_counter_ + 1) % 0x1000;
 		if(irq_counter_ == 0) {
-			nes::cpu.irq(CPU::MAPPER_IRQ);
+			nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 		}
 	}
 }

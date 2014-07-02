@@ -1,13 +1,15 @@
 
 #include "NES.h"
-#include "Mapper.h"
+#include "PPU.h"
+#include "CPU.h"
+#include "Cart.h"
+#include "Config.h"
+#include "APU.h"
+#include "Input.h"
 #include "VideoInterface.h"
+#include <iostream>
 
-CPU    nes::cpu;
-PPU    nes::ppu;
-APU    nes::apu;
 Cart   nes::cart;
-Input  nes::input;
 Config nes::config;
 
 /*
@@ -26,6 +28,7 @@ Config nes::config;
  * timestamp system which would possibly be very beneficial
  */
 
+namespace nes {
 namespace {
 
 //------------------------------------------------------------------------------
@@ -41,7 +44,7 @@ void execute_scanline_0_19() {
 	 */
 
 	for(int i = 0; i < 20; ++i) {
-		nes::ppu.execute_scanline(scanline_vblank());
+		ppu::execute_scanline(scanline_vblank());
 	}
 }
 
@@ -67,7 +70,7 @@ void execute_scanline_20() {
 	 * 1364.
 	 */
 
-	nes::ppu.execute_scanline(scanline_prerender());
+	ppu::execute_scanline(scanline_prerender());
 }
 
 //------------------------------------------------------------------------------
@@ -85,8 +88,8 @@ void execute_scanline_21_260(VideoInterface *video) {
 
 	// process the visible range
 	for(int i = 0; i < 240; ++i) {
-		nes::ppu.execute_scanline(scanline_render(buffer));
-		video->submit_scanline(i, nes::ppu.mask().intensity, buffer);
+		ppu::execute_scanline(scanline_render(buffer));
+		video->submit_scanline(i, ppu::mask().intensity, buffer);
 	}
 }
 
@@ -102,18 +105,18 @@ void execute_scanline_261() {
 	 * drawing lines starts all over again.
 	 */
 
-	nes::ppu.execute_scanline(scanline_postrender());
+	ppu::execute_scanline(scanline_postrender());
 }
 }
 
 //------------------------------------------------------------------------------
 // Name: run_frame
 //------------------------------------------------------------------------------
-void nes::run_frame(VideoInterface *video) {
-	nes::ppu.start_frame();
+void run_frame(VideoInterface *video) {
+	ppu::start_frame();
 	execute_scanline_20();
 	execute_scanline_21_260(video);
-	nes::ppu.end_frame();
+	ppu::end_frame();
 	execute_scanline_261();
 	execute_scanline_0_19();
 }
@@ -121,10 +124,15 @@ void nes::run_frame(VideoInterface *video) {
 //------------------------------------------------------------------------------
 // Name: reset
 //------------------------------------------------------------------------------
-void nes::reset(nes::RESET reset_type) {
+void reset(RESET reset_type) {
 
-	nes::cpu.reset(reset_type);
-	nes::ppu.reset(reset_type);
-	nes::apu.reset(reset_type);
-	nes::input.reset();
+	std::cout << "NES Reset Started" << std::endl;
+	std::cout << "-----------------" << std::endl;
+	cpu::reset(reset_type);
+	ppu::reset(reset_type);
+	apu::reset(reset_type);
+	input::reset();
+	std::cout << "-----------------" << std::endl;
+	std::cout << "NES Reset Complete" << std::endl;
+}
 }

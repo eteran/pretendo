@@ -9,9 +9,9 @@ struct opcode_dec {
 
 	typedef operation_modify memory_access;
 	
-	void operator()(Context &ctx, uint8_t &data) const {
+	void operator()(uint8_t &data) const {
 		--data;
-		update_nz_flags(ctx, data);
+		update_nz_flags(data);
 	}
 };
 

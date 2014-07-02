@@ -8,9 +8,9 @@
 struct opcode_tya {
 	typedef operation_none memory_access;
 	
-	void operator()(Context &ctx) const {
-		ctx.A = ctx.Y;
-		update_nz_flags(ctx, ctx.A);
+	void operator()() const {
+		A = Y;
+		update_nz_flags(A);
 	}
 };
 

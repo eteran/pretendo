@@ -8,43 +8,39 @@
 //------------------------------------------------------------------------------
 class opcode_nmi {
 public:
-	opcode_nmi() {
-	}
-	
-public:
-	void operator()(Context &ctx) {
-		execute(ctx);
+	void operator()() {
+		execute();
 	}
 
 private:
-	void execute(Context &ctx) {
-		switch(ctx.cycle) {
+	void execute() {
+		switch(cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away),
 			// increment PC
-			read_byte(ctx, ctx.PC);
+			read_byte(PC);
 			break;
 		case 2:
 			// push PCH on stack, decrement S
-			write_byte(ctx, ctx.S-- + STACK_ADDRESS, pc_hi(ctx));
+			write_byte(S-- + STACK_ADDRESS, pc_hi());
 			break;
 		case 3:
 			// push PCL on stack, decrement S
-			write_byte(ctx, ctx.S-- + STACK_ADDRESS, pc_lo(ctx));
+			write_byte(S-- + STACK_ADDRESS, pc_lo());
 			break;
 		case 4:
 			// push P on stack, decrement S
-			write_byte(ctx, ctx.S-- + STACK_ADDRESS, ctx.P);
+			write_byte(S-- + STACK_ADDRESS, P);
 			break;
 		case 5:
-			set_flag<I_MASK>(ctx);
+			set_flag<I_MASK>();
 			// fetch PCL
-			set_pc_lo(ctx, read_byte(ctx, NMI_VECTOR_ADDRESS + 0));
+			set_pc_lo(read_byte(NMI_VECTOR_ADDRESS + 0));
 			break;
 		case 6:
 			LAST_CYCLE;
 			// fetch PCH
-			set_pc_hi(ctx, read_byte(ctx, NMI_VECTOR_ADDRESS + 1));
+			set_pc_hi(read_byte(NMI_VECTOR_ADDRESS + 1));
 			OPCODE_COMPLETE;
 		default:
 			abort();

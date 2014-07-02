@@ -4,8 +4,7 @@
 
 #include "bender.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 class Mapper;
 

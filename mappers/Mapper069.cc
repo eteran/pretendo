@@ -1,5 +1,7 @@
 
 #include "Mapper069.h"
+#include "PPU.h"
+#include "Cart.h"
 #include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(69);
@@ -108,17 +110,17 @@ void Mapper69::write_a(uint16_t address, uint8_t value) {
 	case 0x0b: set_prg_cd(value); break;
 	case 0x0c:
 		switch(value & 0x3) {
-		case 0:	nes::ppu.set_mirroring(PPU::mirror_vertical);    break;
-		case 1:	nes::ppu.set_mirroring(PPU::mirror_horizontal);  break;
-		case 2:	nes::ppu.set_mirroring(PPU::mirror_single_low);  break;
-		case 3:	nes::ppu.set_mirroring(PPU::mirror_single_high); break;
+		case 0:	nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
+		case 1:	nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
+		case 2:	nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
+		case 3:	nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
 		}
 		break;
 
 	case 0x0d:
 		irq_control_.raw = value;
 		if(!irq_control_.enabled) {
-			nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+			nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		}
 		break;
 
@@ -155,7 +157,7 @@ void Mapper69::cpu_sync() {
 	if(irq_control_.counter_enabled) {
 		--irq_counter_.raw;
 		if(irq_counter_.raw == 0xffff && irq_control_.enabled) {
-			nes::cpu.irq(CPU::MAPPER_IRQ);
+			nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 		}
 	}
 }

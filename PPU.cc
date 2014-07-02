@@ -1,11 +1,14 @@
 
 #include "PPU.h"
-#include "NES.h"
+#include "CPU.h"
+#include "Cart.h"
 #include "Mapper.h"
+#include "VRAMBank.h"
 
 #include <iostream>
 #include <cstring>
 #include <algorithm>
+#include <cassert>
 
 #ifdef FAST_CPU
 #include "revbits.h"
@@ -31,7 +34,6 @@ enum {
 	SPRITE_ZERO     = 0x10, // internal flag
 	SPRITE_COLOR    = 0x03
 };
-
 
 struct pattern_0 {
 	static const int     index  = 0;
@@ -90,111 +92,186 @@ constexpr uint16_t tile_address(uint16_t vram_address) {
 
 }
 
+namespace nes {
+namespace ppu {
+
+union PPUStatus {
+	uint8_t raw;
+	BitField<5> overflow;
+	BitField<6> sprite0;
+	BitField<7> vblank;
+};
+
+bool show_sprites_ = true;
+
+class SpriteEntry {
+public:
+	uint8_t pattern[2];
+	uint8_t sprite_bytes[4];
+public:
+	bool horizontal_flip() const;
+	bool is_background() const;
+	bool is_sprite_zero() const;
+	bool vertical_flip() const;
+	uint8_t index() const;
+	uint8_t palette() const;
+	uint8_t x() const;
+	uint8_t y() const;
+};
+
+// internal variables
+VRAMBank     vram_banks_[0x10];
+uint8_t      sprite_ram_[0x100];
+SpriteEntry  sprite_data_[8];
+uint8_t      left_most_sprite_x_     = 0xff;
+uint8_t      palette_[0x20];
+uint64_t     ppu_cycle_              = 0;
+uint64_t     ppu_read_2002_cycle_    = 0;
+uint16_t     next_ppu_fetch_address_ = 0;
+uint16_t     attribute_queue_[2];
+uint16_t     pattern_queue_[2];
+uint16_t     nametable_              = 0; // loopy's "t"
+uint16_t     vram_address_           = 0; // loopy's "v"
+uint16_t     hpos_                   = 0; // pixel counter
+uint16_t     vpos_                   = 0; // scanline counter
+uint8_t      next_pattern_[2];
+uint8_t      latch_                  = 0;
+uint8_t      next_attribute_         = 0;
+uint8_t      next_tile_index_        = 0;
+PPUControl   ppu_control_            = {0};
+PPUMask      ppu_mask_               = {0};
+uint8_t      register_2007_buffer_   = 0;
+uint8_t      sprite_address_         = 0;
+uint8_t      sprite_data_index_      = 0;
+PPUStatus    status_                 = {0};
+uint8_t      tile_offset_            = 0; // loopy's "x"
+uint8_t      sprite_buffer_          = 0xff;
+bool         odd_frame_              = false;
+bool         rendering_              = false;
+bool         sprite_init_            = false;
+bool         sprite_zero_found_next_ = false;
+bool         sprite_zero_found_curr_ = false;
+bool         write_latch_            = false;
+bool         write_block_            = false;
+uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
+									 // 4 nametables, each $03c0 bytes in
+									 // size plus 4 corresponding $40 byte
+									 // attribute tables
+									 // even though the real thing only has 2
+									 // tables, we currently simulate 4 for
+									 // simplicity
+
+// internal functions
+int clock_cpu();
+uint16_t background_pattern_table();
+uint16_t sprite_pattern_table();
+uint8_t select_blank_pixel();
+uint8_t select_pixel(uint8_t index);
+uint8_t select_bg_pixel(uint8_t index);
+void clock_x();
+void clock_y();
+void enter_vblank();
+void evaluate_sprites_even();
+void evaluate_sprites_odd();
+void execute_cycle(const scanline_postrender &target);
+void execute_cycle(const scanline_prerender &target);
+void execute_cycle(const scanline_render &target);
+void execute_cycle(const scanline_vblank &target);
+void exit_vblank();
+void open_background_attribute();
+void open_tile_index();
+void read_background_attribute();
+void read_tile_index();
+void render_pixel(uint8_t *dest_buffer);
+void update_shift_registers_idle();
+void update_shift_registers_render();
+void update_sprite_registers();
+void update_vram_address();
+void update_x_scroll();
+
+template <int Size>
+void evaluate_sprites();
+
+template <int Size, class Pattern>
+void read_sprite_pattern();
+
+template <int Size, class Pattern>
+void open_sprite_pattern();
+
+template <class Pattern>
+void read_background_pattern();
+
+template <class Pattern>
+void open_background_pattern();
+
+template <int Size, class Pattern>
+uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line);
+
 //------------------------------------------------------------------------------
 // Name: vertical_flip
 //------------------------------------------------------------------------------
-bool PPU::SpriteEntry::vertical_flip() const {
+bool SpriteEntry::vertical_flip() const {
 	return sprite_bytes[2] & SPRITE_VFLIP;
 }
 
 //------------------------------------------------------------------------------
 // Name: horizontal_flip
 //------------------------------------------------------------------------------
-bool PPU::SpriteEntry::horizontal_flip() const {
+bool SpriteEntry::horizontal_flip() const {
 	return sprite_bytes[2] & SPRITE_HFLIP;
 }
 
 //------------------------------------------------------------------------------
 // Name: is_sprite_zero
 //------------------------------------------------------------------------------
-bool PPU::SpriteEntry::is_sprite_zero() const {
+bool SpriteEntry::is_sprite_zero() const {
 	return sprite_bytes[2] & SPRITE_ZERO;
 }
 
 //------------------------------------------------------------------------------
 // Name: is_background
 //------------------------------------------------------------------------------
-bool PPU::SpriteEntry::is_background() const {
+bool SpriteEntry::is_background() const {
 	return sprite_bytes[2] & SPRITE_PRIORITY;
 }
 
 //------------------------------------------------------------------------------
 // Name: palette
 //------------------------------------------------------------------------------
-uint8_t PPU::SpriteEntry::palette() const {
+uint8_t SpriteEntry::palette() const {
 	return sprite_bytes[2] & SPRITE_COLOR;
 }
 
 //------------------------------------------------------------------------------
 // Name: index
 //------------------------------------------------------------------------------
-uint8_t PPU::SpriteEntry::index() const {
+uint8_t SpriteEntry::index() const {
 	return sprite_bytes[1];
 }
 
 //------------------------------------------------------------------------------
 // Name: y
 //------------------------------------------------------------------------------
-uint8_t PPU::SpriteEntry::y() const {
+uint8_t SpriteEntry::y() const {
 	return sprite_bytes[0];
 }
 
 //------------------------------------------------------------------------------
 // Name: x
 //------------------------------------------------------------------------------
-uint8_t PPU::SpriteEntry::x() const {
+uint8_t SpriteEntry::x() const {
 	return sprite_bytes[3];
-}
-
-//------------------------------------------------------------------------------
-// Name: PPU
-//------------------------------------------------------------------------------
-PPU::PPU() :
-	left_most_sprite_x_(0xff),
-	ppu_cycle_(0),
-	ppu_read_2002_cycle_(0),
-	next_ppu_fetch_address_(0),
-	nametable_(0),
-	vram_address_(0),
-	hpos_(0),
-	vpos_(0),
-	latch_(0),
-	next_attribute_(0),
-	next_tile_index_(0),
-	ppu_control_({0}),
-	ppu_mask_({0}),
-	register_2007_buffer_(0),
-	sprite_address_(0),
-	sprite_data_index_(0),
-	status_({0}),
-	tile_offset_(0),
-	sprite_buffer_(0xff),
-	odd_frame_(false),
-	rendering_(false),
-	sprite_init_(false),
-	sprite_zero_found_next_(false),
-	sprite_zero_found_curr_(false),
-	write_latch_(false),
-	write_block_(false),
-	show_sprites_(true) {
-
-}
-
-//------------------------------------------------------------------------------
-// Name: ~PPU
-//------------------------------------------------------------------------------
-PPU::~PPU() {
 }
 
 //------------------------------------------------------------------------------
 // Name: reset
 //------------------------------------------------------------------------------
-void PPU::reset(nes::RESET reset_type) {
+void reset(RESET reset_type) {
 
 #if 0
 	std::generate(sprite_ram_, sprite_ram_ + 0x100,  rand);
 #endif
-	if(reset_type == nes::HARD_RESET) {
+	if(reset_type == HARD_RESET) {
 		std::fill_n(nametables_, 0x1000, 0);
 		std::fill_n(sprite_ram_, 0x0100, 0);
 
@@ -240,13 +317,13 @@ void PPU::reset(nes::RESET reset_type) {
 	write_latch_            = false;
 	write_block_            = true;
 
-	std::cout << "[PPU::reset] reset complete" << std::endl;
+	std::cout << "PPU reset complete" << std::endl;
 }
 
 //------------------------------------------------------------------------------
 // Name: write2000
 //------------------------------------------------------------------------------
-void PPU::write2000(uint8_t value) {
+void write2000(uint8_t value) {
 
 	latch_ = value;
 
@@ -265,14 +342,14 @@ void PPU::write2000(uint8_t value) {
 
 	// we can re-trigger an NMI ...
 	if(!prev_nmi_on_vblank && ppu_control_.nmi_on_vblank && status_.vblank) {
-		nes::cpu.nmi();
+		cpu::nmi();
 	}
 }
 
 //------------------------------------------------------------------------------
 // Name: write2001
 //------------------------------------------------------------------------------
-void PPU::write2001(uint8_t value) {
+void write2001(uint8_t value) {
 	latch_ = value;
 
 	if(write_block_) {
@@ -285,14 +362,14 @@ void PPU::write2001(uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void PPU::write2002(uint8_t value) {
+void write2002(uint8_t value) {
 	latch_ = value;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void PPU::write2003(uint8_t value) {
+void write2003(uint8_t value) {
 	latch_          = value;
 	sprite_address_ = value;
 }
@@ -300,7 +377,7 @@ void PPU::write2003(uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void PPU::write2004(uint8_t value) {
+void write2004(uint8_t value) {
 	latch_ = value;
 
 	// sprite_address_ is an 8-bit type, so wrapping is implicit
@@ -310,7 +387,7 @@ void PPU::write2004(uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void PPU::write2005(uint8_t value) {
+void write2005(uint8_t value) {
 	latch_ = value;
 
 	if(write_block_) {
@@ -339,7 +416,7 @@ void PPU::write2005(uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void PPU::write2006(uint8_t value) {
+void write2006(uint8_t value) {
 	latch_ = value;
 
 	if(write_block_) {
@@ -361,14 +438,14 @@ void PPU::write2006(uint8_t value) {
 	    nametable_    = (nametable_ & 0x7f00) | (value & 0xff);
 	    vram_address_ = nametable_;
 
-		nes::cart.mapper()->vram_change_hook(vram_address_);
+		cart.mapper()->vram_change_hook(vram_address_);
 	}
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void PPU::write2007(uint8_t value) {
+void write2007(uint8_t value) {
 	latch_ = value;
 
 	const uint16_t temp_address = vram_address_ & 0x3fff;
@@ -387,7 +464,7 @@ void PPU::write2007(uint8_t value) {
 		}
 	}
 
-	nes::cart.mapper()->vram_change_hook(vram_address_);
+	cart.mapper()->vram_change_hook(vram_address_);
 
 	// palette write
 	if((temp_address & 0x3f00) == 0x3f00) {
@@ -401,32 +478,32 @@ void PPU::write2007(uint8_t value) {
 		}
 
 	} else if(vram_banks_[temp_address >> 10].writeable()) {
-		nes::cart.mapper()->write_vram(temp_address, value);
+		cart.mapper()->write_vram(temp_address, value);
 	}
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t PPU::read2000() {
+uint8_t read2000() {
 	return latch_;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t PPU::read2001() {
+uint8_t read2001() {
 	return latch_;
 }
 
 //------------------------------------------------------------------------------
 // Name: read2002
 //------------------------------------------------------------------------------
-uint8_t PPU::read2002() {
+uint8_t read2002() {
 	// upper 3 bits of status
 	// lower 5 bits of garbage (latch)
-	const uint8_t ret = 
-		(status_.raw & (STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK)) | 
+	const uint8_t ret =
+		(status_.raw & (STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK)) |
 		(latch_ & ~(STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK));
 
 	// reset scroll/write latch
@@ -443,14 +520,14 @@ uint8_t PPU::read2002() {
 //------------------------------------------------------------------------------
 // Name: read2003
 //------------------------------------------------------------------------------
-uint8_t PPU::read2003() {
+uint8_t read2003() {
 	return latch_;
 }
 
 //------------------------------------------------------------------------------
 // Name: read2004
 //------------------------------------------------------------------------------
-uint8_t PPU::read2004() {
+uint8_t read2004() {
 	if(sprite_init_) {
 		return 0xff;
 	}
@@ -472,21 +549,21 @@ uint8_t PPU::read2004() {
 //------------------------------------------------------------------------------
 // Name: read2005
 //------------------------------------------------------------------------------
-uint8_t PPU::read2005() {
+uint8_t read2005() {
 	return latch_;
 }
 
 //------------------------------------------------------------------------------
 // Name: read2006
 //------------------------------------------------------------------------------
-uint8_t PPU::read2006() {
+uint8_t read2006() {
 	return latch_;
 }
 
 //------------------------------------------------------------------------------
 // Name: read2007
 //------------------------------------------------------------------------------
-uint8_t PPU::read2007() {
+uint8_t read2007() {
 
 	if(write_block_) {
 		return 0x00;
@@ -508,10 +585,10 @@ uint8_t PPU::read2007() {
 		}
 	}
 
-	nes::cart.mapper()->vram_change_hook(vram_address_);
+	cart.mapper()->vram_change_hook(vram_address_);
 
 	latch_ = register_2007_buffer_;
-	register_2007_buffer_ = nes::cart.mapper()->read_vram(temp_address);
+	register_2007_buffer_ = cart.mapper()->read_vram(temp_address);
 
 	if((temp_address & 0x3f00) == 0x3f00) {
 		latch_ = palette_[temp_address & 0x1f];
@@ -526,36 +603,34 @@ uint8_t PPU::read2007() {
 //------------------------------------------------------------------------------
 // Name: write4014
 //------------------------------------------------------------------------------
-void PPU::write4014(uint8_t value) {
+void write4014(uint8_t value) {
 	// drain current cycles, then go ahead and do the DMA
 	// the procedure takes 513 CPU cycles (+1 on odd CPU cycles):
 	// first one (or two) idle cycles, and then 256 pairs of alternating
 	// read/write cycles.
 #if 0
-	if((nes::cpu.cycle_count() & 1)) {
-		nes::cpu.burn(514);
+	if((cpu::cycle_count() & 1)) {
+		cpu::burn(514);
 	} else {
-		nes::cpu.burn(513);
+		cpu::burn(513);
 	}
 
 	uint16_t sprite_addr = (value << 8);
 
 	// do the copy with wrapping
 	for(int i = 0; i < 256; ++i) {
-		write2004(nes::cart.mapper()->read_memory(sprite_addr++));
+		write2004(cart.mapper()->read_memory(sprite_addr++));
 	}
 #else
 	const uint16_t sprite_addr = (value << 8);
-	nes::cpu.schedule_spr_dma([](uint8_t value) {
-		nes::ppu.write2004(value);
-	}, sprite_addr, 256);
+	cpu::schedule_spr_dma(write2004, sprite_addr, 256);
 #endif
 }
 
 //------------------------------------------------------------------------------
 // Name: set_mirroring
 //------------------------------------------------------------------------------
-void PPU::set_mirroring(uint8_t mir) {
+void set_mirroring(uint8_t mir) {
 
 	// utilizes the concept of a mirroring control byte
 	// each pair of bits represents a table to be mirrored from
@@ -586,21 +661,21 @@ void PPU::set_mirroring(uint8_t mir) {
 //------------------------------------------------------------------------------
 // Name: unset_vram_bank
 //------------------------------------------------------------------------------
-void PPU::unset_vram_bank(uint8_t bank) {
+void unset_vram_bank(uint8_t bank) {
 	vram_banks_[bank] = VRAMBank();
 }
 
 //------------------------------------------------------------------------------
 // Name: set_vram_bank
 //------------------------------------------------------------------------------
-void PPU::set_vram_bank(uint8_t bank, uint8_t *p, bool writeable) {
+void set_vram_bank(uint8_t bank, uint8_t *p, bool writeable) {
 	vram_banks_[bank] = VRAMBank(p, writeable);
 }
 
 //------------------------------------------------------------------------------
 // Name: start_frame
 //------------------------------------------------------------------------------
-void PPU::start_frame() {
+void start_frame() {
 	vpos_ = 0;
 	rendering_ = true;
 }
@@ -608,17 +683,17 @@ void PPU::start_frame() {
 //------------------------------------------------------------------------------
 // Name: end_frame
 //------------------------------------------------------------------------------
-void PPU::end_frame() {
+void end_frame() {
 	odd_frame_ = !odd_frame_;
 	rendering_ = false;
 
-	nes::cart.mapper()->ppu_end_frame();
+	cart.mapper()->ppu_end_frame();
 }
 
 //------------------------------------------------------------------------------
 // Name: write_vram
 //------------------------------------------------------------------------------
-void PPU::write_vram(uint16_t address, uint8_t value) {
+void write_vram(uint16_t address, uint8_t value) {
 
 	assert(vram_banks_[(address >> 10) & 0x0f]);
 	assert(vram_banks_[(address >> 10) & 0x0f].writeable());
@@ -629,7 +704,7 @@ void PPU::write_vram(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: read_vram
 //------------------------------------------------------------------------------
-uint8_t PPU::read_vram(uint16_t address) {
+uint8_t read_vram(uint16_t address) {
 
 	assert(vram_banks_[(address >> 10) & 0x0f]);
 	return vram_banks_[(address >> 10) & 0x0f][address & 0x03ff];
@@ -639,7 +714,7 @@ uint8_t PPU::read_vram(uint16_t address) {
 // Name: sprite_pattern_address
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
-uint16_t PPU::sprite_pattern_address(uint8_t index, uint8_t sprite_line) const {
+uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
 
 	if(Size == 16) {
 		// 8x16. even sprites use $0000, odd $1000
@@ -655,7 +730,7 @@ uint16_t PPU::sprite_pattern_address(uint8_t index, uint8_t sprite_line) const {
 // Name: open_sprite_pattern
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
-void PPU::open_sprite_pattern() {
+void open_sprite_pattern() {
 	const SpriteEntry *const sprite_entry = &sprite_data_[((hpos_ - 1) >> 3) & 0x07];
 
 	if(sprite_entry->y() != 0xff) {
@@ -680,17 +755,17 @@ void PPU::open_sprite_pattern() {
 		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(0xff, 0xff);
 	}
 
-	nes::cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
+	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_sprite_pattern
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
-void PPU::read_sprite_pattern() {
+void read_sprite_pattern() {
 	SpriteEntry *const sprite_entry = &sprite_data_[((hpos_ - 1) >> 3) & 0x07];
 
-	sprite_entry->pattern[Pattern::index] = nes::cart.mapper()->read_vram(next_ppu_fetch_address_);
+	sprite_entry->pattern[Pattern::index] = cart.mapper()->read_vram(next_ppu_fetch_address_);
 
 	if(sprite_entry->y() != 0xff) {
 		// horizontal flip
@@ -707,7 +782,7 @@ void PPU::read_sprite_pattern() {
 //------------------------------------------------------------------------------
 // Name: evaluate_sprites_even
 //------------------------------------------------------------------------------
-void PPU::evaluate_sprites_even() {
+void evaluate_sprites_even() {
 	// write cycle
 	if(hpos_ < 64) {
 //		uint8_t index = hpos_ >> 1;
@@ -726,7 +801,7 @@ void PPU::evaluate_sprites_even() {
 //------------------------------------------------------------------------------
 // Name: evaluate_sprites_odd
 //------------------------------------------------------------------------------
-void PPU::evaluate_sprites_odd() {
+void evaluate_sprites_odd() {
 
 	// read cycle
 	if(hpos_ < 64) {
@@ -740,7 +815,7 @@ void PPU::evaluate_sprites_odd() {
 // Name: evaluate_sprites
 //------------------------------------------------------------------------------
 template <int Size>
-void PPU::evaluate_sprites() {
+void evaluate_sprites() {
 	sprite_data_index_      = 0;
 	sprite_zero_found_next_ = false;
 
@@ -786,7 +861,7 @@ void PPU::evaluate_sprites() {
 						sprite_data_[sprite_data_index_].sprite_bytes[2] |= SPRITE_ZERO;
 						sprite_zero_found_next_ = true;
 					}
-					
+
 					left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_data_[sprite_data_index_].sprite_bytes[3]);
 
 					++sprite_data_index_;
@@ -851,7 +926,7 @@ void PPU::evaluate_sprites() {
 // Name: select_blank_pixel
 // Note: the screen is *always* disabled when this is called
 //------------------------------------------------------------------------------
-uint8_t PPU::select_blank_pixel() const {
+uint8_t select_blank_pixel() {
 
 	assert(!ppu_mask_.screen_enabled);
 
@@ -866,7 +941,7 @@ uint8_t PPU::select_blank_pixel() const {
 // Name: select_bg_pixel
 // Note: the screen is *always* enabled when this is called
 //------------------------------------------------------------------------------
-uint8_t PPU::select_bg_pixel(uint8_t index) {
+uint8_t select_bg_pixel(uint8_t index) {
 
 	assert(ppu_mask_.screen_enabled);
 
@@ -876,8 +951,8 @@ uint8_t PPU::select_bg_pixel(uint8_t index) {
 		const uint16_t mask  = (0x8000 >> tile_offset_);
 		const uint8_t  shift = (0x0f - tile_offset_);
 		return
-				((pattern_queue_[0]   & mask) >> (shift - 0)) | 
-				((pattern_queue_[1]   & mask) >> (shift - 1)) | 
+				((pattern_queue_[0]   & mask) >> (shift - 0)) |
+				((pattern_queue_[1]   & mask) >> (shift - 1)) |
 				((attribute_queue_[0] & mask) >> (shift - 2)) |
 				((attribute_queue_[1] & mask) >> (shift - 3));
 	#else
@@ -903,21 +978,21 @@ uint8_t PPU::select_bg_pixel(uint8_t index) {
 // Name: select_pixel
 // Note: the screen is *always* enabled when this is called
 //------------------------------------------------------------------------------
-uint8_t PPU::select_pixel(uint8_t index) {
+uint8_t select_pixel(uint8_t index) {
 
 	assert(ppu_mask_.screen_enabled);
 
 	uint8_t pixel = select_bg_pixel(index);
-	
+
 	// are ANY sprites possibly in range?
 	if(left_most_sprite_x_ <= index) {
 
 		// then see if any of the sprites belong..
 		if((ppu_mask_.sprite_clipping || index >= 8) && ppu_mask_.sprites_visible) {
-		
+
 			const SpriteEntry *const first = sprite_data_;
 			const SpriteEntry *const last  = &sprite_data_[sprite_data_index_];
-	
+
 			for(const SpriteEntry *p = first; p != last; ++p) {
 				const uint16_t x_offset = index - p->x();
 
@@ -928,8 +1003,8 @@ uint8_t PPU::select_pixel(uint8_t index) {
 					const uint8_t p1 = p->pattern[1];
 
 				#if 1
-					const uint8_t sprite_pixel = 
-							(((p0 >> (7 - x_offset)) & 0x01) << 0x00) | 
+					const uint8_t sprite_pixel =
+							(((p0 >> (7 - x_offset)) & 0x01) << 0x00) |
 							(((p1 >> (7 - x_offset)) & 0x01) << 0x01);
 				#else
 					switch(x_offset) {
@@ -977,37 +1052,37 @@ uint8_t PPU::select_pixel(uint8_t index) {
 // Name:
 //------------------------------------------------------------------------------
 template <class Pattern>
-void PPU::open_background_pattern() {
+void open_background_pattern() {
 
 	const uint8_t tile_line = (vram_address_ & 0x7000) >> 12;
 	next_ppu_fetch_address_ = background_pattern_table() | (next_tile_index_ << 4) | Pattern::offset | tile_line;
-	nes::cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
+	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 template <class Pattern>
-void PPU::read_background_pattern() {
+void read_background_pattern() {
 
-	next_pattern_[Pattern::index] = nes::cart.mapper()->read_vram(next_ppu_fetch_address_);
+	next_pattern_[Pattern::index] = cart.mapper()->read_vram(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void PPU::open_background_attribute() {
+void open_background_attribute() {
 	next_ppu_fetch_address_ = attribute_address(vram_address_);
-	nes::cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
+	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void PPU::read_background_attribute() {
+void read_background_attribute() {
 
 	// fetch the attribute byte
-	const uint8_t attr_byte = nes::cart.mapper()->read_vram(next_ppu_fetch_address_);
+	const uint8_t attr_byte = cart.mapper()->read_vram(next_ppu_fetch_address_);
 
 	// get the attribute bits relevant for this tile
 	next_attribute_ = attribute_bits(vram_address_, attr_byte);
@@ -1016,22 +1091,22 @@ void PPU::read_background_attribute() {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void PPU::open_tile_index() {
+void open_tile_index() {
 	next_ppu_fetch_address_ = tile_address(vram_address_);
-	nes::cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
+	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void PPU::read_tile_index() {
-	next_tile_index_ = nes::cart.mapper()->read_vram(next_ppu_fetch_address_);
+void read_tile_index() {
+	next_tile_index_ = cart.mapper()->read_vram(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
 // Name: clock_x
 //------------------------------------------------------------------------------
-void PPU::clock_x() {
+void clock_x() {
 	// wrap X at 31 and flip bit 10, or just increment
 	if((vram_address_ & 0x1f) == 0x1f) {
 		vram_address_ ^= 0x41f;
@@ -1043,7 +1118,7 @@ void PPU::clock_x() {
 //------------------------------------------------------------------------------
 // Name: clock_y
 //------------------------------------------------------------------------------
-void PPU::clock_y() {
+void clock_y() {
 	// NOTES:
 	//    Pertinent VRAM addresses are really 15 bits, as the last one
 	//    isn't used.  Bits 14-12 are the tileY offset.  Bits 11-0 hold
@@ -1086,7 +1161,7 @@ void PPU::clock_y() {
 //------------------------------------------------------------------------------
 // Name: enter_vblank
 //------------------------------------------------------------------------------
-void PPU::enter_vblank() {
+void enter_vblank() {
 
 	// Reading one PPU clock before reads it as clear and never sets the flag
 	// or generates NMI for that frame.
@@ -1098,7 +1173,7 @@ void PPU::enter_vblank() {
 //------------------------------------------------------------------------------
 // Name: exit_vblank
 //------------------------------------------------------------------------------
-void PPU::exit_vblank() {
+void exit_vblank() {
 	// clear all the relevant status bits
 	status_.raw &= ~(STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK);
 	write_block_ = false;
@@ -1107,7 +1182,7 @@ void PPU::exit_vblank() {
 //------------------------------------------------------------------------------
 // Name: render_pixel
 //------------------------------------------------------------------------------
-void PPU::render_pixel(uint8_t *dest_buffer) {
+void render_pixel(uint8_t *dest_buffer) {
 
 	const uint8_t index = hpos_ - 1;
 	const uint8_t pixel = select_pixel(index);
@@ -1127,7 +1202,7 @@ void PPU::render_pixel(uint8_t *dest_buffer) {
 //------------------------------------------------------------------------------
 // Name: update_shift_registers_idle
 //------------------------------------------------------------------------------
-void PPU::update_shift_registers_idle() {
+void update_shift_registers_idle() {
 
 	pattern_queue_[0]   <<= 8;
 	pattern_queue_[1]   <<= 8;
@@ -1140,7 +1215,7 @@ void PPU::update_shift_registers_idle() {
 //------------------------------------------------------------------------------
 // Name: update_shift_registers_render
 //------------------------------------------------------------------------------
-void PPU::update_shift_registers_render() {
+void update_shift_registers_render() {
 
 	pattern_queue_[0]   |= (next_pattern_[0] & 0x00ff);
 	pattern_queue_[1]   |= (next_pattern_[1] & 0x00ff);
@@ -1152,7 +1227,7 @@ void PPU::update_shift_registers_render() {
 // Name: update_x_scroll
 // Note: occurs at cycle 257 of all rendering scanlines
 //------------------------------------------------------------------------------
-void PPU::update_x_scroll() {
+void update_x_scroll() {
 	// v:0000010000011111=t:0000010000011111
 	vram_address_ = (vram_address_ & 0xfbe0) | (nametable_ & 0x041f);
 }
@@ -1161,7 +1236,7 @@ void PPU::update_x_scroll() {
 // Name: update_sprite_registers
 // Note: occurs at cycles 257 - 320 of all rendering scanlines
 //------------------------------------------------------------------------------
-void PPU::update_sprite_registers() {
+void update_sprite_registers() {
 	// this gets set to $00 for each tick between 257 and 320
 	sprite_address_         = 0;
 	sprite_zero_found_curr_ = sprite_zero_found_next_;
@@ -1171,7 +1246,7 @@ void PPU::update_sprite_registers() {
 // Name: update_vram_address
 // Note: occurs at cycles 279 - 304 of prerender if screen is enabled
 //------------------------------------------------------------------------------
-void PPU::update_vram_address() {
+void update_vram_address() {
 	// v=t
 	vram_address_ = (vram_address_ & ~0x7be0) | (nametable_ & 0x7be0);
 }
@@ -1179,7 +1254,7 @@ void PPU::update_vram_address() {
 //------------------------------------------------------------------------------
 // Name: execute_cycle
 //------------------------------------------------------------------------------
-void PPU::execute_cycle(const scanline_prerender &) {
+void execute_cycle(const scanline_prerender &) {
 
 	// nmi_on_timing passes when this is 0...
 	if(hpos_ == 1) {
@@ -1271,7 +1346,7 @@ void PPU::execute_cycle(const scanline_prerender &) {
 //------------------------------------------------------------------------------
 // Name: execute_cycle
 //------------------------------------------------------------------------------
-void PPU::execute_cycle(const scanline_render &target) {
+void execute_cycle(const scanline_render &target) {
 
 	if(!ppu_mask_.screen_enabled) {
 
@@ -1350,14 +1425,14 @@ void PPU::execute_cycle(const scanline_render &target) {
 //------------------------------------------------------------------------------
 // Name: execute_scanline
 //------------------------------------------------------------------------------
-void PPU::execute_cycle(const scanline_postrender &target) {
+void execute_cycle(const scanline_postrender &target) {
 	(void)target;
 }
 
 //------------------------------------------------------------------------------
 // Name: execute_scanline
 //------------------------------------------------------------------------------
-void PPU::execute_cycle(const scanline_vblank &target) {
+void execute_cycle(const scanline_vblank &target) {
 
 	(void)target;
 
@@ -1370,7 +1445,7 @@ void PPU::execute_cycle(const scanline_vblank &target) {
 			break;
 		case 3:
 			if(ppu_control_.nmi_on_vblank && status_.vblank) {
-				nes::cpu.nmi();
+				cpu::nmi();
 			}
 			break;
 		}
@@ -1382,10 +1457,10 @@ void PPU::execute_cycle(const scanline_vblank &target) {
 // Desc: optionally executes a CPU cycle returns the number of CPU cycles
 //       executed
 //------------------------------------------------------------------------------
-int PPU::clock_cpu() {
+int clock_cpu() {
 	if((ppu_cycle_ % 3) == cpu_alignment) {
 #ifndef FAST_CPU
-		nes::cpu.exec(1);
+		cpu::exec(1);
 #endif
 		return 1;
 	}
@@ -1396,7 +1471,7 @@ int PPU::clock_cpu() {
 // Name: sprite_pattern_table
 // Desc: returns 0x0000 or 0x1000 depending on bit 3 of ppu_control_
 //------------------------------------------------------------------------------
-uint16_t PPU::sprite_pattern_table() const {
+uint16_t sprite_pattern_table() {
 	return ppu_control_.sprite_pattern_table ? 0x1000 : 0x0000;
 }
 
@@ -1404,7 +1479,7 @@ uint16_t PPU::sprite_pattern_table() const {
 // Name: background_pattern_table
 // Desc: returns 0x0000 or 0x1000 depending on bit 4 of ppu_control_
 //------------------------------------------------------------------------------
-uint16_t PPU::background_pattern_table() const {
+uint16_t background_pattern_table() {
 	return ppu_control_.background_pattern_table ? 0x1000 : 0x0000;
 }
 
@@ -1412,7 +1487,7 @@ uint16_t PPU::background_pattern_table() const {
 // Name: execute_scanline
 //------------------------------------------------------------------------------
 template <class T>
-void PPU::execute_scanline(const T &target) {
+void execute_scanline(const T &target) {
 	// NOTE: MMC3 isn't quite right in "FAST_CPU" mode
 	// (but likely good enough for most games)
 	// this is because when executing many cycles at a time
@@ -1428,8 +1503,8 @@ void PPU::execute_scanline(const T &target) {
 		cycles += clock_cpu();
 	}
 
-	nes::cpu.exec(cycles);
-	nes::cart.mapper()->hsync();
+	cpu::exec(cycles);
+	cart.mapper()->hsync();
 #else
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
 		execute_cycle(target);
@@ -1439,9 +1514,47 @@ void PPU::execute_scanline(const T &target) {
 	++vpos_;
 }
 
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint64_t cycle_count() {
+	return ppu_cycle_;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint16_t hpos() {
+	return hpos_;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint16_t vpos() {
+	return vpos_;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+const PPUMask &mask() {
+	return ppu_mask_;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+const PPUControl &control() {
+	return ppu_control_;
+}
+
 // explicitly instantiate the types we use for this function,
 // we don't want to have to put this code in the header
-template void PPU::execute_scanline<scanline_vblank>(const scanline_vblank &target);
-template void PPU::execute_scanline<scanline_prerender>(const scanline_prerender &target);
-template void PPU::execute_scanline<scanline_postrender>(const scanline_postrender &target);
-template void PPU::execute_scanline<scanline_render>(const scanline_render &target);
+template void execute_scanline<scanline_vblank>(const scanline_vblank &target);
+template void execute_scanline<scanline_prerender>(const scanline_prerender &target);
+template void execute_scanline<scanline_postrender>(const scanline_postrender &target);
+template void execute_scanline<scanline_render>(const scanline_render &target);
+
+}
+}

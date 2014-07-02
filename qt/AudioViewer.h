@@ -3,7 +3,7 @@
 #define AUDIO_VIEWER_H_
 
 #include <QDialog>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include "APU.h"
 #include "ui_AudioViewer.h"
 
@@ -22,7 +22,7 @@ public Q_SLOTS:
 
 private:
 	Ui::AudioViewer ui_;
-	uint8_t audio_buffer_[APU::buffer_size];
+	uint8_t audio_buffer_[nes::apu::buffer_size];
 };
 
 #endif

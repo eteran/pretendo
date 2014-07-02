@@ -1,5 +1,7 @@
 
 #include "Mapper007.h"
+#include "PPU.h"
+#include "Cart.h"
 #include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(7);
@@ -85,8 +87,8 @@ void Mapper7::write_handler(uint16_t address, uint8_t value) {
 	set_prg_89abcdef(value & 0x07);
 
 	if(value & 0x10) {
-		nes::ppu.set_mirroring(PPU::mirror_single_high);
+		nes::ppu::set_mirroring(nes::ppu::mirror_single_high);
 	} else {
-		nes::ppu.set_mirroring(PPU::mirror_single_low);
+		nes::ppu::set_mirroring(nes::ppu::mirror_single_low);
 	}
 }

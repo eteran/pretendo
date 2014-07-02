@@ -9,9 +9,9 @@ struct opcode_lda {
 
 	typedef operation_read memory_access;
 
-	void operator()(Context &ctx, uint8_t data) const {
-		ctx.A = data;
-		update_nz_flags(ctx, ctx.A);
+	void operator()(uint8_t data) const {
+		A = data;
+		update_nz_flags(A);
 	}
 };
 

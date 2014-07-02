@@ -1,5 +1,7 @@
 
 #include "Mapper019.h"
+#include "PPU.h"
+#include "Cart.h"
 #include <cstring>
 
 // TODO: CHR-RAM swapping
@@ -50,10 +52,10 @@ uint8_t Mapper19::read_5(uint16_t address) {
 
 	switch(address & 0xf800) {
 	case 0x5000:
-		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		return irq_control_.lo;
 	case 0x5800:
-		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		return irq_control_.hi;
 	default:
 		return Mapper::read_5(address);
@@ -96,12 +98,12 @@ void Mapper19::write_5(uint16_t address, uint8_t value) {
 	case 0x5000:
 		// Low byte of IRQ counter
 		irq_control_.hi = value;
-		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		break;
 	case 0x5800:
 		// High bits of IRQ counter
 		irq_control_.hi = value;
-		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		break;
 	default:
 		Mapper::write_5(address, value);
@@ -185,13 +187,13 @@ void Mapper19::write_c(uint16_t address, uint8_t value) {
 		// A value of $E0 or above will
 		// use VRAM instead
 		mirroring_ = (mirroring_ & 0xf3) | ((value & 0x01) << 2);
-		nes::ppu.set_mirroring(mirroring_);
+		nes::ppu::set_mirroring(mirroring_);
 	} else {
 		// Select 1K VROM bank at PPU $2000
 		// A value of $E0 or above will
 		// use VRAM instead
 		mirroring_ = (mirroring_ & 0xfc) | (value & 0x01);
-		nes::ppu.set_mirroring(mirroring_);
+		nes::ppu::set_mirroring(mirroring_);
 	}
 }
 
@@ -205,13 +207,13 @@ void Mapper19::write_d(uint16_t address, uint8_t value) {
 		// A value of $E0 or above will
 		// use VRAM instead
 		mirroring_ = (mirroring_ & 0x3f) | ((value & 0x01) << 6);
-		nes::ppu.set_mirroring(mirroring_);
+		nes::ppu::set_mirroring(mirroring_);
 	} else {
 		//Select 1K VROM bank at PPU $2800
 		//A value of $E0 or above will
 		//use VRAM instead
 		mirroring_ = (mirroring_ & 0xcf) | ((value & 0x01) << 4);
-		nes::ppu.set_mirroring(mirroring_);
+		nes::ppu::set_mirroring(mirroring_);
 	}
 }
 
@@ -241,7 +243,7 @@ void Mapper19::write_f(uint16_t address, uint8_t value) {
 void Mapper19::cpu_sync() {
 	if(irq_control_.enabled) {
 		if(irq_control_.counter == 0x7fff) {
-			nes::cpu.irq(CPU::MAPPER_IRQ);
+			nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 		} else {
 			++irq_control_.counter;
 		}

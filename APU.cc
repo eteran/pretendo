@@ -1,15 +1,35 @@
 
 #include "APU.h"
+#include "CPU.h"
 #include "NES.h"
+#include "Square.h"
+#include "Triangle.h"
+#include "Noise.h"
+#include "DMC.h"
 #include <iostream>
 #include <cassert>
 #include <cstring>
 
+namespace nes {
+namespace apu {
 namespace {
 
-const int FrameMode        = 0x80;
-const int FrameInhibitIRQ  = 0x40;
-const double CPUFrequency  = 1789772.67; // 1.78977267Mhz
+enum {
+	STATUS_DMC_IRQ  	   = 0x80,
+	STATUS_FRAME_IRQ	   = 0x40,
+	STATUS_ENABLE_DMC	   = 0x10,
+	STATUS_ENABLE_NOISE    = 0x08,
+	STATUS_ENABLE_TRIANGLE = 0x04,
+	STATUS_ENABLE_SQUARE_2 = 0x02,
+	STATUS_ENABLE_SQUARE_1 = 0x01,
+};
+
+union APUFrameCounter {
+	uint8_t raw;
+	BitField<6> inihibit_frame_irq;
+	BitField<7> mode;
+	
+};
 
 //------------------------------------------------------------------------------
 // Name: bound
@@ -23,44 +43,47 @@ const T &bound(const T &lower, const T &value, const T &upper) {
 }
 
 
+const double CPUFrequency  = 1789772.67; // 1.78977267Mhz
 // CPUFrequency / 44100Hz  = 40.5844142857 clocks per sample
 // CPUFrequency / 48000Hz  = 37.286930625  clocks per sample
 // CPUFrequency / 192000Hz = 9.32173265625 clocks per sample
-const int ClocksPerSample = CPUFrequency / APU::frequency;
+const int ClocksPerSample = CPUFrequency / frequency;
 
 }
 
-//------------------------------------------------------------------------------
-// Name: APU
-//------------------------------------------------------------------------------
-APU::APU() : square_0_(0), square_1_(1), apu_cycles_(-1), next_clock_(-1),
-		clock_step_(0), status_({0}), frame_counter_(0), last_frame_counter_(0),
-		sample_index_(0) {
+Square<0> square_0;
+Square<1> square_1;
+Triangle  triangle;
+Noise     noise;
+DMC       dmc;
 
-	using std::memset;
-	memset(sample_buffer_, 0, sizeof(sample_buffer_));
+uint64_t        apu_cycles_         = -1;
+uint64_t        next_clock_         = -1;
+uint8_t         clock_step_         = 0;
+APUStatus       status              = {0};
+APUFrameCounter frame_counter_      = {0};
+uint8_t         last_frame_counter_ = 0;
+size_t          sample_index_       = 0;
+uint8_t         sample_buffer_[buffer_size];
 
-}
-
-//------------------------------------------------------------------------------
-// Name: ~APU
-//------------------------------------------------------------------------------
-APU::~APU() {
-
-}
+void clock_frame_mode_0();
+void clock_frame_mode_1();
+void clock_length();
+void clock_linear();
+uint8_t mix_channels();
 
 //------------------------------------------------------------------------------
 // Name: reset
 //------------------------------------------------------------------------------
-void APU::reset(nes::RESET reset_type) {
+void reset(RESET reset_type) {
 
-	status_.raw    = 0;
-	frame_counter_ = 0;
+	status.raw     = 0;
+	frame_counter_ = {0};
 	apu_cycles_    = 0;
 	next_clock_    = 0;
 	clock_step_    = 0;
 
-	if(reset_type == nes::HARD_RESET) {
+	if(reset_type == HARD_RESET) {
 		last_frame_counter_ = 0;
 	}
 
@@ -106,213 +129,213 @@ void APU::reset(nes::RESET reset_type) {
 	//       nop
 	//       nop
 	//     reset:
-	if(reset_type == nes::HARD_RESET) {
+	if(reset_type == HARD_RESET) {
 		run(2);
 	}
 
-	std::cout << "[APU::reset] reset complete" << std::endl;
+	std::cout << "APU reset complete" << std::endl;
 }
 
 //------------------------------------------------------------------------------
 // Name: write4000
 //------------------------------------------------------------------------------
-void APU::write4000(uint8_t value) {
-	square_0_.write_reg0(value);
+void write4000(uint8_t value) {
+	square_0.write_reg0(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4001
 //------------------------------------------------------------------------------
-void APU::write4001(uint8_t value) {
-	square_0_.write_reg1(value);
+void write4001(uint8_t value) {
+	square_0.write_reg1(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4002
 //------------------------------------------------------------------------------
-void APU::write4002(uint8_t value) {
-	square_0_.write_reg2(value);
+void write4002(uint8_t value) {
+	square_0.write_reg2(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4003
 //------------------------------------------------------------------------------
-void APU::write4003(uint8_t value) {
-	square_0_.write_reg3(value);
+void write4003(uint8_t value) {
+	square_0.write_reg3(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4004
 //------------------------------------------------------------------------------
-void APU::write4004(uint8_t value) {
-	square_1_.write_reg0(value);
+void write4004(uint8_t value) {
+	square_1.write_reg0(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4005
 //------------------------------------------------------------------------------
-void APU::write4005(uint8_t value) {
-	square_1_.write_reg1(value);
+void write4005(uint8_t value) {
+	square_1.write_reg1(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4006
 //------------------------------------------------------------------------------
-void APU::write4006(uint8_t value) {
-	square_1_.write_reg2(value);
+void write4006(uint8_t value) {
+	square_1.write_reg2(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4007
 //------------------------------------------------------------------------------
-void APU::write4007(uint8_t value) {
-	square_1_.write_reg3(value);
+void write4007(uint8_t value) {
+	square_1.write_reg3(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4008
 //------------------------------------------------------------------------------
-void APU::write4008(uint8_t value) {
-	triangle_.write_reg0(value);
+void write4008(uint8_t value) {
+	triangle.write_reg0(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write400A
 //------------------------------------------------------------------------------
-void APU::write400A(uint8_t value) {
-	triangle_.write_reg2(value);
+void write400A(uint8_t value) {
+	triangle.write_reg2(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write400B
 //------------------------------------------------------------------------------
-void APU::write400B(uint8_t value) {
-	triangle_.write_reg3(value);
+void write400B(uint8_t value) {
+	triangle.write_reg3(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write400C
 //------------------------------------------------------------------------------
-void APU::write400C(uint8_t value) {
-	noise_.write_reg0(value);
+void write400C(uint8_t value) {
+	noise.write_reg0(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write400E
 //------------------------------------------------------------------------------
-void APU::write400E(uint8_t value) {
-	noise_.write_reg2(value);
+void write400E(uint8_t value) {
+	noise.write_reg2(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write400F
 //------------------------------------------------------------------------------
-void APU::write400F(uint8_t value) {
-	noise_.write_reg3(value);
+void write400F(uint8_t value) {
+	noise.write_reg3(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4010
 //------------------------------------------------------------------------------
-void APU::write4010(uint8_t value) {
-	dmc_.write_reg0(value);
+void write4010(uint8_t value) {
+	dmc.write_reg0(value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void APU::write4011(uint8_t value) {
-	dmc_.write_reg1(value);
+void write4011(uint8_t value) {
+	dmc.write_reg1(value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void APU::write4012(uint8_t value) {
-	dmc_.write_reg2(value);
+void write4012(uint8_t value) {
+	dmc.write_reg2(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4013
 //------------------------------------------------------------------------------
-void APU::write4013(uint8_t value) {
-	dmc_.write_reg3(value);
+void write4013(uint8_t value) {
+	dmc.write_reg3(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write4015
 //------------------------------------------------------------------------------
-void APU::write4015(uint8_t value) {
+void write4015(uint8_t value) {
 
 	// Writing to this register clears the DMC interrupt flag.
-	status_.dmc_irq = false;
+	status.dmc_irq = false;
 
 	if(value & STATUS_ENABLE_SQUARE_1) {
-		square_0_.enable();
+		square_0.enable();
 	} else {
-		square_0_.disable();
+		square_0.disable();
 	}
 
 	if(value & STATUS_ENABLE_SQUARE_2) {
-		square_1_.enable();
+		square_1.enable();
 	} else {
-		square_1_.disable();
+		square_1.disable();
 	}
 
 	if(value & STATUS_ENABLE_TRIANGLE) {
-		triangle_.enable();
+		triangle.enable();
 	} else {
-		triangle_.disable();
+		triangle.disable();
 	}
 
 	if(value & STATUS_ENABLE_NOISE) {
-		noise_.enable();
+		noise.enable();
 	} else {
-		noise_.disable();
+		noise.disable();
 	}
 
 	if(value & STATUS_ENABLE_DMC) {
-		dmc_.enable();
+		dmc.enable();
 	} else {
-		dmc_.disable();
+		dmc.disable();
 	}
 
-	if(!status_.irq_firing) {
-		nes::cpu.clear_irq(CPU::APU_IRQ);
+	if(!status.irq_firing) {
+		cpu::clear_irq(cpu::APU_IRQ);
 	}
 }
 
 //------------------------------------------------------------------------------
 // Name: read4015
 //------------------------------------------------------------------------------
-uint8_t APU::read4015() {
-	uint8_t ret = status_.raw & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ);
+uint8_t read4015() {
+	uint8_t ret = status.raw & (STATUS_DMC_IRQ | STATUS_FRAME_IRQ);
 
 	// reading this register clears the Frame interrupt flag.
-	status_.frame_irq = false;
+	status.frame_irq = false;
 
-	if(square_0_.length_counter().value() > 0) {
+	if(square_0.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_SQUARE_1;
 	}
 
-	if(square_1_.length_counter().value() > 0) {
+	if(square_1.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_SQUARE_2;
 	}
 
-	if(triangle_.length_counter().value() > 0) {
+	if(triangle.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_TRIANGLE;
 	}
 
-	if(noise_.length_counter().value() > 0) {
+	if(noise.length_counter().value() > 0) {
 		ret |= STATUS_ENABLE_NOISE;
 	}
 
-	if(dmc_.bytes_remaining() > 0) {
+	if(dmc.bytes_remaining() > 0) {
 		ret |= STATUS_ENABLE_DMC;
 	}
 
-	if(!status_.irq_firing) {
-		nes::cpu.clear_irq(CPU::APU_IRQ);
+	if(!status.irq_firing) {
+		cpu::clear_irq(cpu::APU_IRQ);
 	}
 
 	return ret;
@@ -321,15 +344,15 @@ uint8_t APU::read4015() {
 //------------------------------------------------------------------------------
 // Name: write4017
 //------------------------------------------------------------------------------
-void APU::write4017(uint8_t value) {
+void write4017(uint8_t value) {
 
-	frame_counter_      = value;
+	frame_counter_.raw  = value;
 	last_frame_counter_ = value;
 
-	if(frame_counter_ & FrameInhibitIRQ) {
-		status_.frame_irq = false;
-		if(!status_.irq_firing) {
-			nes::cpu.clear_irq(CPU::APU_IRQ);
+	if(frame_counter_.inihibit_frame_irq) {
+		status.frame_irq = false;
+		if(!status.irq_firing) {
+			cpu::clear_irq(cpu::APU_IRQ);
 		}
 	}
 
@@ -337,7 +360,7 @@ void APU::write4017(uint8_t value) {
 
 	clock_step_ = 0;
 
-	if(!(frame_counter_ & FrameMode)) {
+	if(!frame_counter_.mode) {
 		next_clock_ += 7458;
 	}
 }
@@ -345,31 +368,31 @@ void APU::write4017(uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: clock_length
 //------------------------------------------------------------------------------
-void APU::clock_length() {
-	square_0_.length_counter().clock();
-	square_1_.length_counter().clock();
-	triangle_.length_counter().clock();
-	noise_.length_counter().clock();
+void clock_length() {
+	square_0.length_counter().clock();
+	square_1.length_counter().clock();
+	triangle.length_counter().clock();
+	noise.length_counter().clock();
 
-	square_0_.sweep().clock();
-	square_1_.sweep().clock();
+	square_0.sweep().clock();
+	square_1.sweep().clock();
 }
 
 //------------------------------------------------------------------------------
 // Name: clock_linear
 //------------------------------------------------------------------------------
-void APU::clock_linear() {
-	triangle_.linear_counter().clock();
+void clock_linear() {
+	triangle.linear_counter().clock();
 
-	square_0_.envelope().clock();
-	square_1_.envelope().clock();
-	noise_.envelope().clock();
+	square_0.envelope().clock();
+	square_1.envelope().clock();
+	noise.envelope().clock();
 }
 
 //------------------------------------------------------------------------------
 // Name: clock_frame_mode_0
 //------------------------------------------------------------------------------
-void APU::clock_frame_mode_0() {
+void clock_frame_mode_0() {
 
 	// 4 step sequence
 	switch(clock_step_) {
@@ -390,8 +413,8 @@ void APU::clock_frame_mode_0() {
 		break;
 
 	case 3:
-		if(!(frame_counter_ & FrameInhibitIRQ)) {
-			status_.frame_irq = true;
+		if(!(frame_counter_.inihibit_frame_irq)) {
+			status.frame_irq = true;
 		}
 
 		++next_clock_;
@@ -400,16 +423,16 @@ void APU::clock_frame_mode_0() {
 	case 4:
 		clock_linear();
 		clock_length();
-		if(!(frame_counter_ & FrameInhibitIRQ)) {
-			status_.frame_irq = true;
+		if(!(frame_counter_.inihibit_frame_irq)) {
+			status.frame_irq = true;
 		}
 
 		++next_clock_;
 		break;
 
 	case 5:
-		if(!(frame_counter_ & FrameInhibitIRQ)) {
-			status_.frame_irq = true;
+		if(!(frame_counter_.inihibit_frame_irq)) {
+			status.frame_irq = true;
 		}
 
 		next_clock_ += 7457;
@@ -422,7 +445,7 @@ void APU::clock_frame_mode_0() {
 //------------------------------------------------------------------------------
 // Name: clock_frame_mode_1
 //------------------------------------------------------------------------------
-void APU::clock_frame_mode_1() {
+void clock_frame_mode_1() {
 
 	// 5 step sequence
 	switch(clock_step_) {
@@ -459,16 +482,16 @@ void APU::clock_frame_mode_1() {
 //------------------------------------------------------------------------------
 // Name: run
 //------------------------------------------------------------------------------
-void APU::run(int cycles) {
+void run(int cycles) {
 
 	while(cycles-- > 0) {
 
-		if(!(frame_counter_ & FrameInhibitIRQ) && (status_.frame_irq)) {
-			nes::cpu.irq(CPU::APU_IRQ);
+		if(!(frame_counter_.inihibit_frame_irq) && (status.frame_irq)) {
+			cpu::irq(cpu::APU_IRQ);
 		}
 
 		if(apu_cycles_ == next_clock_) {
-			if(frame_counter_ & FrameMode) {
+			if(frame_counter_.mode) {
 				clock_frame_mode_1();
 			} else {
 				clock_frame_mode_0();
@@ -481,11 +504,11 @@ void APU::run(int cycles) {
 			}
 		}
 
-		dmc_.tick();
-		noise_.tick();
-		triangle_.tick();
-		square_0_.tick();
-		square_1_.tick();
+		dmc.tick();
+		noise.tick();
+		triangle.tick();
+		square_0.tick();
+		square_1.tick();
 
 		++apu_cycles_;
 	}
@@ -494,7 +517,7 @@ void APU::run(int cycles) {
 //------------------------------------------------------------------------------
 // Name: buffer
 //------------------------------------------------------------------------------
-const uint8_t *APU::buffer() {
+const uint8_t *buffer() {
 	sample_index_ = 0;
 	return sample_buffer_;
 }
@@ -502,36 +525,46 @@ const uint8_t *APU::buffer() {
 //------------------------------------------------------------------------------
 // Name: mix_channels
 //------------------------------------------------------------------------------
-uint8_t APU::mix_channels() const {
+uint8_t mix_channels() {
 
-	const uint8_t pulse1   = square_0_.output();
-	const uint8_t pulse2   = square_1_.output();
-	const uint8_t triangle = triangle_.output();
-	const uint8_t noise    = noise_.output();
-	const uint8_t dmc      = dmc_.output();
-	
+	const uint8_t pulse1_out   = square_0.output();
+	const uint8_t pulse2_out   = square_1.output();
+	const uint8_t triangle_out = triangle.output();
+	const uint8_t noise_out    = noise.output();
+	const uint8_t dmc_out      = dmc.output();
+
 #if 0
 	float pulse_volume = 0;
 	float tnd_volume   = 0;
 
-	if(pulse1 || pulse2) {
-		pulse_volume = 95.88 / ((8128.0 / (pulse1 + pulse2)) + 100.0);
+	if(pulse1_out || pulse2_out) {
+		pulse_volume = 95.88 / ((8128.0 / (pulse1_out + pulse2_out)) + 100.0);
 	}
 
-	if(triangle || noise || dmc) {
-		tnd_volume = 159.79 / ((1 / ((triangle / 8227.0) + (noise / 12241.0) + (dmc / 22638.0))) + 100.0);
+	if(triangle_out || noise_out || dmc_out) {
+		tnd_volume = 159.79 / ((1 / ((triangle_out / 8227.0) + (noise_out / 12241.0) + (dmc_out / 22638.0))) + 100.0);
 	}
 
 	int result = (pulse_volume + tnd_volume) * 0x100;
 #else
 	int result = (
-		pulse1   +
-		pulse2   +
-		triangle +
-		noise    +
-		dmc      +
+		pulse1_out   +
+		pulse2_out   +
+		triangle_out +
+		noise_out    +
+		dmc_out      +
 		0);
 #endif
 
 	return bound(0, result, 255);
+}
+
+//------------------------------------------------------------------------------
+// Name: 
+//------------------------------------------------------------------------------
+uint64_t cycle_count() {
+	return apu_cycles_;
+}
+
+}
 }

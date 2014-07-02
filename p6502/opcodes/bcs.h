@@ -9,8 +9,8 @@
 //------------------------------------------------------------------------------
 struct opcode_bcs : branch {
 
-	bool operator()(Context &ctx) const {
-		return do_branch(ctx, carry_set());
+	bool operator()() const {
+		return do_branch(carry_set());
 	}
 };
 

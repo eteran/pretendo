@@ -1,5 +1,6 @@
 
 #include "Mapper232.h"
+#include "PPU.h"
 #include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(232);
@@ -32,9 +33,9 @@ void Mapper232::write_8(uint16_t address, uint8_t value) {
 #if 0
 	// firehawk only
 	if(value & 0x10) {
-		nes::ppu.set_mirroring(PPU::mirror_single_high);
+		nes::ppu::set_mirroring(nes::ppu::mirror_single_high);
 	} else {
-		nes::ppu.set_mirroring(PPU::mirror_single_low);
+		nes::ppu::set_mirroring(nes::ppu::mirror_single_low);
 	}
 #endif
 

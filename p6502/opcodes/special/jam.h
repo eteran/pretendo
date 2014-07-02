@@ -8,22 +8,18 @@
 //------------------------------------------------------------------------------
 class opcode_jam {
 public:
-	opcode_jam() {
-	}
-
-public:
-	void operator()(Context &ctx) {
-		execute(ctx);
+	void operator()() {
+		execute();
 	}
 
 private:
-	void execute(Context &ctx) {
-		switch(ctx.cycle) {
+	void execute() {
+		switch(cycle_) {
 		case 1:
 			// make sure we spin forever
-			--ctx.PC;
-			if(ctx.jam_handler) {
-				(*ctx.jam_handler)();
+			--PC;
+			if(jam_handler_) {
+				(*jam_handler_)();
 			}
 			OPCODE_COMPLETE;
 			break;

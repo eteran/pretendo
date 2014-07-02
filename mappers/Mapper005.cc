@@ -1,6 +1,9 @@
 
 #include "Mapper005.h"
+#include "PPU.h"
+#include "Cart.h"
 #include <cstring>
+#include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(5);
 
@@ -112,7 +115,7 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 	case 0x5105:
 		mirroring_mode_ = value;
 		// we do this here so we can allow regular access to just "pass though" to the PPU
-		nes::ppu.set_mirroring(value);
+		nes::ppu::set_mirroring(value);
 		break;
 
 	case 0x5106:
@@ -352,7 +355,7 @@ void Mapper5::write_handler(uint16_t address, uint8_t value) {
 	if(prg_ram_protect1_ == 0x02 && prg_ram_protect2_ == 0x01 && prg_ram_banks_[bank]) {
 		prg_ram_banks_[bank][address & 0x0fff] = value;
 	} else {
-		nes::cpu.write(address, value);
+		nes::cpu::write(address, value);
 	}
 }
 
@@ -366,7 +369,7 @@ uint8_t Mapper5::read_5(uint16_t address) {
 	switch(address) {
 	case 0x5204:
 		ret = irq_status_.raw;
-		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		irq_status_.pending = false;
 		break;
 
@@ -468,7 +471,7 @@ uint8_t Mapper5::read_handler(uint16_t address) {
 		return prg_ram_banks_[bank][address & 0x0fff];
 	}
 
-	return nes::cpu.read(address);
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
@@ -752,7 +755,7 @@ void Mapper5::clock_irq() {
 		// raise IRQ Pending flag
 		if(++irq_counter_ == irq_target_) {
 			if(irq_enabled_) {
-				nes::cpu.irq(CPU::MAPPER_IRQ);
+				nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 			}
 
 			irq_status_.pending = true;

@@ -11,9 +11,9 @@ struct opcode_xas {
 
 	typedef operation_write memory_access;
 	
-	uint8_t operator()(Context &ctx, uint16_t address) const {
-		ctx.S = ctx.X & ctx.A;
-		return ctx.S & (((address >> 8) + 1) & 0xff);
+	uint8_t operator()(uint16_t address) const {
+		S = X & A;
+		return S & (((address >> 8) + 1) & 0xff);
 	}
 };
 

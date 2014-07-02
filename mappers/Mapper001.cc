@@ -1,6 +1,7 @@
 
 #include "Mapper001.h"
-#include "NES.h"
+#include "PPU.h"
+#include "Cart.h"
 #include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(1);
@@ -158,7 +159,7 @@ void Mapper1::write_f(uint16_t address, uint8_t value) {
 void Mapper1::write_handler(uint16_t address, uint8_t value) {
 
 	// ignore writes which are only 1 or 2 cycles appart
-	if(nes::cpu.cycle_count() - cpu_cycles_ > 1) {
+	if(nes::cpu::cycle_count() - cpu_cycles_ > 1) {
 
 		uint8_t bank = (address >> 12) & 0xf;
 
@@ -187,10 +188,10 @@ void Mapper1::write_handler(uint16_t address, uint8_t value) {
 
 			// set mirroring
 			switch(regs_[REG_8000_9FFF] & 0x3) {
-			case 0:	nes::ppu.set_mirroring(PPU::mirror_single_low);  break;
-			case 1:	nes::ppu.set_mirroring(PPU::mirror_single_high); break;
-			case 2:	nes::ppu.set_mirroring(PPU::mirror_vertical);    break;
-			case 3:	nes::ppu.set_mirroring(PPU::mirror_horizontal);  break;
+			case 0:	nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
+			case 1:	nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
+			case 2:	nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
+			case 3:	nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
 			}
 
 			// set CHR-ROM
@@ -221,5 +222,5 @@ void Mapper1::write_handler(uint16_t address, uint8_t value) {
 		}
 	}
 
-	cpu_cycles_ = nes::cpu.cycle_count();
+	cpu_cycles_ = nes::cpu::cycle_count();
 }

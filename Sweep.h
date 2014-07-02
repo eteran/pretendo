@@ -3,19 +3,24 @@
 #define SWEEP_20130502_H_
 
 #include <cstdint>
-#include <boost/noncopyable.hpp>
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 
+template <int Channel>
 class Square;
 
-class Sweep : public boost::noncopyable {
+template <int Channel>
+class Sweep {
 public:
-	Sweep(int channel, Square *square);
+	Sweep(Square<Channel> *square);
 	~Sweep();
+	
+private:
+	Sweep(const Sweep &) = delete;
+	Sweep& operator=(const Sweep &) = delete;
 
 public:
 	void clock();
@@ -31,14 +36,15 @@ private:
 	uint8_t shift() const;
 	
 private:
-	Square *const square_;
-	int           channel_;
+	Square<Channel> *const square_;
 	uint16_t      pulse_period_;
 	uint8_t       counter_;
 	uint8_t       control_;
 	bool          reload_;
 	bool          silenced_;
 };
+
+#include "Sweep.tcc"
 
 #endif
 

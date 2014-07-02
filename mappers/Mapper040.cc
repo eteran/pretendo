@@ -32,7 +32,7 @@ void Mapper40::write_8(uint16_t address, uint8_t value) {
 	(void)value;
 	irq_enabled_ = false;
 	irq_counter_ = 0;
-	nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+	nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 }
 
 //------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ void Mapper40::write_9(uint16_t address, uint8_t value) {
 	(void)value;
 	irq_enabled_ = false;
 	irq_counter_ = 0;
-	nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+	nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 }
 
 //------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ void Mapper40::cpu_sync() {
 	if(irq_enabled_) {
 		irq_counter_ = (irq_counter_ + 1) % 0x1000;
 		if(irq_counter_ == 0) {
-			nes::cpu.irq(CPU::MAPPER_IRQ);
+			nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 		}
 	}
 }

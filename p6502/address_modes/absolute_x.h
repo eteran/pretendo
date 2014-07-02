@@ -4,50 +4,47 @@
 
 class absolute_x {
 public:
-	absolute_x() {
-	}
-
-public:
 	// dispatch to the appropriate version of the address mode
 	template <class Op>
-	void operator()(Context &ctx, Op op) {
-		execute(ctx, op, typename Op::memory_access());
+	void operator()(Op op) {
+		execute(op, typename Op::memory_access());
 	}
 	
 private:
 	template <class Op>
-	void execute(Context &ctx, Op op, const operation_read &) {
+	void execute(Op op, const operation_read &) {
 
-		switch(ctx.cycle) {
+		switch(cycle_) {
 		case 1:
-			// fetch low byte of address, increment ctx.PC
-			effective_address_lo = read_byte(ctx, ctx.PC++);
+			// fetch low byte of address, increment PC
+			data16_ = read_byte(PC++);
 			break;
 		case 2:
 			// fetch high byte of address,
 			// add index register to low address byte,
-			// increment ctx.PC
-			effective_address_ = (read_byte(ctx, ctx.PC++) << 8);
-			effective_address_lo += ctx.X;
+			// increment PC
+			effective_address16_ = (read_byte(PC++) << 8);
+			data16_ += X;
 			break;
 		case 3:
 
 			// read from effective address,
 			// fix the high byte of effective address
-			effective_address_ |= (effective_address_lo & 0xff);
-			data_ = read_byte(ctx, effective_address_);
+			effective_address16_ |= (data16_ & 0xff);
+			data8_ = read_byte(effective_address16_);
 
-			if(effective_address_lo > 0xff) {
-				effective_address_ += 0x100;
+			if(data16_ > 0xff) {
+				effective_address16_ += 0x100;
 				break;
 			} else {
-				op(ctx, data_);
+				LAST_CYCLE;
+				op(data8_);
 				OPCODE_COMPLETE;
 			}
 		case 4:
 			LAST_CYCLE;
 			// re-read from effective address
-			op(ctx, read_byte(ctx, effective_address_));
+			op(read_byte(effective_address16_));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -55,44 +52,44 @@ private:
 	}
 	
 	template <class Op>
-	void execute(Context &ctx, Op op, const operation_modify &) {
+	void execute(Op op, const operation_modify &) {
 	
-		switch(ctx.cycle) {
+		switch(cycle_) {
 		case 1:
-			// fetch low byte of address, increment ctx.PC
-			effective_address_lo = read_byte(ctx, ctx.PC++);
+			// fetch low byte of address, increment PC
+			data16_ = read_byte(PC++);
 			break;
 		case 2:
 			// fetch high byte of address,
 			// add index register to low address byte,
-			// increment ctx.PC
-			effective_address_ = (read_byte(ctx, ctx.PC++) << 8);
-			effective_address_lo += ctx.X;
+			// increment PC
+			effective_address16_ = (read_byte(PC++) << 8);
+			data16_ += X;
 			break;
 		case 3:
 			// read from effective address,
 			// fix the high byte of effective address
-			effective_address_ |= (effective_address_lo & 0xff);
-			data_ = read_byte(ctx, effective_address_);
+			effective_address16_ |= (data16_ & 0xff);
+			data8_ = read_byte(effective_address16_);
 
-			if(effective_address_lo > 0xff) {
-				effective_address_ += 0x100;
+			if(data16_ > 0xff) {
+				effective_address16_ += 0x100;
 			}
 			break;
 		case 4:
 			// re-read from effective address
-			data_ = read_byte(ctx, effective_address_);
+			data8_ = read_byte(effective_address16_);
 			break;
 		case 5:
 			// write the value back to effective address,
 			// and do the operation on it
-			write_byte(ctx, effective_address_, data_);
-			op(ctx, data_);
+			write_byte(effective_address16_, data8_);
+			op(data8_);
 			break;
 		case 6:
 			LAST_CYCLE;
 			// write the new value to effective address
-			write_byte(ctx, effective_address_, data_);
+			write_byte(effective_address16_, data8_);
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -100,48 +97,43 @@ private:
 	}
 	
 	template <class Op>
-	void execute(Context &ctx, Op op, const operation_write &) {
+	void execute(Op op, const operation_write &) {
 
-		switch(ctx.cycle) {
+		switch(cycle_) {
 		case 1:
-			// fetch low byte of address, increment ctx.PC
-			effective_address_lo = read_byte(ctx, ctx.PC++);
+			// fetch low byte of address, increment PC
+			data16_ = read_byte(PC++);
 			break;
 		case 2:
 			// fetch high byte of address,
 			// add index register to low address byte,
-			// increment ctx.PC
-			effective_address_ = (read_byte(ctx, ctx.PC++) << 8);
-			effective_address_lo += ctx.X;
+			// increment PC
+			effective_address16_ = (read_byte(PC++) << 8);
+			data16_ += X;
 			break;
 		case 3:
 			// read from effective address,
 			// fix the high byte of effective address
-			effective_address_ |= (effective_address_lo & 0xff);
-			data_ = read_byte(ctx, effective_address_);
+			effective_address16_ |= (data16_ & 0xff);
+			data8_ = read_byte(effective_address16_);
 
-			if(effective_address_lo > 0xff) {
-				effective_address_ += 0x100;
+			if(data16_ > 0xff) {
+				effective_address16_ += 0x100;
 			}
 			break;
 		case 4:
 			LAST_CYCLE;
 			// write to effective address
 			{
-				uint16_t address = effective_address_;
-				uint8_t  value   = op(ctx, address);
-				write_byte(ctx, address, value);
+				uint16_t address = effective_address16_;
+				uint8_t  value   = op(address);
+				write_byte(address, value);
 			}
 			OPCODE_COMPLETE;
 		default:
 			abort();
 		}
 	}
-
-private:
-	uint16_t effective_address_;
-	uint16_t effective_address_lo;
-	uint8_t  data_;
 };
 
 #endif

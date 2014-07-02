@@ -1,12 +1,15 @@
 
-#include "Sweep.h"
+#ifndef SWEEP_20130502_TCC_
+#define SWEEP_20130502_TCC_
+
 #include "Timer.h"
 #include "Square.h"
 
 //------------------------------------------------------------------------------
 // Name: Sweep
 //------------------------------------------------------------------------------
-Sweep::Sweep(int channel, Square *square) : square_(square), channel_(channel), 
+template <int Channel>
+Sweep<Channel>::Sweep(Square<Channel> *square) : square_(square),  
 		pulse_period_(0), counter_(0), control_(0), reload_(false), 
 		silenced_(false) {
 
@@ -15,21 +18,23 @@ Sweep::Sweep(int channel, Square *square) : square_(square), channel_(channel),
 //------------------------------------------------------------------------------
 // Name: ~Sweep
 //------------------------------------------------------------------------------
-Sweep::~Sweep() {
-
+template <int Channel>
+Sweep<Channel>::~Sweep() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: set_pulse_period
 //------------------------------------------------------------------------------
-void Sweep::set_pulse_period(uint16_t value) {
+template <int Channel>
+void Sweep<Channel>::set_pulse_period(uint16_t value) {
 	pulse_period_ = value;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: target_period
 //------------------------------------------------------------------------------
-uint16_t Sweep::target_period() const {
+template <int Channel>
+uint16_t Sweep<Channel>::target_period() const {
 
 	// The channel's 11-bit raw timer period is shifted right by the shift count
 	// (using a barrel shifter), then either added to or subtracted from the
@@ -37,7 +42,7 @@ uint16_t Sweep::target_period() const {
 	const uint16_t delta = pulse_period_ >> shift();
 
 	if(negate()) {
-		if(channel_ == 0) {
+		if(Channel == 0) {
 			return pulse_period_ - delta - 1;
 		} else {
 			return pulse_period_ - delta;
@@ -48,9 +53,10 @@ uint16_t Sweep::target_period() const {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: clock
 //------------------------------------------------------------------------------
-void Sweep::clock() {
+template <int Channel>
+void Sweep<Channel>::clock() {
 
 	// If the reload flag flag is set, the divider's counter is set to the
 	// period P. If the divider's counter was zero before the reload, the
@@ -92,44 +98,52 @@ void Sweep::clock() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: enabled
 //------------------------------------------------------------------------------
-bool Sweep::enabled() const {
+template <int Channel>
+bool Sweep<Channel>::enabled() const {
 	return control_ & 0x80;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: negate
 //------------------------------------------------------------------------------
-bool Sweep::negate() const {
+template <int Channel>
+bool Sweep<Channel>::negate() const {
 	return control_ & 0x08;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: period
 //------------------------------------------------------------------------------
-uint8_t Sweep::period() const {
+template <int Channel>
+uint8_t Sweep<Channel>::period() const {
 	return (control_ >> 4) & 0x07;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: shift
 //------------------------------------------------------------------------------
-uint8_t Sweep::shift() const {
+template <int Channel>
+uint8_t Sweep<Channel>::shift() const {
 	return control_ & 0x07;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: set_control
 //------------------------------------------------------------------------------
-void Sweep::set_control(uint8_t value) {	
+template <int Channel>
+void Sweep<Channel>::set_control(uint8_t value) {	
 	control_ = value;
 	reload_  = true;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: silenced
 //------------------------------------------------------------------------------
-bool Sweep::silenced() const {
+template <int Channel>
+bool Sweep<Channel>::silenced() const {
 	return silenced_;
 }
+
+#endif

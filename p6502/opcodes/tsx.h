@@ -8,9 +8,9 @@
 struct opcode_tsx {
 	typedef operation_none memory_access;
 	
-	void operator()(Context &ctx) const {
-		ctx.X = ctx.S;
-		update_nz_flags(ctx, ctx.X);
+	void operator()() const {
+		X = S;
+		update_nz_flags(X);
 	}
 };
 

@@ -4,30 +4,25 @@
 
 class immediate {
 public:
-	immediate() {
-	}
-	
-public:
 	// dispatch to the appropriate version of the address mode
 	template <class Op>
-	void operator()(Context &ctx, Op op) {
-		execute(ctx, op, typename Op::memory_access());
+	void operator()(Op op) {
+		execute(op, typename Op::memory_access());
 	}
 	
 private:
 	template <class Op>
-	void execute(Context &ctx, Op op, const operation_read &) {
-		switch(ctx.cycle) {
+	void execute(Op op, const operation_read &) {
+		switch(cycle_) {
 		case 1:
 			LAST_CYCLE;
-			// fetch value, increment ctx.PC
-			op(ctx, read_byte(ctx, ctx.PC++));
+			// fetch value, increment PC
+			op(read_byte(PC++));
 			OPCODE_COMPLETE;
 		default:
 			abort();
 		}
 	}
-private:
 };
 
 #endif

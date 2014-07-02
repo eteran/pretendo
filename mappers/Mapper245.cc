@@ -1,5 +1,7 @@
 
 #include "Mapper245.h"
+#include "PPU.h"
+#include "Cart.h"
 #include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(245);
@@ -181,9 +183,9 @@ void Mapper245::write_a(uint16_t address, uint8_t value) {
 	case 0x0000:
 		if(nes::cart.mirroring() != Cart::MIR_4SCREEN) {
 			if(value & 0x01) {
-				nes::ppu.set_mirroring(PPU::mirror_horizontal);
+				nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 			} else {
-				nes::ppu.set_mirroring(PPU::mirror_vertical);
+				nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 			}
 		}
 		break;
@@ -234,7 +236,7 @@ void Mapper245::write_e(uint16_t address, uint8_t value) {
 	switch(address & 0x0001) {
 	case 0x0000:
 		irq_enabled_ = false;
-		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		break;
 	case 0x0001:
 		irq_enabled_ = true;
@@ -255,11 +257,11 @@ void Mapper245::write_f(uint16_t address, uint8_t value) {
 void Mapper245::vram_change_hook(uint16_t vram_address) {
 
 	if(vram_address & 0x1000 && !(prev_vram_address_ & 0x1000)) {
-		if ((nes::ppu.cycle_count() - prev_ppu_cycle_) >= 16) {
+		if ((nes::ppu::cycle_count() - prev_ppu_cycle_) >= 16) {
 			clock_irq();
 		}
 
-		prev_ppu_cycle_ = nes::ppu.cycle_count();
+		prev_ppu_cycle_ = nes::ppu::cycle_count();
 	}
 
 	prev_vram_address_ = vram_address;
@@ -288,7 +290,7 @@ void Mapper245::clock_irq() {
 #else
 	if (irq_enabled_ && irq_counter_ == 0) {
 #endif
-		nes::cpu.irq(CPU::MAPPER_IRQ);
+		nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 	}
 
 	irq_reload_ = false;

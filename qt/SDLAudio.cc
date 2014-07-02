@@ -24,8 +24,8 @@ SDLAudio::SDLAudio() {
 	spec.userdata = this;
 	spec.channels = 1;
 	spec.format   = AUDIO_U8;
-	spec.freq     = APU::frequency;
-	spec.samples  = APU::buffer_size;
+	spec.freq     = nes::apu::frequency;
+	spec.samples  = nes::apu::buffer_size;
 	
 	SDL_OpenAudio(&spec, 0);
 }

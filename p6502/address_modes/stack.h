@@ -4,33 +4,29 @@
 
 class stack {
 public:
-	stack() {
-	}
-	
-public:
 	// dispatch to the appropriate version of the address mode
 	template <class Op>
-	void operator()(Context &ctx, Op op) {
-		execute(ctx, op, typename Op::memory_access());
+	void operator()(Op op) {
+		execute(op, typename Op::memory_access());
 	}
 	
 private:
 	template <class Op>
-	void execute(Context &ctx, Op op, const operation_stack_read &) {
+	void execute(Op op, const operation_stack_read &) {
 	
-		switch(ctx.cycle) {
+		switch(cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
-			read_byte(ctx, ctx.PC);
+			read_byte(PC);
 			break;
 		case 2:
-			// increment ctx.S
-			++ctx.S;
+			// increment S
+			++S;
 			break;
 		case 3:
 			LAST_CYCLE;
 			// pull register from stack
-			op(ctx, read_byte(ctx, ctx.S + STACK_ADDRESS));
+			op(read_byte(S + STACK_ADDRESS));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -38,24 +34,22 @@ private:
 	}
 	
 	template <class Op>
-	void execute(Context &ctx, Op op, const operation_stack_write &) {
+	void execute(Op op, const operation_stack_write &) {
 	
-		switch(ctx.cycle) {
+		switch(cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
-			read_byte(ctx, ctx.PC);
+			read_byte(PC);
 			break;
 		case 2:
 			LAST_CYCLE;
-			// push register on stack, decrement ctx.S
-			write_byte(ctx, ctx.S-- + STACK_ADDRESS, op(ctx));
+			// push register on stack, decrement S
+			write_byte(S-- + STACK_ADDRESS, op());
 			OPCODE_COMPLETE;
 		default:
 			abort();
 		}
 	}
-
-private:
 };
 
 #endif

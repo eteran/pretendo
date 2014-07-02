@@ -1,5 +1,7 @@
 
 #include "Mapper058.h"
+#include "PPU.h"
+#include "Cart.h"
 #include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(58);
@@ -92,9 +94,9 @@ void Mapper58::write_hander(uint16_t address, uint8_t value) {
 	(void)value;
 
 	if(address & 0x80) {
-		nes::ppu.set_mirroring(PPU::mirror_horizontal);
+		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 	} else {
-		nes::ppu.set_mirroring(PPU::mirror_vertical);
+		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 	}
 
 	if(address & 0x40) {

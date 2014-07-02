@@ -1,8 +1,8 @@
 
 #include "Mapper034.h"
-
 #include "BNROM.h"
 #include "NINA-001.h"
+#include "Cart.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(34);
 

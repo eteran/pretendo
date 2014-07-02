@@ -9,8 +9,8 @@ struct opcode_clv {
 
 	typedef operation_none memory_access;
 
-	void operator()(Context &ctx) const {
-		clear_flag<V_MASK>(ctx);
+	void operator()() const {
+		clear_flag<V_MASK>();
 	}
 };
 

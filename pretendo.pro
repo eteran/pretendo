@@ -84,6 +84,7 @@ HEADERS += \
 		mappers/Mapper076.h \
 		mappers/Mapper079.h \
 		mappers/Mapper086.h \
+		mappers/Mapper088.h \
 		mappers/Mapper090.h \
 		mappers/Mapper113.h \
 		mappers/Mapper118.h \
@@ -133,8 +134,6 @@ SOURCES += \
 		Noise.cc \
 		PPU.cc \
 		Palette.cc \
-		Square.cc \
-		Sweep.cc \
 		Timer.cc \
 		Triangle.cc \
 		libines/ines_crc32.c \
@@ -186,6 +185,7 @@ SOURCES += \
 		mappers/Mapper076.cc \
 		mappers/Mapper079.cc \
 		mappers/Mapper086.cc \
+		mappers/Mapper088.cc \
 		mappers/Mapper090.cc \
 		mappers/Mapper113.cc \
 		mappers/Mapper118.cc \

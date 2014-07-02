@@ -1,43 +1,36 @@
 
-#include "Square.h"
+#ifndef SQUARE_20130206_TCC_
+#define SQUARE_20130206_TCC_
 
-namespace {
-
-const uint8_t sequence[4][8] = {
-	{ 0,1,0,0,0,0,0,0 },
-	{ 0,1,1,0,0,0,0,0 },
-	{ 0,1,1,1,1,0,0,0 },
-	{ 1,0,0,1,1,1,1,1 }
-};
+//------------------------------------------------------------------------------
+// Name: Square
+//------------------------------------------------------------------------------
+template <int Channel>
+Square<Channel>::Square() : sweep_(this), timer_reload_(0), duty_(0), 
+		sequence_index_(0), enabled_(false) {
 
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: ~Square
 //------------------------------------------------------------------------------
-Square::Square(int channel) : sweep_(channel, this), timer_reload_(0), duty_(0), sequence_index_(0),
-		enabled_(false) {
-
+template <int Channel>
+Square<Channel>::~Square() {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: enable
 //------------------------------------------------------------------------------
-Square::~Square() {
-
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-void Square::enable() {
+template <int Channel>
+void Square<Channel>::enable() {
 	enabled_ = true;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: disable
 //------------------------------------------------------------------------------
-void Square::disable() {
+template <int Channel>
+void Square<Channel>::disable() {
 	enabled_ = false;
 	length_counter_.clear();
 }
@@ -45,7 +38,8 @@ void Square::disable() {
 //------------------------------------------------------------------------------
 // Name: write_reg0
 //------------------------------------------------------------------------------
-void Square::write_reg0(uint8_t value) {
+template <int Channel>
+void Square<Channel>::write_reg0(uint8_t value) {
 
 	duty_ = (value >> 6) & 0x03;
 
@@ -61,14 +55,16 @@ void Square::write_reg0(uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_reg1
 //------------------------------------------------------------------------------
-void Square::write_reg1(uint8_t value) {
+template <int Channel>
+void Square<Channel>::write_reg1(uint8_t value) {
 	sweep_.set_control(value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_reg2
 //------------------------------------------------------------------------------
-void Square::write_reg2(uint8_t value) {
+template <int Channel>
+void Square<Channel>::write_reg2(uint8_t value) {
 
 	timer_reload_ = (timer_reload_ & 0xff00) | value;
 	timer_.set_frequency((timer_reload_ + 1) * 2);
@@ -78,7 +74,8 @@ void Square::write_reg2(uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_reg3
 //------------------------------------------------------------------------------
-void Square::write_reg3(uint8_t value) {
+template <int Channel>
+void Square<Channel>::write_reg3(uint8_t value) {
 
 	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);
 	timer_.set_frequency((timer_reload_ + 1) * 2);
@@ -95,7 +92,8 @@ void Square::write_reg3(uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: tick
 //------------------------------------------------------------------------------
-void Square::tick() {
+template <int Channel>
+void Square<Channel>::tick() {
 	if(timer_.tick()) {
 		sequence_index_ = (sequence_index_ + 1) % 8;
 	}
@@ -104,21 +102,31 @@ void Square::tick() {
 //------------------------------------------------------------------------------
 // Name: enabled
 //------------------------------------------------------------------------------
-bool Square::enabled() const {
+template <int Channel>
+bool Square<Channel>::enabled() const {
 	return enabled_;
 }
 
 //------------------------------------------------------------------------------
 // Name: length_counter
 //------------------------------------------------------------------------------
-LengthCounter &Square::length_counter() {
+template <int Channel>
+LengthCounter &Square<Channel>::length_counter() {
 	return length_counter_;
 }
 
 //------------------------------------------------------------------------------
 // Name: output
 //------------------------------------------------------------------------------
-uint8_t Square::output() const {
+template <int Channel>
+uint8_t Square<Channel>::output() const {
+
+	static const uint8_t sequence[4][8] = {
+		{ 0,1,0,0,0,0,0,0 },
+		{ 0,1,1,0,0,0,0,0 },
+		{ 0,1,1,1,1,0,0,0 },
+		{ 1,0,0,1,1,1,1,1 }
+	};
 
 	if((timer_.frequency() - 1) < 8) {
 		return 0;
@@ -136,13 +144,17 @@ uint8_t Square::output() const {
 //------------------------------------------------------------------------------
 // Name: envelope
 //------------------------------------------------------------------------------
-Envelope &Square::envelope() {
+template <int Channel>
+Envelope &Square<Channel>::envelope() {
 	return envelope_;
 }
 
 //------------------------------------------------------------------------------
 // Name: sweep
 //------------------------------------------------------------------------------
-Sweep &Square::sweep() {
+template <int Channel>
+Sweep<Channel> &Square<Channel>::sweep() {
 	return sweep_;
 }
+
+#endif

@@ -4,39 +4,35 @@
 
 class indirect {
 public:
-	indirect() {
-	}
-	
-public:
 	// dispatch to the appropriate version of the address mode
 	template <class Op>
-	void operator()(Context &ctx, Op op) {
-		execute(ctx, op, typename Op::memory_access());
+	void operator()(Op op) {
+		execute(op, typename Op::memory_access());
 	}
 	
 private:
 	template <class Op>
-	void execute(Context &ctx, Op op, const operation_jump &) {
-		switch(ctx.cycle) {
+	void execute(Op op, const operation_jump &) {
+		switch(cycle_) {
 		case 1:
-			// fetch pointer address low, increment ctx.PC
-			effective_address_lo_ = read_byte(ctx, ctx.PC++);
+			// fetch pointer address low, increment PC
+			effective_address_lo_ = read_byte(PC++);
 			break;
 		case 2:
-			// fetch pointer address high, increment ctx.PC
-			effective_address_hi_ =  read_byte(ctx, ctx.PC++);
+			// fetch pointer address high, increment PC
+			effective_address_hi_ =  read_byte(PC++);
 			break;
 		case 3:
-			// fetch low address byte, increment ctx.PC
-			effective_address2_ = (effective_address2_ & 0xff00) | read_byte(ctx, (effective_address_hi_ << 8) | effective_address_lo_);
+			// fetch low address byte, increment PC
+			effective_address16_ = (effective_address16_ & 0xff00) | read_byte((effective_address_hi_ << 8) | effective_address_lo_);
 			break;
 		case 4:
 			LAST_CYCLE;
 			// fetch PCH, copy latch to PCL
 			++effective_address_lo_;
-			effective_address2_ = (effective_address2_ & 0x00ff) | (read_byte(ctx, (effective_address_hi_ << 8) | effective_address_lo_) << 8);
+			effective_address16_ = (effective_address16_ & 0x00ff) | (read_byte((effective_address_hi_ << 8) | effective_address_lo_) << 8);
 			// read from effective address
-			op(ctx, effective_address2_);
+			op(effective_address16_);
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -45,7 +41,6 @@ private:
 	
 private:
 	// effective address now contains the address to read from..
-	uint16_t effective_address2_;
 	uint8_t  effective_address_lo_;
 	uint8_t  effective_address_hi_;
 };

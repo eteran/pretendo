@@ -2,6 +2,15 @@
 #include "Input.h"
 #include <iostream>
 
+namespace nes {
+namespace input {
+
+uint8_t    strobe_      = 0;
+Controller controller1_;
+Controller controller2_;
+Controller controller3_;
+Controller controller4_;
+
 
 /*
  * Notes about the Four Score:
@@ -20,23 +29,16 @@
  */
 
 //------------------------------------------------------------------------------
-// Name: Input
-//------------------------------------------------------------------------------
-Input::Input() : strobe_(0) {
-}
-
-//------------------------------------------------------------------------------
 // Name: reset
 //------------------------------------------------------------------------------
-void Input::reset() {
+void reset() {
 	strobe_ = 0;
-	std::cout << "[Input::reset] reset complete" << std::endl;
 }
 
 //------------------------------------------------------------------------------
 // Name: write4016
 //------------------------------------------------------------------------------
-void Input::write4016(uint8_t value) {
+void write4016(uint8_t value) {
 
 	/*
 	The 4021 has inverting inputs.
@@ -66,7 +68,7 @@ void Input::write4016(uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: read4016
 //------------------------------------------------------------------------------
-uint8_t Input::read4016() {
+uint8_t read4016() {
 	// The ouput looks like this for NES:
 	// OOOxxxxD
 	// Where:
@@ -79,7 +81,7 @@ uint8_t Input::read4016() {
 //------------------------------------------------------------------------------
 // Name: read4017
 //------------------------------------------------------------------------------
-uint8_t Input::read4017() {
+uint8_t read4017() {
 	// The ouput looks like this for NES:
 	// OOOxxxxD
 	// Where:
@@ -92,27 +94,30 @@ uint8_t Input::read4017() {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Controller &Input::controller1() {
+Controller &controller1() {
 	return controller1_;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Controller &Input::controller2() {
+Controller &controller2() {
 	return controller2_;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Controller &Input::controller3() {
+Controller &controller3() {
 	return controller3_;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Controller &Input::controller4() {
+Controller &controller4() {
 	return controller4_;
+}
+
+}
 }

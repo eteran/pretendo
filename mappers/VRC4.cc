@@ -1,6 +1,7 @@
 
 #include "VRC4.h"
 #include "CPU.h"
+#include "PPU.h"
 #include <cstring>
 
 //------------------------------------------------------------------------------
@@ -71,10 +72,10 @@ void VRC4::write_9(uint16_t address, uint8_t value) {
 	case 0x9000:
 	case 0x9002:
 		switch(value & 0x03) {
-		case 0x00: nes::ppu.set_mirroring(PPU::mirror_vertical);    break;
-		case 0x01: nes::ppu.set_mirroring(PPU::mirror_horizontal);  break;
-		case 0x02: nes::ppu.set_mirroring(PPU::mirror_single_low);  break;
-		case 0x03: nes::ppu.set_mirroring(PPU::mirror_single_high); break;
+		case 0x00: nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
+		case 0x01: nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
+		case 0x02: nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
+		case 0x03: nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
 		}
 	}
 }
@@ -156,7 +157,7 @@ void VRC4::write_f(uint16_t address, uint8_t value) {
 		break;
 
 	case 0xf004:
-		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		irq_control_.raw = value;
 		if(irq_control_.enabled) {
 			irq_counter_   = irq_latch_;
@@ -165,7 +166,7 @@ void VRC4::write_f(uint16_t address, uint8_t value) {
 		break;
 
 	case 0xf006:
-		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		irq_control_.enabled = irq_control_.a;
 		break;
 	}
@@ -196,7 +197,7 @@ void VRC4::clock_irq() {
 
 	if(irq_counter_ == 0xff) {
 		irq_counter_ = irq_latch_;
-		nes::cpu.irq(CPU::MAPPER_IRQ);
+		nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 	} else {
 		++irq_counter_;
 	}

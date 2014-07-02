@@ -9,8 +9,8 @@ struct opcode_pha {
 
 	typedef operation_stack_write memory_access;
 
-	uint8_t operator()(Context &ctx) const {
-		return ctx.A;
+	uint8_t operator()() const {
+		return A;
 	}
 };
 

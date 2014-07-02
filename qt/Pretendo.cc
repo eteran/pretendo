@@ -2,10 +2,12 @@
 #include "Pretendo.h"
 #include "About.h"
 #include "AudioViewer.h"
+#include "Cart.h"
 #include "Controller.h"
+#include "Input.h"
 #include "Mapper.h"
 #include "NES.h"
-#include "Preferences.h"
+#include "PPU.h"
 #include "Preferences.h"
 #include "SortFilterProxyModel.h"
 
@@ -39,7 +41,7 @@ const int timer_interval = 0;
 //------------------------------------------------------------------------------
 Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(nullptr), timer_(nullptr), fps_label_(nullptr), framecount_(0), paused_(false), audio_buffer_(nullptr) {
 	ui_.setupUi(this);
-	
+
 	// make only one of these selectable at a time
 	QActionGroup *const zoom_group = new QActionGroup(this);
 	zoom_group->addAction(ui_.action1x);
@@ -47,7 +49,7 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 	zoom_group->addAction(ui_.action3x);
 	zoom_group->addAction(ui_.action4x);
 	ui_.action2x->setChecked(true);
-	
+
 	// set the default zoom
 	zoom(2);
 
@@ -100,7 +102,7 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 		Palette::default_gamma));
 
 	time_.start();
-	
+
 	// set the default player 1 controlls
 	player_1_[Controller::INDEX_A]      = Qt::Key_X;
 	player_1_[Controller::INDEX_B]      = Qt::Key_Z;
@@ -133,8 +135,8 @@ void Pretendo::update() {
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
-	audio_buffer_ = nes::apu.buffer();
-	audio_->write(audio_buffer_, APU::buffer_size);
+	audio_buffer_ = nes::apu::buffer();
+	audio_->write(audio_buffer_, nes::apu::buffer_size);
 
 	// FPS calculation
 	if(time_.elapsed() > 1000) {
@@ -261,27 +263,27 @@ void Pretendo::on_action_Pause_triggered() {
 void Pretendo::keyPressEvent(QKeyEvent *event) {
 
 	if(event->isAutoRepeat()) {
-		return;	
+		return;
 	}
 
 	const int key = event->key();
-	
+
 	if(key == player_1_[Controller::INDEX_A]) {
-		nes::input.controller1().keystate_[Controller::INDEX_A] = true;
+		nes::input::controller1().keystate_[Controller::INDEX_A] = true;
 	} else if(key == player_1_[Controller::INDEX_B]) {
-		nes::input.controller1().keystate_[Controller::INDEX_B] = true;	
+		nes::input::controller1().keystate_[Controller::INDEX_B] = true;
 	} else if(key == player_1_[Controller::INDEX_SELECT]) {
-		nes::input.controller1().keystate_[Controller::INDEX_SELECT] = true;	
+		nes::input::controller1().keystate_[Controller::INDEX_SELECT] = true;
 	} else if(key == player_1_[Controller::INDEX_START]) {
-		nes::input.controller1().keystate_[Controller::INDEX_START] = true;
+		nes::input::controller1().keystate_[Controller::INDEX_START] = true;
 	} else if(key == player_1_[Controller::INDEX_UP]) {
-		nes::input.controller1().keystate_[Controller::INDEX_UP] = true;
+		nes::input::controller1().keystate_[Controller::INDEX_UP] = true;
 	} else if(key == player_1_[Controller::INDEX_DOWN]) {
-		nes::input.controller1().keystate_[Controller::INDEX_DOWN] = true;
+		nes::input::controller1().keystate_[Controller::INDEX_DOWN] = true;
 	} else if(key == player_1_[Controller::INDEX_LEFT]) {
-		nes::input.controller1().keystate_[Controller::INDEX_LEFT] = true;
+		nes::input::controller1().keystate_[Controller::INDEX_LEFT] = true;
 	} else if(key == player_1_[Controller::INDEX_RIGHT]) {
-		nes::input.controller1().keystate_[Controller::INDEX_RIGHT] = true;
+		nes::input::controller1().keystate_[Controller::INDEX_RIGHT] = true;
 	} else {
 		event->ignore();
 	}
@@ -293,27 +295,27 @@ void Pretendo::keyPressEvent(QKeyEvent *event) {
 void Pretendo::keyReleaseEvent(QKeyEvent *event) {
 
 	const int key = event->key();
-	
+
 	if(event->isAutoRepeat()) {
-		return;	
+		return;
 	}
-	
+
 	if(key == player_1_[Controller::INDEX_A]) {
-		nes::input.controller1().keystate_[Controller::INDEX_A] = false;
+		nes::input::controller1().keystate_[Controller::INDEX_A] = false;
 	} else if(key == player_1_[Controller::INDEX_B]) {
-		nes::input.controller1().keystate_[Controller::INDEX_B] = false;	
+		nes::input::controller1().keystate_[Controller::INDEX_B] = false;
 	} else if(key == player_1_[Controller::INDEX_SELECT]) {
-		nes::input.controller1().keystate_[Controller::INDEX_SELECT] = false;	
+		nes::input::controller1().keystate_[Controller::INDEX_SELECT] = false;
 	} else if(key == player_1_[Controller::INDEX_START]) {
-		nes::input.controller1().keystate_[Controller::INDEX_START] = false;
+		nes::input::controller1().keystate_[Controller::INDEX_START] = false;
 	} else if(key == player_1_[Controller::INDEX_UP]) {
-		nes::input.controller1().keystate_[Controller::INDEX_UP] = false;
+		nes::input::controller1().keystate_[Controller::INDEX_UP] = false;
 	} else if(key == player_1_[Controller::INDEX_DOWN]) {
-		nes::input.controller1().keystate_[Controller::INDEX_DOWN] = false;
+		nes::input::controller1().keystate_[Controller::INDEX_DOWN] = false;
 	} else if(key == player_1_[Controller::INDEX_LEFT]) {
-		nes::input.controller1().keystate_[Controller::INDEX_LEFT] = false;
+		nes::input::controller1().keystate_[Controller::INDEX_LEFT] = false;
 	} else if(key == player_1_[Controller::INDEX_RIGHT]) {
-		nes::input.controller1().keystate_[Controller::INDEX_RIGHT] = false;
+		nes::input::controller1().keystate_[Controller::INDEX_RIGHT] = false;
 	} else {
 		event->ignore();
 	}
@@ -323,7 +325,7 @@ void Pretendo::keyReleaseEvent(QKeyEvent *event) {
 // Name: on_actionShow_Sprites_toggled
 //------------------------------------------------------------------------------
 void Pretendo::on_actionShow_Sprites_toggled(bool value) {
-	nes::ppu.show_sprites_ = value;
+	nes::ppu::show_sprites_ = value;
 }
 
 //------------------------------------------------------------------------------
@@ -347,7 +349,7 @@ void Pretendo::on_actionReset_triggered() {
 	if(paused_) {
 		on_action_Pause_triggered();
 	}
-	
+
 	if(timer_->isActive()) {
 		nes::reset(nes::SOFT_RESET);
 	}
@@ -419,15 +421,15 @@ void Pretendo::on_action4x_triggered() {
 // Name: on_action_Preferences_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Preferences_triggered() {
-	
+
 	if(timer_->isActive()) {
 		timer_->stop();
 		audio_->stop();
 	}
 	paused_ = !timer_->isActive();
-	
+
 	preferences_->exec();
-	
+
 	if(paused_) {
 		on_action_Pause_triggered();
 	}
@@ -456,8 +458,8 @@ void Pretendo::on_action_About_triggered() {
 }
 
 //------------------------------------------------------------------------------
-// Name: 
-// Desc: 
+// Name:
+// Desc:
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Audio_Viewer_triggered() {
 	static AudioViewer *dialog = nullptr;

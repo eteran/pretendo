@@ -9,10 +9,10 @@ struct opcode_lax {
 
 	typedef operation_read memory_access;
 
-	void operator()(Context &ctx, uint8_t data) const {
-		ctx.A = data;
-		ctx.X = data;
-		update_nz_flags(ctx, ctx.A);
+	void operator()(uint8_t data) const {
+		A = data;
+		X = data;
+		update_nz_flags(A);
 	}
 };
 

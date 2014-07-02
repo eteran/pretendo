@@ -1,5 +1,6 @@
 
 #include "Mapper003.h"
+#include "Cart.h"
 #include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(3);

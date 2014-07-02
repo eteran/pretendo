@@ -18,7 +18,7 @@ AlsaAudio::AlsaAudio() {
 
 	snd_pcm_hw_params_t * hwparams;
 
-	unsigned int rate = APU::frequency;
+	unsigned int rate = nes::apu::frequency;
 
 	snd_pcm_hw_params_alloca(&hwparams);
 	snd_pcm_hw_params_any(handle_, hwparams);

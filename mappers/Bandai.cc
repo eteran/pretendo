@@ -1,5 +1,6 @@
 
 #include "Bandai.h"
+#include "PPU.h"
 #include <cstring>
 
 //------------------------------------------------------------------------------
@@ -132,15 +133,15 @@ void Bandai::write_handler(uint16_t address, uint8_t value) {
 		break;
 	case 0x09:
 		switch(value & 0x03) {
-		case 0:	nes::ppu.set_mirroring(PPU::mirror_vertical);    break;
-		case 1:	nes::ppu.set_mirroring(PPU::mirror_horizontal);  break;
-		case 2:	nes::ppu.set_mirroring(PPU::mirror_single_low);  break;
-		case 3:	nes::ppu.set_mirroring(PPU::mirror_single_high); break;
+		case 0:	nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
+		case 1:	nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
+		case 2:	nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
+		case 3:	nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
 		}
 		break;
 	case 0x0a:
 		irq_enabled_ = (value & 0x01);
-		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		break;
 	case 0x0b:
 		irq_counter_.lo = value;
@@ -160,7 +161,7 @@ void Bandai::write_handler(uint16_t address, uint8_t value) {
 void Bandai::cpu_sync() {
 	if(irq_enabled_) {
 		if(--irq_counter_.raw == 0x0000) {
-			nes::cpu.irq(CPU::MAPPER_IRQ);
+			nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 		}
 	}
 }

@@ -9,8 +9,8 @@ struct opcode_dex {
 
 	typedef operation_none memory_access;
 
-	void operator()(Context &ctx) const {
-		update_nz_flags(ctx, --ctx.X);
+	void operator()() const {
+		update_nz_flags(--X);
 	}
 };
 

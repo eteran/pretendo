@@ -9,8 +9,8 @@ struct opcode_iny {
 
 	typedef operation_none memory_access;
 
-	void operator()(Context &ctx) const {
-		update_nz_flags(ctx, ++ctx.Y);
+	void operator()() const {
+		update_nz_flags(++Y);
 	}
 };
 

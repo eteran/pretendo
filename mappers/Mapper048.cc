@@ -1,5 +1,6 @@
 
 #include "Mapper048.h"
+#include "PPU.h"
 #include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(48);
@@ -123,13 +124,13 @@ void Mapper48::write_handler(uint16_t address, uint8_t value) {
 		break;
 	case 0xc003:
 		irq_enabled_ = false;
-		nes::cpu.clear_irq(CPU::MAPPER_IRQ);
+		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		break;
 	case 0xe000:
 		if(!(value & 0x40)) {
-			nes::ppu.set_mirroring(PPU::mirror_vertical);
+			nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 		} else {
-			nes::ppu.set_mirroring(PPU::mirror_horizontal);
+			nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 		}
 		break;
 	}
@@ -141,11 +142,11 @@ void Mapper48::write_handler(uint16_t address, uint8_t value) {
 void Mapper48::vram_change_hook(uint16_t vram_address) {
 
 	if(vram_address & 0x1000 && !(prev_vram_address_ & 0x1000)) {
-		if ((nes::ppu.cycle_count() - prev_ppu_cycle_) >= 16) {
+		if ((nes::ppu::cycle_count() - prev_ppu_cycle_) >= 16) {
 			clock_irq();
 		}
 
-		prev_ppu_cycle_ = nes::ppu.cycle_count();
+		prev_ppu_cycle_ = nes::ppu::cycle_count();
 	}
 
 	prev_vram_address_ = vram_address;
@@ -174,7 +175,7 @@ void Mapper48::clock_irq() {
 #else
 	if (irq_enabled_ && irq_counter_ == 0) {
 #endif
-		nes::cpu.irq(CPU::MAPPER_IRQ);
+		nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 	}
 
 	irq_reload_ = false;

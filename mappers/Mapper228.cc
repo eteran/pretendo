@@ -1,7 +1,9 @@
 
 #include "Mapper228.h"
-
+#include "PPU.h"
+#include "Cart.h"
 #include <cstdio>
+#include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(228);
 
@@ -132,9 +134,9 @@ void Mapper228::write_f(uint16_t address, uint8_t value) {
 void Mapper228::write_hander(uint16_t address, uint8_t value) {
 
 	if(address & 0x2000) {
-		nes::ppu.set_mirroring(PPU::mirror_horizontal);
+		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 	} else {
-		nes::ppu.set_mirroring(PPU::mirror_vertical);
+		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 	}
 
 	uint8_t prg_chip_select        = (address >> 11) & 0x03;

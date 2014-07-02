@@ -1,7 +1,6 @@
 
 #include "Cart.h"
 #include "Mapper.h"
-#include "NES.h"
 #include <cstring>
 #include <iostream>
 #include <iomanip>

@@ -8,9 +8,9 @@
 struct opcode_tax {
 	typedef operation_none memory_access;
 	
-	void operator()(Context &ctx) const {
-		ctx.X = ctx.A;
-		update_nz_flags(ctx, ctx.X);
+	void operator()() const {
+		X = A;
+		update_nz_flags(X);
 	}
 };
 
