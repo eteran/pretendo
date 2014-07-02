@@ -11,10 +11,6 @@
 #include <algorithm>
 #include <cassert>
 
-#ifdef FAST_CPU
-#include "revbits.h"
-#endif
-
 //#define SPRITE_ZERO_HACK
 
 namespace {
@@ -771,11 +767,7 @@ void read_sprite_pattern() {
 	if(sprite_entry->y() != 0xff) {
 		// horizontal flip
 		if(sprite_entry->horizontal_flip()) {
-#ifndef FAST_CPU
 			sprite_entry->pattern[Pattern::index] = reverse_bits[sprite_entry->pattern[Pattern::index]];
-#else
-			sprite_entry->pattern[Pattern::index] = revbits(sprite_entry->pattern[Pattern::index]);
-#endif
 		}
 	}
 }
@@ -1460,9 +1452,7 @@ void execute_cycle(const scanline_vblank &target) {
 //------------------------------------------------------------------------------
 int clock_cpu() {
 	if((ppu_cycle_ % 3) == cpu_alignment) {
-#ifndef FAST_CPU
 		cpu::exec(1);
-#endif
 		return 1;
 	}
 	return 0;
@@ -1489,29 +1479,10 @@ uint16_t background_pattern_table() {
 //------------------------------------------------------------------------------
 template <class T>
 void execute_scanline(const T &target) {
-	// NOTE: MMC3 isn't quite right in "FAST_CPU" mode
-	// (but likely good enough for most games)
-	// this is because when executing many cycles at a time
-	// the CPU can cause writes which manually toggle A12
-	// BUT, the PPU cycle count isn't incremented in step
-	// so the MMC3 filtering based on PPU cycles doesn't
-	// see the manual toggles :-/
-
-#ifdef FAST_CPU
-	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-		execute_cycle(target);
-		cycles += clock_cpu();
-	}
-
-	cpu::exec(cycles);
-	cart.mapper()->hsync();
-#else
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
 		execute_cycle(target);
 		clock_cpu();
 	}
-#endif
 	++vpos_;
 }
 
