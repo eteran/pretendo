@@ -1230,7 +1230,7 @@ void update_shift_registers_render() {
 //------------------------------------------------------------------------------
 void update_x_scroll() {
 	// v:0000010000011111=t:0000010000011111
-	vram_address_ = (vram_address_ & 0xfbe0) | (nametable_ & 0x041f);
+	vram_address_ = (vram_address_ & ~0x041f) | (nametable_ & 0x041f);
 }
 
 //------------------------------------------------------------------------------
