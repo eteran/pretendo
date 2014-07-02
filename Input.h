@@ -3,6 +3,7 @@
 #define INPUT_20080314_H_
 
 #include <cstdint>
+#include "NES.h"
 
 using std::uint8_t;
 

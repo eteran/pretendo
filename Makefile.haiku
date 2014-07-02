@@ -32,9 +32,9 @@ APPNAME := Pretendo
 DEFINES  := 
 INCLUDES := -I. -Imappers -I/boot/system/develop/headers/x86/libxml2 -Ilibines -Ip6502 -isystem boost
 ASMFLAGS := -f elf
-CXXFLAGS := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -fomit-frame-pointer -flto -std=c++11 -flto
-CFLAGS   := -gdwarf-2 -gstrict-dwarf -O2 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -fomit-frame-pointer -flto
-LDFLAGS  := -gdwarf-2 -gstrict-dwarf -lbe -lroot -ltranslation -ltracker -lmedia -lgame -L/boot/common/lib -lxml2
+CXXFLAGS := -gdwarf-2 -gstrict-dwarf -O3 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -std=c++11 -flto
+CFLAGS   := -gdwarf-2 -gstrict-dwarf -O3 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -flto
+LDFLAGS  := -gdwarf-2 -gstrict-dwarf -lbe -lroot -ltranslation -ltracker -lmedia -lgame -L/boot/common/lib -lxml2 -flto
 
 ASM_FILES   := \
 	haiku/blitters.asm \
@@ -56,6 +56,7 @@ H_FILES     := \
 	LinearCounter.h \
 	mappers/MMC3.h \
 	Mapper.h \
+	NES.h \
 	mappers/Mapper000.h \
 	mappers/Mapper001.h \
 	mappers/Mapper002.h \
@@ -98,6 +99,7 @@ H_FILES     := \
 	mappers/Mapper075.h \
 	mappers/Mapper076.h \
 	mappers/Mapper079.h \
+	mappers/Mapper088.h \
 	mappers/Mapper086.h \
 	mappers/Mapper090.h \
 	mappers/Mapper113.h \
@@ -117,7 +119,6 @@ H_FILES     := \
 	mappers/Mapper242.h \
 	mappers/Mapper243.h \
 	mappers/Mapper245.h \
-	NES.h \
 	mappers/NINA-001.h \
 	Noise.h \
 	PPU.h \
@@ -125,8 +126,8 @@ H_FILES     := \
 	Reset.h \
 	ShiftRegister.h \
 	Sprite.h \
-	Square.h \
-	Sweep.h \
+	Square.tcc \
+	Sweep.tcc \
 	Timer.h \
 	Triangle.h \
 	VRAMBank.h \
@@ -164,6 +165,7 @@ CXX_FILES   := \
 	LinearCounter.cc \
 	mappers/MMC3.cc \
 	Mapper.cc \
+	NES.cc \
 	mappers/Mapper000.cc \
 	mappers/Mapper001.cc \
 	mappers/Mapper002.cc \
@@ -207,6 +209,7 @@ CXX_FILES   := \
 	mappers/Mapper076.cc \
 	mappers/Mapper079.cc \
 	mappers/Mapper086.cc \
+	mappers/Mapper088.cc \
 	mappers/Mapper090.cc \
 	mappers/Mapper113.cc \
 	mappers/Mapper118.cc \
@@ -225,13 +228,10 @@ CXX_FILES   := \
 	mappers/Mapper242.cc \
 	mappers/Mapper243.cc \
 	mappers/Mapper245.cc \
-	NES.cc \
 	mappers/NINA-001.cc \
 	Noise.cc \
 	PPU.cc \
 	Palette.cc \
-	Square.cc \
-	Sweep.cc \
 	Timer.cc \
 	Triangle.cc \
 	mappers/VRC2.cc \

@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <string>
 #include <boost/uuid/sha1.hpp>
+#include <vector>
 #include <libxml2/libxml/parser.h>
 #include <Alert.h>
 #include <String.h>
@@ -13,6 +14,7 @@
 #include <Roster.h>
 #include <Path.h>
 #include "NES.h"
+#include "Cart.h"
 
 using nes::cart;
 
@@ -43,7 +45,7 @@ CartInfoView::AttachedToWindow (void)
 	path.GetParent(&path);
 	path.Append("nescarts.xml");
 	
-	std::vector<uint8_t> image = cart.raw_image();
+	std::vector<uint8_t> image = nes::cart.raw_image();
     BString stringSHA1 = StreamToSHA1 (&image[0], image.size());
 	
 	xmlDoc *const file = xmlParseFile(path.Path());

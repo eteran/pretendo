@@ -2,6 +2,7 @@
 #include "Mapper057.h"
 #include "Cart.h"
 #include "PPU.h"
+#include "NES.h"
 #include <cstring>
 #include <cassert>
 

@@ -2,6 +2,7 @@
 #include "Mapper010.h"
 #include "PPU.h"
 #include "Cart.h"
+#include "NES.h"
 #include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(10);

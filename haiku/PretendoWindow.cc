@@ -2,6 +2,8 @@
 #include <iostream>
 #include "Mapper.h"
 #include "NES.h"
+#include "APU.h"
+#include "Input.h"
 #include "PretendoWindow.h"
 #include "CartInfoWindow.h"
 #include "PaletteWindow.h"
@@ -12,6 +14,7 @@
 #include "CartInfoWindow.h"
 #include "SimpleMutex.h"
 #include "PretendoView.h"
+#include "Controller.h"
 //#include "AudioWindow.h"
 //#include "InputWindow.h"
 
@@ -124,12 +127,13 @@ PretendoWindow::PretendoWindow()
 	// other things we need
 	fOpenPanel = new ROMFilePanel;
 	//fAudioStream = new AudioStream ("pretendo_audio", 48000.0, 16, 1, (48000.0 / 60));	
-	fAudioStream = new AudioStream (APU::frequency, 8, 1, APU::buffer_size);
+	fAudioStream = new AudioStream (nes::apu::frequency, 8, 1, nes::apu::buffer_size);
 	
 	fDoubled = false;
 	fClear = 0;
 	
-	if ((fThread = spawn_thread(emulation_thread, "pretendo_thread", B_NORMAL_PRIORITY, 					reinterpret_cast<void *>(this))) < B_OK) {
+	if ((fThread = spawn_thread(emulation_thread, "pretendo_thread", B_URGENT_DISPLAY_PRIORITY, 
+		reinterpret_cast<void *>(this))) < B_OK) {
 			throw std::runtime_error("spawn_thread failed");
 	} else {
 		fRunning = false;
@@ -1096,8 +1100,8 @@ PretendoWindow::start_frame()
 void
 PretendoWindow::end_frame()
 {
-	const uint8 *buffer = nes::apu.buffer();
-	fAudioStream->Stream(buffer, APU::buffer_size);
+	const uint8 *buffer = nes::apu::buffer();
+	fAudioStream->Stream(buffer, nes::apu::buffer_size);
 	BlitScreen();
 	fMainLocker.Unlock();
 }
@@ -1127,11 +1131,11 @@ PretendoWindow::emulation_thread (void *data)
 inline void
 PretendoWindow::CheckKey (int32 index, int32 key)
 {
-	nes::input.controller1().keystate_[index] = 
+	nes::input::controller1().keystate_[index] = 
 		fKeyStates.key_states[key >> 3] & (1 << (7 - (key % 8)));
 }
 
-void
+inline void
 PretendoWindow::ReadKeyStates (void)
 {
 	get_key_info(&fKeyStates);
