@@ -665,7 +665,7 @@ void stop() {
 //------------------------------------------------------------------------------
 void schedule_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count, DMA_SOURCE source) {
 	
-	assert(dma_handler_);
+	assert(dma_handler);
 	
 	switch(source) {
 	case SPR_DMA:
