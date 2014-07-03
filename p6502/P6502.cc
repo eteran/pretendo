@@ -11,12 +11,12 @@
 namespace P6502 {
 
 // public registers
-uint16_t PC;
-uint8_t  A;
-uint8_t  X;
-uint8_t  Y;
-uint8_t  S;
-uint8_t  P;
+register16 PC;
+uint8_t    A;
+uint8_t    X;
+uint8_t    Y;
+uint8_t    S;
+uint8_t    P;
 
 // stats
 uint64_t executed_cycles;
@@ -28,11 +28,11 @@ read_handler_t  read_handler_;
 sync_handler_t  sync_handler_;
 
 // internal registers
-uint16_t instruction_;
-uint16_t effective_address16_;
-uint16_t data16_;
-uint8_t  data8_;
-int      cycle_;
+uint16_t   instruction_;
+register16 effective_address16_;
+register16 data16_;
+uint8_t    data8_;
+int        cycle_;
 
 bool     irq_executing_;
 bool     nmi_executing_;
@@ -169,38 +169,6 @@ void update_nz_flags(uint8_t value) {
 
 	P &= ~(N_MASK | Z_MASK);
 	P |= flag_table[value];
-}
-
-//------------------------------------------------------------------------------
-// Name: set_pc_lo
-// Desc: 
-//------------------------------------------------------------------------------
-void set_pc_lo(uint8_t value) {
-	PC = (PC & 0xff00) | value;
-}
-
-//------------------------------------------------------------------------------
-// Name: set_pc_hi
-// Desc: 
-//------------------------------------------------------------------------------
-void set_pc_hi(uint8_t value) {
-	PC = (PC & 0x00ff) | (value << 8);
-}
-
-//------------------------------------------------------------------------------
-// Name: pc_lo
-// Desc: 
-//------------------------------------------------------------------------------
-uint8_t pc_lo() {
-	return PC & 0x00ff;
-}
-
-//------------------------------------------------------------------------------
-// Name: pc_hi
-// Desc: 
-//------------------------------------------------------------------------------
-uint8_t pc_hi() {
-	return ((PC >> 8) & 0x00ff);
 }
 
 // opcode implementation
@@ -535,16 +503,16 @@ void clock() {
 			// first cycle is always instruction fetch
 			// or do we force an interrupt?
 			if(rst_executing_) {
-				read_byte(PC);
+				read_byte(PC.raw);
 				instruction_ = 0x100;
 			} else if(nmi_executing_) {
-				read_byte(PC);
+				read_byte(PC.raw);
 				instruction_ = 0x101;
 			} else if(irq_executing_) {
-				read_byte(PC);
+				read_byte(PC.raw);
 				instruction_ = 0x102;
 			} else {
-				instruction_ = read_byte(PC++);
+				instruction_ = read_byte(PC.raw++);
 			}
 
 		} else {

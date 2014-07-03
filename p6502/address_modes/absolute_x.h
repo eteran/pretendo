@@ -17,24 +17,24 @@ private:
 		switch(cycle_) {
 		case 1:
 			// fetch low byte of address, increment PC
-			data16_ = read_byte(PC++);
+			data16_.raw = read_byte(PC.raw++);
 			break;
 		case 2:
 			// fetch high byte of address,
 			// add index register to low address byte,
 			// increment PC
-			effective_address16_ = (read_byte(PC++) << 8);
-			data16_ += X;
+			effective_address16_.hi = read_byte(PC.raw++);
+			data16_.raw += X;
 			break;
 		case 3:
 
 			// read from effective address,
 			// fix the high byte of effective address
-			effective_address16_ |= (data16_ & 0xff);
-			data8_ = read_byte(effective_address16_);
+			effective_address16_.lo = data16_.lo;
+			data8_ = read_byte(effective_address16_.raw);
 
-			if(data16_ > 0xff) {
-				effective_address16_ += 0x100;
+			if(data16_.raw > 0xff) {
+				++effective_address16_.hi;
 				break;
 			} else {
 				LAST_CYCLE;
@@ -44,7 +44,7 @@ private:
 		case 4:
 			LAST_CYCLE;
 			// re-read from effective address
-			op(read_byte(effective_address16_));
+			op(read_byte(effective_address16_.raw));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -57,39 +57,39 @@ private:
 		switch(cycle_) {
 		case 1:
 			// fetch low byte of address, increment PC
-			data16_ = read_byte(PC++);
+			data16_.raw = read_byte(PC.raw++);
 			break;
 		case 2:
 			// fetch high byte of address,
 			// add index register to low address byte,
 			// increment PC
-			effective_address16_ = (read_byte(PC++) << 8);
-			data16_ += X;
+			effective_address16_.hi = read_byte(PC.raw++);
+			data16_.raw += X;
 			break;
 		case 3:
 			// read from effective address,
 			// fix the high byte of effective address
-			effective_address16_ |= (data16_ & 0xff);
-			data8_ = read_byte(effective_address16_);
+			effective_address16_.lo = data16_.lo;
+			data8_ = read_byte(effective_address16_.raw);
 
-			if(data16_ > 0xff) {
-				effective_address16_ += 0x100;
+			if(data16_.raw > 0xff) {
+				++effective_address16_.hi;
 			}
 			break;
 		case 4:
 			// re-read from effective address
-			data8_ = read_byte(effective_address16_);
+			data8_ = read_byte(effective_address16_.raw);
 			break;
 		case 5:
 			// write the value back to effective address,
 			// and do the operation on it
-			write_byte(effective_address16_, data8_);
+			write_byte(effective_address16_.raw, data8_);
 			op(data8_);
 			break;
 		case 6:
 			LAST_CYCLE;
 			// write the new value to effective address
-			write_byte(effective_address16_, data8_);
+			write_byte(effective_address16_.raw, data8_);
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -102,31 +102,31 @@ private:
 		switch(cycle_) {
 		case 1:
 			// fetch low byte of address, increment PC
-			data16_ = read_byte(PC++);
+			data16_.raw = read_byte(PC.raw++);
 			break;
 		case 2:
 			// fetch high byte of address,
 			// add index register to low address byte,
 			// increment PC
-			effective_address16_ = (read_byte(PC++) << 8);
-			data16_ += X;
+			effective_address16_.hi = read_byte(PC.raw++);
+			data16_.raw += X;
 			break;
 		case 3:
 			// read from effective address,
 			// fix the high byte of effective address
-			effective_address16_ |= (data16_ & 0xff);
-			data8_ = read_byte(effective_address16_);
+			effective_address16_.lo = data16_.lo;
+			data8_ = read_byte(effective_address16_.raw);
 
-			if(data16_ > 0xff) {
-				effective_address16_ += 0x100;
+			if(data16_.raw > 0xff) {
+				++effective_address16_.hi;
 			}
 			break;
 		case 4:
 			LAST_CYCLE;
 			// write to effective address
 			{
-				uint16_t address = effective_address16_;
-				uint8_t  value   = op(address);
+				uint16_t address = effective_address16_.raw;
+				const uint8_t  value   = op(address);
 				write_byte(address, value);
 			}
 			OPCODE_COMPLETE;

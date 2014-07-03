@@ -17,7 +17,7 @@ private:
 		switch(cycle_) {
 		case 1:
 			// read from current PC
-			read_byte(PC);
+			read_byte(PC.raw);
 			break;
 		case 2:
 			// push PCH on stack, decrement S (fake)
@@ -34,12 +34,12 @@ private:
 		case 5:
 			set_flag<I_MASK>();
 			// fetch PCL
-			set_pc_lo(read_byte(RST_VECTOR_ADDRESS + 0));
+			PC.lo = read_byte(RST_VECTOR_ADDRESS + 0);
 			break;
 		case 6:
 			// fetch PCH
 			LAST_CYCLE;
-			set_pc_hi(read_byte(RST_VECTOR_ADDRESS + 1));
+			PC.hi = read_byte(RST_VECTOR_ADDRESS + 1);
 			OPCODE_COMPLETE;
 		default:
 			abort();

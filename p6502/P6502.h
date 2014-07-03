@@ -2,7 +2,10 @@
 #ifndef P6502_20080314_H_
 #define P6502_20080314_H_
 
+#include "bitfield.h"
 #include <cstdint>
+
+namespace P6502 {
 
 using std::int8_t;
 using std::uint16_t;
@@ -10,7 +13,13 @@ using std::uint32_t;
 using std::uint64_t;
 using std::uint8_t;
 
-namespace P6502 {
+union register16 {
+	uint16_t raw;
+	bitfield<0,8> lo;
+	bitfield<8,8> hi;
+};
+
+
 namespace {
 
 typedef uint8_t (*read_handler_t)(uint16_t);
@@ -27,12 +36,12 @@ enum DMA_SOURCE {
 };
 
 // public registers
-extern uint16_t PC;
-extern uint8_t  A;
-extern uint8_t  X;
-extern uint8_t  Y;
-extern uint8_t  S;
-extern uint8_t  P;
+extern register16 PC;
+extern uint8_t    A;
+extern uint8_t    X;
+extern uint8_t    Y;
+extern uint8_t    S;
+extern uint8_t    P;
 
 // stats
 extern uint64_t executed_cycles;
