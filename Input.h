@@ -18,10 +18,10 @@ void write4016(uint8_t value);
 uint8_t read4016();
 uint8_t read4017();
 
-Controller &controller1();
-Controller &controller2();
-Controller &controller3();
-Controller &controller4();
+extern Controller controller1;
+extern Controller controller2;
+extern Controller controller3;
+extern Controller controller4;
 
 }
 }

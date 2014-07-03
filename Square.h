@@ -39,19 +39,16 @@ public:
 	bool enabled() const;
 
 public:
-	LengthCounter  &length_counter();
-	Envelope       &envelope();
-	Sweep<Channel> &sweep();
-
-public:
 	void tick();
 	uint8_t output() const;
 
+public:
+	LengthCounter  length_counter;
+	Envelope       envelope;
+	Sweep<Channel> sweep;
+
 private:
-	LengthCounter  length_counter_;
-	Envelope       envelope_;
 	Timer          timer_;
-	Sweep<Channel> sweep_;
 	uint16_t       timer_reload_;
 	uint8_t        duty_;
 	uint8_t        sequence_index_;

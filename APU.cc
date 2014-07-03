@@ -312,19 +312,19 @@ uint8_t read4015() {
 	// reading this register clears the Frame interrupt flag.
 	status.frame_irq = false;
 
-	if(square_0.length_counter().value() > 0) {
+	if(square_0.length_counter.value() > 0) {
 		ret |= STATUS_ENABLE_SQUARE_1;
 	}
 
-	if(square_1.length_counter().value() > 0) {
+	if(square_1.length_counter.value() > 0) {
 		ret |= STATUS_ENABLE_SQUARE_2;
 	}
 
-	if(triangle.length_counter().value() > 0) {
+	if(triangle.length_counter.value() > 0) {
 		ret |= STATUS_ENABLE_TRIANGLE;
 	}
 
-	if(noise.length_counter().value() > 0) {
+	if(noise.length_counter.value() > 0) {
 		ret |= STATUS_ENABLE_NOISE;
 	}
 
@@ -367,24 +367,24 @@ void write4017(uint8_t value) {
 // Name: clock_length
 //------------------------------------------------------------------------------
 void clock_length() {
-	square_0.length_counter().clock();
-	square_1.length_counter().clock();
-	triangle.length_counter().clock();
-	noise.length_counter().clock();
+	square_0.length_counter.clock();
+	square_1.length_counter.clock();
+	triangle.length_counter.clock();
+	noise.length_counter.clock();
 
-	square_0.sweep().clock();
-	square_1.sweep().clock();
+	square_0.sweep.clock();
+	square_1.sweep.clock();
 }
 
 //------------------------------------------------------------------------------
 // Name: clock_linear
 //------------------------------------------------------------------------------
 void clock_linear() {
-	triangle.linear_counter().clock();
+	triangle.linear_counter.clock();
 
-	square_0.envelope().clock();
-	square_1.envelope().clock();
-	noise.envelope().clock();
+	square_0.envelope.clock();
+	square_1.envelope.clock();
+	noise.envelope.clock();
 }
 
 //------------------------------------------------------------------------------

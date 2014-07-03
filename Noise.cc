@@ -11,32 +11,32 @@ const uint16_t frequency_table[16] = {
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: Noise
 //------------------------------------------------------------------------------
 Noise::Noise() : enabled_(false) {
 
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: ~Noise
 //------------------------------------------------------------------------------
 Noise::~Noise() {
 
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: enable
 //------------------------------------------------------------------------------
 void Noise::enable() {
 	enabled_ = true;
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: disable
 //------------------------------------------------------------------------------
 void Noise::disable() {
 	enabled_ = false;
-	length_counter_.clear();
+	length_counter.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -45,12 +45,12 @@ void Noise::disable() {
 void Noise::write_reg0(uint8_t value) {
 
 	if(value & 0x20) {
-		length_counter_.halt();
+		length_counter.halt();
 	} else {
-		length_counter_.resume();
+		length_counter.resume();
 	}
 
-	envelope_.set_control(value);
+	envelope.set_control(value);
 }
 
 //------------------------------------------------------------------------------
@@ -68,10 +68,10 @@ void Noise::write_reg2(uint8_t value) {
 void Noise::write_reg3(uint8_t value) {
 
 	if(enabled_) {
-		length_counter_.load((value >> 3) & 0x1f);
+		length_counter.load((value >> 3) & 0x1f);
 	}
 
-	envelope_.start();
+	envelope.start();
 }
 
 //------------------------------------------------------------------------------
@@ -79,13 +79,6 @@ void Noise::write_reg3(uint8_t value) {
 //------------------------------------------------------------------------------
 bool Noise::enabled() const {
 	return enabled_;
-}
-
-//------------------------------------------------------------------------------
-// Name: length_counter
-//------------------------------------------------------------------------------
-LengthCounter &Noise::length_counter() {
-	return length_counter_;
 }
 
 //------------------------------------------------------------------------------
@@ -101,16 +94,9 @@ void Noise::tick() {
 // Name: output
 //------------------------------------------------------------------------------
 uint8_t Noise::output() const {
-	if(length_counter_.value() == 0 || ((lfsr_.value() & 1) == 0)) {
+	if(length_counter.value() == 0 || ((lfsr_.value() & 1) == 0)) {
 		return 0;
 	} else {
-		return envelope_.volume();
+		return envelope.volume();
 	}
-}
-
-//------------------------------------------------------------------------------
-// Name: envelope
-//------------------------------------------------------------------------------
-Envelope &Noise::envelope() {
-	return envelope_;
 }

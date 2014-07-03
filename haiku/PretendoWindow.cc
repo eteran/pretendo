@@ -1131,7 +1131,7 @@ PretendoWindow::emulation_thread (void *data)
 inline void
 PretendoWindow::CheckKey (int32 index, int32 key)
 {
-	nes::input::controller1().keystate_[index] = 
+	nes::input::controller1.keystate_[index] = 
 		fKeyStates.key_states[key >> 3] & (1 << (7 - (key % 8)));
 }
 

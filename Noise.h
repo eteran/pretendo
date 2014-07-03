@@ -39,12 +39,10 @@ public:
 	uint8_t output() const;
 
 public:
-	LengthCounter &length_counter();
-	Envelope      &envelope();
+	LengthCounter length_counter;
+	Envelope      envelope;
 
 private:
-	LengthCounter length_counter_;
-	Envelope      envelope_;
 	bool          enabled_;
 	Timer         timer_;
 	LFSR          lfsr_;

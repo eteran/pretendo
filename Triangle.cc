@@ -38,7 +38,7 @@ void Triangle::enable() {
 //------------------------------------------------------------------------------
 void Triangle::disable() {
 	enabled_ = false;
-	length_counter_.clear();
+	length_counter.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -47,12 +47,12 @@ void Triangle::disable() {
 void Triangle::write_reg0(uint8_t value) {
 
 	if(value & 0x80) {
-		length_counter_.halt();
+		length_counter.halt();
 	} else {
-		length_counter_.resume();
+		length_counter.resume();
 	}
 
-	linear_counter_.set_control(value);
+	linear_counter.set_control(value);
 }
 
 //------------------------------------------------------------------------------
@@ -69,13 +69,13 @@ void Triangle::write_reg2(uint8_t value) {
 void Triangle::write_reg3(uint8_t value) {
 
 	if(enabled_) {
-		length_counter_.load((value >> 3) & 0x1f);
+		length_counter.load((value >> 3) & 0x1f);
 	}
 
 	timer_load_ = (timer_load_ & 0x00ff) | ((value & 0x07) << 8);
 	timer_.set_frequency(timer_load_ + 1);
 
-	linear_counter_.reload();
+	linear_counter.reload();
 }
 
 //------------------------------------------------------------------------------
@@ -86,24 +86,10 @@ bool Triangle::enabled() const {
 }
 
 //------------------------------------------------------------------------------
-// Name: length_counter
-//------------------------------------------------------------------------------
-LengthCounter &Triangle::length_counter() {
-	return length_counter_;
-}
-
-//------------------------------------------------------------------------------
-// Name: linear_counter
-//------------------------------------------------------------------------------
-LinearCounter &Triangle::linear_counter() {
-	return linear_counter_;
-}
-
-//------------------------------------------------------------------------------
 // Name: tick
 //------------------------------------------------------------------------------
 void Triangle::tick() {
-	if(timer_.tick() && length_counter_.value() && linear_counter_.value()) {
+	if(timer_.tick() && length_counter.value() && linear_counter.value()) {
 		sequence_index_ = (sequence_index_ + 1) % 32;
 	}
 }
