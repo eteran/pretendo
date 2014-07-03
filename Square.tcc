@@ -66,8 +66,8 @@ void Square<Channel>::write_reg1(uint8_t value) {
 template <int Channel>
 void Square<Channel>::write_reg2(uint8_t value) {
 
-	timer_reload_ = (timer_reload_ & 0xff00) | value;
-	timer_.set_frequency((timer_reload_ + 1) * 2);
+	timer_reload_    = (timer_reload_ & 0xff00) | value;
+	timer_.frequency = (timer_reload_ + 1) * 2;
 	sweep.set_pulse_period(timer_reload_);
 }
 
@@ -77,8 +77,8 @@ void Square<Channel>::write_reg2(uint8_t value) {
 template <int Channel>
 void Square<Channel>::write_reg3(uint8_t value) {
 
-	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);
-	timer_.set_frequency((timer_reload_ + 1) * 2);
+	timer_reload_    = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);
+	timer_.frequency = (timer_reload_ + 1) * 2;
 	sweep.set_pulse_period(timer_reload_);
 
 	if(enabled_) {
@@ -120,7 +120,7 @@ uint8_t Square<Channel>::output() const {
 		{ 1,0,0,1,1,1,1,1 }
 	};
 
-	if((timer_.frequency() - 1) < 8) {
+	if((timer_.frequency - 1) < 8) {
 		return 0;
 	} else if(sequence[duty_][sequence_index_] == 0) {
 		return 0;

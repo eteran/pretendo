@@ -59,7 +59,7 @@ void Noise::write_reg0(uint8_t value) {
 void Noise::write_reg2(uint8_t value) {
 
 	lfsr_.set_mode(value & 0x80);
-	timer_.set_frequency(frequency_table[value & 0x0f]);
+	timer_.frequency = frequency_table[value & 0x0f];
 }
 
 //------------------------------------------------------------------------------

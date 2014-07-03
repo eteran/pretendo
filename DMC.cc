@@ -61,16 +61,10 @@ void DMC::enable() {
 	if(bytes_remaining_ != 0 && bits_remaining_ == 0) {
 		bits_remaining_ = 8;
 
-#if 0
-		// TODO: hijack the CPU for appropriate number of cycles,
-		//       not hardcoded to 3
-		nes::cpu::burn(3);
-		sample_buffer_.load(nes::cart.mapper()->read_memory(sample_pointer_));
-#else
 		nes::cpu::schedule_dmc_dma([](uint8_t value){
 			nes::apu::dmc.load_sample_buffer(value);
 		}, sample_pointer_, 1);
-#endif
+
 		sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
 		if(--bytes_remaining_ == 0) {
@@ -100,7 +94,7 @@ void DMC::write_reg0(uint8_t value) {
 
 	control_ = value;
 
-	timer_.set_frequency(frequency_table[control_ & 0x0f]);
+	timer_.frequency = frequency_table[control_ & 0x0f];
 	timer_.reset();
 
 	if(!irq_enabled()) {
@@ -166,16 +160,10 @@ void DMC::tick() {
 		if(bytes_remaining_ != 0 && bits_remaining_ == 0) {
 			bits_remaining_ = 8;
 
-#if 0
-			// TODO: hijack the CPU for appropriate number of cycles,
-			//       not hardcoded to 3
-			nes::cpu::burn(3);
-			sample_buffer_.load(nes::cart.mapper()->read_memory(sample_pointer_));
-#else
 			nes::cpu::schedule_dmc_dma([](uint8_t value){
 				nes::apu::dmc.load_sample_buffer(value);
 			}, sample_pointer_, 1);
-#endif
+
 			sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
 			if(--bytes_remaining_ == 0) {

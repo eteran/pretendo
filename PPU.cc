@@ -146,8 +146,6 @@ uint8_t      sprite_buffer_          = 0xff;
 bool         odd_frame_              = false;
 bool         rendering_              = false;
 bool         sprite_init_            = false;
-bool         sprite_zero_found_next_ = false;
-bool         sprite_zero_found_curr_ = false;
 bool         write_latch_            = false;
 bool         write_block_            = false;
 uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
@@ -305,8 +303,6 @@ void reset(RESET reset_type) {
 	sprite_buffer_          = 0xff;
 	sprite_data_index_      = 0;
 	left_most_sprite_x_     = 0xff;
-	sprite_zero_found_curr_ = false;
-	sprite_zero_found_next_ = false;
 	status_.raw             = 0;
 	tile_offset_            = 0;
 	vpos_                   = 0;
@@ -810,7 +806,6 @@ void evaluate_sprites_odd() {
 template <int Size>
 void evaluate_sprites() {
 	sprite_data_index_      = 0;
-	sprite_zero_found_next_ = false;
 
 #if 1
 	for(int i = 0; i < 8; ++i) {
@@ -852,7 +847,6 @@ void evaluate_sprites() {
 					// note that we found sprite 0
 					if(index == start_address) {
 						sprite_data_[sprite_data_index_].sprite_bytes[2] |= SPRITE_ZERO;
-						sprite_zero_found_next_ = true;
 					}
 
 					left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_data_[sprite_data_index_].sprite_bytes[3]);
@@ -986,7 +980,7 @@ uint8_t select_pixel(uint8_t index) {
 			const SpriteEntry *const first = sprite_data_;
 			const SpriteEntry *const last  = &sprite_data_[sprite_data_index_];
 
-			for(const SpriteEntry *p = first; p != last; ++p) {
+			for(auto p = first; p != last; ++p) {
 				const uint16_t x_offset = index - p->x();
 
 				// is this sprite visible on this pixel?
@@ -1023,7 +1017,6 @@ uint8_t select_pixel(uint8_t index) {
 						if(p->is_sprite_zero() && (index < 255)) {
 					#endif
 							status_.sprite0         = true;
-							sprite_zero_found_curr_ = false;
 						}
 
 						if((!p->is_background() || ((pixel & 0x03) == 0x00)) && show_sprites_) {
@@ -1232,7 +1225,6 @@ void update_x_scroll() {
 void update_sprite_registers() {
 	// this gets set to $00 for each tick between 257 and 320
 	sprite_address_         = 0;
-	sprite_zero_found_curr_ = sprite_zero_found_next_;
 }
 
 //------------------------------------------------------------------------------

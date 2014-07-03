@@ -71,7 +71,7 @@ void Sweep<Channel>::clock() {
 			if(target < 0x800) {
 				square_->timer_reload_ = target;
 				pulse_period_          = target;
-				square_->timer_.set_frequency((target + 1) * 2);
+				square_->timer_.frequency = (target + 1) * 2;
 			}
 		}
 
@@ -90,7 +90,7 @@ void Sweep<Channel>::clock() {
 				if(target < 0x800) {
 					square_->timer_reload_ = target;
 					pulse_period_          = target;
-					square_->timer_.set_frequency((target + 1) * 2);
+					square_->timer_.frequency = (target + 1) * 2;
 				}
 			}
 		}

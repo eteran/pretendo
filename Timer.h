@@ -17,14 +17,14 @@ private:
 
 public:
 	bool tick();
-	void set_frequency(uint16_t frequency);
 	void reset();
-	uint16_t frequency() const;
 	uint16_t value() const;
-
+	
+public:
+	uint16_t frequency;
+	
 private:
 	uint16_t timer_;
-	uint16_t frequency_;
 };
 
 #endif
