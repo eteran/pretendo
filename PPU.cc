@@ -157,12 +157,12 @@ uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
 									 // simplicity
 
 // internal functions
-int clock_cpu();
 uint16_t background_pattern_table();
 uint16_t sprite_pattern_table();
+uint8_t select_bg_pixel(uint8_t index);
 uint8_t select_blank_pixel();
 uint8_t select_pixel(uint8_t index);
-uint8_t select_bg_pixel(uint8_t index);
+void clock_cpu();
 void clock_x();
 void clock_y();
 void enter_vblank();
@@ -969,6 +969,7 @@ uint8_t select_pixel(uint8_t index) {
 
 	assert(ppu_mask_.screen_enabled);
 
+	// default to displaying the BG pixel
 	uint8_t pixel = select_bg_pixel(index);
 
 	// are ANY sprites possibly in range?
@@ -980,6 +981,7 @@ uint8_t select_pixel(uint8_t index) {
 			const SpriteEntry *const first = sprite_data_;
 			const SpriteEntry *const last  = &sprite_data_[sprite_data_index_];
 
+			// this will loop at most 8 times
 			for(auto p = first; p != last; ++p) {
 				const uint16_t x_offset = index - p->x();
 
@@ -1224,7 +1226,7 @@ void update_x_scroll() {
 //------------------------------------------------------------------------------
 void update_sprite_registers() {
 	// this gets set to $00 for each tick between 257 and 320
-	sprite_address_         = 0;
+	sprite_address_ = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -1442,12 +1444,10 @@ void execute_cycle(const scanline_vblank &target) {
 // Desc: optionally executes a CPU cycle returns the number of CPU cycles
 //       executed
 //------------------------------------------------------------------------------
-int clock_cpu() {
+void clock_cpu() {
 	if((ppu_cycle_ % 3) == cpu_alignment) {
 		cpu::exec(1);
-		return 1;
 	}
-	return 0;
 }
 
 //------------------------------------------------------------------------------
