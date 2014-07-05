@@ -53,12 +53,12 @@ union PPUMask {
 	BitField<3>   background_visible;
 	BitField<4>   sprites_visible;
 	BitField<5,3> intensity;
-	
+
 	// meta-fields which don't occupy any space :-)
 	BitField<3,2> screen_enabled;
 };
 
-void reset(RESET reset_type);
+void reset(Reset reset_type);
 
 static const uint8_t mirror_single_low  = 0x00;
 static const uint8_t mirror_single_high = 0x55;

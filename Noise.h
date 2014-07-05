@@ -8,6 +8,9 @@
 #include "Timer.h"
 #include <cstdint>
 
+namespace nes {
+namespace apu {
+
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
@@ -17,7 +20,7 @@ class Noise {
 public:
 	Noise();
 	~Noise();
-	
+
 private:
 	Noise(const Noise &) = delete;
 	Noise &operator=(const Noise &) = delete;
@@ -39,15 +42,16 @@ public:
 	uint8_t output() const;
 
 public:
-	LengthCounter &length_counter();
-	Envelope      &envelope();
+	LengthCounter length_counter;
+	Envelope      envelope;
 
 private:
-	LengthCounter length_counter_;
-	Envelope      envelope_;
 	bool          enabled_;
 	Timer         timer_;
 	LFSR          lfsr_;
 };
+
+}
+}
 
 #endif

@@ -17,7 +17,7 @@ private:
 		switch(cycle_) {
 		case 1:
 			// make sure we spin forever
-			--PC;
+			--PC.raw;
 			if(jam_handler_) {
 				(*jam_handler_)();
 			}

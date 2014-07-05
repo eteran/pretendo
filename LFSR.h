@@ -4,6 +4,9 @@
 
 #include <cstdint>
 
+namespace nes {
+namespace apu {
+
 using std::uint8_t;
 using std::uint16_t;
 
@@ -48,7 +51,7 @@ public:
 	uint16_t value() const {
 		return value_ & 0x7fff;
 	}
-	
+
 private:
 	//-------------------------------------------------------------------
 	// Name: feedback
@@ -65,5 +68,8 @@ private:
 	uint16_t value_;
 	uint8_t  mode_;
 };
+
+}
+}
 
 #endif

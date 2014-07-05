@@ -100,9 +100,9 @@ struct static_initializer {
 //-------------------------------------------------------------------
 // Name: reset
 //-------------------------------------------------------------------
-void reset(RESET reset_type) {
+void reset(Reset reset_type) {
 
-	if(reset_type == HARD_RESET) {
+	if(reset_type == Reset::Hard) {
 		P6502::stop();
 		trash_ram();
 	}
@@ -190,7 +190,7 @@ void schedule_dmc_dma(P6502::dma_handler_t dma_handler, uint16_t source_address,
 	P6502::schedule_dma(dma_handler, source_address, count, P6502::DMC_DMA);
 }
 
-uint16_t pc() { return PC;}
+uint16_t pc() { return PC.raw;}
 uint8_t a()   { return A; }
 uint8_t p()   { return P; }
 uint8_t s()   { return S; }

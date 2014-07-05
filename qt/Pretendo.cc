@@ -215,7 +215,7 @@ void Pretendo::on_action_Run_triggered() {
 
 				ui_.stackedWidget->setCurrentIndex(1);
 
-				nes::reset(nes::HARD_RESET);
+				nes::reset(nes::Reset::Hard);
 
 				timer_->start(timer_interval);
 				audio_->start();
@@ -269,21 +269,21 @@ void Pretendo::keyPressEvent(QKeyEvent *event) {
 	const int key = event->key();
 
 	if(key == player_1_[Controller::INDEX_A]) {
-		nes::input::controller1().keystate_[Controller::INDEX_A] = true;
+		nes::input::controller1.keystate_[Controller::INDEX_A] = true;
 	} else if(key == player_1_[Controller::INDEX_B]) {
-		nes::input::controller1().keystate_[Controller::INDEX_B] = true;
+		nes::input::controller1.keystate_[Controller::INDEX_B] = true;
 	} else if(key == player_1_[Controller::INDEX_SELECT]) {
-		nes::input::controller1().keystate_[Controller::INDEX_SELECT] = true;
+		nes::input::controller1.keystate_[Controller::INDEX_SELECT] = true;
 	} else if(key == player_1_[Controller::INDEX_START]) {
-		nes::input::controller1().keystate_[Controller::INDEX_START] = true;
+		nes::input::controller1.keystate_[Controller::INDEX_START] = true;
 	} else if(key == player_1_[Controller::INDEX_UP]) {
-		nes::input::controller1().keystate_[Controller::INDEX_UP] = true;
+		nes::input::controller1.keystate_[Controller::INDEX_UP] = true;
 	} else if(key == player_1_[Controller::INDEX_DOWN]) {
-		nes::input::controller1().keystate_[Controller::INDEX_DOWN] = true;
+		nes::input::controller1.keystate_[Controller::INDEX_DOWN] = true;
 	} else if(key == player_1_[Controller::INDEX_LEFT]) {
-		nes::input::controller1().keystate_[Controller::INDEX_LEFT] = true;
+		nes::input::controller1.keystate_[Controller::INDEX_LEFT] = true;
 	} else if(key == player_1_[Controller::INDEX_RIGHT]) {
-		nes::input::controller1().keystate_[Controller::INDEX_RIGHT] = true;
+		nes::input::controller1.keystate_[Controller::INDEX_RIGHT] = true;
 	} else {
 		event->ignore();
 	}
@@ -301,21 +301,21 @@ void Pretendo::keyReleaseEvent(QKeyEvent *event) {
 	}
 
 	if(key == player_1_[Controller::INDEX_A]) {
-		nes::input::controller1().keystate_[Controller::INDEX_A] = false;
+		nes::input::controller1.keystate_[Controller::INDEX_A] = false;
 	} else if(key == player_1_[Controller::INDEX_B]) {
-		nes::input::controller1().keystate_[Controller::INDEX_B] = false;
+		nes::input::controller1.keystate_[Controller::INDEX_B] = false;
 	} else if(key == player_1_[Controller::INDEX_SELECT]) {
-		nes::input::controller1().keystate_[Controller::INDEX_SELECT] = false;
+		nes::input::controller1.keystate_[Controller::INDEX_SELECT] = false;
 	} else if(key == player_1_[Controller::INDEX_START]) {
-		nes::input::controller1().keystate_[Controller::INDEX_START] = false;
+		nes::input::controller1.keystate_[Controller::INDEX_START] = false;
 	} else if(key == player_1_[Controller::INDEX_UP]) {
-		nes::input::controller1().keystate_[Controller::INDEX_UP] = false;
+		nes::input::controller1.keystate_[Controller::INDEX_UP] = false;
 	} else if(key == player_1_[Controller::INDEX_DOWN]) {
-		nes::input::controller1().keystate_[Controller::INDEX_DOWN] = false;
+		nes::input::controller1.keystate_[Controller::INDEX_DOWN] = false;
 	} else if(key == player_1_[Controller::INDEX_LEFT]) {
-		nes::input::controller1().keystate_[Controller::INDEX_LEFT] = false;
+		nes::input::controller1.keystate_[Controller::INDEX_LEFT] = false;
 	} else if(key == player_1_[Controller::INDEX_RIGHT]) {
-		nes::input::controller1().keystate_[Controller::INDEX_RIGHT] = false;
+		nes::input::controller1.keystate_[Controller::INDEX_RIGHT] = false;
 	} else {
 		event->ignore();
 	}
@@ -338,7 +338,7 @@ void Pretendo::on_action_Hard_Reset_triggered() {
 	}
 
 	if(timer_->isActive()) {
-		nes::reset(nes::HARD_RESET);
+		nes::reset(nes::Reset::Hard);
 	}
 }
 
@@ -351,7 +351,7 @@ void Pretendo::on_actionReset_triggered() {
 	}
 
 	if(timer_->isActive()) {
-		nes::reset(nes::SOFT_RESET);
+		nes::reset(nes::Reset::Soft);
 	}
 }
 

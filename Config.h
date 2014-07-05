@@ -15,7 +15,7 @@ class Config {
 public:
 	Config();
 	~Config();
-	
+
 private:
 	Config(const Config &) = delete;
 	Config &operator=(const Config &) = delete;
@@ -40,7 +40,7 @@ public:
 		if(section.empty() || key.empty()) {
 			return false;
 		}
-				
+
 		auto it = sections_.find(section);
 
 		if(it == sections_.end()) {
@@ -67,7 +67,7 @@ public:
 		if(section.empty() || key.empty()) {
 			return false;
 		}
-		
+
 		auto it = sections_.find(section);
 
 		if(it == sections_.end()) {

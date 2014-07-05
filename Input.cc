@@ -8,10 +8,10 @@ namespace nes {
 namespace input {
 
 uint8_t    strobe_      = 0;
-Controller controller1_;
-Controller controller2_;
-Controller controller3_;
-Controller controller4_;
+Controller controller1;
+Controller controller2;
+Controller controller3;
+Controller controller4;
 
 
 /*
@@ -58,10 +58,10 @@ void write4016(uint8_t value) {
 	value &= 0x1;
 
 	if(!value && strobe_) {
-		controller1_.poll();
-		controller2_.poll();
-		controller3_.poll();
-		controller4_.poll();
+		controller1.poll();
+		controller2.poll();
+		controller3.poll();
+		controller4.poll();
 	}
 
 	strobe_ = value;
@@ -77,7 +77,7 @@ uint8_t read4016() {
 	// O = open bus
 	// x = zero
 	// D = data
-	return (controller1_.read() & 0x1f) | 0x40;
+	return (controller1.read() & 0x1f) | 0x40;
 }
 
 //------------------------------------------------------------------------------
@@ -90,35 +90,7 @@ uint8_t read4017() {
 	// O = open bus
 	// x = zero
 	// D = data
-	return (controller2_.read() & 0x1f) | 0x40;
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-Controller &controller1() {
-	return controller1_;
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-Controller &controller2() {
-	return controller2_;
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-Controller &controller3() {
-	return controller3_;
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-Controller &controller4() {
-	return controller4_;
+	return (controller2.read() & 0x1f) | 0x40;
 }
 
 }

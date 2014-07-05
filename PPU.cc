@@ -11,10 +11,6 @@
 #include <algorithm>
 #include <cassert>
 
-#ifdef FAST_CPU
-#include "revbits.h"
-#endif
-
 //#define SPRITE_ZERO_HACK
 
 namespace {
@@ -150,8 +146,6 @@ uint8_t      sprite_buffer_          = 0xff;
 bool         odd_frame_              = false;
 bool         rendering_              = false;
 bool         sprite_init_            = false;
-bool         sprite_zero_found_next_ = false;
-bool         sprite_zero_found_curr_ = false;
 bool         write_latch_            = false;
 bool         write_block_            = false;
 uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
@@ -163,12 +157,12 @@ uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
 									 // simplicity
 
 // internal functions
-int clock_cpu();
 uint16_t background_pattern_table();
 uint16_t sprite_pattern_table();
+uint8_t select_bg_pixel(uint8_t index);
 uint8_t select_blank_pixel();
 uint8_t select_pixel(uint8_t index);
-uint8_t select_bg_pixel(uint8_t index);
+void clock_cpu();
 void clock_x();
 void clock_y();
 void enter_vblank();
@@ -267,12 +261,12 @@ uint8_t SpriteEntry::x() const {
 //------------------------------------------------------------------------------
 // Name: reset
 //------------------------------------------------------------------------------
-void reset(RESET reset_type) {
+void reset(Reset reset_type) {
 
 #if 0
 	std::generate(sprite_ram_, sprite_ram_ + 0x100,  rand);
 #endif
-	if(reset_type == HARD_RESET) {
+	if(reset_type == Reset::Hard) {
 		std::fill_n(nametables_, 0x1000, 0);
 		std::fill_n(sprite_ram_, 0x0100, 0);
 
@@ -309,8 +303,6 @@ void reset(RESET reset_type) {
 	sprite_buffer_          = 0xff;
 	sprite_data_index_      = 0;
 	left_most_sprite_x_     = 0xff;
-	sprite_zero_found_curr_ = false;
-	sprite_zero_found_next_ = false;
 	status_.raw             = 0;
 	tile_offset_            = 0;
 	vpos_                   = 0;
@@ -771,11 +763,7 @@ void read_sprite_pattern() {
 	if(sprite_entry->y() != 0xff) {
 		// horizontal flip
 		if(sprite_entry->horizontal_flip()) {
-#ifndef FAST_CPU
 			sprite_entry->pattern[Pattern::index] = reverse_bits[sprite_entry->pattern[Pattern::index]];
-#else
-			sprite_entry->pattern[Pattern::index] = revbits(sprite_entry->pattern[Pattern::index]);
-#endif
 		}
 	}
 }
@@ -818,7 +806,6 @@ void evaluate_sprites_odd() {
 template <int Size>
 void evaluate_sprites() {
 	sprite_data_index_      = 0;
-	sprite_zero_found_next_ = false;
 
 #if 1
 	for(int i = 0; i < 8; ++i) {
@@ -860,7 +847,6 @@ void evaluate_sprites() {
 					// note that we found sprite 0
 					if(index == start_address) {
 						sprite_data_[sprite_data_index_].sprite_bytes[2] |= SPRITE_ZERO;
-						sprite_zero_found_next_ = true;
 					}
 
 					left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_data_[sprite_data_index_].sprite_bytes[3]);
@@ -983,6 +969,7 @@ uint8_t select_pixel(uint8_t index) {
 
 	assert(ppu_mask_.screen_enabled);
 
+	// default to displaying the BG pixel
 	uint8_t pixel = select_bg_pixel(index);
 
 	// are ANY sprites possibly in range?
@@ -994,7 +981,8 @@ uint8_t select_pixel(uint8_t index) {
 			const SpriteEntry *const first = sprite_data_;
 			const SpriteEntry *const last  = &sprite_data_[sprite_data_index_];
 
-			for(const SpriteEntry *p = first; p != last; ++p) {
+			// this will loop at most 8 times
+			for(auto p = first; p != last; ++p) {
 				const uint16_t x_offset = index - p->x();
 
 				// is this sprite visible on this pixel?
@@ -1031,7 +1019,6 @@ uint8_t select_pixel(uint8_t index) {
 						if(p->is_sprite_zero() && (index < 255)) {
 					#endif
 							status_.sprite0         = true;
-							sprite_zero_found_curr_ = false;
 						}
 
 						if((!p->is_background() || ((pixel & 0x03) == 0x00)) && show_sprites_) {
@@ -1239,8 +1226,7 @@ void update_x_scroll() {
 //------------------------------------------------------------------------------
 void update_sprite_registers() {
 	// this gets set to $00 for each tick between 257 and 320
-	sprite_address_         = 0;
-	sprite_zero_found_curr_ = sprite_zero_found_next_;
+	sprite_address_ = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -1458,14 +1444,10 @@ void execute_cycle(const scanline_vblank &target) {
 // Desc: optionally executes a CPU cycle returns the number of CPU cycles
 //       executed
 //------------------------------------------------------------------------------
-int clock_cpu() {
+void clock_cpu() {
 	if((ppu_cycle_ % 3) == cpu_alignment) {
-#ifndef FAST_CPU
 		cpu::exec(1);
-#endif
-		return 1;
 	}
-	return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -1489,29 +1471,10 @@ uint16_t background_pattern_table() {
 //------------------------------------------------------------------------------
 template <class T>
 void execute_scanline(const T &target) {
-	// NOTE: MMC3 isn't quite right in "FAST_CPU" mode
-	// (but likely good enough for most games)
-	// this is because when executing many cycles at a time
-	// the CPU can cause writes which manually toggle A12
-	// BUT, the PPU cycle count isn't incremented in step
-	// so the MMC3 filtering based on PPU cycles doesn't
-	// see the manual toggles :-/
-
-#ifdef FAST_CPU
-	int cycles = 0;
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-		execute_cycle(target);
-		cycles += clock_cpu();
-	}
-
-	cpu::exec(cycles);
-	cart.mapper()->hsync();
-#else
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
 		execute_cycle(target);
 		clock_cpu();
 	}
-#endif
 	++vpos_;
 }
 

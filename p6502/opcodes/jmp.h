@@ -10,7 +10,7 @@ struct opcode_jmp {
 	typedef operation_jump memory_access;
 
 	void operator()(uint16_t data) const {
-		PC = data;
+		PC.raw = data;
 	}
 };
 

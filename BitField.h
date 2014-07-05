@@ -130,7 +130,7 @@ public:
 	}
 
 	operator bool() const { return value_ & (Mask << Index); }
-	
+
 private:
 	T value_;
 };

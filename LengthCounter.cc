@@ -2,6 +2,9 @@
 #include "LengthCounter.h"
 #include "APU.h"
 
+namespace nes {
+namespace apu {
+
 namespace {
 const uint8_t length_table[32] = {
 	0x0a, 0xfe,
@@ -125,4 +128,7 @@ void LengthCounter::clock() {
 	}
 
 	reload_ = false;
+}
+
+}
 }

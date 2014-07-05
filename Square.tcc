@@ -2,12 +2,18 @@
 #ifndef SQUARE_20130206_TCC_
 #define SQUARE_20130206_TCC_
 
+namespace nes {
+namespace apu {
+
 //------------------------------------------------------------------------------
 // Name: Square
 //------------------------------------------------------------------------------
 template <int Channel>
-Square<Channel>::Square() : sweep_(this), timer_reload_(0), duty_(0), 
+Square<Channel>::Square() : sweep(this), timer_reload_(0), duty_(0),
 		sequence_index_(0), enabled_(false) {
+
+
+	static_assert(Channel >= 0 && Channel < 2, "only channels 0 and 1 are valid");
 
 }
 
@@ -32,7 +38,7 @@ void Square<Channel>::enable() {
 template <int Channel>
 void Square<Channel>::disable() {
 	enabled_ = false;
-	length_counter_.clear();
+	length_counter.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -44,12 +50,12 @@ void Square<Channel>::write_reg0(uint8_t value) {
 	duty_ = (value >> 6) & 0x03;
 
 	if(value & 0x20) {
-		length_counter_.halt();
+		length_counter.halt();
 	} else {
-		length_counter_.resume();
+		length_counter.resume();
 	}
 
-	envelope_.set_control(value);
+	envelope.set_control(value);
 }
 
 //------------------------------------------------------------------------------
@@ -57,7 +63,7 @@ void Square<Channel>::write_reg0(uint8_t value) {
 //------------------------------------------------------------------------------
 template <int Channel>
 void Square<Channel>::write_reg1(uint8_t value) {
-	sweep_.set_control(value);
+	sweep.set_control(value);
 }
 
 //------------------------------------------------------------------------------
@@ -66,9 +72,9 @@ void Square<Channel>::write_reg1(uint8_t value) {
 template <int Channel>
 void Square<Channel>::write_reg2(uint8_t value) {
 
-	timer_reload_ = (timer_reload_ & 0xff00) | value;
-	timer_.set_frequency((timer_reload_ + 1) * 2);
-	sweep_.set_pulse_period(timer_reload_);
+	timer_reload_    = (timer_reload_ & 0xff00) | value;
+	timer_.frequency = (timer_reload_ + 1) * 2;
+	sweep.set_pulse_period(timer_reload_);
 }
 
 //------------------------------------------------------------------------------
@@ -77,16 +83,16 @@ void Square<Channel>::write_reg2(uint8_t value) {
 template <int Channel>
 void Square<Channel>::write_reg3(uint8_t value) {
 
-	timer_reload_ = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);
-	timer_.set_frequency((timer_reload_ + 1) * 2);
-	sweep_.set_pulse_period(timer_reload_);
+	timer_reload_    = (timer_reload_ & 0x00ff) | ((value & 0x07) << 8);
+	timer_.frequency = (timer_reload_ + 1) * 2;
+	sweep.set_pulse_period(timer_reload_);
 
 	if(enabled_) {
-		length_counter_.load((value >> 3) & 0x1f);
+		length_counter.load((value >> 3) & 0x1f);
 	}
 
 	sequence_index_ = 0;
-	envelope_.start();
+	envelope.start();
 }
 
 //------------------------------------------------------------------------------
@@ -94,9 +100,10 @@ void Square<Channel>::write_reg3(uint8_t value) {
 //------------------------------------------------------------------------------
 template <int Channel>
 void Square<Channel>::tick() {
-	if(timer_.tick()) {
+
+	timer_.tick([this]() {
 		sequence_index_ = (sequence_index_ + 1) % 8;
-	}
+	});
 }
 
 //------------------------------------------------------------------------------
@@ -105,14 +112,6 @@ void Square<Channel>::tick() {
 template <int Channel>
 bool Square<Channel>::enabled() const {
 	return enabled_;
-}
-
-//------------------------------------------------------------------------------
-// Name: length_counter
-//------------------------------------------------------------------------------
-template <int Channel>
-LengthCounter &Square<Channel>::length_counter() {
-	return length_counter_;
 }
 
 //------------------------------------------------------------------------------
@@ -128,33 +127,20 @@ uint8_t Square<Channel>::output() const {
 		{ 1,0,0,1,1,1,1,1 }
 	};
 
-	if((timer_.frequency() - 1) < 8) {
+	if((timer_.frequency - 1) < 8) {
 		return 0;
 	} else if(sequence[duty_][sequence_index_] == 0) {
 		return 0;
-	} else if(sweep_.silenced()) {
+	} else if(sweep.silenced()) {
 		return 0;
-	} else if(length_counter_.value() == 0) {
+	} else if(length_counter.value() == 0) {
 		return 0;
 	} else {
-		return envelope_.volume();
+		return envelope.volume();
 	}
 }
 
-//------------------------------------------------------------------------------
-// Name: envelope
-//------------------------------------------------------------------------------
-template <int Channel>
-Envelope &Square<Channel>::envelope() {
-	return envelope_;
 }
-
-//------------------------------------------------------------------------------
-// Name: sweep
-//------------------------------------------------------------------------------
-template <int Channel>
-Sweep<Channel> &Square<Channel>::sweep() {
-	return sweep_;
 }
 
 #endif

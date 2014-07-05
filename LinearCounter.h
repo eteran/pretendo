@@ -4,16 +4,16 @@
 
 #include <cstdint>
 
+namespace nes {
+namespace apu {
+
 using std::uint8_t;
-using std::uint16_t;
-using std::uint32_t;
-using std::uint64_t;
 
 class LinearCounter {
 public:
 	LinearCounter();
 	~LinearCounter();
-	
+
 private:
 	LinearCounter(const LinearCounter &) = delete;
 	LinearCounter &operator=(const LinearCounter &) = delete;
@@ -29,5 +29,8 @@ private:
 	uint8_t control_;
 	bool    reload_;
 };
+
+}
+}
 
 #endif

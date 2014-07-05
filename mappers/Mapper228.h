@@ -27,11 +27,22 @@ private:
 	virtual uint8_t read_4(uint16_t address);
 	virtual uint8_t read_5(uint16_t address);
 
+
+	virtual uint8_t read_8(uint16_t address);
+	virtual uint8_t read_9(uint16_t address);
+	virtual uint8_t read_a(uint16_t address);
+	virtual uint8_t read_b(uint16_t address);
+	virtual uint8_t read_c(uint16_t address);
+	virtual uint8_t read_d(uint16_t address);
+	virtual uint8_t read_e(uint16_t address);
+	virtual uint8_t read_f(uint16_t address);
+
 private:
 	void write_hander(uint16_t address, uint8_t value);
 
 private:
 	uint8_t ram_[0x04];
+	const uint8_t *rom_[0x08];
 };
 
 #endif

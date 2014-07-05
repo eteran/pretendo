@@ -17,16 +17,16 @@ private:
 		switch(cycle_) {
 		case 1:
 			// fetch address, increment PC
-			effective_address16_ = PC++;
+			effective_address16_.raw = PC.raw++;
 			break;
 		case 2:
 			// read from address, add index register to it
-			effective_address16_ = read_byte(effective_address16_) + Y;
+			effective_address16_.raw = read_byte(effective_address16_.raw) + Y;
 			break;
 		case 3:
 			LAST_CYCLE;
 			// read from effective address
-            op(read_byte_zp(effective_address16_ & 0xff));
+            op(read_byte_zp(effective_address16_.lo));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -39,18 +39,18 @@ private:
 		switch(cycle_) {
 		case 1:
 			// fetch address, increment PC
-			effective_address16_ = PC++;
+			effective_address16_.raw = PC.raw++;
 			break;
 		case 2:
 			// read from address, add index register to it
-			effective_address16_ = read_byte(effective_address16_) + Y;
+			effective_address16_.raw = read_byte(effective_address16_.raw) + Y;
 			break;
 		case 3:
 			LAST_CYCLE;
 			// write to effective address
 			{
-				uint16_t address = effective_address16_ & 0xff;
-				uint8_t  value   = op(address);
+				const uint16_t address = effective_address16_.lo;
+				const uint8_t  value   = op(address);
             	write_byte_zp(address, value);
 			}
 			OPCODE_COMPLETE;

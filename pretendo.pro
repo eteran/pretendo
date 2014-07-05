@@ -221,150 +221,130 @@ SOURCES += \
 
 RESOURCES += qt/pretendo.qrc
 
-bender {
-	DEFINES     += USE_BENDER
-	DEFINES     += FAST_CPU
-	DEPENDPATH  += bender
-	INCLUDEPATH += bender
-	
-	HEADERS     +=      \
-		bender/CPU.h    \
-		bender/bender.h \
-		
-	SOURCES     +=    \
-		bender/CPU.cc \
-		
-        QMAKE_EXTRA_COMPILERS += nasmproc
-        ASM_SRCS += bender.asm revbits.asm
-        nasmproc.output   = ${OBJECTS_DIR}/${QMAKE_FILE_BASE}.o
-        nasmproc.commands = nasm -f elf ${QMAKE_FILE_NAME} -o ${OBJECTS_DIR}/${QMAKE_FILE_BASE}.o
-        nasmproc.input    = ASM_SRCS
-		
-} else {
-    DEPENDPATH  += p6502
-    INCLUDEPATH += p6502
+DEPENDPATH  += p6502
+INCLUDEPATH += p6502
 
-    HEADERS += \
-		p6502/address_modes/zero_page_x.h \
-		p6502/address_modes/absolute_x.h \
-		p6502/address_modes/zero_page_y.h \
-		p6502/address_modes/relative.h \
-		p6502/address_modes/indirect_indexed.h \
-		p6502/address_modes/stack.h \
-		p6502/address_modes/implied.h \
-		p6502/address_modes/immediate.h \
-		p6502/address_modes/accumulator.h \
-		p6502/address_modes/zero_page.h \
-		p6502/address_modes/indirect.h \
-		p6502/address_modes/absolute_y.h \
-		p6502/address_modes/absolute.h \
-		p6502/address_modes/indexed_indirect.h \
-		p6502/CPU.h \
-		p6502/memory.h \
-		p6502/opcodes.h \
-		p6502/address_modes.h \
-		p6502/opcodes/tsx.h \
-		p6502/opcodes/lsr.h \
-		p6502/opcodes/ldx.h \
-		p6502/opcodes/sta.h \
-		p6502/opcodes/bvs.h \
-		p6502/opcodes/dey.h \
-		p6502/opcodes/ldy.h \
-		p6502/opcodes/unofficial/asr.h \
-		p6502/opcodes/unofficial/aac.h \
-		p6502/opcodes/unofficial/arr.h \
-		p6502/opcodes/unofficial/axa.h \
-		p6502/opcodes/unofficial/axs.h \
-		p6502/opcodes/unofficial/dcp.h \
-		p6502/opcodes/unofficial/isc.h \
-		p6502/opcodes/unofficial/lar.h \
-		p6502/opcodes/unofficial/lax.h \
-		p6502/opcodes/unofficial/rla.h \
-		p6502/opcodes/unofficial/rra.h \
-		p6502/opcodes/unofficial/aax.h \
-		p6502/opcodes/unofficial/slo.h \
-		p6502/opcodes/unofficial/sre.h \
-		p6502/opcodes/unofficial/sxa.h \
-		p6502/opcodes/unofficial/sya.h \
-		p6502/opcodes/unofficial/xaa.h \
-		p6502/opcodes/unofficial/xas.h \
-		p6502/opcodes/asl.h \
-		p6502/opcodes/txs.h \
-		p6502/opcodes/clc.h \
-		p6502/opcodes/bcs.h \
-		p6502/opcodes/sei.h \
-		p6502/opcodes/iny.h \
-		p6502/opcodes/bmi.h \
-		p6502/opcodes/bit.h \
-		p6502/opcodes/lda.h \
-		p6502/opcodes/cli.h \
-		p6502/opcodes/rti.h \
-		p6502/opcodes/stx.h \
-		p6502/opcodes/pha.h \
-		p6502/opcodes/bpl.h \
-		p6502/opcodes/branch.h \
-		p6502/opcodes/sed.h \
-		p6502/opcodes/ora.h \
-		p6502/opcodes/beq.h \
-		p6502/opcodes/cpx.h \
-		p6502/opcodes/bcc.h \
-		p6502/opcodes/adc.h \
-		p6502/opcodes/bvc.h \
-		p6502/opcodes/clv.h \
-		p6502/opcodes/plp.h \
-		p6502/opcodes/inc.h \
-		p6502/opcodes/sec.h \
-		p6502/opcodes/inx.h \
-		p6502/opcodes/rts.h \
-		p6502/opcodes/sty.h \
-		p6502/opcodes/tya.h \
-		p6502/opcodes/bne.h \
-		p6502/opcodes/txa.h \
-		p6502/opcodes/cld.h \
-		p6502/opcodes/eor.h \
-		p6502/opcodes/jmp.h \
-		p6502/opcodes/ror.h \
-		p6502/opcodes/compare.h \
-		p6502/opcodes/dex.h \
-		p6502/opcodes/and.h \
-		p6502/opcodes/cpy.h \
-		p6502/opcodes/tay.h \
-		p6502/opcodes/cmp.h \
-		p6502/opcodes/nop.h \
-		p6502/opcodes/rol.h \
-		p6502/opcodes/dec.h \
-		p6502/opcodes/sbc.h \
-		p6502/opcodes/jsr.h \
-		p6502/opcodes/tax.h \
-		p6502/opcodes/pla.h \
-		p6502/opcodes/php.h \
-		p6502/P6502.h
+HEADERS += \
+	p6502/address_modes/zero_page_x.h \
+	p6502/address_modes/absolute_x.h \
+	p6502/address_modes/zero_page_y.h \
+	p6502/address_modes/relative.h \
+	p6502/address_modes/indirect_indexed.h \
+	p6502/address_modes/stack.h \
+	p6502/address_modes/implied.h \
+	p6502/address_modes/immediate.h \
+	p6502/address_modes/accumulator.h \
+	p6502/address_modes/zero_page.h \
+	p6502/address_modes/indirect.h \
+	p6502/address_modes/absolute_y.h \
+	p6502/address_modes/absolute.h \
+	p6502/address_modes/indexed_indirect.h \
+	p6502/CPU.h \
+	p6502/memory.h \
+	p6502/opcodes.h \
+	p6502/address_modes.h \
+	p6502/opcodes/tsx.h \
+	p6502/opcodes/lsr.h \
+	p6502/opcodes/ldx.h \
+	p6502/opcodes/sta.h \
+	p6502/opcodes/bvs.h \
+	p6502/opcodes/dey.h \
+	p6502/opcodes/ldy.h \
+	p6502/opcodes/unofficial/asr.h \
+	p6502/opcodes/unofficial/aac.h \
+	p6502/opcodes/unofficial/arr.h \
+	p6502/opcodes/unofficial/axa.h \
+	p6502/opcodes/unofficial/axs.h \
+	p6502/opcodes/unofficial/dcp.h \
+	p6502/opcodes/unofficial/isc.h \
+	p6502/opcodes/unofficial/lar.h \
+	p6502/opcodes/unofficial/lax.h \
+	p6502/opcodes/unofficial/rla.h \
+	p6502/opcodes/unofficial/rra.h \
+	p6502/opcodes/unofficial/aax.h \
+	p6502/opcodes/unofficial/slo.h \
+	p6502/opcodes/unofficial/sre.h \
+	p6502/opcodes/unofficial/sxa.h \
+	p6502/opcodes/unofficial/sya.h \
+	p6502/opcodes/unofficial/xaa.h \
+	p6502/opcodes/unofficial/xas.h \
+	p6502/opcodes/asl.h \
+	p6502/opcodes/txs.h \
+	p6502/opcodes/clc.h \
+	p6502/opcodes/bcs.h \
+	p6502/opcodes/sei.h \
+	p6502/opcodes/iny.h \
+	p6502/opcodes/bmi.h \
+	p6502/opcodes/bit.h \
+	p6502/opcodes/lda.h \
+	p6502/opcodes/cli.h \
+	p6502/opcodes/rti.h \
+	p6502/opcodes/stx.h \
+	p6502/opcodes/pha.h \
+	p6502/opcodes/bpl.h \
+	p6502/opcodes/branch.h \
+	p6502/opcodes/sed.h \
+	p6502/opcodes/ora.h \
+	p6502/opcodes/beq.h \
+	p6502/opcodes/cpx.h \
+	p6502/opcodes/bcc.h \
+	p6502/opcodes/adc.h \
+	p6502/opcodes/bvc.h \
+	p6502/opcodes/clv.h \
+	p6502/opcodes/plp.h \
+	p6502/opcodes/inc.h \
+	p6502/opcodes/sec.h \
+	p6502/opcodes/inx.h \
+	p6502/opcodes/rts.h \
+	p6502/opcodes/sty.h \
+	p6502/opcodes/tya.h \
+	p6502/opcodes/bne.h \
+	p6502/opcodes/txa.h \
+	p6502/opcodes/cld.h \
+	p6502/opcodes/eor.h \
+	p6502/opcodes/jmp.h \
+	p6502/opcodes/ror.h \
+	p6502/opcodes/compare.h \
+	p6502/opcodes/dex.h \
+	p6502/opcodes/and.h \
+	p6502/opcodes/cpy.h \
+	p6502/opcodes/tay.h \
+	p6502/opcodes/cmp.h \
+	p6502/opcodes/nop.h \
+	p6502/opcodes/rol.h \
+	p6502/opcodes/dec.h \
+	p6502/opcodes/sbc.h \
+	p6502/opcodes/jsr.h \
+	p6502/opcodes/tax.h \
+	p6502/opcodes/pla.h \
+	p6502/opcodes/php.h \
+	p6502/P6502.h
 
-    SOURCES += \
-		p6502/P6502.cc \
-		p6502/CPU.cc
-}
+SOURCES += \
+	p6502/P6502.cc \
+	p6502/CPU.cc
+
 
 asound {
-	DEFINES += ALSA_SOUND 
-	
+	DEFINES += ALSA_SOUND
+
 	SOURCES += qt/AlsaAudio.cc
 	HEADERS += qt/AlsaAudio.h
-	
+
 	LIBS    += -lasound
-	
+
 	SOURCES -= qt/NullAudio.cc
-	HEADERS -= qt/NullAudio.h	
+	HEADERS -= qt/NullAudio.h
 }
 
 sdlsound {
 	DEFINES += SDL_SOUND
-	
+
 	SOURCES += qt/SDLAudio.cc
 	HEADERS += qt/SDLAudio.h
-	
+
 	LIBS    += $$system(sdl-config --libs)
-	
+
 	SOURCES -= qt/NullAudio.cc
 	HEADERS -= qt/NullAudio.h
 }
@@ -372,10 +352,10 @@ sdlsound {
 qsound {
 	QT      += multimedia
 	DEFINES += QT_SOUND
-	
+
 	SOURCES += qt/QtAudio.cc qt/AudioBuffer.cc
 	HEADERS += qt/QtAudio.h  qt/AudioBuffer.h
-	
+
 	SOURCES -= qt/NullAudio.cc
 	HEADERS -= qt/NullAudio.h
 }
@@ -389,7 +369,7 @@ win32-* {
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
 	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall
 
-	QMAKE_CFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3 
+	QMAKE_CFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3
 	QMAKE_CXXFLAGS_RELEASE += -pedantic -march=native -g3 -W -Wall -O3
 	QMAKE_LFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3
 }

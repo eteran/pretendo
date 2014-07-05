@@ -31,35 +31,35 @@ private:
 		case 1:
 			// read next instruction byte (and throw it away),
 			// increment PC
-			read_byte(PC);
+			read_byte(PC.raw);
 			break;
 		case 2:
 			// push PCH on stack, decrement S
-			write_byte(S-- + STACK_ADDRESS, pc_hi());
+			write_byte(S-- + STACK_ADDRESS, PC.hi);
 			break;
 		case 3:
 			// push PCL on stack, decrement S
-			write_byte(S-- + STACK_ADDRESS, pc_lo());
+			write_byte(S-- + STACK_ADDRESS, PC.lo);
 			break;
 		case 4:
 			// push P on stack, decrement S
 			write_byte(S-- + STACK_ADDRESS, P);
 			if(nmi_asserted_) {
-				effective_address16_ = NMI_VECTOR_ADDRESS;
+				effective_address16_.raw = NMI_VECTOR_ADDRESS;
 				nmi_asserted_ = false;
 			} else {
-				effective_address16_ = IRQ_VECTOR_ADDRESS;
+				effective_address16_.raw = IRQ_VECTOR_ADDRESS;
 			}
 			break;
 		case 5:
 			set_flag<I_MASK>();
 			// fetch PCL
-			set_pc_lo(read_byte(effective_address16_ + 0));
+			PC.lo = read_byte(effective_address16_.raw + 0);
 			break;
 		case 6:
 			LAST_CYCLE_0;
 			// fetch PCH
-			set_pc_hi(read_byte(effective_address16_ + 1));
+			PC.hi = read_byte(effective_address16_.raw + 1);
 			OPCODE_COMPLETE;
 		default:
 			abort();

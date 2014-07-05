@@ -1,7 +1,7 @@
 
 #include "Config.h"
 
-#include <functional> 
+#include <functional>
 #include <cctype>
 #include <locale>
 #include <vector>
@@ -76,14 +76,14 @@ std::vector<std::string> explode(const std::string &delimeter, const std::string
 			}
 
 			r.push_back(string.substr(first));
-			
+
 			while(limit < 0) {
 				r.pop_back();
 				++limit;
 			}
 		}
 	}
-	
+
 	return r;
 }
 
@@ -96,12 +96,12 @@ inline std::vector<std::string> explode(const std::string &delimeter, const std:
 
 }
 
-Config::Config() 
+Config::Config()
 {
 #ifdef __HAIKU__
 		BPath path;
 		BDirectory *dir;
-		
+
 		find_directory(B_USER_SETTINGS_DIRECTORY, &path, false);
 		filename_ = path.Path();
 		dir = new BDirectory(filename_.c_str());
@@ -110,13 +110,13 @@ Config::Config()
 #else
 	filename_ = ("~/.pretendo");
 	struct stat st;
-	
+
 	if (stat(filename_.c_str(), &st) != 0 && ! (S_ISDIR(st.st_mode))) {
 		mkdir(filename_.c_str(), 0777);
 		filename_ += "/pretendo.conf";
-	}	
+	}
 #endif //__HAIKU__
-	
+
 	Load();
 }
 
@@ -126,22 +126,22 @@ Config::~Config() {
 }
 
 
-bool 
+bool
 Config::Load() {
 
 	std::cout << "Loading config from file..." << std::endl;
 	std::ifstream file(filename_.c_str());
-		
+
 	if(! file) {
 		// file does not exist, make a new one with some defaults
 		std::cout << "Couldn't load file. Creating new one..." << std::endl;
-		
+
 		NewSection("App Settings");
 		NewKey("App Settings", std::make_pair("ShowOpenOnLoad", "false"));
 		NewKey("App Settings", std::make_pair("AutoRun", "false"));
 		NewKey("App Settings", std::make_pair("SleepOnLoseFocus", "false"));
 		NewKey("App Settings", std::make_pair("ROMDirectory", "./roms"));
-		
+
 		Save();
 		return false;
 	}
@@ -151,16 +151,16 @@ Config::Load() {
 	unsigned int line_number = 0;
 
 	while(std::getline(file, linebuffer)) {
-	
+
 		trim(linebuffer);
-	
+
 		++line_number;
 		if(linebuffer.empty()) {
 			continue;
 		}
 
 		if(linebuffer[0] == '[') {
-		
+
 			// TODO: handle if there is junk after the closing ']' character
 			const size_t end = linebuffer.find_last_of(']');
 
@@ -174,14 +174,14 @@ Config::Load() {
 		} else if(linebuffer[0] == '#') {
 			// skip comments
 			continue;
-		} else {			
+		} else {
 			if(current_section.empty()) {
 				std::cerr << "Error: every configuration option must be in a section" << std::endl;
 				continue;
 			}
-			
+
 			const std::vector<std::string> values = explode("=", linebuffer);
-			
+
 			if(values.size() != 2) {
 				std::cerr << "Error: Every key must have exactly one value" << line_number << std::endl;
 				continue;
@@ -189,7 +189,7 @@ Config::Load() {
 
 			std::string key   = values[0];
 			std::string value = values[1];
-			
+
 			trim(key);
 			trim(value);
 
@@ -201,7 +201,7 @@ Config::Load() {
 			NewKey(current_section, std::make_pair(key, value));
 		}
 	}
-	
+
 	return true;
 }
 
@@ -242,7 +242,7 @@ bool Config::DeleteSection(const std::string &section) {
 	if(it == sections_.end()) {
 		return false;
 	}
-	
+
 	sections_.erase(it);
 	return true;
 }
@@ -254,14 +254,14 @@ bool Config::NewSection(const std::string &section) {
 	if(section.empty()) {
 		return false;
 	}
-	
+
 	auto it = sections_.insert(std::make_pair(section, section_type()));
 
 	if(!it.second) {
 		std::cout << "Section: " << section << " already in list." << std::endl;
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -276,7 +276,7 @@ bool Config::NewKey(const std::string &section, const std::pair<std::string, std
 	}
 
 	std::cout << "NewKey -> adding: " << key.first << ", " << key.second << std::endl;
-	
+
 	auto it = sections_[section].insert(key);
 	if(!it.second) {
 		std::cout << "key " << key.first << " already exists." << std::endl;

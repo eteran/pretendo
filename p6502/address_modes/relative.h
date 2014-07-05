@@ -36,13 +36,13 @@ private:
 		case 1:
 			LAST_CYCLE;
 			// fetch operand, increment PC
-			data8_ = read_byte(PC++);
+			data8_ = read_byte(PC.raw++);
 			break;
 		case 2:
 			// Fetch opcode of next instruction,
 			// If branch is taken, add operand to PCL.
 			// Otherwise increment PC.
-			new_op = read_byte(PC);
+			new_op = read_byte(PC.raw);
 
 			// ------
 			// A taken non-page-crossing branch ignores IRQ during
@@ -53,9 +53,9 @@ private:
 			// Therefore, we DON'T check for IRQ/NMI/RESET here
 
 			if(op()) {
-				old_pc = PC;
-				new_pc = (PC + static_cast<int8_t>(data8_));
-				set_pc_lo(new_pc & 0xff);
+				old_pc.raw = PC.raw;
+				new_pc.raw = (PC.raw + static_cast<int8_t>(data8_));
+				PC.lo = new_pc.lo;
 			} else {
 				if(rst_executing_) {
 					instruction_ = 0x100;
@@ -64,7 +64,7 @@ private:
 				} else if(irq_executing_) {
 					instruction_ = 0x102;
 				} else {
-					instruction_ = new_op; ++PC;
+					instruction_ = new_op; ++PC.raw;
 				}
 				cycle_ = 0;
 			}
@@ -72,11 +72,11 @@ private:
 		case 3:
 			// Fetch opcode of next instruction.
 			// Fix PCH. If it did not change, increment PC.
-			new_op = read_byte(PC);
+			new_op = read_byte(PC.raw);
 
-			if((new_pc & 0xff00) != (old_pc & 0xff00)) {
+			if(new_pc.hi != old_pc.hi) {
 				LAST_CYCLE_0;
-				PC = new_pc;
+				PC.raw = new_pc.raw;
 			} else {
 				if(rst_executing_) {
 					instruction_ = 0x100;
@@ -85,13 +85,13 @@ private:
 				} else if(irq_executing_) {
 					instruction_ = 0x102;
 				} else {
-					instruction_ = new_op; ++PC;
+					instruction_ = new_op; ++PC.raw;
 				}
 				cycle_ = 0;
 			}
 			break;
 		case 4:
-			new_op = read_byte(PC);
+			new_op = read_byte(PC.raw);
 
 			if(rst_executing_) {
 				instruction_ = 0x100;
@@ -100,7 +100,7 @@ private:
 			} else if(irq_executing_) {
 				instruction_ = 0x102;
 			} else {
-				instruction_ = new_op; ++PC;
+				instruction_ = new_op; ++PC.raw;
 			}
 			cycle_ = 0;
 			break;
@@ -110,8 +110,8 @@ private:
 	}
 
 private:
-	uint16_t old_pc;
-	uint16_t new_pc;
+	register16 old_pc;
+	register16 new_pc;
 	uint8_t  new_op;
 };
 

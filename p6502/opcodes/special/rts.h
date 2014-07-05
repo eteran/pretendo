@@ -17,7 +17,7 @@ private:
 		switch(cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
-			read_byte(PC);
+			read_byte(PC.raw);
 			break;
 		case 2:
 			// increment S
@@ -25,16 +25,16 @@ private:
 			break;
 		case 3:
 			// pull PCL from stack, increment S
-			set_pc_lo(read_byte(S++ + STACK_ADDRESS));
+			PC.lo = read_byte(S++ + STACK_ADDRESS);
 			break;
 		case 4:
 			// pull PCH from stack
-			set_pc_hi(read_byte(S + STACK_ADDRESS));
+			PC.hi = read_byte(S + STACK_ADDRESS);
 			break;
 		case 5:
 			LAST_CYCLE;
 			 // increment PC
-			++PC;
+			++PC.raw;
 			OPCODE_COMPLETE;
 		default:
 			abort();

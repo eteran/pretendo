@@ -124,7 +124,7 @@ void run_frame(VideoInterface *video) {
 //------------------------------------------------------------------------------
 // Name: reset
 //------------------------------------------------------------------------------
-void reset(RESET reset_type) {
+void reset(Reset reset_type) {
 
 	std::cout << "NES Reset Started" << std::endl;
 	std::cout << "-----------------" << std::endl;

@@ -8,6 +8,9 @@
 #include <cstddef>
 #include <cstdint>
 
+namespace nes {
+namespace apu {
+
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
@@ -17,7 +20,7 @@ class Triangle {
 public:
 	Triangle();
 	~Triangle();
-	
+
 private:
 	Triangle(const Triangle &) = delete;
 	Triangle &operator=(const Triangle &) = delete;
@@ -35,20 +38,21 @@ public:
 	bool enabled() const;
 
 public:
-	LengthCounter &length_counter();
-	LinearCounter &linear_counter();
+	LengthCounter length_counter;
+	LinearCounter linear_counter;
 
 public:
 	void tick();
 	uint8_t output() const;
 
 private:
-	LengthCounter length_counter_;
-	LinearCounter linear_counter_;
 	bool          enabled_;
 	uint16_t      timer_load_;
 	size_t        sequence_index_;
 	Timer         timer_;
 };
+
+}
+}
 
 #endif

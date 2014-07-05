@@ -17,7 +17,7 @@ private:
 		switch(cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
-			read_byte(PC);
+			read_byte(PC.raw);
 			break;
 		case 2:
 			// increment S
@@ -39,7 +39,7 @@ private:
 		switch(cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
-			read_byte(PC);
+			read_byte(PC.raw);
 			break;
 		case 2:
 			LAST_CYCLE;

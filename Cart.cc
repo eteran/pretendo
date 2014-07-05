@@ -101,7 +101,7 @@ Cart::load(const std::string &s) {
 		chr_hash_ = 0;
 		rom_hash_ = 0;
 	}
-	
+
 	return false;
 }
 

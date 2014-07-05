@@ -11,7 +11,7 @@ using std::uint8_t;
 class Controller {
 public:
 	Controller();
-	
+
 private:
 	Controller(const Controller &) = delete;
 	Controller &operator=(const Controller &) = delete;
@@ -40,5 +40,6 @@ private:
 	uint8_t                read_index_;
 	bool                   connected_;
 };
+
 
 #endif

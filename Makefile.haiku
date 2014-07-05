@@ -4,7 +4,7 @@ SHELL = /bin/sh
 # suffix Definitions
 .SUFFIXES:                # Delete the default suffixes
 .SUFFIXES: .c .cc .o .h .tcc .asm # Define our suffix list
-	
+
 .cc.o:
 	@echo compiling $< ...
 	@$(CXX) $(CXXFLAGS) $(DEFINES) -c $< -o $@ 1>/dev/null
@@ -12,12 +12,12 @@ SHELL = /bin/sh
 .c.o:
 	@echo compiling $< ...
 	@$(CC) $(CFLAGS) $(DEFINES) -c $< -o $@ 1>/dev/null
-	
+
 .asm.o:
 	@echo assembling $< ...
 	@$(ASM) $(ASMFLAGS) $(DEFINES) $< -o $@ 1>/dev/null
-	
-	
+
+
 ASM    := nasm -f elf
 CXX    := g++ -march=i686 -ansi
 CC     := gcc -march=i686 -ansi
@@ -29,8 +29,13 @@ STRIP  := strip
 
 APPNAME := Pretendo
 
+<<<<<<< HEAD
 DEFINES  := 
 INCLUDES := -I. -Imappers -I/boot/system/develop/headers/libxml2 -Ilibines -Ip6502 -isystem boost
+=======
+DEFINES  :=
+INCLUDES := -I. -Imappers -I/boot/system/develop/headers/x86/libxml2 -Ilibines -Ip6502 -isystem boost
+>>>>>>> 1964246d5434927bf7971c03d4e007c8c021cb27
 ASMFLAGS := -f elf
 CXXFLAGS := -gdwarf-2 -gstrict-dwarf -O3 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -std=c++11 -flto
 CFLAGS   := -gdwarf-2 -gstrict-dwarf -O3 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -flto
@@ -39,7 +44,7 @@ LDFLAGS  := -gdwarf-2 -gstrict-dwarf -L/boot/system/develop/lib/x86 -lbe -lroot 
 ASM_FILES   := \
 	haiku/blitters.asm \
 	haiku/copies.asm
-				
+
 
 H_FILES     := \
 	APU.h \
@@ -254,12 +259,12 @@ CXX_FILES   := \
 	haiku/PaletteWindow.cc \
 	haiku/PaletteView.cc \
 	haiku/PretendoView.cc \
-	
+
 C_FILES     := \
 	libines/ines_crc32.c \
 	libines/lib_ines.c \
 	libines/load_ines.c
-	
+
 RES_FILES	:=  \
 	pretendo.rsrc
 
@@ -284,7 +289,7 @@ clean:
 	$(RM) $(O_FILES) $(APPNAME) core *~ 2> /dev/null
 
 distclean: mrproper
-	
+
 depend:
 	@echo "Building Dependency Information..."
 	@$(RM) makedep
@@ -293,12 +298,12 @@ depend:
 	@echo '$$r makedep' >>eddep
 	@echo 'w' >>eddep
 	@$(ED) - Makefile.haiku < eddep
-	@$(RM) eddep makedep 
+	@$(RM) eddep makedep
 	@echo '# DEPENDENCIES MUST END AT END OF FILE' >> Makefile.haiku
 	@echo '# IF YOU PUT STUFF HERE IT WILL GO AWAY' >> Makefile.haiku
 	@echo '# see make depend above' >> Makefile.haiku
 	@echo "Done"
-        
+
 #-----------------------------------------------------------------
 # DO NOT DELETE THIS LINE -- make depend uses it
 #-----------------------------------------------------------------
