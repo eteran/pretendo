@@ -11,7 +11,7 @@
 namespace nes {
 namespace apu {
 namespace {
-
+	
 enum {
 	STATUS_DMC_IRQ  	   = 0x80,
 	STATUS_FRAME_IRQ	   = 0x40,

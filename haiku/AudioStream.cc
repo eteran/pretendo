@@ -5,6 +5,7 @@
 #include <MediaDefs.h>
 #include <string.h>
 
+
 AudioStream::AudioStream (float sampleRate, int32 sampleBits, 
 	int32 channels, int32 bufferSize)
 {	
