@@ -41,4 +41,5 @@ private:
 	bool                   connected_;
 };
 
+
 #endif

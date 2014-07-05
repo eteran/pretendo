@@ -4,6 +4,9 @@
 
 #include <cstdint>
 
+namespace nes {
+namespace apu {
+
 using std::uint8_t;
 using std::uint16_t;
 
@@ -65,5 +68,8 @@ private:
 	uint16_t value_;
 	uint8_t  mode_;
 };
+
+}
+}
 
 #endif

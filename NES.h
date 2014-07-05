@@ -14,7 +14,7 @@ extern Cart   cart;
 extern Config config;
 
 void run_frame(VideoInterface *video);
-void reset(RESET reset_type);
+void reset(Reset reset_type);
 
 }
 

@@ -28,4 +28,3 @@ void Controller::poll() {
 		read_index_ = 0;
 	}
 }
-

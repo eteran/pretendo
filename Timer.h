@@ -4,7 +4,9 @@
 
 #include <cstdint>
 
-using std::uint8_t;
+namespace nes {
+namespace apu {
+
 using std::uint16_t;
 
 class Timer {
@@ -35,6 +37,9 @@ public:
 private:
 	uint16_t timer_;
 };
+
+}
+}
 
 #endif
 

@@ -7,12 +7,6 @@
 #include <cstdint>
 #include <cstddef>
 
-template <int Channel>
-class Square;
-class Triangle;
-class Noise;
-class DMC;
-
 namespace nes {
 namespace apu {
 
@@ -20,6 +14,12 @@ using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
+
+template <int Channel>
+class Square;
+class Triangle;
+class Noise;
+class DMC;
 
 union APUStatus {
 	uint8_t raw;
@@ -38,7 +38,7 @@ union APUStatus {
 static const int frequency   = 48000;
 static const int buffer_size = frequency / 60;
 
-void reset(RESET reset_type);
+void reset(Reset reset_type);
 
 void write4000(uint8_t value);
 void write4001(uint8_t value);

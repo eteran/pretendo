@@ -73,7 +73,7 @@ uint8_t mix_channels();
 //------------------------------------------------------------------------------
 // Name: reset
 //------------------------------------------------------------------------------
-void reset(RESET reset_type) {
+void reset(Reset reset_type) {
 
 	status.raw     = 0;
 	frame_counter_ = {0};
@@ -81,7 +81,7 @@ void reset(RESET reset_type) {
 	next_clock_    = 0;
 	clock_step_    = 0;
 
-	if(reset_type == HARD_RESET) {
+	if(reset_type == Reset::Hard) {
 		last_frame_counter_ = 0;
 	}
 
@@ -127,7 +127,7 @@ void reset(RESET reset_type) {
 	//       nop
 	//       nop
 	//     reset:
-	if(reset_type == HARD_RESET) {
+	if(reset_type == Reset::Hard) {
 		run(2);
 	}
 

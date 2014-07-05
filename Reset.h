@@ -4,10 +4,11 @@
 
 namespace nes {
 
-enum RESET {
-	HARD_RESET,
-	SOFT_RESET
+enum class Reset {
+	Hard,
+	Soft
 };
+
 }
 
 #endif

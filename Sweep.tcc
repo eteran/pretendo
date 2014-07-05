@@ -5,6 +5,9 @@
 #include "Timer.h"
 #include "Square.h"
 
+namespace nes {
+namespace apu {
+
 //------------------------------------------------------------------------------
 // Name: Sweep
 //------------------------------------------------------------------------------
@@ -144,6 +147,9 @@ void Sweep<Channel>::set_control(uint8_t value) {
 template <int Channel>
 bool Sweep<Channel>::silenced() const {
 	return silenced_;
+}
+
+}
 }
 
 #endif

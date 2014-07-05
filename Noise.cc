@@ -1,6 +1,9 @@
 
 #include "Noise.h"
 
+namespace nes {
+namespace apu {
+
 namespace {
 
 // NTSC period table
@@ -100,4 +103,7 @@ uint8_t Noise::output() const {
 	} else {
 		return envelope.volume();
 	}
+}
+
+}
 }

@@ -58,7 +58,7 @@ union PPUMask {
 	BitField<3,2> screen_enabled;
 };
 
-void reset(RESET reset_type);
+void reset(Reset reset_type);
 
 static const uint8_t mirror_single_low  = 0x00;
 static const uint8_t mirror_single_high = 0x55;

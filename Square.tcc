@@ -2,6 +2,9 @@
 #ifndef SQUARE_20130206_TCC_
 #define SQUARE_20130206_TCC_
 
+namespace nes {
+namespace apu {
+
 //------------------------------------------------------------------------------
 // Name: Square
 //------------------------------------------------------------------------------
@@ -135,6 +138,9 @@ uint8_t Square<Channel>::output() const {
 	} else {
 		return envelope.volume();
 	}
+}
+
+}
 }
 
 #endif

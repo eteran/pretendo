@@ -215,7 +215,7 @@ void Pretendo::on_action_Run_triggered() {
 
 				ui_.stackedWidget->setCurrentIndex(1);
 
-				nes::reset(nes::HARD_RESET);
+				nes::reset(nes::Reset::Hard);
 
 				timer_->start(timer_interval);
 				audio_->start();
@@ -338,7 +338,7 @@ void Pretendo::on_action_Hard_Reset_triggered() {
 	}
 
 	if(timer_->isActive()) {
-		nes::reset(nes::HARD_RESET);
+		nes::reset(nes::Reset::Hard);
 	}
 }
 
@@ -351,7 +351,7 @@ void Pretendo::on_actionReset_triggered() {
 	}
 
 	if(timer_->isActive()) {
-		nes::reset(nes::SOFT_RESET);
+		nes::reset(nes::Reset::Soft);
 	}
 }
 

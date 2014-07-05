@@ -59,7 +59,7 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 		1.094f, 1.506f, 1.962f, 1.962f  // Signal high
 	};
 
-	float lo_and_hi[2] = {
+	const float lo_and_hi[2] = {
 		levels[level + 4 * (color == 0x0)],
 		levels[level + 4 * (color <  0xD)]
 	};

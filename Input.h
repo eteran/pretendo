@@ -5,12 +5,12 @@
 #include <cstdint>
 #include "NES.h"
 
-using std::uint8_t;
-
 class Controller;
 
 namespace nes {
 namespace input {
+
+using std::uint8_t;
 
 void reset();
 

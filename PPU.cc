@@ -261,12 +261,12 @@ uint8_t SpriteEntry::x() const {
 //------------------------------------------------------------------------------
 // Name: reset
 //------------------------------------------------------------------------------
-void reset(RESET reset_type) {
+void reset(Reset reset_type) {
 
 #if 0
 	std::generate(sprite_ram_, sprite_ram_ + 0x100,  rand);
 #endif
-	if(reset_type == HARD_RESET) {
+	if(reset_type == Reset::Hard) {
 		std::fill_n(nametables_, 0x1000, 0);
 		std::fill_n(sprite_ram_, 0x0100, 0);
 

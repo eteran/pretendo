@@ -8,6 +8,9 @@
 #include <cstddef>
 #include <cstdint>
 
+namespace nes {
+namespace apu {
+
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
@@ -48,5 +51,8 @@ private:
 	size_t        sequence_index_;
 	Timer         timer_;
 };
+
+}
+}
 
 #endif

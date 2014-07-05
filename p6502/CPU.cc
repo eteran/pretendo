@@ -100,9 +100,9 @@ struct static_initializer {
 //-------------------------------------------------------------------
 // Name: reset
 //-------------------------------------------------------------------
-void reset(RESET reset_type) {
+void reset(Reset reset_type) {
 
-	if(reset_type == HARD_RESET) {
+	if(reset_type == Reset::Hard) {
 		P6502::stop();
 		trash_ram();
 	}

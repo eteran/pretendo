@@ -527,7 +527,7 @@ PretendoWindow::OnRun (void)
 
 	if (! fRunning) {
 		if(const std::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
-			reset(nes::HARD_RESET);
+			reset(nes::Reset::Hard);
 			fMutex->Unlock();
 			fRunning = true;
 			fAudioStream->Start();
@@ -585,14 +585,14 @@ PretendoWindow::OnPause (void)
 void
 PretendoWindow::OnSoftReset (void)
 {
-	reset(nes::SOFT_RESET);
+	reset(nes::Reset::Soft);
 }
 
 
 void
 PretendoWindow::OnHardReset (void)
 {
-	reset(nes::HARD_RESET);
+	reset(nes::Reset::Hard);
 }
 
 

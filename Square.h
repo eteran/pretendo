@@ -8,10 +8,11 @@
 #include "Timer.h"
 #include <cstdint>
 
+namespace nes {
+namespace apu {
+
 using std::uint8_t;
 using std::uint16_t;
-using std::uint32_t;
-using std::uint64_t;
 
 template <int Channel>
 class Square {
@@ -54,6 +55,9 @@ private:
 	uint8_t        sequence_index_;
 	bool           enabled_;
 };
+
+}
+}
 
 #include "Square.tcc"
 

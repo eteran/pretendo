@@ -68,7 +68,7 @@ void unmap_cd();
 void unmap_ef();
 
 void trash_ram();
-void reset(RESET reset_type);
+void reset(Reset reset_type);
 
 }
 }

@@ -4,6 +4,8 @@
 #include "CPU.h"
 #include "Mapper.h"
 
+namespace nes {
+namespace apu {
 namespace {
 
 // NTSC period table
@@ -199,4 +201,7 @@ bool DMC::irq_enabled() const {
 //------------------------------------------------------------------------------
 bool DMC::loop() const {
 	return control_ & 0x40;
+}
+
+}
 }
