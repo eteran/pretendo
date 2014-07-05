@@ -3,13 +3,13 @@
 #include "PPU.h"
 #include "NES.h"
 #include "Cart.h"
-#include <cstdio>
 #include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(228);
 
 namespace {
-	uint8_t *prg_chips[4];
+const uint8_t *prg_chips[4];
+const uint32_t ChipSize = 0x080000;
 }
 
 //------------------------------------------------------------------------------
@@ -22,10 +22,19 @@ Mapper228::Mapper228() {
 	ram_[2] = 0;
 	ram_[3] = 0;
 
-	prg_chips[0] = nes::cart.prg() + 0x000000;
-	prg_chips[1] = nes::cart.prg() + 0x080000;
-	prg_chips[2] = nullptr; // TODO: implement open bus effect here...
-	prg_chips[3] = nes::cart.prg() + 0x100000;
+	rom_[0] = nullptr;
+	rom_[1] = nullptr;
+	rom_[2] = nullptr;
+	rom_[3] = nullptr;
+	rom_[4] = nullptr;
+	rom_[5] = nullptr;
+	rom_[6] = nullptr;
+	rom_[7] = nullptr;
+
+	prg_chips[0] = nes::cart.prg() + ChipSize * 0;
+	prg_chips[1] = nes::cart.prg() + ChipSize * 1;
+	prg_chips[2] = nullptr;
+	prg_chips[3] = nes::cart.prg() + ChipSize * 2;
 
 	write_hander(0x8000, 0x00);
 }
@@ -150,17 +159,137 @@ void Mapper228::write_hander(uint16_t address, uint8_t value) {
 
 	assert(prg_chip_select != 2);
 
-	printf("prg_chip_select = %d\n", prg_chip_select);
-
 	// Cheetahmen II seems to only have one chip
-	if(prg_mask < 0x7ffff) {
+	if(prg_mask < (ChipSize - 1)) {
 		prg_chip_select = 0;
 	}
 
-	if(prg_mode == 0) {
-		set_prg_89abcdef_ptr(prg_chips[prg_chip_select] + (((prg_page_select >> 1) * 0x8000) & 0x7ffff));
-	} else if(prg_mode == 1) {
-		set_prg_89ab_ptr(prg_chips[prg_chip_select] + ((prg_page_select * 0x4000) & 0x7ffff));
-		set_prg_cdef_ptr(prg_chips[prg_chip_select] + ((prg_page_select * 0x4000) & 0x7ffff));
+	if(prg_chips[prg_chip_select]) {
+		if(prg_mode == 0) {
+
+			const uint8_t *const ptr = prg_chips[prg_chip_select] + (((prg_page_select >> 1) * 0x8000) & (ChipSize - 1));
+
+			rom_[0] = ptr + 0x0000;
+			rom_[1] = ptr + 0x1000;
+			rom_[2] = ptr + 0x2000;
+			rom_[3] = ptr + 0x3000;
+			rom_[4] = ptr + 0x4000;
+			rom_[5] = ptr + 0x5000;
+			rom_[6] = ptr + 0x6000;
+			rom_[7] = ptr + 0x7000;
+
+		} else if(prg_mode == 1) {
+
+			const uint8_t *const ptr = prg_chips[prg_chip_select] + ((prg_page_select * 0x4000) & (ChipSize - 1));
+
+			rom_[0] = ptr + 0x0000;
+			rom_[1] = ptr + 0x1000;
+			rom_[2] = ptr + 0x2000;
+			rom_[3] = ptr + 0x3000;
+			rom_[4] = ptr + 0x0000;
+			rom_[5] = ptr + 0x1000;
+			rom_[6] = ptr + 0x2000;
+			rom_[7] = ptr + 0x3000;
+		}
+	} else {
+		rom_[0] = nullptr;
+		rom_[1] = nullptr;
+		rom_[2] = nullptr;
+		rom_[3] = nullptr;
+		rom_[4] = nullptr;
+		rom_[5] = nullptr;
+		rom_[6] = nullptr;
+		rom_[7] = nullptr;
 	}
 }
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint8_t Mapper228::read_8(uint16_t address) {
+	//return Mapper::read_8(address);
+
+	if(rom_[0]) {
+		return rom_[0][address & 0x0fff];
+	}
+
+	return Mapper::read_8(address);
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint8_t Mapper228::read_9(uint16_t address) {
+	if(rom_[1]) {
+		return rom_[1][address & 0x0fff];
+	}
+
+	return Mapper::read_9(address);
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint8_t Mapper228::read_a(uint16_t address) {
+	if(rom_[2]) {
+		return rom_[2][address & 0x0fff];
+	}
+
+	return Mapper::read_a(address);
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint8_t Mapper228::read_b(uint16_t address) {
+	if(rom_[3]) {
+		return rom_[3][address & 0x0fff];
+	}
+
+	return Mapper::read_b(address);
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint8_t Mapper228::read_c(uint16_t address) {
+	if(rom_[4]) {
+		return rom_[4][address & 0x0fff];
+	}
+
+	return Mapper::read_c(address);
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint8_t Mapper228::read_d(uint16_t address) {
+	if(rom_[5]) {
+		return rom_[5][address & 0x0fff];
+	}
+
+	return Mapper::read_d(address);
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint8_t Mapper228::read_e(uint16_t address) {
+	if(rom_[6]) {
+		return rom_[6][address & 0x0fff];
+	}
+
+	return Mapper::read_e(address);
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+uint8_t Mapper228::read_f(uint16_t address) {
+	if(rom_[7]) {
+		return rom_[7][address & 0x0fff];
+	}
+
+	return Mapper::read_f(address);
+}
+

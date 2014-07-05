@@ -102,20 +102,8 @@ protected:
 	void set_prg_89ab(int num) const;
 	void set_prg_cdef(int num) const;
 
-	// TODO: remove the need for this, handle it in the Mapper read/write hooks
-	void set_prg_89ab_ptr(uint8_t *p) const { nes::cpu::swap_89(p + 0x0000); nes::cpu::swap_ab(p + 0x2000); }
-	void set_prg_cdef_ptr(uint8_t *p) const { nes::cpu::swap_cd(p + 0x0000); nes::cpu::swap_ef(p + 0x2000); }
-
 	// 32K swap
 	void set_prg_89abcdef(int num) const;
-
-	// TODO: remove the need for this, handle it in the Mapper read/write hooks
-	void set_prg_89abcdef_ptr(uint8_t *p) const {
-		nes::cpu::swap_89(p + 0x0000);
-		nes::cpu::swap_ab(p + 0x2000);
-		nes::cpu::swap_cd(p + 0x4000);
-		nes::cpu::swap_ef(p + 0x6000);
-	}
 
 	// ---- CHR ROM ----
 	// 1K-swaps
