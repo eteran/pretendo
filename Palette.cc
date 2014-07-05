@@ -53,11 +53,11 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 	static const float black       = 0.518f;
 	static const float white       = 1.962f;
 	static const float attenuation = 0.746f;
-	
+
 	static const float levels[8] = {
 		0.350f, 0.518f, 0.962f, 1.550f, // Signal low
 		1.094f, 1.506f, 1.962f, 1.962f  // Signal high
-	}; 
+	};
 
 	float lo_and_hi[2] = {
 		levels[level + 4 * (color == 0x0)],
@@ -71,7 +71,7 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 
 	// 12 clock cycles per pixel.
 	for(int p = 0; p < 12; ++p) {
-	
+
 		// NES NTSC modulator (square wave between two voltage levels):
 		float spot = lo_and_hi[wave(p, color)];
 
@@ -81,21 +81,21 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 		}
 
 		// Normalize:
-		float v = (spot - black) / (white - black); 
+		float v = (spot - black) / (white - black);
 
 		// Ideal TV NTSC demodulator:
 		// Apply contrast/brightness
-		v = (v - .5f) * contrast + .5f; 
+		v = (v - .5f) * contrast + .5f;
 		v *= brightness / 12.f;
 
 		y += v;
 		i += v * std::cos((M_PI / 6.f) * (p + hue));
 		q += v * std::sin((M_PI / 6.f) * (p + hue));
-	}   
+	}
 
 	i *= saturation;
 	q *= saturation;
-	
+
 	// Convert YIQ into RGB according to FCC-sanctioned conversion matrix.
 	rgb_color_t rgb;
 	rgb.r = bound(0x00, static_cast<int>(255 * gamma_fix(y +  0.946882f * i +  0.623557f * q, gamma)), 0xff);

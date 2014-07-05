@@ -9,8 +9,8 @@
 // Name: Sweep
 //------------------------------------------------------------------------------
 template <int Channel>
-Sweep<Channel>::Sweep(Square<Channel> *square) : square_(square),  
-		pulse_period_(0), counter_(0), control_(0), reload_(false), 
+Sweep<Channel>::Sweep(Square<Channel> *square) : square_(square),
+		pulse_period_(0), counter_(0), control_(0), reload_(false),
 		silenced_(false) {
 
 }
@@ -133,7 +133,7 @@ uint8_t Sweep<Channel>::shift() const {
 // Name: set_control
 //------------------------------------------------------------------------------
 template <int Channel>
-void Sweep<Channel>::set_control(uint8_t value) {	
+void Sweep<Channel>::set_control(uint8_t value) {
 	control_ = value;
 	reload_  = true;
 }

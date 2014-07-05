@@ -6,8 +6,11 @@
 // Name: Square
 //------------------------------------------------------------------------------
 template <int Channel>
-Square<Channel>::Square() : sweep(this), timer_reload_(0), duty_(0), 
+Square<Channel>::Square() : sweep(this), timer_reload_(0), duty_(0),
 		sequence_index_(0), enabled_(false) {
+
+
+	static_assert(Channel >= 0 && Channel < 2, "only channels 0 and 1 are valid");
 
 }
 
@@ -94,9 +97,10 @@ void Square<Channel>::write_reg3(uint8_t value) {
 //------------------------------------------------------------------------------
 template <int Channel>
 void Square<Channel>::tick() {
-	if(timer_.tick()) {
+
+	timer_.tick([this]() {
 		sequence_index_ = (sequence_index_ + 1) % 8;
-	}
+	});
 }
 
 //------------------------------------------------------------------------------

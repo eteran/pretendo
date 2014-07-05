@@ -53,7 +53,7 @@ union PPUMask {
 	BitField<3>   background_visible;
 	BitField<4>   sprites_visible;
 	BitField<5,3> intensity;
-	
+
 	// meta-fields which don't occupy any space :-)
 	BitField<3,2> screen_enabled;
 };

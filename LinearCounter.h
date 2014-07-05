@@ -13,7 +13,7 @@ class LinearCounter {
 public:
 	LinearCounter();
 	~LinearCounter();
-	
+
 private:
 	LinearCounter(const LinearCounter &) = delete;
 	LinearCounter &operator=(const LinearCounter &) = delete;

@@ -17,7 +17,7 @@ class Sweep {
 public:
 	Sweep(Square<Channel> *square);
 	~Sweep();
-	
+
 private:
 	Sweep(const Sweep &) = delete;
 	Sweep& operator=(const Sweep &) = delete;
@@ -34,7 +34,7 @@ private:
 	uint16_t target_period() const;
 	uint8_t period() const;
 	uint8_t shift() const;
-	
+
 private:
 	Square<Channel> *const square_;
 	uint16_t      pulse_period_;

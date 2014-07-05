@@ -17,7 +17,7 @@ class Noise {
 public:
 	Noise();
 	~Noise();
-	
+
 private:
 	Noise(const Noise &) = delete;
 	Noise &operator=(const Noise &) = delete;

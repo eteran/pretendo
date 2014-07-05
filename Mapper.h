@@ -36,7 +36,7 @@ public:
 
 protected:
 	Mapper();
-	
+
 private:
 	Mapper(const Mapper &) = delete;
 	Mapper &operator=(const Mapper &) = delete;

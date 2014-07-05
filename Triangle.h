@@ -17,7 +17,7 @@ class Triangle {
 public:
 	Triangle();
 	~Triangle();
-	
+
 private:
 	Triangle(const Triangle &) = delete;
 	Triangle &operator=(const Triangle &) = delete;

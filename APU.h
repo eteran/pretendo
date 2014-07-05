@@ -30,7 +30,7 @@ union APUStatus {
 	BitField<4> dmc_enabled;
 	BitField<6> frame_irq;
 	BitField<7> dmc_irq;
-	
+
 	// meta field
 	BitField<6,2> irq_firing;
 };

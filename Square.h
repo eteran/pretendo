@@ -16,11 +16,11 @@ using std::uint64_t;
 template <int Channel>
 class Square {
 	friend class Sweep<Channel>;
-	
+
 public:
 	Square();
 	~Square();
-	
+
 private:
 	Square(const Square &) = delete;
 	Square &operator=(const Square &) = delete;

@@ -13,7 +13,7 @@ class Cart {
 public:
 	Cart();
 	~Cart();
-	
+
 private:
 	Cart(const Cart &) = delete;
 	Cart &operator=(const Cart &) = delete;

@@ -13,7 +13,7 @@ class LengthCounter {
 public:
 	LengthCounter();
 	~LengthCounter();
-	
+
 private:
 	LengthCounter(const LengthCounter &) = delete;
 	LengthCounter &operator=(const LengthCounter &) = delete;

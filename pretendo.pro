@@ -326,25 +326,25 @@ SOURCES += \
 
 
 asound {
-	DEFINES += ALSA_SOUND 
-	
+	DEFINES += ALSA_SOUND
+
 	SOURCES += qt/AlsaAudio.cc
 	HEADERS += qt/AlsaAudio.h
-	
+
 	LIBS    += -lasound
-	
+
 	SOURCES -= qt/NullAudio.cc
-	HEADERS -= qt/NullAudio.h	
+	HEADERS -= qt/NullAudio.h
 }
 
 sdlsound {
 	DEFINES += SDL_SOUND
-	
+
 	SOURCES += qt/SDLAudio.cc
 	HEADERS += qt/SDLAudio.h
-	
+
 	LIBS    += $$system(sdl-config --libs)
-	
+
 	SOURCES -= qt/NullAudio.cc
 	HEADERS -= qt/NullAudio.h
 }
@@ -352,10 +352,10 @@ sdlsound {
 qsound {
 	QT      += multimedia
 	DEFINES += QT_SOUND
-	
+
 	SOURCES += qt/QtAudio.cc qt/AudioBuffer.cc
 	HEADERS += qt/QtAudio.h  qt/AudioBuffer.h
-	
+
 	SOURCES -= qt/NullAudio.cc
 	HEADERS -= qt/NullAudio.h
 }
@@ -369,7 +369,7 @@ win32-* {
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
 	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall
 
-	QMAKE_CFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3 
+	QMAKE_CFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3
 	QMAKE_CXXFLAGS_RELEASE += -pedantic -march=native -g3 -W -Wall -O3
 	QMAKE_LFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3
 }

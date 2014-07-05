@@ -11,7 +11,7 @@ using std::uint8_t;
 class Controller {
 public:
 	Controller();
-	
+
 private:
 	Controller(const Controller &) = delete;
 	Controller &operator=(const Controller &) = delete;

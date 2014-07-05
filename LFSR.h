@@ -48,7 +48,7 @@ public:
 	uint16_t value() const {
 		return value_ & 0x7fff;
 	}
-	
+
 private:
 	//-------------------------------------------------------------------
 	// Name: feedback

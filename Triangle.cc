@@ -89,9 +89,12 @@ bool Triangle::enabled() const {
 // Name: tick
 //------------------------------------------------------------------------------
 void Triangle::tick() {
-	if(timer_.tick() && length_counter.value() && linear_counter.value()) {
-		sequence_index_ = (sequence_index_ + 1) % 32;
-	}
+
+	timer_.tick([this]() {
+		if(length_counter.value() && linear_counter.value()) {
+			sequence_index_ = (sequence_index_ + 1) % 32;
+		}
+	});
 }
 
 //------------------------------------------------------------------------------

@@ -13,7 +13,7 @@ class Envelope {
 public:
 	Envelope();
 	~Envelope();
-	
+
 private:
 	Envelope(const Envelope &) = delete;
 	Envelope &operator=(const Envelope &) = delete;
