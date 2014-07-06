@@ -29,13 +29,8 @@ STRIP  := strip
 
 APPNAME := Pretendo
 
-<<<<<<< HEAD
-DEFINES  := 
-INCLUDES := -I. -Imappers -I/boot/system/develop/headers/libxml2 -Ilibines -Ip6502 -isystem boost
-=======
 DEFINES  :=
 INCLUDES := -I. -Imappers -I/boot/system/develop/headers/x86/libxml2 -Ilibines -Ip6502 -isystem boost
->>>>>>> 1964246d5434927bf7971c03d4e007c8c021cb27
 ASMFLAGS := -f elf
 CXXFLAGS := -gdwarf-2 -gstrict-dwarf -O3 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -std=c++11 -flto
 CFLAGS   := -gdwarf-2 -gstrict-dwarf -O3 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -flto
