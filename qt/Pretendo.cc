@@ -31,8 +31,8 @@
 
 namespace {
 
-//const int timer_interval = 1000. / 60;
-const int timer_interval = 0;
+//const int TimerInterval = 1000. / 60;
+const int TimerInterval = 0;
 
 }
 
@@ -217,7 +217,7 @@ void Pretendo::on_action_Run_triggered() {
 
 				nes::reset(nes::Reset::Hard);
 
-				timer_->start(timer_interval);
+				timer_->start(TimerInterval);
 				audio_->start();
 				paused_ = false;
 
