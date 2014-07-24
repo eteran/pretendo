@@ -34,7 +34,7 @@ INCLUDES := -I. -Imappers -I/boot/system/develop/headers/x86/libxml2 -Ilibines -
 ASMFLAGS := -f elf
 CXXFLAGS := -gdwarf-2 -gstrict-dwarf -O3 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -std=c++11 -flto
 CFLAGS   := -gdwarf-2 -gstrict-dwarf -O3 -pedantic -pipe $(INCLUDES) -W -Wall -Wno-long-long -flto
-LDFLAGS  := -gdwarf-2 -gstrict-dwarf -lbe -lroot -ltranslation -ltracker -lmedia -lgame -L/boot/common/lib -lxml2 -flto
+LDFLAGS  := -gdwarf-2 -gstrict-dwarf -L/boot/system/develop/lib/x86 -lbe -lroot -ltranslation -ltracker -lmedia -lgame -lxml2 -flto
 
 ASM_FILES   := \
 	haiku/blitters.asm \

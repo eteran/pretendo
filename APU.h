@@ -35,7 +35,7 @@ union APUStatus {
 	BitField<6,2> irq_firing;
 };
 
-static const int frequency   = 48000;
+static const int frequency   = 44100;
 static const int buffer_size = frequency / 60;
 
 void reset(Reset reset_type);
