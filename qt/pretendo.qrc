@@ -8,5 +8,6 @@
     <file>../graphics/pretendo_32x32x8.png</file>
     <file>../graphics/repeat.png</file>
     <file>../graphics/stop.png</file>
+	<file>../graphics/controller.svg</file>
   </qresource>
 </RCC>
