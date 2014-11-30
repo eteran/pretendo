@@ -2,7 +2,7 @@
 #include "Mapper075.h"
 #include "PPU.h"
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(75);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(75)
 
 //------------------------------------------------------------------------------
 // Name:

@@ -15,7 +15,9 @@ public:
 	void stop();
 
 private:
-	snd_pcm_t *handle_;
+	snd_pcm_t           *handle_;
+	snd_pcm_hw_params_t *hwparams_;
+	snd_pcm_sw_params_t	*swparams_;
 };
 
 #endif

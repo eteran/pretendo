@@ -7,7 +7,7 @@
 
 // TODO: CHR-RAM swapping
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(19);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(19)
 
 //------------------------------------------------------------------------------
 // Name:

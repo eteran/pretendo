@@ -4,7 +4,7 @@
 #include "NES.h"
 #include "MMC3.h"
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(4);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(4)
 
 //------------------------------------------------------------------------------
 // Name: Mapper4

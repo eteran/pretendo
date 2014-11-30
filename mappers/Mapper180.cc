@@ -2,7 +2,7 @@
 #include "Mapper180.h"
 #include <cstring>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(180);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(180)
 
 //------------------------------------------------------------------------------
 // Name:

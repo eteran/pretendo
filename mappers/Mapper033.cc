@@ -2,7 +2,7 @@
 #include "Mapper033.h"
 #include "PPU.h"
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(33);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(33)
 
 //------------------------------------------------------------------------------
 // Name:

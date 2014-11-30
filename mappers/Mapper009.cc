@@ -5,7 +5,7 @@
 #include "Cart.h"
 #include <cstring>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(9);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(9)
 
 //------------------------------------------------------------------------------
 // Name:

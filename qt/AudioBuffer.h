@@ -24,7 +24,7 @@ private:
 	mutable QMutex mutex_;
 	quint64 read_pos_;
 	quint64 write_pos_;
-	char buffer_[nes::apu::buffer_size * 30];
+	char buffer_[nes::apu::buffer_size * 4];
 };
 
 #endif

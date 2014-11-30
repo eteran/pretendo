@@ -2,7 +2,7 @@
 #include "Mapper079.h"
 #include <cassert>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(79);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(79)
 
 //------------------------------------------------------------------------------
 // Name:

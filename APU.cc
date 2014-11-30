@@ -33,7 +33,7 @@ union APUFrameCounter {
 // Name: bound
 //------------------------------------------------------------------------------
 template<class T>
-const T &bound(const T &lower, const T &value, const T &upper) {
+constexpr T bound(T lower, T value, T upper) {
 	using std::min;
 	using std::max;
 

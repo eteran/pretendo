@@ -5,7 +5,7 @@
 #include "NINA-001.h"
 #include "Cart.h"
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(34);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(34)
 
 //------------------------------------------------------------------------------
 // Name:

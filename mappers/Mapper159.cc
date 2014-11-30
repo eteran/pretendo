@@ -2,7 +2,7 @@
 #include "Mapper159.h"
 #include "Bandai.h"
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(159);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(159)
 
 //------------------------------------------------------------------------------
 // Name: Mapper159

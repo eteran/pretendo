@@ -1,7 +1,7 @@
 
 #include "Mapper144.h"
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(144);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(144)
 
 //------------------------------------------------------------------------------
 // Name:

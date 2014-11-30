@@ -63,7 +63,7 @@ std::shared_ptr<Mapper> Mapper::create_mapper(int num) {
 	const std::map<int, create_ptr> &mappers = registered_mappers_ines();
 	auto it = mappers.find(num);
 	if(it != mappers.end() && (f = it->second)) {
-		ret = (*f)();
+		ret = f();
 	} else {
 		std::cout << "unsupported mapper hardware - iNES number: " << num << std::endl;
 		return std::shared_ptr<Mapper>();
@@ -894,26 +894,6 @@ uint8_t Mapper::read_memory(uint16_t address) {
 	default:
 		abort();
 	}
-}
-
-//------------------------------------------------------------------------------
-// Name: hsync
-//------------------------------------------------------------------------------
-void Mapper::hsync() {
-
-	// default just calls cpu_sync for each missed cycle
-	// not terribly accurate, but good enough for most cases
-
-	static uint64_t old_cpu_timestamp = 0;
-
-	const uint64_t new_cpu_timestamp = nes::cpu::cycle_count();
-	const uint64_t cycles_executed   = (new_cpu_timestamp - old_cpu_timestamp);
-
-	for(uint64_t i = 0; i < cycles_executed; ++i) {
-		cpu_sync();
-	}
-
-	old_cpu_timestamp = new_cpu_timestamp;
 }
 
 //------------------------------------------------------------------------------

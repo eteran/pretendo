@@ -4,7 +4,7 @@
 #include "NES.h"
 #include <cassert>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(3);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(3)
 
 //------------------------------------------------------------------------------
 // Name:

@@ -3,7 +3,7 @@
 #include "VRC4.h"
 #include <cstring>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(21);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(21)
 
 //------------------------------------------------------------------------------
 // Name: Mapper21

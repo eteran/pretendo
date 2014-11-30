@@ -5,7 +5,7 @@
 #include "NES.h"
 #include <cassert>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(48);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(48)
 
 //#define MMC3A_STYLE
 

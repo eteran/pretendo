@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <functional>
 
 using std::uint8_t;
 using std::uint16_t;
@@ -16,7 +17,7 @@ using std::uint64_t;
 
 class Mapper;
 
-typedef std::shared_ptr<Mapper> (*create_ptr)();
+typedef std::function<std::shared_ptr<Mapper>()> create_ptr;
 
 class Mapper {
 public:
@@ -25,8 +26,6 @@ public:
 
 	void write_memory(uint16_t address, uint8_t value);
 	uint8_t read_memory(uint16_t address);
-
-	void hsync();
 
 public:
 	// the standard mapper interface
@@ -169,24 +168,17 @@ private:
 template<class T>
 struct MapperRegisterObject {
 	MapperRegisterObject(int n) {
-		Mapper::register_mapper(n, MapperCreate);
-	}
-
-	static std::shared_ptr<Mapper> MapperCreate() {
-		return std::shared_ptr<Mapper>(new T());
+		Mapper::register_mapper(n, []() {
+			return std::make_shared<T>();
+		});
 	}
 };
 
 
 // macro to hide details of setting up a static instance of the previously
-// mentioned macro. The first line of each Mapper[NNN].cpp file should be
+// mentioned class. The first line of each Mapper[NNN].cpp file should be
 // a call to this macro passing the appropriate mapper number
-// NOTE: in order for the __COUNTER__ macro expansion to work,
-// we need the middle-man function "FUNC1" to call "FUNC2"
-
-#define SETUP_STATIC_MAPPER_REGISTRAR_FUNC2(X, U, Y) static MapperRegisterObject<Mapper##X> Mapper##U##Register(Y)
-#define SETUP_STATIC_MAPPER_REGISTRAR_FUNC1(X, U, Y) SETUP_STATIC_MAPPER_REGISTRAR_FUNC2(X, U, Y)
-#define SETUP_STATIC_INES_MAPPER_REGISTRAR(N)        SETUP_STATIC_MAPPER_REGISTRAR_FUNC1(N, __COUNTER__, N)
+#define SETUP_STATIC_INES_MAPPER_REGISTRAR(N)     namespace { static MapperRegisterObject<Mapper##N> MapperRegister(N); }
 
 #endif
 

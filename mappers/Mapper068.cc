@@ -5,7 +5,7 @@
 #include "Cart.h"
 #include <cassert>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(68);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(68)
 
 //------------------------------------------------------------------------------
 // Name: Mapper68

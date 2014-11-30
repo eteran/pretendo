@@ -5,7 +5,7 @@
 #include <cstring>
 #include <cassert>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(50);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(50)
 
 //------------------------------------------------------------------------------
 // Name:

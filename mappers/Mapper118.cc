@@ -2,7 +2,7 @@
 #include "Mapper118.h"
 #include "MMC3.h"
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(118);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(118)
 
 // TODO: mirroring crap
 

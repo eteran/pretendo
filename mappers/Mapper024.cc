@@ -3,7 +3,7 @@
 #include "VRC6.h"
 #include <cstring>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(24);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(24)
 
 //------------------------------------------------------------------------------
 // Name: Mapper24

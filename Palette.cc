@@ -12,8 +12,8 @@ namespace {
 //------------------------------------------------------------------------------
 // Name: bound
 //------------------------------------------------------------------------------
-template<class T>
-const T &bound(const T &lower, const T &value, const T &upper) {
+template <class T>
+constexpr T bound(T lower, T value, T upper) {
 	using std::min;
 	using std::max;
 
@@ -30,7 +30,7 @@ constexpr int wave(int p, int color) {
 //------------------------------------------------------------------------------
 // Name: gamma_fix
 //------------------------------------------------------------------------------
-float gamma_fix(float f, float gamma) {
+constexpr float gamma_fix(float f, float gamma) {
 	using std::pow;
 	return f < 0.f ? 0.f : pow(f, 2.2f / gamma);
 }

@@ -5,7 +5,7 @@
 #include "Cart.h"
 #include <cassert>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(228);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(228)
 
 namespace {
 const uint8_t *prg_chips[4];

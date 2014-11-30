@@ -2,7 +2,7 @@
 #include "Mapper064.h"
 #include "PPU.h"
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(64);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(64)
 
 namespace {
 enum {

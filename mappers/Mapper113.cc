@@ -3,7 +3,7 @@
 #include "PPU.h"
 #include <cassert>
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(113);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(113)
 
 //------------------------------------------------------------------------------
 // Name:

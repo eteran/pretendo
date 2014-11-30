@@ -4,7 +4,7 @@
 #include "NES.h"
 #include "Cart.h"
 
-SETUP_STATIC_INES_MAPPER_REGISTRAR(90);
+SETUP_STATIC_INES_MAPPER_REGISTRAR(90)
 
 
 // TODO: this mapper is very confusing... I have no idea if I am on the right track
