@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 struct opcode_cmp : compare {
 
-	void operator()(uint8_t data) const {
+	static void execute(uint8_t data) {
 		do_compare(A, data);
 	}
 };

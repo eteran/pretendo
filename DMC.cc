@@ -21,7 +21,7 @@ const uint16_t frequency_table[16] = {
 //------------------------------------------------------------------------------
 // Name: DMC
 //------------------------------------------------------------------------------
-DMC::DMC() : muted_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), bits_remaining_(0), control_(0) {
+DMC::DMC() : muted_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), bits_remaining_(0), control_({0}) {
 }
 
 //------------------------------------------------------------------------------
@@ -94,9 +94,9 @@ void DMC::disable() {
 //------------------------------------------------------------------------------
 void DMC::write_reg0(uint8_t value) {
 
-	control_ = value;
+	control_.value = value;
 
-	timer_.frequency = frequency_table[control_ & 0x0f];
+	timer_.frequency = frequency_table[control_.frequency];
 	timer_.reset();
 
 	if(!irq_enabled()) {
@@ -193,14 +193,14 @@ uint8_t DMC::output() const {
 // Name: irq_enabled
 //------------------------------------------------------------------------------
 bool DMC::irq_enabled() const {
-	return control_ & 0x80;
+	return control_.irq;
 }
 
 //------------------------------------------------------------------------------
 // Name: loop
 //------------------------------------------------------------------------------
 bool DMC::loop() const {
-	return control_ & 0x40;
+	return control_.loop;
 }
 
 }

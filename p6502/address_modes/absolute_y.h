@@ -2,17 +2,16 @@
 #ifndef ABSOLUTE_Y_H_
 #define ABSOLUTE_Y_H_
 
+template <class Op>
 class absolute_y {
 public:
-	// dispatch to the appropriate version of the address mode
-	template <class Op>
-	void operator()(Op op) {
-		execute(op, typename Op::memory_access());
+	// dispatch to the appropriate version of the address mode	
+	static void execute() {
+		execute(typename Op::memory_access());
 	}
 	
 private:
-	template <class Op>
-	void execute(Op op, const operation_read &) {
+	static void execute(const operation_read &) {
 
 		switch(cycle_) {
 		case 1:
@@ -38,21 +37,20 @@ private:
 				break;
 			} else {
 				LAST_CYCLE;
-				op(data8_);
+				Op::execute(data8_);
 				OPCODE_COMPLETE;
 			}
 		case 4:
 			LAST_CYCLE;
 			// re-read from effective address
-			op(read_byte(effective_address16_.raw));
+			Op::execute(read_byte(effective_address16_.raw));
 			OPCODE_COMPLETE;
 		default:
 			abort();
 		}
 	}
 	
-	template <class Op>
-	void execute(Op op, const operation_modify &) {
+	static void execute(const operation_modify &) {
 
 		switch(cycle_) {
 		case 1:
@@ -84,7 +82,7 @@ private:
 			// write the value back to effective address,
 			// and do the operation on it
 			write_byte(effective_address16_.raw, data8_);
-			op(data8_);
+			Op::execute(data8_);
 			break;
 		case 6:
 			LAST_CYCLE;
@@ -96,8 +94,7 @@ private:
 		}
 	}
 
-	template <class Op>
-	void execute(Op op, const operation_write &) {
+	static void execute(const operation_write &) {
 
 		switch(cycle_) {
 		case 1:
@@ -126,7 +123,7 @@ private:
 			// write to effective address
 			{
 				uint16_t address = effective_address16_.raw;
-				uint8_t  value   = op(address);
+				uint8_t  value   = Op::execute(address);
 				write_byte(address, value);
 			}
 			OPCODE_COMPLETE;

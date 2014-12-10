@@ -8,7 +8,7 @@
 struct opcode_tya {
 	typedef operation_none memory_access;
 	
-	void operator()() const {
+	static void execute() {
 		A = Y;
 		update_nz_flags(A);
 	}

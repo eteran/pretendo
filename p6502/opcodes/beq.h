@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 struct opcode_beq : branch {
 
-	bool operator()() const {
+	static bool execute() {
 		return do_branch(zero_set());
 	}
 };

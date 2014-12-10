@@ -9,7 +9,7 @@ struct opcode_isc : compare {
 
 	typedef operation_modify memory_access;
 	
-	void operator()(uint8_t &data) const {
+	static void execute(uint8_t &data) {
 		++data;
 		const uint16_t temp16 = A - data - ((P & C_MASK) ^ C_MASK);
 		const bool carry	= (temp16 < 0x100);

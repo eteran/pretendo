@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 struct opcode_bmi : branch {
 
-	bool operator()() const {
+	static bool execute() {
 		return do_branch(negative_set());
 	}
 };

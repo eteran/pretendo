@@ -21,12 +21,7 @@ do {                                                  \
 //------------------------------------------------------------------------------
 class opcode_irq {
 public:
-	void operator()() {
-		execute();
-	}
-
-private:
-	void execute() {
+	static void execute() {
 		switch(cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away),

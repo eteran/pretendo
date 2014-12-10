@@ -9,7 +9,7 @@ struct opcode_sbc {
 
 	typedef operation_read memory_access;
 
-	void operator()(uint8_t data) const {
+	static void execute(uint8_t data) {
 		const uint16_t temp16 = A - data - ((P & C_MASK) ^ C_MASK);
 		const bool carry	= (temp16 < 0x100);
 		const bool overflow	= ((A ^ data) & (A ^ temp16) & 0x80) != 0;

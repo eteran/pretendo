@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 struct opcode_bne : branch {
 
-	bool operator()() const {
+	static bool execute() {
 		return do_branch(zero_clear());
 	}
 };

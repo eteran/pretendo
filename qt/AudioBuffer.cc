@@ -17,7 +17,7 @@ AudioBuffer::AudioBuffer(QObject *parent) : QIODevice(parent), read_pos_(0), wri
 qint64 AudioBuffer::readData(char *data, qint64 maxSize) {
 
 
-	QMutexLocker lock(&mutex_);
+	//QMutexLocker lock(&mutex_);
 
 	qint64 i;
 	for(i = 0; i < maxSize; ++i) {
@@ -37,7 +37,7 @@ qint64 AudioBuffer::readData(char *data, qint64 maxSize) {
 
 qint64 AudioBuffer::writeData(const char *data, qint64 maxSize) {
 
-	QMutexLocker lock(&mutex_);
+	//QMutexLocker lock(&mutex_);
 	
 	qint64 i;
 	for(i = 0; i < maxSize; ++i) {
@@ -61,7 +61,7 @@ bool AudioBuffer::atEnd() const {
 }
 
 qint64 AudioBuffer::bytesAvailable() const {
-	QMutexLocker lock(&mutex_);
+	//QMutexLocker lock(&mutex_);
 	return qAbs(write_pos_ - read_pos_);
 }
 

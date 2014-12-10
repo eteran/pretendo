@@ -12,11 +12,11 @@ struct opcode_nop {
 	// we let this take one or more parameters so
 	// it can be passed to any address mode's read
 	// operation
-	void operator()() const {
+	static void execute() {
 	}
 	
 	template <class T>
-	void operator()(T) const {
+	static void execute(T) {
 	}
 };
 

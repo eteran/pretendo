@@ -24,14 +24,6 @@ enum {
 	STATUS_VBLANK   = 0x80
 };
 
-enum {
-	SPRITE_VFLIP    = 0x80,
-	SPRITE_HFLIP    = 0x40,
-	SPRITE_PRIORITY = 0x20,
-	SPRITE_ZERO     = 0x10, // internal flag
-	SPRITE_COLOR    = 0x03
-};
-
 struct pattern_0 {
 	static const int     index  = 0;
 	static const uint8_t offset = 0;
@@ -93,10 +85,13 @@ namespace nes {
 namespace ppu {
 
 union PPUStatus {
-	uint8_t raw;
+	uint8_t     raw;
+	
 	BitField<5> overflow;
 	BitField<6> sprite0;
 	BitField<7> vblank;
+	
+	BitField<5,3> flags;
 };
 
 bool show_sprites_ = true;
@@ -104,17 +99,26 @@ bool show_sprites_ = true;
 class SpriteEntry {
 public:
 	uint8_t pattern[2];
-	uint8_t sprite_bytes[4];
-public:
-	bool horizontal_flip() const;
-	bool is_background() const;
-	bool is_sprite_zero() const;
-	bool vertical_flip() const;
-	uint8_t index() const;
-	uint8_t palette() const;
-	uint8_t x() const;
-	uint8_t y() const;
+	union {
+		uint32_t       bytes;
+		
+		BitField<0,8>  byte0;
+		BitField<8,8>  byte1;
+		BitField<16,8> byte2;
+		BitField<24,8> byte3;
+		
+		BitField<0,8>  y;
+		BitField<8,8>  index;
+		BitField<24,8> x;
+		
+		BitField<23>   vflip;
+		BitField<22>   hflip;
+		BitField<21>   priority;
+		BitField<20>   zero;    // internal flag
+		BitField<16,2> color;
+	};
 };
+
 
 // internal variables
 VRAMBank     vram_banks_[0x10];
@@ -203,62 +207,6 @@ template <int Size, class Pattern>
 uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line);
 
 //------------------------------------------------------------------------------
-// Name: vertical_flip
-//------------------------------------------------------------------------------
-bool SpriteEntry::vertical_flip() const {
-	return sprite_bytes[2] & SPRITE_VFLIP;
-}
-
-//------------------------------------------------------------------------------
-// Name: horizontal_flip
-//------------------------------------------------------------------------------
-bool SpriteEntry::horizontal_flip() const {
-	return sprite_bytes[2] & SPRITE_HFLIP;
-}
-
-//------------------------------------------------------------------------------
-// Name: is_sprite_zero
-//------------------------------------------------------------------------------
-bool SpriteEntry::is_sprite_zero() const {
-	return sprite_bytes[2] & SPRITE_ZERO;
-}
-
-//------------------------------------------------------------------------------
-// Name: is_background
-//------------------------------------------------------------------------------
-bool SpriteEntry::is_background() const {
-	return sprite_bytes[2] & SPRITE_PRIORITY;
-}
-
-//------------------------------------------------------------------------------
-// Name: palette
-//------------------------------------------------------------------------------
-uint8_t SpriteEntry::palette() const {
-	return sprite_bytes[2] & SPRITE_COLOR;
-}
-
-//------------------------------------------------------------------------------
-// Name: index
-//------------------------------------------------------------------------------
-uint8_t SpriteEntry::index() const {
-	return sprite_bytes[1];
-}
-
-//------------------------------------------------------------------------------
-// Name: y
-//------------------------------------------------------------------------------
-uint8_t SpriteEntry::y() const {
-	return sprite_bytes[0];
-}
-
-//------------------------------------------------------------------------------
-// Name: x
-//------------------------------------------------------------------------------
-uint8_t SpriteEntry::x() const {
-	return sprite_bytes[3];
-}
-
-//------------------------------------------------------------------------------
 // Name: reset
 //------------------------------------------------------------------------------
 void reset(Reset reset_type) {
@@ -273,10 +221,7 @@ void reset(Reset reset_type) {
 		for(int i = 0; i < 8; ++i) {
 			sprite_data_[i].pattern[0] = 0;
 			sprite_data_[i].pattern[1] = 0;
-			sprite_data_[i].sprite_bytes[0] = 0xff;
-			sprite_data_[i].sprite_bytes[1] = 0xff;
-			sprite_data_[i].sprite_bytes[2] = 0xff;
-			sprite_data_[i].sprite_bytes[3] = 0xff;
+			sprite_data_[i].bytes = 0xffffffff;
 		}
 
 		memcpy(palette_, powerup_palette, sizeof(palette_));
@@ -496,8 +441,8 @@ uint8_t read2002() {
 	// upper 3 bits of status
 	// lower 5 bits of garbage (latch)
 	const uint8_t ret =
-		(status_.raw & (STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK)) |
-		(latch_ & ~(STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK));
+		(status_.raw &  (STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK)) |
+		(latch_      & ~(STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK));
 
 	// reset scroll/write latch
 	write_latch_ = false;
@@ -724,21 +669,19 @@ uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
 void open_sprite_pattern() {
-	const SpriteEntry *const sprite_entry = &sprite_data_[((hpos_ - 1) >> 3) & 0x07];
+	const SpriteEntry &sprite_entry = sprite_data_[((hpos_ - 1) >> 3) & 0x07];
 
-	if(sprite_entry->y() != 0xff) {
-		const uint8_t index = sprite_entry->index();
-		uint8_t sprite_line;
+	if(sprite_entry.y != 0xff) {
+		const uint8_t index = sprite_entry.index;
+		uint8_t sprite_line = sprite_entry.y;
 
 		// vertical flip
-		if(sprite_entry->vertical_flip()) {
+		if(sprite_entry.vflip) {
 			if(Size == 16) {
-				sprite_line = sprite_entry->y() ^ 0x0F;
+				sprite_line ^= 0x0F;
 			} else {
-				sprite_line = sprite_entry->y() ^ 0x07;
+				sprite_line ^= 0x07;
 			}
-		} else {
-			sprite_line = sprite_entry->y();
 		}
 
 		// fetch the actual sprite data
@@ -756,16 +699,18 @@ void open_sprite_pattern() {
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
 void read_sprite_pattern() {
-	SpriteEntry *const sprite_entry = &sprite_data_[((hpos_ - 1) >> 3) & 0x07];
+	SpriteEntry& sprite_entry = sprite_data_[((hpos_ - 1) >> 3) & 0x07];
 
-	sprite_entry->pattern[Pattern::index] = cart.mapper()->read_vram(next_ppu_fetch_address_);
+	uint8_t pattern = cart.mapper()->read_vram(next_ppu_fetch_address_);
 
-	if(sprite_entry->y() != 0xff) {
+	if(sprite_entry.y != 0xff) {
 		// horizontal flip
-		if(sprite_entry->horizontal_flip()) {
-			sprite_entry->pattern[Pattern::index] = reverse_bits[sprite_entry->pattern[Pattern::index]];
+		if(sprite_entry.hflip) {
+			pattern = reverse_bits[pattern];
 		}
 	}
+	
+	sprite_entry.pattern[Pattern::index] = pattern;
 }
 
 //------------------------------------------------------------------------------
@@ -809,10 +754,7 @@ void evaluate_sprites() {
 
 #if 1
 	for(int i = 0; i < 8; ++i) {
-		sprite_data_[i].sprite_bytes[0] = 0xff; // y
-		sprite_data_[i].sprite_bytes[1] = 0xff; // index
-		sprite_data_[i].sprite_bytes[2] = 0xff; // attributes
-		sprite_data_[i].sprite_bytes[3] = 0xff; // x
+		sprite_data_[i].bytes = 0xffffffff;
 	}
 #endif
 
@@ -834,22 +776,27 @@ void evaluate_sprites() {
 			//    the next open slot in secondary OAM (unless 8 sprites have been found, in
 			//    which case the write is ignored).
 			if(sprite_data_index_ < 8) {
-				const uint16_t sprite_line = (vpos_ - 1) - (sprite_ram_[index]);
+				const uint16_t sprite_line = (vpos_ - 1) - sprite_ram_[index];
 
 				// 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
 				if(sprite_line < Size) {
-					sprite_data_[sprite_data_index_].sprite_bytes[0] = sprite_line;                   // y
-					sprite_data_[sprite_data_index_].sprite_bytes[1] = sprite_ram_[index + 1]; 	      // index
-					sprite_data_[sprite_data_index_].sprite_bytes[2] = sprite_ram_[index + 2] & 0xe3; // attributes
-					sprite_data_[sprite_data_index_].sprite_bytes[3] = sprite_ram_[index + 3]; 	      // x
+				
+					SpriteEntry &sprite_entry = sprite_data_[sprite_data_index_];
+					
+					const uint8_t new_x = sprite_ram_[index + 3];
+				
+					sprite_entry.byte0 = sprite_line;                   // y
+					sprite_entry.byte1 = sprite_ram_[index + 1];        // index
+					sprite_entry.byte2 = sprite_ram_[index + 2] & 0xe3; // attributes
+					sprite_entry.byte3 = new_x;                         // x
 
 					// note that we found sprite 0
 					if(index == start_address) {
-						sprite_data_[sprite_data_index_].sprite_bytes[2] |= SPRITE_ZERO;
+						sprite_entry.zero = true;
 					}
 
-					left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_data_[sprite_data_index_].sprite_bytes[3]);
+					left_most_sprite_x_ = std::min(left_most_sprite_x_, new_x);
 
 					++sprite_data_index_;
 				}
@@ -983,7 +930,7 @@ uint8_t select_pixel(uint8_t index) {
 
 			// this will loop at most 8 times
 			for(auto p = first; p != last; ++p) {
-				const uint16_t x_offset = index - p->x();
+				const uint16_t x_offset = index - p->x;
 
 				// is this sprite visible on this pixel?
 				if(x_offset < 8) {
@@ -1014,15 +961,15 @@ uint8_t select_pixel(uint8_t index) {
 						// NOTE: according to blargg's tests, a collision doesn't seem
 						//       possible to occur on the rightmost pixel
 					#ifndef SPRITE_ZERO_HACK
-						if(p->is_sprite_zero() && (pixel & 0x03) && (index < 255)) {
+						if(p->zero && (pixel & 0x03) && (index < 255)) {
 					#else
-						if(p->is_sprite_zero() && (index < 255)) {
+						if(p->zero && (index < 255)) {
 					#endif
-							status_.sprite0         = true;
+							status_.sprite0 = true;
 						}
 
-						if((!p->is_background() || ((pixel & 0x03) == 0x00)) && show_sprites_) {
-							pixel = 0x10 | sprite_pixel | (p->palette() << 2);
+						if((!p->priority || ((pixel & 0x03) == 0x00)) && show_sprites_) {
+							pixel = 0x10 | sprite_pixel | (p->color << 2);
 						}
 
 						// don't process any more sprites
@@ -1163,7 +1110,7 @@ void enter_vblank() {
 //------------------------------------------------------------------------------
 void exit_vblank() {
 	// clear all the relevant status bits
-	status_.raw &= ~(STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK);
+	status_.flags = 0;
 	write_block_ = false;
 }
 

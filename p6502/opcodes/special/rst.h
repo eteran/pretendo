@@ -8,12 +8,7 @@
 //------------------------------------------------------------------------------
 class opcode_rst {
 public:
-	void operator()() {
-		execute();
-	}
-
-private:
-	void execute() {
+	static void execute() {
 		switch(cycle_) {
 		case 1:
 			// read from current PC

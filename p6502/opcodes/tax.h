@@ -8,7 +8,7 @@
 struct opcode_tax {
 	typedef operation_none memory_access;
 	
-	void operator()() const {
+	static void execute() {
 		X = A;
 		update_nz_flags(X);
 	}

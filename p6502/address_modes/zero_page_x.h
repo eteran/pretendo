@@ -2,17 +2,16 @@
 #ifndef ZERO_PAGE_X_H_
 #define ZERO_PAGE_X_H_
 
+template <class Op>
 class zero_page_x {
 public:
 	// dispatch to the appropriate version of the address mode
-	template <class Op>
-	void operator()(Op op) {
-		execute(op, typename Op::memory_access());
+	static void execute() {
+		execute(typename Op::memory_access());
 	}
 	
 private:
-	template <class Op>
-	void execute(Op op, const operation_read &) {
+	static void execute(const operation_read &) {
 
 		switch(cycle_) {
 		case 1:
@@ -26,15 +25,14 @@ private:
 		case 3:
 			LAST_CYCLE;
 			// read from effective address
-            op(read_byte_zp(effective_address16_.lo));
+            Op::execute(read_byte_zp(effective_address16_.lo));
 			OPCODE_COMPLETE;
 		default:
 			abort();
 		}
 	}
 
-	template <class Op>
-	void execute(Op op, const operation_modify &) {
+	static void execute(const operation_modify &) {
 
 		switch(cycle_) {
 		case 1:
@@ -53,7 +51,7 @@ private:
 			// write the value back to effective address,
 			// and do the operation on it
             write_byte_zp(effective_address16_.lo, data8_);
-			op(data8_);
+			Op::execute(data8_);
 			break;
 		case 5:
 			LAST_CYCLE;
@@ -65,8 +63,7 @@ private:
 		}
 	}
 
-	template <class Op>
-	void execute(Op op, const operation_write &) {
+	static void execute(const operation_write &) {
 
 		switch(cycle_) {
 		case 1:
@@ -82,7 +79,7 @@ private:
 			// write to effective address
 			{
 				const uint16_t address = effective_address16_.lo;
-				const uint8_t  value   = op(address);
+				const uint8_t  value   = Op::execute(address);
             	write_byte_zp(address, value);
 			}
 			OPCODE_COMPLETE;

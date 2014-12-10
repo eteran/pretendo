@@ -8,7 +8,7 @@
 struct opcode_axs {
 	typedef operation_read memory_access;
 	
-	void operator()(uint8_t data) const {
+	static void execute(uint8_t data) {
 		const uint16_t new_x = (X & A) - data;
 		const bool carry     = (new_x < 0x100);
 		X = new_x & 0xff;

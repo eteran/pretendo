@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 struct opcode_bvc : branch {
 
-	bool operator()() const {
+	static bool execute() {
 		return do_branch(overflow_clear());
 	}
 };

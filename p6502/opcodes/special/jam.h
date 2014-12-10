@@ -8,12 +8,7 @@
 //------------------------------------------------------------------------------
 class opcode_jam {
 public:
-	void operator()() {
-		execute();
-	}
-
-private:
-	void execute() {
+	static void execute() {
 		switch(cycle_) {
 		case 1:
 			// make sure we spin forever

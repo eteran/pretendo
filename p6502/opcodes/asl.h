@@ -10,7 +10,7 @@ struct opcode_asl {
 
 	typedef operation_modify memory_access;
 	
-	void operator()(uint8_t &data) const {
+	static void execute(uint8_t &data) {
 		set_flag_condition<C_MASK>(data & 0x80);
 		data <<= 1;
 		update_nz_flags(data);

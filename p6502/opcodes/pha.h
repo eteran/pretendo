@@ -9,7 +9,7 @@ struct opcode_pha {
 
 	typedef operation_stack_write memory_access;
 
-	uint8_t operator()() const {
+	static uint8_t execute() {
 		return A;
 	}
 };

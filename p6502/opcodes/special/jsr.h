@@ -8,12 +8,7 @@
 //------------------------------------------------------------------------------
 class opcode_jsr {
 public:
-	void operator()() {
-		execute();
-	}
-
-private:
-	void execute() {
+	static void execute() {
 		switch(cycle_) {
 		case 1:
 			// fetch low address byte, increment PC

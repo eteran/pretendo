@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 struct opcode_bpl : branch {
 
-	bool operator()() const {
+	static bool execute() {
 		return do_branch(negative_clear());
 	}
 };

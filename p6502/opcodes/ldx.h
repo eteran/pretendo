@@ -9,7 +9,7 @@ struct opcode_ldx {
 
 	typedef operation_read memory_access;
 
-	void operator()(uint8_t data) const {
+	static void execute(uint8_t data) {
 		X = data;
 		update_nz_flags(X);
 	}

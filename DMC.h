@@ -4,6 +4,7 @@
 
 #include "ShiftRegister.h"
 #include "Timer.h"
+#include "BitField.h"
 #include <cstdint>
 
 namespace nes {
@@ -13,6 +14,13 @@ using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
+
+union DMCControl {
+	uint8_t       value;
+	BitField<0,4> frequency;
+	BitField<6>   loop;
+	BitField<7>   irq;
+};
 
 class DMC {
 public:
@@ -55,7 +63,7 @@ private:
 	ShiftRegister<uint8_t> sample_buffer_;
 	Timer                  timer_;
 	uint8_t                output_;
-	uint8_t                control_;
+	DMCControl             control_;
 };
 
 }

@@ -9,7 +9,7 @@ struct opcode_clc {
 
 	typedef operation_none memory_access;
 
-	void operator()() const {
+	static void execute() {
 		clear_flag<C_MASK>();
 	}
 };

@@ -2,17 +2,16 @@
 #ifndef INDEXED_INDIRECT_H_
 #define INDEXED_INDIRECT_H_
 
+template <class Op>
 class indexed_indirect {
 public:
 	// dispatch to the appropriate version of the address mode
-	template <class Op>
-	void operator()(Op op) {
-		execute(op, typename Op::memory_access());
+	static void execute() {
+		execute(typename Op::memory_access());
 	}
 	
-private:
-	template <class Op>
-	void execute(Op op, const operation_read &) {
+private:	
+	static void execute(const operation_read &) {
 
 		switch(cycle_) {
 		case 1:
@@ -34,7 +33,7 @@ private:
 		case 5:
 			LAST_CYCLE;
 			// read from effective address
-			op(read_byte(effective_address16_.raw));
+			Op::execute(read_byte(effective_address16_.raw));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -42,8 +41,7 @@ private:
 		}
 	}
 	
-	template <class Op>
-	void execute(Op op, const operation_modify &) {
+	static void execute(const operation_modify &) {
 
 		switch(cycle_) {
 		case 1:
@@ -70,7 +68,7 @@ private:
 			// write the value back to effective address,
 			// and do the operation on it
 			write_byte(effective_address16_.raw, data8_);
-			op(data8_);
+			Op::execute(data8_);
 			break;
 		case 7:
 			LAST_CYCLE;
@@ -82,8 +80,7 @@ private:
 		}
 	}
 		
-	template <class Op>
-	void execute(Op op, const operation_write &) {
+	static void execute(const operation_write &) {
 
 		switch(cycle_) {
 		case 1:
@@ -107,7 +104,7 @@ private:
 			// write to effective address
 			{
 				const uint16_t address = effective_address16_.raw;
-				const uint8_t  value   = op(address);
+				const uint8_t  value   = Op::execute(address);
 				write_byte(address, value);
 			}
 			OPCODE_COMPLETE;

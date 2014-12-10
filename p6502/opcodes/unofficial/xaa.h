@@ -9,7 +9,7 @@ struct opcode_xaa {
 
 	typedef operation_read memory_access;
 
-	void operator()(uint8_t data) const {
+	static void execute(uint8_t data) {
 	
 		// who knows what the magic value should be...
 	

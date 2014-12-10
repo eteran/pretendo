@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 struct opcode_bcc : branch {
 
-	bool operator()() const {
+	static bool execute() {
 		return do_branch(carry_clear());
 	}
 };

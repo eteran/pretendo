@@ -9,7 +9,7 @@ struct opcode_rra {
 
 	typedef operation_modify memory_access;
 	
-	void operator()(uint8_t &data) const {
+	static void execute(uint8_t &data) {
 		// only correct because C_MASK is 0x01, we basically want to shift in an 0x80
 		// if C_MASK is set, and a 0 if it is not
 		const uint8_t bit = (P & C_MASK) << 7;

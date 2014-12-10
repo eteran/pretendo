@@ -9,7 +9,7 @@ struct opcode_iny {
 
 	typedef operation_none memory_access;
 
-	void operator()() const {
+	static void execute() {
 		update_nz_flags(++Y);
 	}
 };

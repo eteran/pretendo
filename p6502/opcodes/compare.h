@@ -5,7 +5,7 @@ struct compare {
 	typedef operation_read memory_access;
 
 protected:
-	void do_compare(uint8_t reg, uint8_t data) const {
+	static void do_compare(uint8_t reg, uint8_t data) {
 		// compares a register to internal 8-bit register
 		// and sets flags
 		const uint16_t data16 = reg - data;

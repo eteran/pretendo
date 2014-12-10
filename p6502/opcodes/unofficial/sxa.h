@@ -10,7 +10,7 @@ struct opcode_sxa {
 
 	typedef operation_write memory_access;
 
-	uint8_t operator()(uint16_t &address) const {
+	static uint8_t execute(uint16_t &address) {
 	
 		const uint8_t high_byte = ((address >> 8) & 0xff) + 1;
 		const uint8_t value     = (X & high_byte);

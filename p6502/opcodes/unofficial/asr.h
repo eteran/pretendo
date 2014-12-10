@@ -9,7 +9,7 @@ struct opcode_asr {
 
 	typedef operation_read memory_access;
 
-	void operator()(uint8_t data) const {
+	static void execute(uint8_t data) {
 		A &= data;
 		set_flag_condition<C_MASK>(A & 0x01);
 		A >>= 1;

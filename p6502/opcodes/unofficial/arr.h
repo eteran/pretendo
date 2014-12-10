@@ -9,7 +9,7 @@ struct opcode_arr {
 
 	typedef operation_read memory_access;
 
-	void operator()(uint8_t data) const {
+	static void execute(uint8_t data) {
 		A &= data;
 		
 		// only correct because C_MASK is 0x01, we basically want to shift in an 0x80

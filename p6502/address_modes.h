@@ -2,9 +2,6 @@
 #ifndef ADDRESS_MODES_20121204_H_
 #define ADDRESS_MODES_20121204_H_
 
-
-namespace mode {
-
 #include "address_modes/absolute.h"
 #include "address_modes/absolute_x.h"
 #include "address_modes/absolute_y.h"
@@ -19,7 +16,5 @@ namespace mode {
 #include "address_modes/zero_page.h"
 #include "address_modes/zero_page_x.h"
 #include "address_modes/zero_page_y.h"
-
-}
 
 #endif

@@ -9,7 +9,7 @@ struct opcode_sta {
 
 	typedef operation_write memory_access;
 
-	uint8_t operator()(uint16_t address) const {
+	static uint8_t execute(uint16_t address) {
 		(void)address;
 		return A;
 	}

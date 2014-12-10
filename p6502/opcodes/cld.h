@@ -9,7 +9,7 @@ struct opcode_cld {
 
 	typedef operation_none memory_access;
 
-	void operator()() const {
+	static void execute() {
 		clear_flag<D_MASK>();
 	}
 };

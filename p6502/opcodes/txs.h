@@ -9,7 +9,7 @@ struct opcode_txs {
 
 	typedef operation_none memory_access;
 
-	void operator()() const {
+	static void execute() {
 		S = X;
 	}
 };

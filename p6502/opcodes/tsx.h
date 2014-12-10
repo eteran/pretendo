@@ -8,7 +8,7 @@
 struct opcode_tsx {
 	typedef operation_none memory_access;
 	
-	void operator()() const {
+	static void execute() {
 		X = S;
 		update_nz_flags(X);
 	}

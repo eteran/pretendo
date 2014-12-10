@@ -9,7 +9,7 @@ struct opcode_inc {
 
 	typedef operation_modify memory_access;
 	
-	void operator()(uint8_t &data) const {
+	static void execute(uint8_t &data) {
 		++data;
 		update_nz_flags(data);
 	}

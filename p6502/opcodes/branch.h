@@ -18,7 +18,7 @@ protected:
 
 protected:
 	template <class Condition>
-	bool do_branch(Condition condition) const {
+	static bool do_branch(Condition condition) {
 		return condition();
 	}
 };

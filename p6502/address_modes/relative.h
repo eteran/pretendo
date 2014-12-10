@@ -16,12 +16,12 @@ do {                                                  \
 } while(0)
 
 
+template <class Op>
 class relative {
 public:
-	// dispatch to the appropriate version of the address mode
-	template <class Op>
-	void operator()(Op op) {
-		execute(op, typename Op::memory_access());
+	// dispatch to the appropriate version of the address mode	
+	static void execute() {
+		execute(typename Op::memory_access());
 	}
 
 private:
@@ -29,9 +29,7 @@ private:
 	// pipelining. This means we can't use the normal "end of opcode"
 	// logic, we need to load up the next instruction and fake the
 	// end of opcode sequence
-
-	template <class Op>
-	void execute(Op op, const operation_branch &) {
+	static void execute(const operation_branch &) {
 		switch(cycle_) {
 		case 1:
 			LAST_CYCLE;
@@ -39,10 +37,11 @@ private:
 			data8_ = read_byte(PC.raw++);
 			break;
 		case 2:
+		{
 			// Fetch opcode of next instruction,
 			// If branch is taken, add operand to PCL.
 			// Otherwise increment PC.
-			new_op = read_byte(PC.raw);
+			const uint8_t new_op = read_byte(PC.raw);
 
 			// ------
 			// A taken non-page-crossing branch ignores IRQ during
@@ -52,10 +51,10 @@ private:
 			// ------
 			// Therefore, we DON'T check for IRQ/NMI/RESET here
 
-			if(op()) {
-				old_pc.raw = PC.raw;
-				new_pc.raw = (PC.raw + static_cast<int8_t>(data8_));
-				PC.lo = new_pc.lo;
+			if(Op::execute()) {
+				old_pc_.raw = PC.raw;
+				new_pc_.raw = (PC.raw + static_cast<int8_t>(data8_));
+				PC.lo = new_pc_.lo;
 			} else {
 				if(rst_executing_) {
 					instruction_ = 0x100;
@@ -69,14 +68,16 @@ private:
 				cycle_ = 0;
 			}
 			break;
+		}
 		case 3:
+		{
 			// Fetch opcode of next instruction.
 			// Fix PCH. If it did not change, increment PC.
-			new_op = read_byte(PC.raw);
+			const uint8_t new_op = read_byte(PC.raw);
 
-			if(new_pc.hi != old_pc.hi) {
+			if(new_pc_.hi != old_pc_.hi) {
 				LAST_CYCLE_0;
-				PC.raw = new_pc.raw;
+				PC.raw = new_pc_.raw;
 			} else {
 				if(rst_executing_) {
 					instruction_ = 0x100;
@@ -90,8 +91,10 @@ private:
 				cycle_ = 0;
 			}
 			break;
+		}
 		case 4:
-			new_op = read_byte(PC.raw);
+		{
+			const uint8_t new_op = read_byte(PC.raw);
 
 			if(rst_executing_) {
 				instruction_ = 0x100;
@@ -104,15 +107,11 @@ private:
 			}
 			cycle_ = 0;
 			break;
+		}
 		default:
 			abort();
 		}
 	}
-
-private:
-	register16 old_pc;
-	register16 new_pc;
-	uint8_t  new_op;
 };
 
 #endif

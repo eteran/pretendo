@@ -9,7 +9,7 @@ struct opcode_pla {
 
 	typedef operation_stack_read memory_access;
 
-	void operator()(uint8_t data) const {
+	static void execute(uint8_t data) {
 		A = data;
 		update_nz_flags(A);
 	}

@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <type_traits>
 
 using std::uint8_t;
 using std::uint16_t;
@@ -13,75 +14,15 @@ using std::uint64_t;
 namespace {
 
 template <size_t LastBit>
-struct bitfield_helper;
-
-template <> struct bitfield_helper<1>  { typedef uint8_t type; };
-template <> struct bitfield_helper<2>  { typedef uint8_t type; };
-template <> struct bitfield_helper<3>  { typedef uint8_t type; };
-template <> struct bitfield_helper<4>  { typedef uint8_t type; };
-template <> struct bitfield_helper<5>  { typedef uint8_t type; };
-template <> struct bitfield_helper<6>  { typedef uint8_t type; };
-template <> struct bitfield_helper<7>  { typedef uint8_t type; };
-template <> struct bitfield_helper<8>  { typedef uint8_t type; };
-
-template <> struct bitfield_helper<9>  { typedef uint16_t type; };
-template <> struct bitfield_helper<10> { typedef uint16_t type; };
-template <> struct bitfield_helper<11> { typedef uint16_t type; };
-template <> struct bitfield_helper<12> { typedef uint16_t type; };
-template <> struct bitfield_helper<13> { typedef uint16_t type; };
-template <> struct bitfield_helper<14> { typedef uint16_t type; };
-template <> struct bitfield_helper<15> { typedef uint16_t type; };
-template <> struct bitfield_helper<16> { typedef uint16_t type; };
-
-template <> struct bitfield_helper<17> { typedef uint32_t type; };
-template <> struct bitfield_helper<18> { typedef uint32_t type; };
-template <> struct bitfield_helper<19> { typedef uint32_t type; };
-template <> struct bitfield_helper<20> { typedef uint32_t type; };
-template <> struct bitfield_helper<21> { typedef uint32_t type; };
-template <> struct bitfield_helper<22> { typedef uint32_t type; };
-template <> struct bitfield_helper<23> { typedef uint32_t type; };
-template <> struct bitfield_helper<24> { typedef uint32_t type; };
-template <> struct bitfield_helper<25> { typedef uint32_t type; };
-template <> struct bitfield_helper<26> { typedef uint32_t type; };
-template <> struct bitfield_helper<27> { typedef uint32_t type; };
-template <> struct bitfield_helper<28> { typedef uint32_t type; };
-template <> struct bitfield_helper<29> { typedef uint32_t type; };
-template <> struct bitfield_helper<30> { typedef uint32_t type; };
-template <> struct bitfield_helper<31> { typedef uint32_t type; };
-template <> struct bitfield_helper<32> { typedef uint32_t type; };
-
-template <> struct bitfield_helper<33> { typedef uint64_t type; };
-template <> struct bitfield_helper<34> { typedef uint64_t type; };
-template <> struct bitfield_helper<35> { typedef uint64_t type; };
-template <> struct bitfield_helper<36> { typedef uint64_t type; };
-template <> struct bitfield_helper<37> { typedef uint64_t type; };
-template <> struct bitfield_helper<38> { typedef uint64_t type; };
-template <> struct bitfield_helper<39> { typedef uint64_t type; };
-template <> struct bitfield_helper<40> { typedef uint64_t type; };
-template <> struct bitfield_helper<41> { typedef uint64_t type; };
-template <> struct bitfield_helper<42> { typedef uint64_t type; };
-template <> struct bitfield_helper<43> { typedef uint64_t type; };
-template <> struct bitfield_helper<44> { typedef uint64_t type; };
-template <> struct bitfield_helper<45> { typedef uint64_t type; };
-template <> struct bitfield_helper<46> { typedef uint64_t type; };
-template <> struct bitfield_helper<47> { typedef uint64_t type; };
-template <> struct bitfield_helper<48> { typedef uint64_t type; };
-template <> struct bitfield_helper<49> { typedef uint64_t type; };
-template <> struct bitfield_helper<50> { typedef uint64_t type; };
-template <> struct bitfield_helper<51> { typedef uint64_t type; };
-template <> struct bitfield_helper<52> { typedef uint64_t type; };
-template <> struct bitfield_helper<53> { typedef uint64_t type; };
-template <> struct bitfield_helper<54> { typedef uint64_t type; };
-template <> struct bitfield_helper<55> { typedef uint64_t type; };
-template <> struct bitfield_helper<56> { typedef uint64_t type; };
-template <> struct bitfield_helper<57> { typedef uint64_t type; };
-template <> struct bitfield_helper<58> { typedef uint64_t type; };
-template <> struct bitfield_helper<59> { typedef uint64_t type; };
-template <> struct bitfield_helper<60> { typedef uint64_t type; };
-template <> struct bitfield_helper<61> { typedef uint64_t type; };
-template <> struct bitfield_helper<62> { typedef uint64_t type; };
-template <> struct bitfield_helper<63> { typedef uint64_t type; };
-template <> struct bitfield_helper<64> { typedef uint64_t type; };
+struct bitfield_helper {
+	typedef
+		typename std::conditional<LastBit == 0 , void,
+		typename std::conditional<LastBit <= 8 , uint8_t,
+		typename std::conditional<LastBit <= 16, uint16_t,
+		typename std::conditional<LastBit <= 32, uint32_t,
+		typename std::conditional<LastBit <= 64, uint64_t,
+		void>::type>::type>::type>::type>::type type;
+};
 
 }
 

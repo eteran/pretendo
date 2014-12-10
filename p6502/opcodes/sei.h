@@ -9,7 +9,7 @@ struct opcode_sei {
 
 	typedef operation_none memory_access;
 
-	void operator()() const {
+	static void execute() {
 		set_flag<I_MASK>();
 	}
 };
