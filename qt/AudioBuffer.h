@@ -4,7 +4,7 @@
 
 #include "APU.h"
 #include <QIODevice>
-#include <QMutex>
+#include <QReadWriteLock>
 
 class AudioBuffer : public QIODevice {
 	Q_OBJECT
@@ -21,7 +21,7 @@ public:
 	virtual qint64 writeData(const char *data, qint64 maxSize);
 
 private:
-	mutable QMutex mutex_;
+	mutable QReadWriteLock lock_;
 	quint64 read_pos_;
 	quint64 write_pos_;
 	char buffer_[nes::apu::buffer_size * 4];

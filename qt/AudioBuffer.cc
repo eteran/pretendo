@@ -1,23 +1,23 @@
 
 #include "AudioBuffer.h"
 #include <QtDebug>
-#include <QMutexLocker>
+#include <QReadLocker>
+#include <QWriteLocker>
 #include <algorithm>
 
-AudioBuffer::AudioBuffer() : QIODevice(), read_pos_(0), write_pos_(0) {
+AudioBuffer::AudioBuffer() : QIODevice(), lock_(QReadWriteLock::Recursive), read_pos_(0), write_pos_(0) {
 	std::fill(buffer_, buffer_ +  sizeof(buffer_), 0x80);
 	open(QIODevice::ReadWrite);
 }
 
-AudioBuffer::AudioBuffer(QObject *parent) : QIODevice(parent), read_pos_(0), write_pos_(0) {
+AudioBuffer::AudioBuffer(QObject *parent) : QIODevice(parent), lock_(QReadWriteLock::Recursive), read_pos_(0), write_pos_(0) {
 	std::fill(buffer_, buffer_ +  sizeof(buffer_), 0x80);
 	open(QIODevice::ReadWrite);
 }
 
 qint64 AudioBuffer::readData(char *data, qint64 maxSize) {
 
-
-	//QMutexLocker lock(&mutex_);
+	QReadLocker lock(&lock_);
 
 	qint64 i;
 	for(i = 0; i < maxSize; ++i) {
@@ -31,13 +31,13 @@ qint64 AudioBuffer::readData(char *data, qint64 maxSize) {
 			break;
 		}
 	}
-
+	
 	return i;
 }
 
 qint64 AudioBuffer::writeData(const char *data, qint64 maxSize) {
 
-	//QMutexLocker lock(&mutex_);
+	QWriteLocker lock(&lock_);
 	
 	qint64 i;
 	for(i = 0; i < maxSize; ++i) {
@@ -61,8 +61,13 @@ bool AudioBuffer::atEnd() const {
 }
 
 qint64 AudioBuffer::bytesAvailable() const {
-	//QMutexLocker lock(&mutex_);
-	return qAbs(write_pos_ - read_pos_);
+	QReadLocker lock(&lock_);
+	
+	if(write_pos_ > read_pos_) {
+		return write_pos_ - read_pos_;
+	} else {
+		return sizeof(buffer_) - read_pos_ + write_pos_;
+	}
 }
 
 bool AudioBuffer::isSequential() const {
