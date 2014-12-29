@@ -15,7 +15,7 @@ $(OBJ_DIR)/%.o: %.c
 TARGET = libines.a
 
 CFLAGS  := -pedantic -W -Wall -O2 -g3
-LDFLAGS := 
+LDFLAGS := -lz
 C_FILES := ines_crc32.c lib_ines.c load_ines.c
 H_FILES := ines_crc32.h lib_ines.h load_ines.h ines_types.h 
 

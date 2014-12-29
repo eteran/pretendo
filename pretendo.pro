@@ -367,11 +367,11 @@ win32-* {
 *-g++* {
 	QMAKE_CFLAGS_DEBUG     += -g3 -W -Wall
 	QMAKE_CXXFLAGS_DEBUG   += -g3 -W -Wall
-	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall
+	QMAKE_LFLAGS_DEBUG     += -g3 -W -Wall -lz
 
 	QMAKE_CFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3
 	QMAKE_CXXFLAGS_RELEASE += -pedantic -march=native -g3 -W -Wall -O3
-	QMAKE_LFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3
+	QMAKE_LFLAGS_RELEASE   += -pedantic -march=native -g3 -W -Wall -O3 -lz
 }
 
 *-g++*:lto {

@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <zlib.h>
 
 /* Flags in ines_header_t.ctrl1 */
 #define INES_MIRROR  0x01
@@ -265,6 +266,147 @@ INES_RETURN_CODE write_file_INES(const char *filename, const ines_cart_t *cart) 
 	return retcode;
 }
 
+/*-----------------------------------------------------------------------------
+// Name: load_gzip_INES
+//---------------------------------------------------------------------------*/
+INES_RETURN_CODE load_gzip_INES(const char *filename, ines_cart_t *cart) {
+	INES_RETURN_CODE retcode = INES_OK;
+
+	gzFile  file            = 0;
+	size_t  prg_alloc_size  = 0;
+	size_t  chr_alloc_size  = 0;
+	int     has_trainer     = 0;
+	
+	ines_header_t header;
+
+	void *header_ptr       = 0;
+	void *prg_ptr          = 0;
+	void *chr_ptr          = 0;
+	void *trainer_ptr      = 0;
+
+	assert(cart != 0);
+	assert(filename != 0);
+
+	cart->header  = 0;
+	cart->trainer = 0;
+	cart->prg_rom = 0;
+	cart->chr_rom = 0;
+	
+	file = gzopen(filename, "rb");
+	if(!file) {
+		return INES_OPEN_FAILED;
+	}
+	
+
+	/* read the header data */
+	if(gzread(file, &header, sizeof(ines_header_t)) != sizeof(ines_header_t)) {
+		retcode = INES_READ_FAILED;
+		goto error;
+	}
+	
+	cart->version = ((header.ctrl2 & 0xc) == 0x8) ? 2 : 1;
+
+	retcode = check_header_INES(&header, cart->version);
+	if((retcode != INES_OK) && (retcode != INES_DIRTY_HEADER)) {
+		goto error;
+	}
+
+
+	has_trainer = ines_trainer_present(&header, cart->version);
+	
+	cart->prg_size     = ines_prg_size    (&header, cart->version) * PRG_BLOCK_SIZE;
+	cart->chr_size     = ines_chr_size    (&header, cart->version) * CHR_BLOCK_SIZE;
+	cart->mirroring    = ines_mirroring   (&header, cart->version);
+	cart->system       = ines_system      (&header, cart->version);
+	cart->display      = ines_display     (&header, cart->version);
+	cart->ppu          = ines_ppu         (&header, cart->version);
+	cart->mapper       = ines_mapper      (&header, cart->version);
+	cart->submapper    = ines_submapper   (&header, cart->version);
+	
+	prg_alloc_size = next_power(cart->prg_size);
+	chr_alloc_size = next_power(cart->chr_size);
+
+	/* allocate memory for the cart */
+	header_ptr  = malloc(sizeof(ines_header_t));
+	prg_ptr     = cart->prg_size ? malloc(prg_alloc_size) : 0;
+	chr_ptr     = cart->chr_size ? malloc(chr_alloc_size) : 0;
+	trainer_ptr = has_trainer    ? malloc(TRAINER_SIZE)   : 0;
+
+	/* make sure it all went smoothly */
+	if(!header_ptr || (cart->prg_size && !prg_ptr) || (cart->chr_size && !chr_ptr) || (has_trainer && !trainer_ptr)) {
+		retcode = INES_OUT_OF_MEMORY;
+		goto error;
+	}
+
+	/* assign some pointers */
+	cart->header  = header_ptr;
+	cart->prg_rom = prg_ptr;
+	cart->chr_rom = chr_ptr;
+	cart->trainer = trainer_ptr;
+
+	memcpy(cart->header, &header, sizeof(ines_header_t));
+	if(has_trainer) {
+		if(gzread(file, cart->trainer, TRAINER_SIZE) != TRAINER_SIZE) {
+			retcode = INES_READ_FAILED;
+			goto error;
+		}
+	}
+
+	if(cart->prg_size != 0) {
+		if(gzread(file, cart->prg_rom, cart->prg_size) != (int)cart->prg_size) {
+			retcode = INES_READ_FAILED;
+			goto error;
+		}
+		
+		if((prg_alloc_size - cart->prg_size) > 0x2000 && cart->prg_size >= 0x2000) {
+			/* replicate the last bank if necessary */
+			uint8_t *const last_8k = cart->prg_rom + cart->prg_size - 0x2000;
+			uint8_t *p = cart->prg_rom + cart->prg_size;
+			while(p < cart->prg_rom + prg_alloc_size) {
+				memcpy(p, last_8k, 0x2000);
+				p += 0x2000;
+			}
+		}
+	}
+
+	if(cart->chr_size != 0) {
+		uint8_t *p;
+		if(gzread(file, cart->chr_rom, cart->chr_size) != (int)cart->chr_size) {
+			retcode = INES_READ_FAILED;
+			goto error;
+		}
+		
+		p = cart->chr_rom + cart->chr_size;
+		while(p != cart->chr_rom + chr_alloc_size) {
+			*p++ = 0xff;
+		}
+	}
+
+	gzclose(file);
+	return retcode;
+
+error:
+	free(header_ptr);
+	free(prg_ptr);
+	free(chr_ptr);
+	free(trainer_ptr);
+
+	cart->header       = 0;
+	cart->trainer      = 0;
+	cart->prg_rom      = 0;
+	cart->chr_rom      = 0;
+	cart->prg_size     = 0;
+	cart->chr_size     = 0;
+	cart->mirroring    = 0;
+	cart->system       = 0;
+	cart->display      = 0;
+	cart->ppu          = 0;
+	cart->mapper       = 0;
+	cart->submapper    = 0;
+
+	gzclose(file);
+	return retcode;
+}
 
 /*-----------------------------------------------------------------------------
 // Name: load_file_INES
@@ -273,10 +415,11 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 
 	INES_RETURN_CODE retcode = INES_OK;
 
-	FILE *file             = 0;
-	size_t prg_alloc_size  = 0;
-	size_t chr_alloc_size  = 0;
-	int    has_trainer     = 0;
+	FILE *  file            = 0;
+	size_t  prg_alloc_size  = 0;
+	size_t  chr_alloc_size  = 0;
+	int     has_trainer     = 0;
+	uint8_t magic[4];
 	
 	ines_header_t header;
 
@@ -297,7 +440,22 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 	if(!file) {
 		return INES_OPEN_FAILED;
 	}
-
+	
+	/* read first few bytes to see what the magic bytes are */
+	if(fread(magic, sizeof(magic), 1, file) != 1) {
+		retcode = INES_READ_FAILED;
+		goto error;	
+	}
+	
+	/* reset the file handle */
+	rewind(file);
+	
+	/* is it a gzip file? */
+	if(magic[0] == 0x1f && magic[1] == 0x8b) {
+		fclose(file);
+		return load_gzip_INES(filename, cart);
+	}
+	
 	if((retcode = read_header_INES(file, &header)) != INES_OK) {
 		goto error;
 	}
