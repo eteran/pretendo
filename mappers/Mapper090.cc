@@ -36,7 +36,10 @@ const uint8_t reverse_bits[256] = {
 //------------------------------------------------------------------------------
 // Name: Mapper90
 //------------------------------------------------------------------------------
-Mapper90::Mapper90() : map_67_(0x00), prg_mode_(0x00), chr_mode_(0x00), chr_mirror_(0x00), chr_block_mode_(0x00), chr_block_(0x00), multiply_1_(0), multiply_2_(0), prg_ram_(0) {
+Mapper90::Mapper90() : multiply_1_(0), multiply_2_(0), prg_ram_(0) {
+
+	bank_control_ = { 0 };
+	chr_control_  = { 0 };
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
@@ -48,14 +51,23 @@ Mapper90::Mapper90() : map_67_(0x00), prg_mode_(0x00), chr_mode_(0x00), chr_mirr
 	prg_[2] = 0;
 	prg_[3] = 0;
 
-	chr_[0] = 0;
-	chr_[1] = 0;
-	chr_[2] = 0;
-	chr_[3] = 0;
-	chr_[4] = 0;
-	chr_[5] = 0;
-	chr_[6] = 0;
-	chr_[7] = 0;
+	chr_lo_[0] = 0;
+	chr_lo_[1] = 0;
+	chr_lo_[2] = 0;
+	chr_lo_[3] = 0;
+	chr_lo_[4] = 0;
+	chr_lo_[5] = 0;
+	chr_lo_[6] = 0;
+	chr_lo_[7] = 0;
+
+	chr_hi_[0] = 0;
+	chr_hi_[1] = 0;
+	chr_hi_[2] = 0;
+	chr_hi_[3] = 0;
+	chr_hi_[4] = 0;
+	chr_hi_[5] = 0;
+	chr_hi_[6] = 0;
+	chr_hi_[7] = 0;
 
 }
 
@@ -141,7 +153,7 @@ void Mapper90::write_9(uint16_t address, uint8_t value) {
 	case 0x05:
 	case 0x06:
 	case 0x07:
-		chr_[address & 0x07] = (chr_[address & 0x07] & 0xff00) | value;
+		chr_lo_[address & 0x07] = value;
 		break;
 	}
 
@@ -162,7 +174,7 @@ void Mapper90::write_a(uint16_t address, uint8_t value) {
 	case 0x05:
 	case 0x06:
 	case 0x07:
-		chr_[address & 0x07] = (chr_[address & 0x07] & 0x00ff) | ((value & 0xff) << 8);
+		chr_hi_[address & 0x07] = value;
 		break;
 	}
 
@@ -194,10 +206,7 @@ void Mapper90::write_d(uint16_t address, uint8_t value) {
 
 	switch(address & 0x03) {
 	case 0x00:
-		// TODO: capture: .RN.....
-		prg_mode_ = (value & 0x07);
-		chr_mode_ = (value >> 3) & 0x03;
-		map_67_   = (value & 0x80);
+		bank_control_.raw = (value & ~0x20);
 		break;
 	case 0x01:
 		switch(value & 0x03) {
@@ -208,13 +217,10 @@ void Mapper90::write_d(uint16_t address, uint8_t value) {
 		}
 		break;
 	case 0x02:
-		// TODO: Mapper 211 NT control ?
+		// unknown
 		break;
 	case 0x03:
-		// CHR control?
-		chr_mirror_     = (value & 0x80);
-		chr_block_mode_ = (value & 0x20);
-		chr_block_      = (value & 0x1f);
+		chr_control_.raw = value;
 		break;
 	}
 
@@ -226,7 +232,7 @@ void Mapper90::write_d(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper90::sync_prg() {
 
-	switch(prg_mode_) {
+	switch(bank_control_.prg) {
 	case 0x00:
 		set_prg_67((prg_[3] * 4) + 3);
 		set_prg_89abcdef(-1);
@@ -275,7 +281,7 @@ void Mapper90::sync_prg() {
 		break;
 	}
 
-	if(!map_67_) {
+	if(!bank_control_.map_67) {
 		nes::cpu::unmap_67();
 	}
 }
@@ -285,62 +291,57 @@ void Mapper90::sync_prg() {
 //------------------------------------------------------------------------------
 void Mapper90::sync_chr() {
 
-	if(chr_block_mode_ == 0x00) {
-		// emulated manually by read_vram hook
+	if(chr_control_.mirror) {
+		switch(bank_control_.chr) {
+		case 0x00:
+			set_chr_0000_1fff((chr_lo_[0] | (chr_hi_[0] << 8)));
+			break;
+		case 0x01:
+			set_chr_0000_0fff((chr_lo_[0] | (chr_hi_[0] << 8)));
+			set_chr_1000_1fff((chr_lo_[4] | (chr_hi_[4] << 8)));
+			break;
+		case 0x02:
+			set_chr_0000_07ff((chr_lo_[0] | (chr_hi_[0] << 8)));
+			set_chr_0800_0fff((chr_lo_[2] | (chr_hi_[2] << 8)));
+			set_chr_1000_17ff((chr_lo_[0] | (chr_hi_[0] << 8)));
+			set_chr_1800_1fff((chr_lo_[6] | (chr_hi_[6] << 8)));
+			break;
+		case 0x03:
+			set_chr_0000_03ff((chr_lo_[0] | (chr_hi_[0] << 8)));
+			set_chr_0400_07ff((chr_lo_[1] | (chr_hi_[1] << 8)));
+			set_chr_0800_0bff((chr_lo_[2] | (chr_hi_[2] << 8)));
+			set_chr_0c00_0fff((chr_lo_[3] | (chr_hi_[3] << 8)));
+			set_chr_1000_13ff((chr_lo_[0] | (chr_hi_[0] << 8)));
+			set_chr_1400_17ff((chr_lo_[1] | (chr_hi_[1] << 8)));
+			set_chr_1800_1bff((chr_lo_[6] | (chr_hi_[6] << 8)));
+			set_chr_1c00_1fff((chr_lo_[7] | (chr_hi_[7] << 8)));
+			break;
+		}
 	} else {
-
-		if(chr_mirror_) {
-			switch(chr_mode_) {
-			case 0x00:
-				set_chr_0000_1fff(chr_[0]);
-				break;
-			case 0x01:
-				set_chr_0000_0fff(chr_[0]);
-				set_chr_1000_1fff(chr_[4]);
-				break;
-			case 0x02:
-				set_chr_0000_07ff(chr_[0]);
-				set_chr_0800_0fff(chr_[2]);
-				set_chr_1000_17ff(chr_[0]);
-				set_chr_1800_1fff(chr_[6]);
-				break;
-			case 0x03:
-				set_chr_0000_03ff(chr_[0]);
-				set_chr_0400_07ff(chr_[1]);
-				set_chr_0800_0bff(chr_[2]);
-				set_chr_0c00_0fff(chr_[3]);
-				set_chr_1000_13ff(chr_[0]);
-				set_chr_1400_17ff(chr_[1]);
-				set_chr_1800_1bff(chr_[6]);
-				set_chr_1c00_1fff(chr_[7]);
-				break;
-			}
-		} else {
-			switch(chr_mode_) {
-			case 0x00:
-				set_chr_0000_1fff(chr_[0]);
-				break;
-			case 0x01:
-				set_chr_0000_0fff(chr_[0]);
-				set_chr_1000_1fff(chr_[4]);
-				break;
-			case 0x02:
-				set_chr_0000_07ff(chr_[0]);
-				set_chr_0800_0fff(chr_[2]);
-				set_chr_1000_17ff(chr_[4]);
-				set_chr_1800_1fff(chr_[6]);
-				break;
-			case 0x03:
-				set_chr_0000_03ff(chr_[0]);
-				set_chr_0400_07ff(chr_[1]);
-				set_chr_0800_0bff(chr_[2]);
-				set_chr_0c00_0fff(chr_[3]);
-				set_chr_1000_13ff(chr_[4]);
-				set_chr_1400_17ff(chr_[5]);
-				set_chr_1800_1bff(chr_[6]);
-				set_chr_1c00_1fff(chr_[7]);
-				break;
-			}
+		switch(bank_control_.chr) {
+		case 0x00:
+			set_chr_0000_1fff((chr_lo_[0] | (chr_hi_[0] << 8)));
+			break;
+		case 0x01:
+			set_chr_0000_0fff((chr_lo_[0] | (chr_hi_[0] << 8)));
+			set_chr_1000_1fff((chr_lo_[4] | (chr_hi_[4] << 8)));
+			break;
+		case 0x02:
+			set_chr_0000_07ff((chr_lo_[0] | (chr_hi_[0] << 8)));
+			set_chr_0800_0fff((chr_lo_[2] | (chr_hi_[2] << 8)));
+			set_chr_1000_17ff((chr_lo_[4] | (chr_hi_[4] << 8)));
+			set_chr_1800_1fff((chr_lo_[6] | (chr_hi_[6] << 8)));
+			break;
+		case 0x03:
+			set_chr_0000_03ff((chr_lo_[0] | (chr_hi_[0] << 8)));
+			set_chr_0400_07ff((chr_lo_[1] | (chr_hi_[1] << 8)));
+			set_chr_0800_0bff((chr_lo_[2] | (chr_hi_[2] << 8)));
+			set_chr_0c00_0fff((chr_lo_[3] | (chr_hi_[3] << 8)));
+			set_chr_1000_13ff((chr_lo_[4] | (chr_hi_[4] << 8)));
+			set_chr_1400_17ff((chr_lo_[5] | (chr_hi_[5] << 8)));
+			set_chr_1800_1bff((chr_lo_[6] | (chr_hi_[6] << 8)));
+			set_chr_1c00_1fff((chr_lo_[7] | (chr_hi_[7] << 8)));
+			break;
 		}
 	}
 }
@@ -350,22 +351,33 @@ void Mapper90::sync_chr() {
 //------------------------------------------------------------------------------
 uint8_t Mapper90::read_vram(uint16_t address) {
 
-	if(chr_block_mode_ == 0x00) {
-
+	if(chr_control_.disabled) {
+		
 		// 256k blocks = 0x40000
-		const uint16_t block_offset = (chr_block_ * 0x40000);
+		const uint16_t block_offset = (chr_control_.block * 0x40000);
 		const uint8_t *const chr_rom = nes::cart.chr();
 		const uint32_t chr_mask      = nes::cart.chr_mask();
 
 		switch((address >> 10) & 0x0f) {
-		case 0x00: return chr_rom[((block_offset + ((chr_[0] & 0xff) * 0x400)) & chr_mask)];
-		case 0x01: return chr_rom[((block_offset + ((chr_[1] & 0xff) * 0x400)) & chr_mask)];
-		case 0x02: return chr_rom[((block_offset + ((chr_[2] & 0xff) * 0x400)) & chr_mask)];
-		case 0x03: return chr_rom[((block_offset + ((chr_[3] & 0xff) * 0x400)) & chr_mask)];
-		case 0x04: return chr_rom[((block_offset + ((chr_[4] & 0xff) * 0x400)) & chr_mask)];
-		case 0x05: return chr_rom[((block_offset + ((chr_[5] & 0xff) * 0x400)) & chr_mask)];
-		case 0x06: return chr_rom[((block_offset + ((chr_[6] & 0xff) * 0x400)) & chr_mask)];
-		case 0x07: return chr_rom[((block_offset + ((chr_[7] & 0xff) * 0x400)) & chr_mask)];
+		case 0x00: return chr_rom[((block_offset + (0x0 * 0x400)) & chr_mask)];
+		case 0x01: return chr_rom[((block_offset + (0x1 * 0x400)) & chr_mask)];
+		case 0x02: return chr_rom[((block_offset + (0x2 * 0x400)) & chr_mask)];
+		case 0x03: return chr_rom[((block_offset + (0x3 * 0x400)) & chr_mask)];
+		case 0x04: return chr_rom[((block_offset + (0x4 * 0x400)) & chr_mask)];
+		case 0x05: return chr_rom[((block_offset + (0x5 * 0x400)) & chr_mask)];
+		case 0x06: return chr_rom[((block_offset + (0x6 * 0x400)) & chr_mask)];
+		case 0x07: return chr_rom[((block_offset + (0x7 * 0x400)) & chr_mask)];
+		
+		/*
+		case 0x08: return chr_rom[((block_offset + (0x8 * 0x400)) & chr_mask)];
+		case 0x09: return chr_rom[((block_offset + (0x9 * 0x400)) & chr_mask)];
+		case 0x0a: return chr_rom[((block_offset + (0xa * 0x400)) & chr_mask)];
+		case 0x0b: return chr_rom[((block_offset + (0xb * 0x400)) & chr_mask)];
+		case 0x0c: return chr_rom[((block_offset + (0xc * 0x400)) & chr_mask)];
+		case 0x0d: return chr_rom[((block_offset + (0xd * 0x400)) & chr_mask)];
+		case 0x0e: return chr_rom[((block_offset + (0xe * 0x400)) & chr_mask)];
+		case 0x0f: return chr_rom[((block_offset + (0xf * 0x400)) & chr_mask)];
+		*/
 		}
 	}
 

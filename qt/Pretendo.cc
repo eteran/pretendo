@@ -61,7 +61,7 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 	ui_.toolBar->addWidget(fps_label_);
 
 	QStringList filters;
-	filters << "*.nes";
+	filters << "*.nes" << "*.nes.gz";
 
 	filesystem_model_ = new QFileSystemModel(this);
 	filesystem_model_->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDot);
@@ -153,7 +153,7 @@ void Pretendo::update() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Load_ROM_triggered() {
 
-	const QString rom = QFileDialog::getOpenFileName(this, tr("Open ROM File"), QString(), tr("iNES ROM Images (*.nes)"));
+	const QString rom = QFileDialog::getOpenFileName(this, tr("Open ROM File"), QString(), tr("iNES ROM Images (*.nes *.nes.gz)"));
 	if(!rom.isNull()) {
 		on_action_Stop_triggered();
 		on_action_Free_ROM_triggered();

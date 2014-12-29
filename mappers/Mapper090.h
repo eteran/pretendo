@@ -3,8 +3,26 @@
 #define MAPPER090_20080314_H_
 
 #include "Mapper.h"
+#include "BitField.h"
 
 class Mapper90 : public Mapper {
+private:
+	union BankControl {
+		uint8_t raw;
+		BitField<0,3> prg;
+		BitField<3,2> chr;
+		BitField<5>   n;
+		BitField<6>   r;
+		BitField<6>   map_67;
+		
+	};
+	
+	union ChrControl {
+		uint8_t raw;
+		BitField<0,5> block;	
+		BitField<5>   disabled;
+		BitField<7>   mirror;
+	};
 public:
 	Mapper90();
 
@@ -31,20 +49,16 @@ private:
 	void sync_chr();
 
 private:
-	uint16_t chr_[8];
-	uint8_t  prg_[4];
+	uint8_t chr_hi_[8];
+	uint8_t chr_lo_[8];
+	uint8_t prg_[4];
 
-	uint8_t  map_67_;
-	uint8_t  prg_mode_;
-	uint8_t  chr_mode_;
+	BankControl bank_control_;
+	ChrControl  chr_control_;
 
-	uint8_t  chr_mirror_;
-	uint8_t  chr_block_mode_;
-	uint8_t  chr_block_;
-
-	uint8_t  multiply_1_;
-	uint8_t  multiply_2_;
-	uint8_t  prg_ram_;
+	uint8_t multiply_1_;
+	uint8_t multiply_2_;
+	uint8_t prg_ram_;
 };
 
 #endif
