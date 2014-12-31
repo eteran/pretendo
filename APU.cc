@@ -62,7 +62,7 @@ APUStatus       status              = {0};
 APUFrameCounter frame_counter_      = {0};
 uint8_t         last_frame_counter_ = 0;
 size_t          sample_index_       = 0;
-uint8_t         sample_buffer_[buffer_size];
+uint8_t         sample_buffer_[buffer_size + 16];
 
 void clock_frame_mode_0();
 void clock_frame_mode_1();
