@@ -221,8 +221,8 @@ SOURCES += \
 
 RESOURCES += qt/pretendo.qrc
 
-DEPENDPATH  += p6502
-INCLUDEPATH += p6502
+DEPENDPATH  += $$_PRO_FILE_PWD_ p6502
+INCLUDEPATH += $$_PRO_FILE_PWD_ p6502
 
 HEADERS += \
 	p6502/address_modes/zero_page_x.h \

@@ -29,8 +29,8 @@ public:
 
 public:
 	// the standard mapper interface
-	virtual void save()		{};
-	virtual void restore()	{};
+	virtual void save()		{}
+	virtual void restore()	{}
 	virtual std::string name() const = 0;
 
 protected:

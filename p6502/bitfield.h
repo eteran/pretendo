@@ -42,7 +42,7 @@ public:
 	}
 
 	operator T() const             { return (value_ >> Index) & Mask; }
-	explicit operator bool() const { return value_ & (Mask << Index); }
+	explicit operator bool() const { return (value_ & (Mask << Index)) != 0; }
 	bitfield &operator++()         { return *this = *this + 1; }
 	T operator++(int)              { T r = *this; ++*this; return r; }
 	bitfield &operator--()         { return *this = *this - 1; }
@@ -70,7 +70,8 @@ public:
 		return *this;
 	}
 
-	operator bool() const { return value_ & (Mask << Index); }
+	operator bool() const  { return (value_ & (Mask << Index)) != 0; }
+	bool operator!() const { return (value_ & (Mask << Index)) == 0; }
 	
 private:
 	T value_;

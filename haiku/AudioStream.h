@@ -3,14 +3,16 @@
 #define _AUDIO_STREAM_H_
 
 #include <SoundPlayer.h>
-#include <boost/noncopyable.hpp>
 
-
-class AudioStream : public boost::noncopyable 
+class AudioStream
 {
 	public:
 			AudioStream (float sampleRate, int32 sampleBits, int32 	channels, int32 bufferSize);
 	virtual ~AudioStream();
+	
+	private:
+		AudioStream(const AudioStream &) = delete;
+		AudioStream& operator=(const AudioStream &) = delete;
 	
 	public:
 	void Stream (const void *stream, size_t numSamples);
