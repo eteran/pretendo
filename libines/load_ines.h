@@ -83,7 +83,9 @@ typedef struct {
 /* functions for loading and freeing a iNES file */
 INES_RETURN_CODE free_file_INES(ines_cart_t *cart);
 INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart);
+#ifdef __linux__
 INES_RETURN_CODE load_gzip_INES(const char *filename, ines_cart_t *cart);
+#endif
 INES_RETURN_CODE write_file_INES(const char *filename, const ines_cart_t *cart);
 
 /* API access to iNES data, works with version 2.0 ROMs as well */

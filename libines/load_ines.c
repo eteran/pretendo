@@ -22,7 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+
+#ifdef __linux__
 #include <zlib.h>
+#endif
 
 /* Flags in ines_header_t.ctrl1 */
 #define INES_MIRROR  0x01
@@ -266,6 +269,7 @@ INES_RETURN_CODE write_file_INES(const char *filename, const ines_cart_t *cart) 
 	return retcode;
 }
 
+#ifdef __linux__
 /*-----------------------------------------------------------------------------
 // Name: load_gzip_INES
 //---------------------------------------------------------------------------*/
@@ -407,6 +411,7 @@ error:
 	gzclose(file);
 	return retcode;
 }
+#endif
 
 /*-----------------------------------------------------------------------------
 // Name: load_file_INES
@@ -451,11 +456,12 @@ INES_RETURN_CODE load_file_INES(const char *filename, ines_cart_t *cart) {
 	rewind(file);
 	
 	/* is it a gzip file? */
+#ifdef __linux__
 	if(magic[0] == 0x1f && magic[1] == 0x8b) {
-		fclose(file);
+		fclose(file);	
 		return load_gzip_INES(filename, cart);
 	}
-	
+#endif	
 	if((retcode = read_header_INES(file, &header)) != INES_OK) {
 		goto error;
 	}
