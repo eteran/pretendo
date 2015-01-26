@@ -43,6 +43,7 @@ bool flag_z();
 
 uint64_t cycle_count();
 void clear_irq(IRQ_SOURCE source);
+void clear_nmi();
 void exec(int cycles);
 void irq(IRQ_SOURCE source);
 void nmi();

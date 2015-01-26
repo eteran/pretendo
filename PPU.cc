@@ -269,8 +269,7 @@ void write2000(uint8_t value) {
 		return;
 	}
 
-	const bool prev_nmi_on_vblank = ppu_control_.nmi_on_vblank;
-
+	const PPUControl prev_control = ppu_control_;
 	ppu_control_.raw = value;
 
 	// name table address
@@ -278,10 +277,18 @@ void write2000(uint8_t value) {
 	nametable_ &= 0xf3ff;
 	nametable_ |= (value & 0x03) << 10;
 
+#if 0
 	// we can re-trigger an NMI ...
-	if(!prev_nmi_on_vblank && ppu_control_.nmi_on_vblank && status_.vblank) {
+	if(!prev_control.nmi_on_vblank && ppu_control_.nmi_on_vblank && status_.vblank) {
 		cpu::nmi();
 	}
+#else
+	if(prev_control.nmi_on_vblank && !ppu_control_.nmi_on_vblank) {
+		cpu::clear_nmi();
+	} else if(!prev_control.nmi_on_vblank && ppu_control_.nmi_on_vblank && status_.vblank && hpos_ != 0) {
+		cpu::nmi();
+	}
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -961,7 +968,7 @@ uint8_t select_pixel(uint8_t index) {
 						// NOTE: according to blargg's tests, a collision doesn't seem
 						//       possible to occur on the rightmost pixel
 					#ifndef SPRITE_ZERO_HACK
-						if(p->zero && (pixel & 0x03) && (index < 255)) {
+						if(p->zero && (index < 255) && (pixel & 0x03)) {
 					#else
 						if(p->zero && (index < 255)) {
 					#endif

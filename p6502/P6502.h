@@ -52,6 +52,7 @@ void stop();
 void irq();
 void nmi();
 void reset_irq();
+void reset_nmi();
 void run(int cycles);
 void schedule_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count, DMA_SOURCE source);
 
