@@ -28,6 +28,7 @@ private:
 public:
 	void enable();
 	void disable();
+	void set_enabled(bool value);
 
 public:
 	void write_reg0(uint8_t value);

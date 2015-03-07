@@ -63,11 +63,16 @@ bool AudioBuffer::atEnd() const {
 qint64 AudioBuffer::bytesAvailable() const {
 	//QReadLocker lock(&lock_);
 	
+	qint64 ret;
+	
 	if(write_pos_ > read_pos_) {
-		return write_pos_ - read_pos_;
+		ret = write_pos_ - read_pos_;
 	} else {
-		return sizeof(buffer_) - read_pos_ + write_pos_;
+		ret = sizeof(buffer_) - read_pos_ + write_pos_;
 	}
+	
+	Q_ASSERT(ret > 0);
+	return ret;
 }
 
 bool AudioBuffer::isSequential() const {

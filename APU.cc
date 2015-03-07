@@ -268,35 +268,11 @@ void write4015(uint8_t value) {
 	// Writing to this register clears the DMC interrupt flag.
 	status.dmc_irq = false;
 
-	if(value & STATUS_ENABLE_SQUARE_1) {
-		square_0.enable();
-	} else {
-		square_0.disable();
-	}
-
-	if(value & STATUS_ENABLE_SQUARE_2) {
-		square_1.enable();
-	} else {
-		square_1.disable();
-	}
-
-	if(value & STATUS_ENABLE_TRIANGLE) {
-		triangle.enable();
-	} else {
-		triangle.disable();
-	}
-
-	if(value & STATUS_ENABLE_NOISE) {
-		noise.enable();
-	} else {
-		noise.disable();
-	}
-
-	if(value & STATUS_ENABLE_DMC) {
-		dmc.enable();
-	} else {
-		dmc.disable();
-	}
+	square_0.set_enabled(value & STATUS_ENABLE_SQUARE_1);
+	square_1.set_enabled(value & STATUS_ENABLE_SQUARE_2);
+	triangle.set_enabled(value & STATUS_ENABLE_TRIANGLE);
+	noise.set_enabled(value & STATUS_ENABLE_NOISE);
+	dmc.set_enabled(value & STATUS_ENABLE_DMC);
 
 	if(!status.irq_firing) {
 		cpu::clear_irq(cpu::APU_IRQ);
@@ -525,27 +501,18 @@ const uint8_t *buffer() {
 //------------------------------------------------------------------------------
 uint8_t mix_channels() {
 
-	const uint8_t pulse1_out   = square_0.output();
-	const uint8_t pulse2_out   = square_1.output();
-	const uint8_t triangle_out = triangle.output();
-	const uint8_t noise_out    = noise.output();
-	const uint8_t dmc_out      = dmc.output();
+	const int pulse1_out   = square_0.output();
+	const int pulse2_out   = square_1.output();
+	const int triangle_out = triangle.output();
+	const int noise_out    = noise.output();
+	const int dmc_out      = dmc.output();
 
-#if 0
-	float pulse_volume = 0;
-	float tnd_volume   = 0;
-
-	if(pulse1_out || pulse2_out) {
-		pulse_volume = 95.88 / ((8128.0 / (pulse1_out + pulse2_out)) + 100.0);
-	}
-
-	if(triangle_out || noise_out || dmc_out) {
-		tnd_volume = 159.79 / ((1 / ((triangle_out / 8227.0) + (noise_out / 12241.0) + (dmc_out / 22638.0))) + 100.0);
-	}
-
-	int result = (pulse_volume + tnd_volume) * 0x100;
+#if 1
+	const double pulse_out = 0.00752 * (pulse1_out + pulse2_out);    
+	const double tnd_out = 0.00851 * triangle_out + 0.00494 * noise_out + 0.00335 * dmc_out;
+	const int result = (pulse_out + tnd_out) * 255.0;
 #else
-	int result = (
+	const int result = (
 		pulse1_out   +
 		pulse2_out   +
 		triangle_out +

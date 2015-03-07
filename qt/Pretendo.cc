@@ -21,8 +21,8 @@
 
 #if defined(QT_SOUND)
 #include "QtAudio.h"
-#elif defined(SDL_SOUND)
-#include "SDLAudio.h"
+#elif defined(PULSE_AUDIO_SOUND)
+#include "PulseAudio.h"
 #elif defined(ALSA_SOUND)
 #include "AlsaAudio.h"
 #else
@@ -85,8 +85,8 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 
 #if defined(QT_SOUND)
 	audio_ = new QtAudio(this);
-#elif defined(SDL_SOUND)
-	audio_ = new SDLAudio();
+#elif defined(PULSE_AUDIO_SOUND)
+	audio_ = new PulseAudio();
 #elif defined(ALSA_SOUND)
 	audio_ = new AlsaAudio();
 #else

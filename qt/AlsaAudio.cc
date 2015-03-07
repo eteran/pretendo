@@ -42,10 +42,10 @@ AlsaAudio::~AlsaAudio() {
 void AlsaAudio::write(const void *p, size_t n) {
 
 	if(handle_) {
-		if(snd_pcm_state(handle_) == SND_PCM_STATE_XRUN) {
-			snd_pcm_prepare(handle_);
+		int state = snd_pcm_writei(handle_, p, n);
+		if(state < 0) {
+			snd_pcm_recover(handle_, state, 0);
 		}
-		snd_pcm_writei(handle_, p, n);
 	}
 }
 

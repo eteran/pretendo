@@ -2,7 +2,9 @@
 #ifndef ALSA_AUDIO_20130124_H_
 #define ALSA_AUDIO_20130124_H_
 
+#include "APU.h"
 #include <alsa/asoundlib.h>
+#include <cstdint>
 
 class AlsaAudio {
 public:

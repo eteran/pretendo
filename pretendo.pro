@@ -337,13 +337,13 @@ asound {
 	HEADERS -= qt/NullAudio.h
 }
 
-sdlsound {
-	DEFINES += SDL_SOUND
+pulseaudio {
+	DEFINES += PULSE_AUDIO_SOUND
 
-	SOURCES += qt/SDLAudio.cc
-	HEADERS += qt/SDLAudio.h
+	SOURCES += qt/PulseAudio.cc
+	HEADERS += qt/PulseAudio.h
 
-	LIBS    += $$system(sdl-config --libs)
+	LIBS    += -lpulse -lpulse-simple
 
 	SOURCES -= qt/NullAudio.cc
 	HEADERS -= qt/NullAudio.h

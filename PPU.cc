@@ -121,6 +121,7 @@ public:
 
 
 // internal variables
+SpriteEntry* current_sprite_         = nullptr;
 VRAMBank     vram_banks_[0x10];
 uint8_t      sprite_ram_[0x100];
 SpriteEntry  sprite_data_[8];
@@ -676,14 +677,15 @@ uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
 void open_sprite_pattern() {
-	const SpriteEntry &sprite_entry = sprite_data_[((hpos_ - 1) >> 3) & 0x07];
 
-	if(sprite_entry.y != 0xff) {
-		const uint8_t index = sprite_entry.index;
-		uint8_t sprite_line = sprite_entry.y;
+	current_sprite_ = &sprite_data_[((hpos_ - 1) >> 3) & 0x07];
+
+	if(current_sprite_->y != 0xff) {
+		const uint8_t index = current_sprite_->index;
+		uint8_t sprite_line = current_sprite_->y;
 
 		// vertical flip
-		if(sprite_entry.vflip) {
+		if(current_sprite_->vflip) {
 			if(Size == 16) {
 				sprite_line ^= 0x0F;
 			} else {
@@ -706,18 +708,17 @@ void open_sprite_pattern() {
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
 void read_sprite_pattern() {
-	SpriteEntry& sprite_entry = sprite_data_[((hpos_ - 1) >> 3) & 0x07];
 
 	uint8_t pattern = cart.mapper()->read_vram(next_ppu_fetch_address_);
 
-	if(sprite_entry.y != 0xff) {
+	if(current_sprite_->y != 0xff) {
 		// horizontal flip
-		if(sprite_entry.hflip) {
+		if(current_sprite_->hflip) {
 			pattern = reverse_bits[pattern];
 		}
 	}
 	
-	sprite_entry.pattern[Pattern::index] = pattern;
+	current_sprite_->pattern[Pattern::index] = pattern;
 }
 
 //------------------------------------------------------------------------------
@@ -942,13 +943,14 @@ uint8_t select_pixel(uint8_t index) {
 				// is this sprite visible on this pixel?
 				if(x_offset < 8) {
 
-					const uint8_t p0 = p->pattern[0];
-					const uint8_t p1 = p->pattern[1];
+					const uint8_t  p0 = p->pattern[0];
+					const uint8_t  p1 = p->pattern[1];
+					const uint16_t shift = 7 - x_offset;
 
 				#if 1
 					const uint8_t sprite_pixel =
-							(((p0 >> (7 - x_offset)) & 0x01) << 0x00) |
-							(((p1 >> (7 - x_offset)) & 0x01) << 0x01);
+							(((p0 >> shift) & 0x01) << 0x00) |
+							(((p1 >> shift) & 0x01) << 0x01);
 				#else
 					switch(x_offset) {
 					case 0: sprite_pixel = ((p0 >> 7) & 0x01) | ((p1 >> 6) & 0x02); break;
@@ -1197,7 +1199,8 @@ void update_vram_address() {
 //------------------------------------------------------------------------------
 void execute_cycle(const scanline_prerender &) {
 
-	// nmi_on_timing passes when this is 0...
+	assert(vpos_ == 0);
+
 	if(hpos_ == 1) {
 		exit_vblank();
 	}
@@ -1275,7 +1278,9 @@ void execute_cycle(const scanline_prerender &) {
 			// dummy fetches
 			case 337: open_tile_index(); break;
 			case 338: read_tile_index(); break;
-			case 339: open_tile_index(); break;
+            case 339: open_tile_index(); if(odd_frame_) {
+                    ++hpos_;
+                } break; // skip one clock if the first visible line on odd frames
 			case 340: read_tile_index(); break;
 			default:
 				abort();
@@ -1305,13 +1310,13 @@ void execute_cycle(const scanline_render &target) {
 		}
 	} else {
 
-		// skip one clock if the first visible line on odd frames
-		if(odd_frame_ && vpos_ == 1 && hpos_ == 0) {
-			++hpos_;
-		}
-
 		if(hpos_ < 1) {
-			// idle
+			// the first clock is acts like the last clock of the pre-render if we skipped a cycle
+			if(odd_frame_ && vpos_ == 1 && hpos_ == 0) {
+				read_tile_index();
+			} else {
+				// idle
+			}
 		} else if(hpos_ < 257) {
 			switch(hpos_ & 0x07) {
 			case 1: render_pixel(target.buffer); evaluate_sprites_odd();  open_tile_index(); break;
@@ -1426,6 +1431,9 @@ uint16_t background_pattern_table() {
 template <class T>
 void execute_scanline(const T &target) {
 	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
+	#if 0
+		printf("PPU Executing: HPOS: %d, VPOS: %d, ODD: %d, ENABLED: %02x\n", hpos_, vpos_, odd_frame_, (int)ppu_mask_.screen_enabled);
+	#endif
 		execute_cycle(target);
 		clock_cpu();
 	}

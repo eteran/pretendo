@@ -16,8 +16,8 @@ class Preferences;
 
 #if defined(QT_SOUND)
 	class QtAudio;
-#elif defined(SDL_SOUND)
-	class SDLAudio;
+#elif defined(PULSE_AUDIO_SOUND)
+	class PulseAudio;
 #elif defined(ALSA_SOUND)
 	class AlsaAudio;
 #else
@@ -74,8 +74,8 @@ private:
 	bool                   paused_;
 #if defined(QT_SOUND)
 	QtAudio *audio_;
-#elif defined(SDL_SOUND)
-	SDLAudio *audio_;
+#elif defined(PULSE_AUDIO_SOUND)
+	PulseAudio *audio_;
 #elif defined(ALSA_SOUND)
 	AlsaAudio *audio_;
 #else
