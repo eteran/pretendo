@@ -31,12 +31,6 @@ public:
 public:
 	bool writeable() const   { return writeable_; }
 
-public:
-	void set_pointer(uint8_t *p, bool writeable) {
-		ptr_       = p;
-		writeable_ = writeable;
-	}
-
 private:
 	uint8_t* ptr_;
 	bool     writeable_;

@@ -75,20 +75,51 @@ void QtVideo::initializeGL() {
 // Name: submit_scanline
 //------------------------------------------------------------------------------
 void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source) {
-	uint32_t *const s = scanlines_[scanline];
+	
 	const uint32_t *const palette = palette_[intensity];
 	
+#if 1
+	uint64_t *s = reinterpret_cast<uint64_t *>(scanlines_[scanline]);
+	for(int i = 0; i < Width; ) {
+	
+		// this approach will try to read 32-bits from the source at a time...
+		const uint32_t pixels = *reinterpret_cast<const uint32_t *>(source + i);
+		const uint8_t pix0 = (pixels >> 0x00) & 0xff;
+		const uint8_t pix1 = (pixels >> 0x08) & 0xff;
+		const uint8_t pix2 = (pixels >> 0x10) & 0xff;
+		const uint8_t pix3 = (pixels >> 0x18) & 0xff;
+	
+		// collect them into 128-bits of data (unfonately with some indirection)
+		uint64_t value0 = 
+			(static_cast<uint64_t>(palette[pix0]) << 0) |
+			(static_cast<uint64_t>(palette[pix1]) << 32);
+
+		uint64_t value1 = 
+			(static_cast<uint64_t>(palette[pix2]) << 0) |
+			(static_cast<uint64_t>(palette[pix3]) << 32);
+	
+	
+		// then write them, this will help the rendering be much more
+		// cache friendly
+		*s++ = value0;
+		*s++ = value1;
+		
+		i += 4;
+	}
+#else
+	uint32_t *const s = scanlines_[scanline];
 	std::transform(source, source + Width, s, [palette](uint8_t index) {
 		return palette[index];
 	});
+#endif
 }
 
 //------------------------------------------------------------------------------
 // Name: set_palette
 //------------------------------------------------------------------------------
 void QtVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal) {
-	assert(pal != 0);
-	assert(intensity != 0);
+	assert(pal);
+	assert(intensity);
 
 	for(int j = 0; j < 8; j++) {
 		for(int i = 0; i < 64; i++) {

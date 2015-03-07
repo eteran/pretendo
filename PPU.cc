@@ -592,16 +592,16 @@ void set_mirroring(uint8_t mir) {
 	// single lo:  00000000b, or $00
 	// single hi:  01010101b, or $55
 
-	vram_banks_[0x08].set_pointer(&nametables_[(mir << 0xa) & 0x0c00], true);
-	vram_banks_[0x09].set_pointer(&nametables_[(mir << 0x8) & 0x0c00], true);
-	vram_banks_[0x0a].set_pointer(&nametables_[(mir << 0x6) & 0x0c00], true);
-	vram_banks_[0x0b].set_pointer(&nametables_[(mir << 0x4) & 0x0c00], true);
+	vram_banks_[0x08] = VRAMBank(&nametables_[(mir << 0xa) & 0x0c00], true);
+	vram_banks_[0x09] = VRAMBank(&nametables_[(mir << 0x8) & 0x0c00], true);
+	vram_banks_[0x0a] = VRAMBank(&nametables_[(mir << 0x6) & 0x0c00], true);
+	vram_banks_[0x0b] = VRAMBank(&nametables_[(mir << 0x4) & 0x0c00], true);
 
 	// [$3000, $4000) mirrors [$2000, $3000)
-	vram_banks_[0x0c].set_pointer(&nametables_[(mir << 0xa) & 0x0c00], true);
-	vram_banks_[0x0d].set_pointer(&nametables_[(mir << 0x8) & 0x0c00], true);
-	vram_banks_[0x0e].set_pointer(&nametables_[(mir << 0x6) & 0x0c00], true);
-	vram_banks_[0x0f].set_pointer(&nametables_[(mir << 0x4) & 0x0c00], true);
+	vram_banks_[0x0c] = VRAMBank(&nametables_[(mir << 0xa) & 0x0c00], true);
+	vram_banks_[0x0d] = VRAMBank(&nametables_[(mir << 0x8) & 0x0c00], true);
+	vram_banks_[0x0e] = VRAMBank(&nametables_[(mir << 0x6) & 0x0c00], true);
+	vram_banks_[0x0f] = VRAMBank(&nametables_[(mir << 0x4) & 0x0c00], true);
 }
 
 //------------------------------------------------------------------------------

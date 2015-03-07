@@ -34,7 +34,7 @@ private:
 	virtual void clock_irq() = 0;
 
 protected:
-	uint8_t chr_ram_[0x10000]; // we should get this from iNES 2.0, 
+	uint8_t chr_ram_[0x40000]; // we should get this from iNES 2.0, 
 							   // but this seems to do for now
 	uint8_t prg_ram_[0x2000];
 	uint8_t chr_bank_[8];

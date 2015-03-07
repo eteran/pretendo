@@ -28,10 +28,10 @@ Q_SIGNALS:
 	void render_frame();
 
 private:
+	uint32_t *scanlines_[240];
 	uint32_t  palette_[8][64];
 	uint32_t *buffer_;
 	GLuint    texture_;
-	uint32_t *scanlines_[240];
 };
 
 #endif
