@@ -1,3 +1,6 @@
 [submodule "libunif"]
 	path = libunif
 	url = https://github.com/eteran/libunif
+[submodule "libines"]
+	path = libines
+	url = https://github.com/eteran/libines
