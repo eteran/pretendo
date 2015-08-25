@@ -11,11 +11,11 @@
 namespace nes {
 namespace apu {
 namespace {
-	
+
 enum {
-	STATUS_DMC_IRQ  	   = 0x80,
-	STATUS_FRAME_IRQ	   = 0x40,
-	STATUS_ENABLE_DMC	   = 0x10,
+	STATUS_DMC_IRQ         = 0x80,
+	STATUS_FRAME_IRQ       = 0x40,
+	STATUS_ENABLE_DMC      = 0x10,
 	STATUS_ENABLE_NOISE    = 0x08,
 	STATUS_ENABLE_TRIANGLE = 0x04,
 	STATUS_ENABLE_SQUARE_2 = 0x02,
@@ -101,7 +101,7 @@ void reset(Reset reset_type) {
 	write4007(00);
 
 	// triangle
-//	write4008(10); // triangle is unaffected..
+	//write4008(10); // triangle is unaffected..
 	write400A(00);
 	write400B(00);
 
@@ -508,7 +508,7 @@ uint8_t mix_channels() {
 	const int dmc_out      = dmc.output();
 
 #if 1
-	const double pulse_out = 0.00752 * (pulse1_out + pulse2_out);    
+	const double pulse_out = 0.00752 * (pulse1_out + pulse2_out);
 	const double tnd_out = 0.00851 * triangle_out + 0.00494 * noise_out + 0.00335 * dmc_out;
 	const int result = (pulse_out + tnd_out) * 255.0;
 #else

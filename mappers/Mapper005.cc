@@ -486,8 +486,8 @@ uint8_t Mapper5::read_vram(uint16_t address) {
 	}
 
 
-//	VSPLIT_RIGHT  = 0x40,
-//	VSPLIT_TILE   = 0x1f
+// VSPLIT_RIGHT  = 0x40,
+// VSPLIT_TILE   = 0x1f
 
 	switch((address >> 10) & 0x0f) {
 	case 0x08:

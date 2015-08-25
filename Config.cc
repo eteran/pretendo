@@ -111,7 +111,7 @@ Config::Config()
 	filename_ = ("~/.pretendo");
 	struct stat st;
 
-	if (stat(filename_.c_str(), &st) != 0 && ! (S_ISDIR(st.st_mode))) {
+	if(stat(filename_.c_str(), &st) != 0 && ! (S_ISDIR(st.st_mode))) {
 		mkdir(filename_.c_str(), 0777);
 		filename_ += "/pretendo.conf";
 	}

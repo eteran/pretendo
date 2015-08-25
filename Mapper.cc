@@ -19,11 +19,11 @@ Mapper::Mapper() {
 	// NOTE: we're not supporting trainers anymore, that's why the code is gone
 
 	switch(nes::cart.mirroring()) {
-	case Cart::MIR_VERTICAL:	nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
-	case Cart::MIR_HORIZONTAL:	nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
-	case Cart::MIR_SINGLE_LOW:	nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
-	case Cart::MIR_SINGLE_HIGH:	nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
-	case Cart::MIR_4SCREEN:		nes::ppu::set_mirroring(nes::ppu::mirror_4screen);     break;
+	case Cart::MIR_VERTICAL:    nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
+	case Cart::MIR_HORIZONTAL:  nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
+	case Cart::MIR_SINGLE_LOW:  nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
+	case Cart::MIR_SINGLE_HIGH: nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
+	case Cart::MIR_4SCREEN:     nes::ppu::set_mirroring(nes::ppu::mirror_4screen);     break;
 	case Cart::MIR_MAPPER:
 	default:
 		// Nothing, handled by Mapper
@@ -58,8 +58,7 @@ Mapper::~Mapper() {
 	nes::ppu::unset_vram_bank(12);
 	nes::ppu::unset_vram_bank(13);
 	nes::ppu::unset_vram_bank(14);
-	nes::ppu::unset_vram_bank(15);	
-	
+	nes::ppu::unset_vram_bank(15);
 }
 
 //------------------------------------------------------------------------------

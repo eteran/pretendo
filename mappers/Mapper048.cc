@@ -173,9 +173,9 @@ void Mapper48::clock_irq() {
 		irq_reload_ = true;
 	}
 #ifdef MMC3A_STYLE
-	if (irq_enabled_ && irq_counter_ == 0 && irq_reload_) {
+	if(irq_enabled_ && irq_counter_ == 0 && irq_reload_) {
 #else
-	if (irq_enabled_ && irq_counter_ == 0) {
+	if(irq_enabled_ && irq_counter_ == 0) {
 #endif
 		nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 	}

@@ -157,9 +157,9 @@ void Mapper18::cpu_sync() {
 	
 	if(irq_control_.mode_4bit) {
 		wrap = (--irq_counter_.counter_4bit == 0);
-	} else 	if(irq_control_.mode_8bit) {
+	} else if(irq_control_.mode_8bit) {
 		wrap = (--irq_counter_.counter_8bit == 0);
-	} else 	if(irq_control_.mode_12bit) {
+	} else if(irq_control_.mode_12bit) {
 		wrap = (--irq_counter_.counter_12bit == 0);
 	} else {
 		wrap = (--irq_counter_.counter_16bit == 0);

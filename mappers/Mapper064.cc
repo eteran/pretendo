@@ -260,7 +260,7 @@ void Mapper64::clock_irq() {
 		irq_reload_ = true;
 	}
 
-	if (irq_enabled_ && irq_counter_ == 0) {
+	if(irq_enabled_ && irq_counter_ == 0) {
 		nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 	}
 

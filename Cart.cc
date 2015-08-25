@@ -200,5 +200,5 @@ std::vector<uint8_t> Cart::raw_image() const {
 		image.insert(image.end(), chr_rom, chr_rom + cart_.chr_size);
 	}
 
- 	return image;
+	return image;
 }

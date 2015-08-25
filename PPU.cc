@@ -727,9 +727,11 @@ void read_sprite_pattern() {
 void evaluate_sprites_even() {
 	// write cycle
 	if(hpos_ < 64) {
-//		uint8_t index = hpos_ >> 1;
-//		sprite_data_[(index >> 2) & 0x07].sprite_bytes[index & 0x03] = sprite_buffer_;
-//		printf("SETTING: S-OAM[%d][%d] = %02x\n", (index >> 2) & 0x07, index & 0x03, sprite_buffer_);
+#if 0
+		uint8_t index = hpos_ >> 1;
+		sprite_data_[(index >> 2) & 0x07].sprite_bytes[index & 0x03] = sprite_buffer_;
+		printf("SETTING: S-OAM[%d][%d] = %02x\n", (index >> 2) & 0x07, index & 0x03, sprite_buffer_);
+#endif
 	} else if(hpos_ == 256) {
 		// TODO: do this part incrementally during cycles 0-255 like the real thing
 		if(ppu_control_.large_sprites) {
@@ -1345,8 +1347,8 @@ void execute_cycle(const scanline_render &target) {
 
 			// fetch first 2 tiles of NEXT scanline
 			switch(hpos_ & 0x07) {
-			case 1: open_tile_index(); break;			// open the bus for nametable fetch
-			case 2: read_tile_index(); break;			// fetch the name table byte
+			case 1: open_tile_index(); break;           // open the bus for nametable fetch
+			case 2: read_tile_index(); break;           // fetch the name table byte
 			case 3: open_background_attribute(); break; // open the bus for the attribute fetch
 			case 4: read_background_attribute(); break; // fetch the attributes
 			case 5: open_background_pattern<pattern_0>(); break; // open the bus for pattern A fetch

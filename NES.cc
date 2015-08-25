@@ -37,7 +37,7 @@ namespace {
 void execute_scanline_0_19() {
 
 	/*
-	 * 0..19:	Starting at the instant the VINT flag is pulled down (when a NMI is
+	 * 0..19:  Starting at the instant the VINT flag is pulled down (when a NMI is
 	 * generated), 20 scanlines make up the period of time on the PPU which I like
 	 * to call the VINT period. During this time, the PPU makes no access to it's
 	 * external memory (i.e. name / pattern tables, etc.).
@@ -54,7 +54,7 @@ void execute_scanline_0_19() {
 void execute_scanline_20() {
 
 	/*
-	 * 20:	After 20 scanlines worth of time go by (since the VINT flag was set),
+	 * 20:  After 20 scanlines worth of time go by (since the VINT flag was set),
 	 * the PPU starts to render scanlines. This first scanline is a dummy one;
 	 * although it will access it's external memory in the same sequence it would
 	 * for drawing a valid scanline, no on-screen pixels are rendered during this
@@ -99,7 +99,7 @@ void execute_scanline_21_260(VideoInterface *video) {
 void execute_scanline_261() {
 
 	/*
-	 * 261:	after the very last rendered scanline finishes, the PPU does nothing
+	 * 261:  after the very last rendered scanline finishes, the PPU does nothing
 	 * for 1 scanline (i.e. the programmer gets screwed out of perfectly good VINT
 	 * time). When this scanline finishes, the VINT flag is set, and the process of
 	 * drawing lines starts all over again.

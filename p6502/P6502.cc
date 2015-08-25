@@ -459,8 +459,6 @@ void execute_opcode() {
 //------------------------------------------------------------------------------
 void clock() {
 
-	assert(cycle_ < 10);
-	
 	if(dmc_dma_count_) {
 
 		// the count will always be initially even (we multiply by 2)
@@ -498,6 +496,8 @@ void clock() {
 		}
 		
 	} else {
+		assert(cycle_ < 10);
+		
 		if(cycle_ == 0) {
 
 			// first cycle is always instruction fetch
