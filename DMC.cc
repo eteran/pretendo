@@ -21,7 +21,7 @@ const uint16_t frequency_table[16] = {
 //------------------------------------------------------------------------------
 // Name: DMC
 //------------------------------------------------------------------------------
-DMC::DMC() : muted_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), bits_remaining_(0), control_({0}) {
+DMC::DMC() : muted_(false), sample_pointer_(0xc000), sample_address_(0xc000), bytes_remaining_(0), sample_length_(0), bits_remaining_(0), output_(0), control_({0}) {
 }
 
 //------------------------------------------------------------------------------
