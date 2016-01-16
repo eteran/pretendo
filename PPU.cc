@@ -1134,9 +1134,9 @@ void render_pixel(uint8_t *dest_buffer) {
 	const uint8_t pixel = select_pixel(index);
 
 	if(ppu_mask_.monochrome) {
-		dest_buffer[index] = palette_[pixel & 0x03 ? pixel : 0x00] & 0x30;
+		dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00] & 0x30;
 	} else {
-		dest_buffer[index] = palette_[pixel & 0x03 ? pixel : 0x00];
+		dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00];
 	}
 
 	pattern_queue_[0]   <<= 1;
