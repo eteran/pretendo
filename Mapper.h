@@ -167,7 +167,7 @@ private:
 // creation table in order to create an object of each type of mapper
 template<class T>
 struct MapperRegisterObject {
-	MapperRegisterObject(int n) {
+	explicit MapperRegisterObject(int n) {
 		Mapper::register_mapper(n, []() {
 			return std::make_shared<T>();
 		});
