@@ -10,6 +10,10 @@ struct opcode_sbc {
 	typedef operation_read memory_access;
 
 	static void execute(uint8_t data) {
+	
+		// TODO(eteran): can we use GCC's __builtin_usub_overflow here and
+		//               take advantage of hardware overflow detection?
+	
 		const uint16_t temp16 = A - data - ((P & C_MASK) ^ C_MASK);
 		const bool carry	= (temp16 < 0x100);
 		const bool overflow	= ((A ^ data) & (A ^ temp16) & 0x80) != 0;

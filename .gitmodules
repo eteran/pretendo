@@ -4,3 +4,6 @@
 [submodule "libines"]
 	path = libines
 	url = https://github.com/eteran/libines
+[submodule "libines2"]
+	path = libines2
+	url = https://github.com/eteran/libines2.git

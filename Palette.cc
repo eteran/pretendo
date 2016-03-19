@@ -2,6 +2,7 @@
 #include "Palette.h"
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -111,6 +112,8 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 //------------------------------------------------------------------------------
 const rgb_color_t *Palette::NTSC(float saturation, float hue, float contrast, float brightness, float gamma) {
 
+
+	std::cout << "Creating Palette: <" << saturation << "," << hue << "," << contrast << "," << brightness << "," << gamma << ">" << std::endl;
 	static rgb_color_t color_list[64];
 
 	for(int i = 0; i < 64; ++i) {

@@ -1,5 +1,6 @@
 
 #include "QtVideo.h"
+#include <QGLShader>
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -66,9 +67,41 @@ void QtVideo::initializeGL() {
 	glGenTextures(1, &texture_);
 	glBindTexture(GL_TEXTURE_2D, texture_);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, Width);
+	
+	// clamp out of bounds texture coordinates
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	
+	// link the texture with the buffer
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer_);
+	
+
+	
+#if 0
+	QGLShaderProgram program(context());
+	
+	program.addShaderFromSourceCode(QGLShader::Vertex,
+	"    void main(void) {\n"
+	"      gl_Position = ftransform();\n"
+	"      gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+	"    }"
+	);
+	
+	program.addShaderFromSourceCode(QGLShader::Fragment,
+    "    uniform sampler2D rubyTexture;\n"
+	"    void main(void) {   \n"
+	"      vec4 rgb = texture2D(rubyTexture, gl_TexCoord[0].xy);\n"
+	"      vec4 intens = smoothstep(0.2, 0.8,rgb) + normalize(vec4(rgb.xyz, 1.0));\n"
+	"      if(fract(gl_FragCoord.y * 0.5) > 0.5) intens = rgb * 0.8;\n"
+	"      gl_FragColor = intens;\n"
+	"    }"
+	);
+	
+	program.link();
+	program.bind();
+#endif
+	
+
 }
 
 //------------------------------------------------------------------------------
@@ -120,6 +153,8 @@ void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source
 void QtVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal) {
 	assert(pal);
 	assert(intensity);
+	
+	std::cout << "Setting Palette" << std::endl;
 
 	for(int j = 0; j < 8; j++) {
 		for(int i = 0; i < 64; i++) {
@@ -162,8 +197,8 @@ void QtVideo::paintGL() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, false ? GL_NEAREST : GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, false ? GL_NEAREST : GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, true ? GL_NEAREST : GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, true ? GL_NEAREST : GL_LINEAR);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer_);
 
 	glBegin(GL_TRIANGLE_STRIP);

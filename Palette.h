@@ -26,7 +26,7 @@ static const float default_saturation = 1.0f;
 static const float default_hue        = 0.0f;
 static const float default_contrast   = 1.0f;
 static const float default_brightness = 1.0f;
-static const float default_gamma      = 2.0f;
+static const float default_gamma      = 1.4f;
 
 const rgb_color_t *NTSC(float saturation, float hue, float contrast, float brightness, float gamma);
 
