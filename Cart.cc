@@ -43,7 +43,7 @@ constexpr bool is_power_of_2(size_t size) {
 //------------------------------------------------------------------------------
 // Name: Cart
 //------------------------------------------------------------------------------
-Cart::Cart() : prg_mask_(0), chr_mask_(0), prg_hash_(0), chr_hash_(0), rom_hash_(0), mirroring_(MIR_HORIZONTAL){
+Cart::Cart() : cart_(nullptr), prg_mask_(0), chr_mask_(0), prg_hash_(0), chr_hash_(0), rom_hash_(0), mirroring_(MIR_HORIZONTAL){
 	memset(&cart_, 0, sizeof(cart_));
 }
 
@@ -71,7 +71,7 @@ Cart::load(const std::string &s) {
 		prg_mask_ = create_mask(cart_->prg_size_);
 		chr_mask_ = create_mask(cart_->chr_size_);
 
-		switch(cart_->header_->mirroring()) {
+		switch(cart_->header()->mirroring()) {
 		case iNES::Mirroring::HORIZONTAL:  mirroring_ = MIR_HORIZONTAL; break;
 		case iNES::Mirroring::VERTICAL:    mirroring_ = MIR_VERTICAL;   break;
 		case iNES::Mirroring::FOUR_SCREEN: mirroring_ = MIR_4SCREEN;    break;
@@ -101,7 +101,7 @@ Cart::load(const std::string &s) {
 	} catch (const iNES::ines_error &e) {
 		std::cout << " ERROR Loading ROM File!" << std::endl;
 		cart_     = nullptr;
-		mapper_   = std::shared_ptr<Mapper>();
+		mapper_   = nullptr;
 		prg_hash_ = 0;
 		chr_hash_ = 0;
 		rom_hash_ = 0;
@@ -116,7 +116,7 @@ Cart::load(const std::string &s) {
 void Cart::unload() {
 	delete cart_;
 	cart_ = nullptr;
-	mapper_.reset();
+	mapper_ = nullptr;
 }
 
 //------------------------------------------------------------------------------
