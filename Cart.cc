@@ -1,5 +1,6 @@
 
 #include "Cart.h"
+#include "iNES/Error.h"
 #include "Mapper.h"
 #include <cstring>
 #include <iostream>
@@ -60,42 +61,46 @@ bool
 Cart::load(const std::string &s) {
 
 	std::cout << "[Cart::load] loading '" << s << "'...";
-
-	const INES_RETURN_CODE r = load_file_INES(s.c_str(), &cart_);
-	if(r == INES_OK) {
+	
+	try {	
+		cart_ = new iNES::Rom(s.c_str());
+		
 		std::cout << " OK!" << std::endl;
 
 		// get mask values
-		prg_mask_ = create_mask(cart_.prg_size);
-		chr_mask_ = create_mask(cart_.chr_size);
+		prg_mask_ = create_mask(cart_->prg_size_);
+		chr_mask_ = create_mask(cart_->chr_size_);
 
-		switch(cart_.mirroring) {
-		case MIRR_HORIZONTAL: mirroring_ = MIR_HORIZONTAL; break;
-		case MIRR_VERTICAL:   mirroring_ = MIR_VERTICAL;   break;
-		case MIRR_4SCREEN:    mirroring_ = MIR_4SCREEN;    break;
-		default:              mirroring_ = MIR_MAPPER;     break;
+		switch(cart_->header_->mirroring()) {
+		case iNES::Mirroring::HORIZONTAL:  mirroring_ = MIR_HORIZONTAL; break;
+		case iNES::Mirroring::VERTICAL:    mirroring_ = MIR_VERTICAL;   break;
+		case iNES::Mirroring::FOUR_SCREEN: mirroring_ = MIR_4SCREEN;    break;
+		default:
+			mirroring_ = MIR_MAPPER;
+			break;
 		}
 
-		prg_hash_ = prg_hash_INES(&cart_);
-		chr_hash_ = chr_hash_INES(&cart_);
-		rom_hash_ = rom_hash_INES(&cart_);
+		prg_hash_ = cart_->prg_hash();
+		chr_hash_ = cart_->chr_hash();
+		rom_hash_ = cart_->rom_hash();
 
 		std::cout << "PRG HASH: " << std::hex << std::setw(8) << std::setfill('0') << prg_hash_ << std::dec << std::endl;
 		std::cout << "CHR HASH: " << std::hex << std::setw(8) << std::setfill('0') << chr_hash_ << std::dec << std::endl;
 		std::cout << "ROM HASH: " << std::hex << std::setw(8) << std::setfill('0') << rom_hash_ << std::dec << std::endl;
 
-		if(!is_power_of_2(cart_.prg_size)) {
+		if(!is_power_of_2(cart_->prg_size_)) {
 			std::cout << "WARNING: PRG size is not a power of 2, this is unusual" << std::endl;
 		}
 
-		if(!is_power_of_2(cart_.chr_size)) {
+		if(!is_power_of_2(cart_->chr_size_)) {
 			std::cout << "WARNING: CHR size is not a power of 2, this is unusual" << std::endl;
 		}
 
-		mapper_ = Mapper::create_mapper(cart_.mapper);
+		mapper_ = Mapper::create_mapper(cart_->header()->mapper());
 		return true;
-	} else {
-		std::cout << " ERROR! (" << r << ")" << std::endl;
+	} catch (const iNES::ines_error &e) {
+		std::cout << " ERROR Loading ROM File!" << std::endl;
+		cart_     = nullptr;
 		mapper_   = std::shared_ptr<Mapper>();
 		prg_hash_ = 0;
 		chr_hash_ = 0;
@@ -109,8 +114,8 @@ Cart::load(const std::string &s) {
 // Name: unload
 //------------------------------------------------------------------------------
 void Cart::unload() {
-	free_file_INES(&cart_);
-	memset(&cart_, 0, sizeof(cart_));
+	delete cart_;
+	cart_ = nullptr;
 	mapper_.reset();
 }
 
@@ -118,7 +123,7 @@ void Cart::unload() {
 // Name: has_chr_rom
 //------------------------------------------------------------------------------
 bool Cart::has_chr_rom() const {
-	return cart_.chr_rom;
+	return cart_->chr_rom_;
 }
 
 //------------------------------------------------------------------------------
@@ -139,14 +144,14 @@ uint32_t Cart::chr_mask() const {
 // Name: prg
 //------------------------------------------------------------------------------
 uint8_t *Cart::prg() const {
-	return cart_.prg_rom;
+	return cart_->prg_rom_;
 }
 
 //------------------------------------------------------------------------------
 // Name: chr
 //------------------------------------------------------------------------------
 uint8_t *Cart::chr() const {
-	return cart_.chr_rom;
+	return cart_->chr_rom_;
 }
 
 //------------------------------------------------------------------------------
@@ -193,11 +198,11 @@ std::vector<uint8_t> Cart::raw_image() const {
 	const uint8_t *const chr_rom = chr();
 
 	// create a vector and copy the PRG into it
-	std::vector<uint8_t> image(prg_rom, prg_rom + cart_.prg_size);
+	std::vector<uint8_t> image(prg_rom, prg_rom + cart_->prg_size_);
 
 	// if there is CHR, insert it at the end of the vector
 	if(chr_rom) {
-		image.insert(image.end(), chr_rom, chr_rom + cart_.chr_size);
+		image.insert(image.end(), chr_rom, chr_rom + cart_->chr_size_);
 	}
 
 	return image;

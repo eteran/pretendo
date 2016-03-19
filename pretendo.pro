@@ -12,7 +12,7 @@ lessThan(QT_MAJOR_VERSION, 5) {
 	QMAKE_CXXFLAGS += -std=c++0x
 }
 
-INCLUDEPATH += qt
+INCLUDEPATH += qt libines2/include
 
 HEADERS += \
 		APU.h \
@@ -34,10 +34,9 @@ HEADERS += \
 		Timer.h \
 		Triangle.h \
 		VRAMBank.h \
-		libines/ines_crc32.h \
-		libines/ines_types.h \
-		libines/lib_ines.h \
-		libines/load_ines.h \
+		libines2/include/iNES/Error.h \
+		libines2/include/iNES/Header.h \
+		libines2/include/iNES/Rom.h \
 		mappers/BNROM.h \
 		mappers/Bandai.h \
 		mappers/MMC3.h \
@@ -136,9 +135,8 @@ SOURCES += \
 		Palette.cc \
 		Timer.cc \
 		Triangle.cc \
-		libines/ines_crc32.c \
-		libines/lib_ines.c \
-		libines/load_ines.c \
+		libines2/lib/Header.cpp \
+		libines2/lib/Rom.cpp \		
 		mappers/BNROM.cc \
 		mappers/Bandai.cc \
 		mappers/MMC3.cc \

@@ -2,7 +2,7 @@
 #ifndef CART_20120303_H_
 #define CART_20120303_H_
 
-#include "libines/load_ines.h"
+#include "iNES/Rom.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -44,14 +44,14 @@ public:
 	std::vector<uint8_t> raw_image() const;
 
 private:
-	ines_cart_t               cart_;
+	iNES::Rom                *cart_;
 	uint32_t                  prg_mask_;
 	uint32_t                  chr_mask_;
 	uint32_t                  prg_hash_;
 	uint32_t                  chr_hash_;
 	uint32_t                  rom_hash_;
 	MIRRORING                 mirroring_;
-	std::shared_ptr<Mapper> mapper_;
+	std::shared_ptr<Mapper>   mapper_;
 };
 
 #endif
