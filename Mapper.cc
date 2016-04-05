@@ -67,9 +67,9 @@ Mapper::~Mapper() {
 std::shared_ptr<Mapper> Mapper::create_mapper(int num) {
 
 	std::shared_ptr<Mapper> ret;
-	create_ptr f = nullptr;;
+	create_func f = nullptr;;
 
-	const std::map<int, create_ptr> &mappers = registered_mappers_ines();
+	const std::map<int, create_func> &mappers = registered_mappers_ines();
 	auto it = mappers.find(num);
 	if(it != mappers.end() && (f = it->second)) {
 		ret = f();
@@ -930,7 +930,7 @@ void Mapper::vram_change_hook(uint16_t vram_address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper::register_mapper(int num, create_ptr create_ptr) {
+void Mapper::register_mapper(int num, create_func create_ptr) {
 	assert(create_ptr != 0);
 
 	std::cout << "[Mapper::register_mapper] Registering Mapper: " << num << std::endl;

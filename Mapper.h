@@ -17,12 +17,12 @@ using std::uint64_t;
 
 class Mapper;
 
-typedef std::function<std::shared_ptr<Mapper>()> create_ptr;
+typedef std::function<std::shared_ptr<Mapper>()> create_func;
 
 class Mapper {
 public:
 	static std::shared_ptr<Mapper> create_mapper(int num);
-	static void register_mapper(int num, create_ptr create_ptr);
+	static void register_mapper(int num, create_func create_ptr);
 
 	void write_memory(uint16_t address, uint8_t value);
 	uint8_t read_memory(uint16_t address);
@@ -156,8 +156,8 @@ private:
 	// we use a function here to return a static object
 	// to ensure order of initialization, otherwise, the mappers
 	// could try to register themselves before the map was constructed
-	static std::map<int, create_ptr> &registered_mappers_ines() {
-		static std::map<int, create_ptr> static_map;
+	static std::map<int, create_func> &registered_mappers_ines() {
+		static std::map<int, create_func> static_map;
 		return static_map;
 	}
 };
