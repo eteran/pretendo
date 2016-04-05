@@ -51,7 +51,6 @@ endif()
 
 find_package(Qt4 4.6.0 REQUIRED QtCore QtGui QtOpenGL QtMultimedia)
 find_package(Boost 1.35 REQUIRED)
-find_package(ZLIB 1.2.8 REQUIRED)
 
 include(${QT_USE_FILE})
 
@@ -59,7 +58,6 @@ include_directories(
 	qt
 	p6502
 	libines2/include
-	${ZLIB_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIR}
 	${INCLUDES}
 	
@@ -89,8 +87,6 @@ set(SOURCE_FILES ${SOURCE_FILES}
 	Palette.cc 
 	Timer.cc 
 	Triangle.cc 
-	libines2/lib/Header.cpp 
-	libines2/lib/Rom.cpp 		
 	mappers/BNROM.cc 
 	mappers/Bandai.cc 
 	mappers/MMC3.cc 
@@ -178,9 +174,11 @@ add_executable(pretendo ${SOURCE_FILES})
 target_link_libraries(pretendo LINK_PUBLIC
 	Qt4::QtGui Qt4::QtOpenGL Qt4::QtMultimedia
 	-lGL
-	${ZLIB_LIBRARIES}
+	ines2
 	${BOOST_LIBRARIES}
 	${LIBRARIES}
 )
 
 set_property(TARGET pretendo PROPERTY CXX_STANDARD 11)
+
+add_subdirectory(libines2/lib)
