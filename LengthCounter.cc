@@ -84,7 +84,7 @@ void LengthCounter::resume() {
 //------------------------------------------------------------------------------
 // Name: value
 //------------------------------------------------------------------------------
-uint8_t LengthCounter::value() const{
+uint8_t LengthCounter::value() const {
 	if(reload_) {
 		value_  = reload_value_;
 		reload_ = false;
