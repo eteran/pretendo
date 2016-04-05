@@ -16,7 +16,7 @@ class Square;
 template <int Channel>
 class Sweep {
 public:
-	Sweep(Square<Channel> *square);
+	explicit Sweep(Square<Channel> *square);
 	~Sweep();
 
 private:
