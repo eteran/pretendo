@@ -10,7 +10,7 @@ class AudioBuffer : public QIODevice {
 	Q_OBJECT
 public:
 	AudioBuffer();
-	AudioBuffer(QObject *parent = 0);
+	explicit AudioBuffer(QObject *parent = 0);
 
 public:
 	virtual bool atEnd() const;

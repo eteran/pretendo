@@ -11,7 +11,7 @@ class QtAudio : public QObject {
 	Q_OBJECT
 
 public:
-	QtAudio(QObject *parent = 0);
+	explicit QtAudio(QObject *parent = 0);
 	virtual ~QtAudio();
 
 public:

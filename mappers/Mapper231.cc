@@ -14,6 +14,8 @@ Mapper231::Mapper231() {
 
 	set_prg_89ab(0);
 	set_prg_cdef(0);
+	
+	prg_ = 0;
 
 	memset(chr_ram_, 0, sizeof(chr_ram_));
 

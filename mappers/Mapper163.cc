@@ -12,8 +12,13 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(163)
 Mapper163::Mapper163() : reg_5101_(0) {
 
 	set_prg_89abcdef(0);
-
+	
+	prg_      = 0;
+	security_ = 0;
+	trigger_  = 0;
+	
 	memset(chr_ram_, 0, sizeof(chr_ram_));
+	memset(prg_ram_, 0, sizeof(prg_ram_));
 
 	if(nes::cart.has_chr_rom()) {
 		set_chr_0000_1fff(0);

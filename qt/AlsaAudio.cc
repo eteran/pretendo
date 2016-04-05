@@ -16,18 +16,16 @@ AlsaAudio::AlsaAudio() {
 		// throw an exception, we failed to even open the device :-(
 	}
 
-	snd_pcm_hw_params_t * hwparams;
-
 	unsigned int rate = nes::apu::frequency;
 
-	snd_pcm_hw_params_alloca(&hwparams);
-	snd_pcm_hw_params_any(handle_, hwparams);
+	snd_pcm_hw_params_alloca(&hwparams_);
+	snd_pcm_hw_params_any(handle_, hwparams_);
 
-	snd_pcm_hw_params_set_access   (handle_, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
-	snd_pcm_hw_params_set_format   (handle_, hwparams, SND_PCM_FORMAT_U8);
-	snd_pcm_hw_params_set_channels (handle_, hwparams, 1);
-	snd_pcm_hw_params_set_rate_near(handle_, hwparams, &rate, 0);
-	snd_pcm_hw_params(handle_, hwparams);
+	snd_pcm_hw_params_set_access   (handle_, hwparams_, SND_PCM_ACCESS_RW_INTERLEAVED);
+	snd_pcm_hw_params_set_format   (handle_, hwparams_, SND_PCM_FORMAT_U8);
+	snd_pcm_hw_params_set_channels (handle_, hwparams_, 1);
+	snd_pcm_hw_params_set_rate_near(handle_, hwparams_, &rate, 0);
+	snd_pcm_hw_params(handle_, hwparams_);
 }
 
 //------------------------------------------------------------------------------
