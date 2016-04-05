@@ -6,7 +6,7 @@
 
 class VRC2 : public Mapper {
 public:
-	VRC2(int chr_shift);
+	explicit VRC2(int chr_shift);
 
 public:
 	virtual std::string name() const;
