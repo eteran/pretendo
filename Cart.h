@@ -44,14 +44,14 @@ public:
 	std::vector<uint8_t> raw_image() const;
 
 private:
-	iNES::Rom                *cart_;
-	uint32_t                  prg_mask_;
-	uint32_t                  chr_mask_;
-	uint32_t                  prg_hash_;
-	uint32_t                  chr_hash_;
-	uint32_t                  rom_hash_;
-	MIRRORING                 mirroring_;
-	std::shared_ptr<Mapper>   mapper_;
+	std::shared_ptr<iNES::Rom> rom_;
+	uint32_t                   prg_mask_;
+	uint32_t                   chr_mask_;
+	uint32_t                   prg_hash_;
+	uint32_t                   chr_hash_;
+	uint32_t                   rom_hash_;
+	MIRRORING                  mirroring_;
+	std::shared_ptr<Mapper>    mapper_;
 };
 
 #endif

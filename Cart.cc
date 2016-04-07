@@ -43,8 +43,8 @@ constexpr bool is_power_of_2(size_t size) {
 //------------------------------------------------------------------------------
 // Name: Cart
 //------------------------------------------------------------------------------
-Cart::Cart() : cart_(nullptr), prg_mask_(0), chr_mask_(0), prg_hash_(0), chr_hash_(0), rom_hash_(0), mirroring_(MIR_HORIZONTAL){
-	memset(&cart_, 0, sizeof(cart_));
+Cart::Cart() : rom_(nullptr), prg_mask_(0), chr_mask_(0), prg_hash_(0), chr_hash_(0), rom_hash_(0), mirroring_(MIR_HORIZONTAL){
+	memset(&rom_, 0, sizeof(rom_));
 }
 
 //------------------------------------------------------------------------------
@@ -63,15 +63,15 @@ Cart::load(const std::string &s) {
 	std::cout << "[Cart::load] loading '" << s << "'...";
 	
 	try {	
-		cart_ = new iNES::Rom(s.c_str());
+		rom_ = std::make_shared<iNES::Rom>(s.c_str());
 		
 		std::cout << " OK!" << std::endl;
 
 		// get mask values
-		prg_mask_ = create_mask(cart_->prg_size());
-		chr_mask_ = create_mask(cart_->chr_size());
+		prg_mask_ = create_mask(rom_->prg_size());
+		chr_mask_ = create_mask(rom_->chr_size());
 
-		switch(cart_->header()->mirroring()) {
+		switch(rom_->header()->mirroring()) {
 		case iNES::Mirroring::HORIZONTAL:  mirroring_ = MIR_HORIZONTAL; break;
 		case iNES::Mirroring::VERTICAL:    mirroring_ = MIR_VERTICAL;   break;
 		case iNES::Mirroring::FOUR_SCREEN: mirroring_ = MIR_4SCREEN;    break;
@@ -80,27 +80,27 @@ Cart::load(const std::string &s) {
 			break;
 		}
 
-		prg_hash_ = cart_->prg_hash();
-		chr_hash_ = cart_->chr_hash();
-		rom_hash_ = cart_->rom_hash();
+		prg_hash_ = rom_->prg_hash();
+		chr_hash_ = rom_->chr_hash();
+		rom_hash_ = rom_->rom_hash();
 
 		std::cout << "PRG HASH: " << std::hex << std::setw(8) << std::setfill('0') << prg_hash_ << std::dec << std::endl;
 		std::cout << "CHR HASH: " << std::hex << std::setw(8) << std::setfill('0') << chr_hash_ << std::dec << std::endl;
 		std::cout << "ROM HASH: " << std::hex << std::setw(8) << std::setfill('0') << rom_hash_ << std::dec << std::endl;
 
-		if(!is_power_of_2(cart_->prg_size())) {
+		if(!is_power_of_2(rom_->prg_size())) {
 			std::cout << "WARNING: PRG size is not a power of 2, this is unusual" << std::endl;
 		}
 
-		if(!is_power_of_2(cart_->chr_size())) {
+		if(!is_power_of_2(rom_->chr_size())) {
 			std::cout << "WARNING: CHR size is not a power of 2, this is unusual" << std::endl;
 		}
 
-		mapper_ = Mapper::create_mapper(cart_->header()->mapper());
+		mapper_ = Mapper::create_mapper(rom_->header()->mapper());
 		return true;
 	} catch (const iNES::ines_error &e) {
 		std::cout << " ERROR Loading ROM File! " << e.what() << std::endl;
-		cart_     = nullptr;
+		rom_     = nullptr;
 		mapper_   = nullptr;
 		prg_hash_ = 0;
 		chr_hash_ = 0;
@@ -114,8 +114,7 @@ Cart::load(const std::string &s) {
 // Name: unload
 //------------------------------------------------------------------------------
 void Cart::unload() {
-	delete cart_;
-	cart_ = nullptr;
+	rom_ = nullptr;
 	mapper_ = nullptr;
 }
 
@@ -123,7 +122,7 @@ void Cart::unload() {
 // Name: has_chr_rom
 //------------------------------------------------------------------------------
 bool Cart::has_chr_rom() const {
-	return cart_->chr_rom();
+	return rom_->chr_rom();
 }
 
 //------------------------------------------------------------------------------
@@ -144,14 +143,14 @@ uint32_t Cart::chr_mask() const {
 // Name: prg
 //------------------------------------------------------------------------------
 uint8_t *Cart::prg() const {
-	return cart_->prg_rom();
+	return rom_->prg_rom();
 }
 
 //------------------------------------------------------------------------------
 // Name: chr
 //------------------------------------------------------------------------------
 uint8_t *Cart::chr() const {
-	return cart_->chr_rom();
+	return rom_->chr_rom();
 }
 
 //------------------------------------------------------------------------------
@@ -198,11 +197,11 @@ std::vector<uint8_t> Cart::raw_image() const {
 	const uint8_t *const chr_rom = chr();
 
 	// create a vector and copy the PRG into it
-	std::vector<uint8_t> image(prg_rom, prg_rom + cart_->prg_size());
+	std::vector<uint8_t> image(prg_rom, prg_rom + rom_->prg_size());
 
 	// if there is CHR, insert it at the end of the vector
 	if(chr_rom) {
-		image.insert(image.end(), chr_rom, chr_rom + cart_->chr_size());
+		image.insert(image.end(), chr_rom, chr_rom + rom_->chr_size());
 	}
 
 	return image;
