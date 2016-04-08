@@ -498,7 +498,7 @@ uint8_t Mapper::read_vram(uint16_t address) {
 //------------------------------------------------------------------------------
 void Mapper::set_prg_67(int num) const {
 	num *= (8 * 1024);
-	nes::cpu::swap_67(nes::cart.prg() + (num& nes::cart.prg_mask()));
+	nes::cpu::swap_67(nes::cart.prg() + (num & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
@@ -506,7 +506,7 @@ void Mapper::set_prg_67(int num) const {
 //------------------------------------------------------------------------------
 void Mapper::set_prg_89(int num) const {
 	num *= (8 * 1024);
-	nes::cpu::swap_89(nes::cart.prg() + (num& nes::cart.prg_mask()));
+	nes::cpu::swap_89(nes::cart.prg() + (num & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
@@ -514,7 +514,7 @@ void Mapper::set_prg_89(int num) const {
 //------------------------------------------------------------------------------
 void Mapper::set_prg_ab(int num) const {
 	num *= (8 * 1024);
-	nes::cpu::swap_ab(nes::cart.prg() + (num& nes::cart.prg_mask()));
+	nes::cpu::swap_ab(nes::cart.prg() + (num & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
@@ -522,7 +522,7 @@ void Mapper::set_prg_ab(int num) const {
 //------------------------------------------------------------------------------
 void Mapper::set_prg_cd(int num) const {
 	num *= (8 * 1024);
-	nes::cpu::swap_cd(nes::cart.prg() + (num& nes::cart.prg_mask()));
+	nes::cpu::swap_cd(nes::cart.prg() + (num & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
@@ -530,7 +530,7 @@ void Mapper::set_prg_cd(int num) const {
 //------------------------------------------------------------------------------
 void Mapper::set_prg_ef(int num) const {
 	num *= (8 * 1024);
-	nes::cpu::swap_ef(nes::cart.prg() + (num& nes::cart.prg_mask()));
+	nes::cpu::swap_ef(nes::cart.prg() + (num & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
