@@ -76,14 +76,10 @@ void write2006(uint8_t value);
 void write2007(uint8_t value);
 void write4014(uint8_t value);
 
-uint8_t read2000();
-uint8_t read2001();
 uint8_t read2002();
-uint8_t read2003();
 uint8_t read2004();
-uint8_t read2005();
-uint8_t read2006();
 uint8_t read2007();
+uint8_t read200x();
 
 void write_vram(uint16_t address, uint8_t value);
 uint8_t read_vram(uint16_t address);

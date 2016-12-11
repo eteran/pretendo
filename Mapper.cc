@@ -357,16 +357,11 @@ uint8_t Mapper::read_1(uint16_t address) {
 uint8_t Mapper::read_2(uint16_t address) {
 
 	switch(address & 0x07) {
-	case 0x00: return nes::ppu::read2000();
-	case 0x01: return nes::ppu::read2001();
 	case 0x02: return nes::ppu::read2002();
-	case 0x03: return nes::ppu::read2003();
 	case 0x04: return nes::ppu::read2004();
-	case 0x05: return nes::ppu::read2005();
-	case 0x06: return nes::ppu::read2006();
 	case 0x07: return nes::ppu::read2007();
 	default:
-		abort();
+		return nes::ppu::read200x();
 	}
 }
 
@@ -375,16 +370,11 @@ uint8_t Mapper::read_2(uint16_t address) {
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_3(uint16_t address) {
 	switch(address & 0x07) {
-	case 0x00: return nes::ppu::read2000();
-	case 0x01: return nes::ppu::read2001();
 	case 0x02: return nes::ppu::read2002();
-	case 0x03: return nes::ppu::read2003();
 	case 0x04: return nes::ppu::read2004();
-	case 0x05: return nes::ppu::read2005();
-	case 0x06: return nes::ppu::read2006();
 	case 0x07: return nes::ppu::read2007();
 	default:
-		abort();
+		return nes::ppu::read200x();
 	}
 }
 
