@@ -135,6 +135,7 @@ void Pretendo::update() {
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
+	nes::apu::reset_buffer_index();
 	audio_buffer_ = nes::apu::buffer();
 	audio_->write(audio_buffer_, nes::apu::buffer_size);
 

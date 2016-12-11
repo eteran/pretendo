@@ -65,6 +65,7 @@ uint8_t read4015();
 uint64_t cycle_count();
 void run(int cycles);
 const uint8_t *buffer();
+void reset_buffer_index();
 
 extern Square<0> square_0;
 extern Square<1> square_1;
