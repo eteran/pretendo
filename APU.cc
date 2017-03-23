@@ -61,8 +61,8 @@ uint8_t         clock_step_         = 0;
 APUStatus       status              = {0};
 APUFrameCounter frame_counter_      = {0};
 uint8_t         last_frame_counter_ = 0;
-size_t          sample_index_       = 0;
-uint8_t         sample_buffer_[buffer_size + 16];
+
+circular_buffer<uint8_t, buffer_size> sample_buffer_;
 
 void clock_frame_mode_0();
 void clock_frame_mode_1();
@@ -472,10 +472,8 @@ void run(int cycles) {
 			}
 		}
 
-		if(sample_index_ != sizeof(sample_buffer_)) {
-			if((apu_cycles_ % ClocksPerSample) == 0) {
-				sample_buffer_[sample_index_++] = mix_channels();
-			}
+		if((apu_cycles_ % ClocksPerSample) == 0) {
+			sample_buffer_.push_back(mix_channels());
 		}
 
 		dmc.tick();
@@ -488,19 +486,6 @@ void run(int cycles) {
 	}
 }
 
-//------------------------------------------------------------------------------
-// Name: reset_buffer_index
-//------------------------------------------------------------------------------
-void reset_buffer_index() {
-	sample_index_ = 0;
-}
-
-//------------------------------------------------------------------------------
-// Name: buffer
-//------------------------------------------------------------------------------
-const uint8_t *buffer() {
-	return sample_buffer_;
-}
 
 //------------------------------------------------------------------------------
 // Name: mix_channels

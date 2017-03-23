@@ -16,8 +16,8 @@ QtAudio::QtAudio(QObject *parent) : QObject(parent) {
 	QAudioFormat format;
 
 	// Set up the format
-	format.setChannels(1);
-	format.setFrequency(nes::apu::frequency);
+	format.setChannelCount(1);
+	format.setSampleRate(nes::apu::frequency);
 	format.setSampleSize(8);
 	format.setCodec("audio/pcm");
 	format.setByteOrder(QAudioFormat::LittleEndian);

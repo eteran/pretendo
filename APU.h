@@ -4,6 +4,7 @@
 
 #include "Reset.h"
 #include "BitField.h"
+#include "circular_buffer.h"
 #include <cstdint>
 #include <cstddef>
 
@@ -64,14 +65,15 @@ void write4017(uint8_t value);
 uint8_t read4015();
 uint64_t cycle_count();
 void run(int cycles);
-const uint8_t *buffer();
-void reset_buffer_index();
+
 
 extern Square<0> square_0;
 extern Square<1> square_1;
 extern Triangle  triangle;
 extern Noise     noise;
 extern DMC       dmc;
+
+extern circular_buffer<uint8_t, buffer_size> sample_buffer_;
 
 extern APUStatus status;
 

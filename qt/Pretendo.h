@@ -81,7 +81,7 @@ private:
 #else
 	NullAudio *audio_;
 #endif
-	const uint8_t *audio_buffer_;
+	uint8_t *audio_buffer_;
 
 };
 

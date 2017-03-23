@@ -31,16 +31,18 @@
 
 namespace {
 
-//const int TimerInterval = 1000. / 60;
-const int TimerInterval = 0;
+const int TimerInterval = 1000. / 60;
+//const int TimerInterval = 0;
 
 }
 
 //------------------------------------------------------------------------------
 // Name: Pretendo
 //------------------------------------------------------------------------------
-Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(nullptr), timer_(nullptr), fps_label_(nullptr), framecount_(0), paused_(false), audio_buffer_(nullptr) {
+Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(nullptr), timer_(nullptr), fps_label_(nullptr), framecount_(0), paused_(false) {
 	ui_.setupUi(this);
+	
+	audio_buffer_ = new uint8_t[nes::apu::buffer_size];
 
 	// make only one of these selectable at a time
 	QActionGroup *const zoom_group = new QActionGroup(this);
@@ -122,6 +124,7 @@ Pretendo::~Pretendo() {
 	on_action_Stop_triggered();
 	on_action_Free_ROM_triggered();
 	delete audio_;
+	delete [] audio_buffer_;
 }
 
 //------------------------------------------------------------------------------
@@ -135,8 +138,12 @@ void Pretendo::update() {
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
-	nes::apu::reset_buffer_index();
-	audio_buffer_ = nes::apu::buffer();
+	
+	// get a copy of the audio buffer...
+	for(size_t i = 0; i < nes::apu::sample_buffer_.size(); ++i) {
+		audio_buffer_[i] = nes::apu::sample_buffer_[i];
+	}
+	
 	audio_->write(audio_buffer_, nes::apu::buffer_size);
 
 	// FPS calculation

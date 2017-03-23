@@ -96,21 +96,14 @@ union PPUStatus {
 
 bool show_sprites_ = true;
 
-class SpriteEntry {
-public:
+struct SpriteEntry {
 	uint8_t pattern[2];
 	union {
-		uint32_t       bytes;
-		
-		BitField<0,8>  byte0;
-		BitField<8,8>  byte1;
-		BitField<16,8> byte2;
-		BitField<24,8> byte3;
+		uint8_t        bytes[4];
 		
 		BitField<0,8>  y;
 		BitField<8,8>  index;
-		BitField<24,8> x;
-		
+		BitField<24,8> x;		
 		BitField<23>   vflip;
 		BitField<22>   hflip;
 		BitField<21>   priority;
@@ -222,7 +215,8 @@ void reset(Reset reset_type) {
 		for(int i = 0; i < 8; ++i) {
 			sprite_data_[i].pattern[0] = 0;
 			sprite_data_[i].pattern[1] = 0;
-			sprite_data_[i].bytes = 0xffffffff;
+			
+			memset(sprite_data_[i].bytes, 0xff, sizeof(sprite_data_[i].bytes));
 		}
 
 		memcpy(palette_, powerup_palette, sizeof(palette_));
@@ -732,11 +726,11 @@ void evaluate_sprites_odd() {
 //------------------------------------------------------------------------------
 template <int Size>
 void evaluate_sprites() {
-	sprite_data_index_      = 0;
+	sprite_data_index_ = 0;
 
 #if 1
 	for(int i = 0; i < 8; ++i) {
-		sprite_data_[i].bytes = 0xffffffff;
+		memset(sprite_data_[i].bytes, 0xff, sizeof(sprite_data_[i].bytes));
 	}
 #endif
 
@@ -768,10 +762,10 @@ void evaluate_sprites() {
 					
 					const uint8_t new_x = sprite_ram_[index + 3];
 				
-					sprite_entry.byte0 = sprite_line;                   // y
-					sprite_entry.byte1 = sprite_ram_[index + 1];        // index
-					sprite_entry.byte2 = sprite_ram_[index + 2] & 0xe3; // attributes
-					sprite_entry.byte3 = new_x;                         // x
+					sprite_entry.bytes[0] = sprite_line;                   // y
+					sprite_entry.bytes[1] = sprite_ram_[index + 1];        // index
+					sprite_entry.bytes[2] = sprite_ram_[index + 2] & 0xe3; // attributes
+					sprite_entry.bytes[3] = sprite_ram_[index + 3];        // x
 
 					// note that we found sprite 0
 					if(index == start_address) {

@@ -62,11 +62,10 @@ if(ENABLE_LTO)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 endif()
 
-find_package(Qt4 4.6.0 REQUIRED QtCore QtGui QtOpenGL QtMultimedia)
+find_package(Qt5 5.4.0 REQUIRED Widgets OpenGL Multimedia)
 find_package(Boost 1.35 REQUIRED)
 find_package(OpenGL REQUIRED)
 
-include(${QT_USE_FILE})
 
 include_directories(
 	qt
@@ -187,7 +186,7 @@ set(SOURCE_FILES ${SOURCE_FILES}
 add_executable(pretendo ${SOURCE_FILES})
 
 target_link_libraries(pretendo LINK_PUBLIC
-	Qt4::QtGui Qt4::QtOpenGL Qt4::QtMultimedia
+	Qt5::Widgets Qt5::OpenGL Qt5::Multimedia
 	${OPENGL_LIBRARIES}
 	ines2
 	${BOOST_LIBRARIES}

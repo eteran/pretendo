@@ -186,8 +186,13 @@ void QtVideo::end_frame() {
 //------------------------------------------------------------------------------
 void QtVideo::paintGL() {
 
-	const unsigned int output_width  = width();
-	const unsigned int output_height = height();
+	static const bool smooth_scaling = false;
+
+	// Some DPI awareness
+	const qreal ratio = devicePixelRatio();
+
+	const unsigned int output_width  = width() * ratio;
+	const unsigned int output_height = height() * ratio;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -197,8 +202,8 @@ void QtVideo::paintGL() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, true ? GL_NEAREST : GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, true ? GL_NEAREST : GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, !smooth_scaling ? GL_NEAREST : GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, !smooth_scaling ? GL_NEAREST : GL_LINEAR);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer_);
 
 	glBegin(GL_TRIANGLE_STRIP);
