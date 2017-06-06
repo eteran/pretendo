@@ -66,20 +66,20 @@ Mapper::~Mapper() {
 //------------------------------------------------------------------------------
 std::shared_ptr<Mapper> Mapper::create_mapper(int num) {
 
-	std::shared_ptr<Mapper> ret;
-	create_func f = nullptr;;
+	create_func f = nullptr;
 
 	const std::map<int, create_func> &mappers = registered_mappers_ines();
 	auto it = mappers.find(num);
 	if(it != mappers.end() && (f = it->second)) {
-		ret = f();
+		auto ret = f();
+		std::cout << "[Mapper::create_mapper] mapper #" << num << " loaded, type: " << ret->name() << std::endl;
+		return ret;
 	} else {
 		std::cout << "unsupported mapper hardware - iNES number: " << num << std::endl;
-		return std::shared_ptr<Mapper>();
+		return nullptr;
 	}
 
-	std::cout << "[Mapper::create_mapper] mapper #" << num << " loaded, type: " << ret->name() << std::endl;
-	return ret;
+
 }
 
 //------------------------------------------------------------------------------
