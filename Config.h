@@ -15,6 +15,12 @@ class Config {
 public:
 	Config();
 	~Config();
+	
+public:
+	static std::string homeDirectory();
+	static std::string configDirectory();
+	static std::string cacheDirectory();
+	
 
 private:
 	Config(const Config &) = delete;

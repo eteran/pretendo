@@ -49,6 +49,7 @@ protected:
 	bool     irq_reload_;
 	bool     save_ram_enabled_;
 	bool     save_ram_writable_;
+    MemoryMappedFile prg_ptr_;
 };
 
 

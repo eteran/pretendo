@@ -4,6 +4,7 @@
 #include "NES.h"
 #include "Cart.h"
 #include <cstring>
+#include <iostream>
 
 // TODO: CHR-RAM swapping
 
@@ -13,6 +14,8 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(19)
 // Name:
 //------------------------------------------------------------------------------
 Mapper19::Mapper19() : irq_control_({0}), mirroring_(0) {
+
+    prg_ptr_ = open_sram(0x2000);
 
 	memset(prg_ram_, 0, sizeof(prg_ram_));
 	memset(chr_ram_, 0, sizeof(chr_ram_));
@@ -67,14 +70,14 @@ uint8_t Mapper19::read_5(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper19::read_6(uint16_t address) {
-	return prg_ram_[address & 0x1fff];
+	return prg_ptr_[address & 0x1fff];
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper19::read_7(uint16_t address) {
-	return prg_ram_[address & 0x1fff];
+	return prg_ptr_[address & 0x1fff];
 }
 
 //------------------------------------------------------------------------------
@@ -116,14 +119,14 @@ void Mapper19::write_5(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper19::write_6(uint16_t address, uint8_t value) {
-	prg_ram_[address & 0x1fff] = value;
+	prg_ptr_[address & 0x1fff] = value;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 void Mapper19::write_7(uint16_t address, uint8_t value) {
-	prg_ram_[address & 0x1fff] = value;
+	prg_ptr_[address & 0x1fff] = value;
 }
 
 //------------------------------------------------------------------------------

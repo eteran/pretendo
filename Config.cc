@@ -7,6 +7,9 @@
 #include <vector>
 #include <sys/stat.h>
 
+#include <boost/filesystem.hpp>
+#include <pwd.h>
+
 #ifdef __HAIKU__
 	#include <FindDirectory.h>
 	#include <fs_info.h>
@@ -108,14 +111,12 @@ Config::Config()
 		dir->CreateDirectory("Pretendo", NULL);
 		filename_ += "/Pretendo/pretendo.config";
 #else
-	filename_ = ("~/.pretendo");
-	struct stat st;
 
-	if(stat(filename_.c_str(), &st) != 0 && ! (S_ISDIR(st.st_mode))) {
-		mkdir(filename_.c_str(), 0777);
-		filename_ += "/pretendo.conf";
-	}
-#endif //__HAIKU__
+	const std::string config_path = configDirectory();
+	boost::filesystem::create_directories(config_path);
+	
+	filename_ = config_path + "/pretendo.conf";
+#endif
 
 	Load();
 }
@@ -299,4 +300,41 @@ bool Config::DeleteKey(const std::string &section, const std::string &keyName) {
 	}
 
 	return false;
+}
+
+
+std::string Config::homeDirectory() {
+#if defined(__unix__)
+	const char *homedir;
+
+	if ((homedir = getenv("HOME")) == NULL) {
+    	homedir = getpwuid(getuid())->pw_dir;
+	}
+	
+	return homedir;
+#else
+	return std::string();
+#endif
+}
+
+std::string Config::configDirectory() {
+#if defined(__unix__)
+	const std::string home = homeDirectory();
+	const boost::filesystem::path home_directory(home);
+    const boost::filesystem::path config_path = home_directory / ".config";
+	return config_path.string();
+#else
+	return std::string();
+#endif
+}
+
+std::string Config::cacheDirectory() {
+#if defined(__unix__)
+	const std::string home = homeDirectory();
+	const boost::filesystem::path home_directory(home);
+    const boost::filesystem::path cache_path = home_directory / ".cache" / "pretendo";
+	return cache_path.string();
+#else
+	return std::string();
+#endif
 }

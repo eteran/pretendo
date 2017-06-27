@@ -4,11 +4,14 @@
 #include "Cart.h"
 #include "NES.h"
 #include <cstring>
+#include <iostream>
 
 //------------------------------------------------------------------------------
 // Name: MMC3
 //------------------------------------------------------------------------------
 MMC3::MMC3() : prev_ppu_cycle_(0), prev_vram_address_(0xffff), command_(0), irq_latch_(0), irq_counter_(0), irq_enabled_(false), irq_reload_(false), save_ram_enabled_(false), save_ram_writable_(false) {
+
+    prg_ptr_ = open_sram(0x2000);
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
@@ -64,7 +67,7 @@ std::string MMC3::name() const {
 uint8_t MMC3::read_6(uint16_t address) {
 
 	if(save_ram_enabled_ && nes::cart.mirroring() != Cart::MIR_4SCREEN) {
-		return prg_ram_[address & 0x1fff];
+		return prg_ptr_[address & 0x1fff];
 	} else {
 		return Mapper::read_6(address);
 	}
@@ -76,7 +79,7 @@ uint8_t MMC3::read_6(uint16_t address) {
 uint8_t MMC3::read_7(uint16_t address) {
 
 	if(save_ram_enabled_ && nes::cart.mirroring() != Cart::MIR_4SCREEN) {
-		return prg_ram_[address & 0x1fff];
+		return prg_ptr_[address & 0x1fff];
 	} else {
 		return Mapper::read_7(address);
 	}
@@ -88,7 +91,7 @@ uint8_t MMC3::read_7(uint16_t address) {
 void MMC3::write_6(uint16_t address, uint8_t value) {
 
 	if(save_ram_enabled_ && save_ram_writable_ && nes::cart.mirroring() != Cart::MIR_4SCREEN) {
-		prg_ram_[address & 0x1fff] = value;
+		prg_ptr_[address & 0x1fff] = value;
 	} else {
 		Mapper::write_6(address, value);
 	}
@@ -100,7 +103,7 @@ void MMC3::write_6(uint16_t address, uint8_t value) {
 void MMC3::write_7(uint16_t address, uint8_t value) {
 
 	if(save_ram_enabled_ && save_ram_writable_ && nes::cart.mirroring() != Cart::MIR_4SCREEN) {
-		prg_ram_[address & 0x1fff] = value;
+		prg_ptr_[address & 0x1fff] = value;
 	} else {
 		Mapper::write_7(address, value);
 	}

@@ -4,12 +4,25 @@
 #include "CPU.h"
 #include "Cart.h"
 #include "Input.h"
+#include "Config.h"
 #include "NES.h"
 #include "PPU.h"
+
+#include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <cstdlib>
+#include <string>
+
+#include <boost/filesystem.hpp>
+
+#include <pwd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <unistd.h>
 
 //------------------------------------------------------------------------------
 // Name: Mapper
@@ -925,4 +938,19 @@ void Mapper::register_mapper(int num, create_func create_ptr) {
 
 	std::cout << "[Mapper::register_mapper] Registering Mapper: " << num << std::endl;
 	registered_mappers_ines()[num] = create_ptr;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+MemoryMappedFile Mapper::open_sram(size_t size) {
+
+    const boost::filesystem::path cache_path = Config::cacheDirectory();
+    boost::filesystem::create_directories(cache_path);
+
+    char hex_buf[32];
+    snprintf(hex_buf, sizeof(hex_buf), "%08x", nes::cart.rom_hash());
+    boost::filesystem::path save_file = cache_path / (std::string(hex_buf) + ".sav");
+
+    return MemoryMappedFile(save_file.string(), size);
 }

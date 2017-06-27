@@ -4,6 +4,8 @@
 #include "Cart.h"
 #include "NES.h"
 #include <cstring>
+#include <iostream>
+
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(1)
 
@@ -25,6 +27,8 @@ enum {
 // Name: Mapper1
 //------------------------------------------------------------------------------
 Mapper1::Mapper1() : cpu_cycles_(0), latch_(0), write_counter_(0) {
+	
+    prg_ptr_ = open_sram(0x2000);
 
 	memset(prg_ram_, 0, sizeof(prg_ram_));
 	memset(chr_ram_, 0, sizeof(chr_ram_));
@@ -59,7 +63,7 @@ std::string Mapper1::name() const {
 //------------------------------------------------------------------------------
 uint8_t Mapper1::read_6(uint16_t address) {
 	if(!(regs_[REG_E000_FFFF] & 0x10)) {
-		return prg_ram_[address & 0x1fff];
+		return prg_ptr_[address & 0x1fff];
 	} else {
 		 return Mapper::read_6(address);
 	}
@@ -70,7 +74,7 @@ uint8_t Mapper1::read_6(uint16_t address) {
 //------------------------------------------------------------------------------
 uint8_t Mapper1::read_7(uint16_t address) {
 	if(!(regs_[REG_E000_FFFF] & 0x10)) {
-		return prg_ram_[address & 0x1fff];
+		return prg_ptr_[address & 0x1fff];
 	} else {
 		return Mapper::read_7(address);
 	}
@@ -81,7 +85,7 @@ uint8_t Mapper1::read_7(uint16_t address) {
 //------------------------------------------------------------------------------
 void Mapper1::write_6(uint16_t address, uint8_t value) {
 	if(!(regs_[REG_E000_FFFF] & 0x10)) {
-		prg_ram_[address & 0x1fff] = value;
+		prg_ptr_[address & 0x1fff] = value;
 	} else {
 		Mapper::write_6(address, value);
 	}
@@ -92,7 +96,7 @@ void Mapper1::write_6(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper1::write_7(uint16_t address, uint8_t value) {
 	if(!(regs_[REG_E000_FFFF] & 0x10)) {
-		prg_ram_[address & 0x1fff] = value;
+		prg_ptr_[address & 0x1fff] = value;
 	} else {
 		Mapper::write_7(address, value);
 	}

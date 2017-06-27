@@ -28,6 +28,7 @@ private:
 	uint8_t security_;
 	uint8_t trigger_;
 	uint8_t reg_5101_;
+    MemoryMappedFile prg_ptr_;
 };
 
 #endif

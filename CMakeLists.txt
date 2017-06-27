@@ -63,7 +63,8 @@ if(ENABLE_LTO)
 endif()
 
 find_package(Qt5 5.4.0 REQUIRED Widgets OpenGL Multimedia)
-find_package(Boost 1.35 REQUIRED)
+find_package(Boost 1.35 COMPONENTS system filesystem REQUIRED)
+
 find_package(OpenGL REQUIRED)
 
 
@@ -101,6 +102,7 @@ set(SOURCE_FILES ${SOURCE_FILES}
 	Palette.cc 
 	Timer.cc 
 	Triangle.cc 
+	MemoryMappedFile.cc
 	mappers/BNROM.cc 
 	mappers/Bandai.cc 
 	mappers/MMC3.cc 
@@ -189,7 +191,7 @@ target_link_libraries(pretendo LINK_PUBLIC
 	Qt5::Widgets Qt5::OpenGL Qt5::Multimedia
 	${OPENGL_LIBRARIES}
 	ines2
-	${BOOST_LIBRARIES}
+	${Boost_LIBRARIES}
 	${LIBRARIES}
 )
 

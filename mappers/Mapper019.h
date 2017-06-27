@@ -50,6 +50,7 @@ private:
 	uint8_t    chr_ram_[0x2000];
 	IRQControl irq_control_;
 	uint8_t    mirroring_;
+    MemoryMappedFile    prg_ptr_;
 };
 
 #endif

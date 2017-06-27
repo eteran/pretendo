@@ -4,6 +4,7 @@
 
 #include "CPU.h"
 #include "Cart.h"
+#include "MemoryMappedFile.h"
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -26,6 +27,9 @@ public:
 
 	void write_memory(uint16_t address, uint8_t value);
 	uint8_t read_memory(uint16_t address);
+
+public:
+    MemoryMappedFile open_sram(size_t size);
 
 public:
 	// the standard mapper interface

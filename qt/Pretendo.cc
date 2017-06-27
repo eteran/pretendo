@@ -165,7 +165,7 @@ void Pretendo::on_action_Load_ROM_triggered() {
 	if(!rom.isNull()) {
 		on_action_Stop_triggered();
 		on_action_Free_ROM_triggered();
-		nes::cart.load(qPrintable(rom));
+        nes::cart.load(rom.toStdString());
 	}
 }
 
@@ -197,7 +197,7 @@ void Pretendo::picked(const QModelIndex &index) {
 						if(!filename.isEmpty()) {
 							on_action_Stop_triggered();
 							on_action_Free_ROM_triggered();
-							nes::cart.load(qPrintable(filename));
+                            nes::cart.load(filename.toStdString());
 							on_action_Run_triggered();
 						}
 					}
@@ -378,7 +378,7 @@ void Pretendo::showEvent(QShowEvent *event) {
 		ui_.listView->setRootIndex(filter_model_->mapFromSource(root_model_index));
 
 		if(info.isFile()) {
-			nes::cart.load(qPrintable(rom));
+            nes::cart.load(rom.toStdString());
 			on_action_Run_triggered();
 		}
 	}

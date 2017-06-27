@@ -57,12 +57,12 @@ Cart::~Cart() {
 //------------------------------------------------------------------------------
 // Name: load
 //------------------------------------------------------------------------------
-bool
-Cart::load(const std::string &s) {
+bool Cart::load(const std::string &s) {
 
 	std::cout << "[Cart::load] loading '" << s << "'...";
 	
-	try {	
+    try {
+        filename_ = s;
 		rom_ = std::make_shared<iNES::Rom>(s.c_str());
 		
 		std::cout << " OK!" << std::endl;
@@ -97,6 +97,7 @@ Cart::load(const std::string &s) {
 		}
 
 		mapper_ = Mapper::create_mapper(rom_->header()->mapper());
+
 		return true;
 	} catch (const iNES::ines_error &e) {
 		std::cout << " ERROR Loading ROM File! " << e.what() << std::endl;
@@ -105,6 +106,7 @@ Cart::load(const std::string &s) {
 		prg_hash_ = 0;
 		chr_hash_ = 0;
 		rom_hash_ = 0;
+        filename_.clear();
 	}
 
 	return false;
@@ -116,6 +118,7 @@ Cart::load(const std::string &s) {
 void Cart::unload() {
 	rom_ = nullptr;
 	mapper_ = nullptr;
+    filename_.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -205,4 +208,11 @@ std::vector<uint8_t> Cart::raw_image() const {
 	}
 
 	return image;
+}
+
+//------------------------------------------------------------------------------
+// Name: filename
+//------------------------------------------------------------------------------
+const std::string &Cart::filename() const {
+    return filename_;
 }

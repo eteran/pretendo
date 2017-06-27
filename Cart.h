@@ -29,6 +29,7 @@ public:
 	};
 
 public:
+    const std::string &filename() const;
 	bool load(const std::string &s);
 	void unload();
 	bool has_chr_rom() const;
@@ -43,7 +44,7 @@ public:
 	const std::shared_ptr<Mapper> &mapper() const;
 	std::vector<uint8_t> raw_image() const;
 
-private:
+private:    
 	std::shared_ptr<iNES::Rom> rom_;
 	uint32_t                   prg_mask_;
 	uint32_t                   chr_mask_;
@@ -52,6 +53,7 @@ private:
 	uint32_t                   rom_hash_;
 	MIRRORING                  mirroring_;
 	std::shared_ptr<Mapper>    mapper_;
+    std::string                filename_;
 };
 
 #endif

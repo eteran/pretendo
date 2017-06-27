@@ -3,6 +3,7 @@
 #include "Cart.h"
 #include "NES.h"
 #include <cstring>
+#include <iostream>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(163)
 
@@ -10,6 +11,8 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(163)
 // Name: Mapper163
 //------------------------------------------------------------------------------
 Mapper163::Mapper163() : reg_5101_(0) {
+
+    prg_ptr_ = open_sram(0x2000);
 
 	set_prg_89abcdef(0);
 	
@@ -58,14 +61,14 @@ uint8_t Mapper163::read_5(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper163::read_6(uint16_t address) {
-	return prg_ram_[address & 0x1fff];
+	return prg_ptr_[address & 0x1fff];
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper163::read_7(uint16_t address) {
-	return prg_ram_[address & 0x1fff];
+	return prg_ptr_[address & 0x1fff];
 }
 
 //------------------------------------------------------------------------------
@@ -111,12 +114,12 @@ void Mapper163::write_5(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper163::write_6(uint16_t address, uint8_t value) {
-	prg_ram_[address & 0x1fff] = value;
+	prg_ptr_[address & 0x1fff] = value;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 void Mapper163::write_7(uint16_t address, uint8_t value) {
-	prg_ram_[address & 0x1fff] = value;
+	prg_ptr_[address & 0x1fff] = value;
 }

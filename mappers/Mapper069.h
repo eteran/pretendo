@@ -46,6 +46,7 @@ private:
 	uint8_t    command_8000_;
 	uint8_t    command_c000_;
 	uint8_t    prg_mode_;
+    MemoryMappedFile    prg_ptr_;
 };
 
 #endif

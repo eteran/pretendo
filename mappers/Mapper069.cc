@@ -4,6 +4,7 @@
 #include "NES.h"
 #include "Cart.h"
 #include <cstring>
+#include <iostream>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(69)
 
@@ -11,6 +12,8 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(69)
 // Name:
 //------------------------------------------------------------------------------
 Mapper69::Mapper69() : irq_counter_({0}), irq_control_({0}), command_8000_(0), command_c000_(0), prg_mode_(0) {
+
+    prg_ptr_ = open_sram(0x2000);
 
 	memset(chr_ram_, 0, sizeof(chr_ram_));
 	memset(prg_ram_, 0, sizeof(prg_ram_));
@@ -39,7 +42,7 @@ std::string Mapper69::name() const {
 uint8_t Mapper69::read_6(uint16_t address) {
 	switch(prg_mode_ & 0xc0) {
 	case 0x00: return Mapper::read_6(address);
-	case 0xc0: return prg_ram_[address & 0x1fff];
+	case 0xc0: return prg_ptr_[address & 0x1fff];
 	}
 
 	return (address >> 8);
@@ -51,7 +54,7 @@ uint8_t Mapper69::read_6(uint16_t address) {
 uint8_t Mapper69::read_7(uint16_t address) {
 	switch(prg_mode_ & 0xc0) {
 	case 0x00: return Mapper::read_7(address);
-	case 0xc0: return prg_ram_[address & 0x1fff];
+	case 0xc0: return prg_ptr_[address & 0x1fff];
 	}
 
 	return (address >> 8);
@@ -64,7 +67,7 @@ void Mapper69::write_6(uint16_t address, uint8_t value) {
 	switch(prg_mode_ & 0xc0) {
 	case 0x00: Mapper::write_6(address, value); break;
 	case 0x80: break;
-	case 0xc0: prg_ram_[address & 0x1fff] = value; break;
+	case 0xc0: prg_ptr_[address & 0x1fff] = value; break;
 	}
 }
 
@@ -75,7 +78,7 @@ void Mapper69::write_7(uint16_t address, uint8_t value) {
 	switch(prg_mode_ & 0xc0) {
 	case 0x00: Mapper::write_7(address, value); break;
 	case 0x80: break;
-	case 0xc0: prg_ram_[address & 0x1fff] = value; break;
+	case 0xc0: prg_ptr_[address & 0x1fff] = value; break;
 	}
 }
 
