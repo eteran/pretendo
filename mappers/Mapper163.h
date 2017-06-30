@@ -23,7 +23,6 @@ public:
 
 private:
 	uint8_t chr_ram_[0x2000];
-	uint8_t prg_ram_[0x2000];
 	uint8_t prg_;
 	uint8_t security_;
 	uint8_t trigger_;

@@ -46,7 +46,6 @@ public:
 	virtual void cpu_sync();
 
 private:
-	uint8_t    prg_ram_[0x2000];
 	uint8_t    chr_ram_[0x2000];
 	IRQControl irq_control_;
 	uint8_t    mirroring_;

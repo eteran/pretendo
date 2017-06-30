@@ -14,12 +14,8 @@ class QSortFilterProxyModel;
 class QTimer;
 class Preferences;
 
-#if defined(QT_SOUND)
-	class QtAudio;
-#elif defined(PULSE_AUDIO_SOUND)
+#if defined(PULSE_AUDIO_SOUND)
 	class PulseAudio;
-#elif defined(ALSA_SOUND)
-	class AlsaAudio;
 #else
 	class NullAudio;
 #endif
@@ -72,12 +68,9 @@ private:
 	QTime                  time_;
 	quint64                framecount_;
 	bool                   paused_;
-#if defined(QT_SOUND)
-	QtAudio *audio_;
-#elif defined(PULSE_AUDIO_SOUND)
+
+#if defined(PULSE_AUDIO_SOUND)
 	PulseAudio *audio_;
-#elif defined(ALSA_SOUND)
-	AlsaAudio *audio_;
 #else
 	NullAudio *audio_;
 #endif

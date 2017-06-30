@@ -115,13 +115,16 @@ void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source
 	uint64_t *s = reinterpret_cast<uint64_t *>(scanlines_[scanline]);
 	for(int i = 0; i < Width; ) {
 	
-		// this approach will try to read 32-bits from the source at a time...
-		const uint32_t pixels = *reinterpret_cast<const uint32_t *>(source + i);
-		const uint8_t pix0 = (pixels >> 0x00) & 0xff;
-		const uint8_t pix1 = (pixels >> 0x08) & 0xff;
-		const uint8_t pix2 = (pixels >> 0x10) & 0xff;
-		const uint8_t pix3 = (pixels >> 0x18) & 0xff;
-	
+		// this approach will try to read 64-bits from the source at a time...
+		const uint8_t pix0 = source[i + 0];
+		const uint8_t pix1 = source[i + 1];
+		const uint8_t pix2 = source[i + 2];
+		const uint8_t pix3 = source[i + 3];
+		const uint8_t pix4 = source[i + 4];
+		const uint8_t pix5 = source[i + 5];
+		const uint8_t pix6 = source[i + 6];
+		const uint8_t pix7 = source[i + 7];
+
 		// collect them into 128-bits of data (unfonately with some indirection)
 		uint64_t value0 = 
 			(static_cast<uint64_t>(palette[pix0]) << 0) |
@@ -130,14 +133,24 @@ void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source
 		uint64_t value1 = 
 			(static_cast<uint64_t>(palette[pix2]) << 0) |
 			(static_cast<uint64_t>(palette[pix3]) << 32);
+			
+		uint64_t value2 = 
+			(static_cast<uint64_t>(palette[pix4]) << 0) |
+			(static_cast<uint64_t>(palette[pix5]) << 32);
+			
+		uint64_t value3 = 
+			(static_cast<uint64_t>(palette[pix6]) << 0) |
+			(static_cast<uint64_t>(palette[pix7]) << 32);
 	
 	
 		// then write them, this will help the rendering be much more
 		// cache friendly
 		*s++ = value0;
 		*s++ = value1;
+		*s++ = value2;
+		*s++ = value3;
 		
-		i += 4;
+		i += 8;
 	}
 #else
 	uint32_t *const s = scanlines_[scanline];

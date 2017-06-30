@@ -16,7 +16,6 @@ Mapper69::Mapper69() : irq_counter_({0}), irq_control_({0}), command_8000_(0), c
     prg_ptr_ = open_sram(0x2000);
 
 	memset(chr_ram_, 0, sizeof(chr_ram_));
-	memset(prg_ram_, 0, sizeof(prg_ram_));
 
 	set_prg_67(0);
 	set_prg_89ab(0);

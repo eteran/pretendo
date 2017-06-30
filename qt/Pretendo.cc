@@ -19,20 +19,16 @@
 #include <QLabel>
 #include <QMessageBox>
 
-#if defined(QT_SOUND)
-#include "QtAudio.h"
-#elif defined(PULSE_AUDIO_SOUND)
+#if defined(PULSE_AUDIO_SOUND)
 #include "PulseAudio.h"
-#elif defined(ALSA_SOUND)
-#include "AlsaAudio.h"
 #else
 #include "NullAudio.h"
 #endif
 
 namespace {
 
-const int TimerInterval = 1000. / 60;
-//const int TimerInterval = 0;
+//const int TimerInterval = 1000. / 60;
+const int TimerInterval = 0;
 
 }
 
@@ -85,12 +81,8 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 	timer_ = new QTimer(this);
 	connect(timer_, SIGNAL(timeout()), this, SLOT(update()));
 
-#if defined(QT_SOUND)
-	audio_ = new QtAudio(this);
-#elif defined(PULSE_AUDIO_SOUND)
+#if defined(PULSE_AUDIO_SOUND)
 	audio_ = new PulseAudio();
-#elif defined(ALSA_SOUND)
-	audio_ = new AlsaAudio();
 #else
 	audio_ = new NullAudio();
 #endif

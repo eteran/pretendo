@@ -30,7 +30,6 @@ Mapper1::Mapper1() : cpu_cycles_(0), latch_(0), write_counter_(0) {
 	
     prg_ptr_ = open_sram(0x2000);
 
-	memset(prg_ram_, 0, sizeof(prg_ram_));
 	memset(chr_ram_, 0, sizeof(chr_ram_));
 
 	set_prg_89ab(0);

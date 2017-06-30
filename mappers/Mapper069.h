@@ -40,7 +40,6 @@ public:
 
 private:
 	uint8_t    chr_ram_[0x2000];
-	uint8_t    prg_ram_[0x2000];
 	IRQCounter irq_counter_;
 	IRQControl irq_control_;
 	uint8_t    command_8000_;

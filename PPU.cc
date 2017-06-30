@@ -155,50 +155,50 @@ uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
 									 // simplicity
 
 // internal functions
-uint16_t background_pattern_table();
-uint16_t sprite_pattern_table();
-uint8_t select_bg_pixel(uint8_t index);
-uint8_t select_blank_pixel();
-uint8_t select_pixel(uint8_t index);
-void clock_cpu();
-void clock_x();
-void clock_y();
-void enter_vblank();
-void evaluate_sprites_even();
-void evaluate_sprites_odd();
-void execute_cycle(const scanline_postrender &target);
-void execute_cycle(const scanline_prerender &target);
-void execute_cycle(const scanline_render &target);
-void execute_cycle(const scanline_vblank &target);
-void exit_vblank();
-void open_background_attribute();
-void open_tile_index();
-void read_background_attribute();
-void read_tile_index();
-void render_pixel(uint8_t *dest_buffer);
-void update_shift_registers_idle();
-void update_shift_registers_render();
-void update_sprite_registers();
-void update_vram_address();
-void update_x_scroll();
+static uint16_t background_pattern_table();
+static uint16_t sprite_pattern_table();
+static uint8_t select_bg_pixel(uint8_t index);
+static uint8_t select_blank_pixel();
+static uint8_t select_pixel(uint8_t index);
+static void clock_cpu();
+static void clock_x();
+static void clock_y();
+static void enter_vblank();
+static void evaluate_sprites_even();
+static void evaluate_sprites_odd();
+static void execute_cycle(const scanline_postrender &target);
+static void execute_cycle(const scanline_prerender &target);
+static void execute_cycle(const scanline_render &target);
+static void execute_cycle(const scanline_vblank &target);
+static void exit_vblank();
+static void open_background_attribute();
+static void open_tile_index();
+static void read_background_attribute();
+static void read_tile_index();
+static void render_pixel(uint8_t *dest_buffer);
+static void update_shift_registers_idle();
+static void update_shift_registers_render();
+static void update_sprite_registers();
+static void update_vram_address();
+static void update_x_scroll();
 
 template <int Size>
-void evaluate_sprites();
+static void evaluate_sprites();
 
 template <int Size, class Pattern>
-void read_sprite_pattern();
+static void read_sprite_pattern();
 
 template <int Size, class Pattern>
-void open_sprite_pattern();
+static void open_sprite_pattern();
 
 template <class Pattern>
-void read_background_pattern();
+static void read_background_pattern();
 
 template <class Pattern>
-void open_background_pattern();
+static void open_background_pattern();
 
 template <int Size, class Pattern>
-uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line);
+static uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line);
 
 //------------------------------------------------------------------------------
 // Name: reset

@@ -17,7 +17,6 @@ Mapper19::Mapper19() : irq_control_({0}), mirroring_(0) {
 
     prg_ptr_ = open_sram(0x2000);
 
-	memset(prg_ram_, 0, sizeof(prg_ram_));
 	memset(chr_ram_, 0, sizeof(chr_ram_));
 
 	set_prg_89abcdef(0);

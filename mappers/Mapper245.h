@@ -36,7 +36,6 @@ private:
 
 private:
 	uint8_t chr_ram_[0x2000];
-	uint8_t prg_ram_[0x2000];
 	uint8_t chr_bank_[8];
 	uint8_t prg_bank_[2];
 

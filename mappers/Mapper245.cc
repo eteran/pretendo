@@ -24,7 +24,6 @@ Mapper245::Mapper245() : prev_ppu_cycle_(0), prev_vram_address_(0xffff), command
 	set_prg_cdef(-1);
 
 	memset(chr_ram_,  0, sizeof(chr_ram_));
-	memset(prg_ram_,  0, sizeof(prg_ram_));
 	memset(chr_bank_, 0, sizeof(chr_bank_));
 	memset(prg_bank_, 0, sizeof(prg_bank_));
 
