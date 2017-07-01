@@ -859,23 +859,23 @@ void Mapper::set_chr_0000_1fff_ram(uint8_t *p, int num) const {
 //------------------------------------------------------------------------------
 void Mapper::write_memory(uint16_t address, uint8_t value) {
 
-	switch(address & 0xf000) {
+	switch((address >> 12) & 0xf) {
 	case 0x0000: write_0(address, value); break;
-	case 0x1000: write_1(address, value); break;
-	case 0x2000: write_2(address, value); break;
-	case 0x3000: write_3(address, value); break;
-	case 0x4000: write_4(address, value); break;
-	case 0x5000: write_5(address, value); break;
-	case 0x6000: write_6(address, value); break;
-	case 0x7000: write_7(address, value); break;
-	case 0x8000: write_8(address, value); break;
-	case 0x9000: write_9(address, value); break;
-	case 0xa000: write_a(address, value); break;
-	case 0xb000: write_b(address, value); break;
-	case 0xc000: write_c(address, value); break;
-	case 0xd000: write_d(address, value); break;
-	case 0xe000: write_e(address, value); break;
-	case 0xf000: write_f(address, value); break;
+	case 0x0001: write_1(address, value); break;
+	case 0x0002: write_2(address, value); break;
+	case 0x0003: write_3(address, value); break;
+	case 0x0004: write_4(address, value); break;
+	case 0x0005: write_5(address, value); break;
+	case 0x0006: write_6(address, value); break;
+	case 0x0007: write_7(address, value); break;
+	case 0x0008: write_8(address, value); break;
+	case 0x0009: write_9(address, value); break;
+	case 0x000a: write_a(address, value); break;
+	case 0x000b: write_b(address, value); break;
+	case 0x000c: write_c(address, value); break;
+	case 0x000d: write_d(address, value); break;
+	case 0x000e: write_e(address, value); break;
+	case 0x000f: write_f(address, value); break;
 	default:
 		abort();
 	}
@@ -886,23 +886,23 @@ void Mapper::write_memory(uint16_t address, uint8_t value) {
 // Name: read_memory
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_memory(uint16_t address) {
-	switch(address & 0xf000) {
+	switch((address >> 12) & 0xf) {
 	case 0x0000: return read_0(address);
-	case 0x1000: return read_1(address);
-	case 0x2000: return read_2(address);
-	case 0x3000: return read_3(address);
-	case 0x4000: return read_4(address);
-	case 0x5000: return read_5(address);
-	case 0x6000: return read_6(address);
-	case 0x7000: return read_7(address);
-	case 0x8000: return read_8(address);
-	case 0x9000: return read_9(address);
-	case 0xa000: return read_a(address);
-	case 0xb000: return read_b(address);
-	case 0xc000: return read_c(address);
-	case 0xd000: return read_d(address);
-	case 0xe000: return read_e(address);
-	case 0xf000: return read_f(address);
+	case 0x0001: return read_1(address);
+	case 0x0002: return read_2(address);
+	case 0x0003: return read_3(address);
+	case 0x0004: return read_4(address);
+	case 0x0005: return read_5(address);
+	case 0x0006: return read_6(address);
+	case 0x0007: return read_7(address);
+	case 0x0008: return read_8(address);
+	case 0x0009: return read_9(address);
+	case 0x000a: return read_a(address);
+	case 0x000b: return read_b(address);
+	case 0x000c: return read_c(address);
+	case 0x000d: return read_d(address);
+	case 0x000e: return read_e(address);
+	case 0x000f: return read_f(address);
 	default:
 		abort();
 	}

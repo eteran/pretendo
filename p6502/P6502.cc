@@ -21,11 +21,6 @@ uint8_t    P;
 // stats
 uint64_t executed_cycles;
 
-// handlers
-jam_handler_t   jam_handler_;
-write_handler_t write_handler_;
-read_handler_t  read_handler_;
-sync_handler_t  sync_handler_;
 
 // internal registers
 uint16_t   instruction_;
@@ -47,7 +42,7 @@ bool     rst_asserted_;
 
 namespace {
 
-enum {
+enum : uint8_t {
 	C_MASK = 0x01,
 	Z_MASK = 0x02,
 	I_MASK = 0x04,
@@ -58,10 +53,10 @@ enum {
 	N_MASK = 0x80
 };
 
-const uint16_t NMI_VECTOR_ADDRESS = 0xfffa;
-const uint16_t RST_VECTOR_ADDRESS = 0xfffc;
-const uint16_t IRQ_VECTOR_ADDRESS = 0xfffe;
-const uint16_t STACK_ADDRESS      = 0x0100;
+constexpr uint16_t NMI_VECTOR_ADDRESS = 0xfffa;
+constexpr uint16_t RST_VECTOR_ADDRESS = 0xfffc;
+constexpr uint16_t IRQ_VECTOR_ADDRESS = 0xfffe;
+constexpr uint16_t STACK_ADDRESS      = 0x0100;
 
 
 dma_handler_t spr_dma_handler_        = 0;
@@ -527,19 +522,23 @@ void clock() {
 }
 
 //------------------------------------------------------------------------------
+// Name: tick
+// Desc:
+//------------------------------------------------------------------------------
+void tick() {
+	clock();
+	sync_handler();
+	++executed_cycles;
+}
+
+//------------------------------------------------------------------------------
 // Name: run
 // Desc:
 //------------------------------------------------------------------------------
 void run(int cycles) {
 
 	while(cycles-- > 0) {
-		clock();
-
-		if(sync_handler_) {
-			(*sync_handler_)();
-		}
-
-		++executed_cycles;
+		tick();
 	}
 }
 
@@ -591,17 +590,7 @@ void reset_nmi() {
 // Name: init
 // Desc:
 //------------------------------------------------------------------------------
-void init(jam_handler_t jam, read_handler_t read, write_handler_t write, sync_handler_t sync) {
-
-	// these two are required
-	assert(read);
-	assert(write);
-
-	jam_handler_   = jam;
-	read_handler_  = read;
-	write_handler_ = write;
-	sync_handler_  = sync;
-
+void init() {
 	stop();
 }
 

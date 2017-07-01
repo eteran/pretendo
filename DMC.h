@@ -25,7 +25,7 @@ union DMCControl {
 class DMC {
 public:
 	DMC();
-	~DMC();
+	~DMC() = default;
 
 private:
 	DMC(const DMC &) = delete;

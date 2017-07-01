@@ -41,7 +41,7 @@ public:
 	uint8_t *prg() const;
 	uint8_t *chr() const;
 	MIRRORING mirroring() const;
-	const std::shared_ptr<Mapper> &mapper() const;
+	const std::shared_ptr<Mapper> &mapper() const { return mapper_; }
 	std::vector<uint8_t> raw_image() const;
 
 private:    

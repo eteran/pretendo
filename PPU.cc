@@ -1373,7 +1373,7 @@ void execute_cycle(const scanline_vblank &target) {
 //------------------------------------------------------------------------------
 void clock_cpu() {
 	if((ppu_cycle_ % 3) == cpu_alignment) {
-		cpu::exec(1);
+		cpu::exec<1>();
 	}
 }
 

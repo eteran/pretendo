@@ -17,7 +17,7 @@ template <int Channel>
 class Sweep {
 public:
 	explicit Sweep(Square<Channel> *square);
-	~Sweep();
+	~Sweep() = default;
 
 private:
 	Sweep(const Sweep &) = delete;

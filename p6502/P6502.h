@@ -19,13 +19,17 @@ union register16 {
 	bitfield<8,8> hi;
 };
 
+// NOTE(eteran): user of this library must implement the following...
+uint8_t read_handler(uint16_t address);
+void write_handler(uint16_t address, uint8_t value);
+void jam_handler();
+void sync_handler();
+
 
 namespace {
 
-typedef uint8_t (*read_handler_t)(uint16_t);
-typedef void (*jam_handler_t)();
-typedef void (*sync_handler_t)();
-typedef void (*write_handler_t)(uint16_t, uint8_t);
+
+
 typedef void (*dma_handler_t)(uint8_t);
 
 }
@@ -46,7 +50,7 @@ extern uint8_t    P;
 // stats
 extern uint64_t executed_cycles;
 
-void init(jam_handler_t jam, read_handler_t read, write_handler_t write, sync_handler_t sync);
+void init();
 void reset();
 void stop();
 void irq();
@@ -54,7 +58,15 @@ void nmi();
 void reset_irq();
 void reset_nmi();
 void run(int cycles);
+void tick();
 void schedule_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count, DMA_SOURCE source);
+
+template <int Cycles>
+void run() {
+	for(int i = 0; i < Cycles; ++i) {
+		tick();
+	}
+}
 
 }
 

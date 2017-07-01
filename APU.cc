@@ -128,7 +128,7 @@ void reset(Reset reset_type) {
 	//       nop
 	//     reset:
 	if(reset_type == Reset::Hard) {
-		run(2);
+		run<2>();
 	}
 
 	std::cout << "APU reset complete" << std::endl;
@@ -454,35 +454,41 @@ void clock_frame_mode_1() {
 }
 
 //------------------------------------------------------------------------------
+// Name: tick
+//------------------------------------------------------------------------------
+void tick() {
+	if(!(frame_counter_.inihibit_frame_irq) && (status.frame_irq)) {
+		cpu::irq(cpu::APU_IRQ);
+	}
+
+	if(apu_cycles_ == next_clock_) {
+		if(frame_counter_.mode) {
+			clock_frame_mode_1();
+		} else {
+			clock_frame_mode_0();
+		}
+	}
+
+	if((apu_cycles_ % ClocksPerSample) == 0) {
+		sample_buffer_.push_back(mix_channels());
+	}
+
+	dmc.tick();
+	noise.tick();
+	triangle.tick();
+	square_0.tick();
+	square_1.tick();
+
+	++apu_cycles_;
+}
+
+//------------------------------------------------------------------------------
 // Name: run
 //------------------------------------------------------------------------------
 void run(int cycles) {
 
 	while(cycles-- > 0) {
-
-		if(!(frame_counter_.inihibit_frame_irq) && (status.frame_irq)) {
-			cpu::irq(cpu::APU_IRQ);
-		}
-
-		if(apu_cycles_ == next_clock_) {
-			if(frame_counter_.mode) {
-				clock_frame_mode_1();
-			} else {
-				clock_frame_mode_0();
-			}
-		}
-
-		if((apu_cycles_ % ClocksPerSample) == 0) {
-			sample_buffer_.push_back(mix_channels());
-		}
-
-		dmc.tick();
-		noise.tick();
-		triangle.tick();
-		square_0.tick();
-		square_1.tick();
-
-		++apu_cycles_;
+		tick();
 	}
 }
 

@@ -64,7 +64,15 @@ void write4017(uint8_t value);
 
 uint8_t read4015();
 uint64_t cycle_count();
+void tick();
 void run(int cycles);
+
+template <int Cycles>
+void run() {
+	for(int i = 0; i < Cycles; ++i) {
+		tick();
+	}
+}
 
 
 extern Square<0> square_0;

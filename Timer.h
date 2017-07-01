@@ -18,7 +18,6 @@ private:
 	Timer &operator=(const Timer &) = delete;
 
 public:
-	bool tick();
 	void reset();
 	uint16_t value() const;
 

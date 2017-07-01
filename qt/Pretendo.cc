@@ -211,7 +211,7 @@ void Pretendo::on_action_Run_triggered() {
 		if(!timer_->isActive()) {
 
 			// we test mapper, it's a good metric for "did we load the cart correctly"
-			if(const std::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
+			if(const std::shared_ptr<Mapper> &mapper = nes::cart.mapper()) {
 
 				ui_.stackedWidget->setCurrentIndex(1);
 

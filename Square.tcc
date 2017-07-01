@@ -12,16 +12,8 @@ template <int Channel>
 Square<Channel>::Square() : sweep(this), timer_reload_(0), duty_(0),
 		sequence_index_(0), enabled_(false) {
 
-
 	static_assert(Channel >= 0 && Channel < 2, "only channels 0 and 1 are valid");
 
-}
-
-//------------------------------------------------------------------------------
-// Name: ~Square
-//------------------------------------------------------------------------------
-template <int Channel>
-Square<Channel>::~Square() {
 }
 
 //------------------------------------------------------------------------------

@@ -9,6 +9,27 @@
 #include <cstdlib>
 #include <cstring>
 
+
+// implement the required functions
+namespace P6502 {
+
+uint8_t read_handler(uint16_t address) {
+	return nes::cart.mapper()->read_memory(address);
+}
+
+void write_handler(uint16_t address, uint8_t value) {
+	return nes::cart.mapper()->write_memory(address, value);
+}
+
+void jam_handler() {
+}
+
+void sync_handler() {
+	return nes::cart.mapper()->cpu_sync();
+}
+
+}
+
 namespace nes {
 namespace cpu {
 
@@ -19,7 +40,7 @@ using P6502::S;
 using P6502::X; 
 using P6502::Y; 
 
-enum {
+enum : uint8_t {
 	C_MASK = 0x01,
 	Z_MASK = 0x02,
 	I_MASK = 0x04,
@@ -30,10 +51,10 @@ enum {
 	N_MASK = 0x80
 };
 
-static const unsigned int page_count = 32;
-static const unsigned int page_size  = 0x10000 / page_count;
-static const unsigned int page_mask  = page_size - 1;
-static const unsigned int page_shift = 11;
+static constexpr unsigned int page_count = 32;
+static constexpr unsigned int page_size  = 0x10000 / page_count;
+static constexpr unsigned int page_mask  = page_size - 1;
+static constexpr unsigned int page_shift = 11;
 
 uint8_t ram_[0x800];
 uint8_t irq_sources_ = 0x00;
@@ -43,22 +64,7 @@ namespace {
 
 struct static_initializer {
 	static_initializer() {
-		P6502::init(
-			[]() {
-				// JAM handler
-			},
-			[](uint16_t address) {
-				// read handler
-				return cart.mapper()->read_memory(address);
-			},
-			[](uint16_t address, uint8_t value) {
-				// write handler
-				return cart.mapper()->write_memory(address, value);
-			},
-			[]() {
-				// sync handler
-				return cart.mapper()->cpu_sync();
-			});
+		P6502::init();
 
 		page_[0x00] = ram_;
 		page_[0x01] = ram_;

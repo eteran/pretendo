@@ -2,8 +2,9 @@
 #ifndef CPU_20080314_H_
 #define CPU_20080314_H_
 
-#include "../Reset.h"
+#include "Reset.h"
 #include "P6502.h"
+#include "APU.h"
 #include <memory>
 #include <cstdint>
 class Mapper;
@@ -49,6 +50,12 @@ void irq(IRQ_SOURCE source);
 void nmi();
 void schedule_spr_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
 void schedule_dmc_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
+
+template <int N>
+void exec() {
+	P6502::run<N>();
+	apu::run<N>();
+}
 
 void swap_01(uint8_t *ptr);
 void swap_23(uint8_t *ptr);

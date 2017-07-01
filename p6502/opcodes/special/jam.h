@@ -13,9 +13,7 @@ public:
 		case 1:
 			// make sure we spin forever
 			--PC.raw;
-			if(jam_handler_) {
-				(*jam_handler_)();
-			}
+			jam_handler();
 			OPCODE_COMPLETE;
 			break;
 		default:

@@ -20,7 +20,7 @@ class Square {
 
 public:
 	Square();
-	~Square();
+	~Square() = default;
 
 private:
 	Square(const Square &) = delete;

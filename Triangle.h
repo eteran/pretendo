@@ -19,7 +19,7 @@ using std::uint64_t;
 class Triangle {
 public:
 	Triangle();
-	~Triangle();
+	~Triangle() = default;
 
 private:
 	Triangle(const Triangle &) = delete;

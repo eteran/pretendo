@@ -19,7 +19,7 @@ using std::uint64_t;
 class Noise {
 public:
 	Noise();
-	~Noise();
+	~Noise() = default;
 
 private:
 	Noise(const Noise &) = delete;
