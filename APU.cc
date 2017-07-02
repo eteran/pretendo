@@ -41,11 +41,18 @@ constexpr T bound(T lower, T value, T upper) {
 }
 
 
-const double CPUFrequency  = 1789772.67; // 1.78977267Mhz
+constexpr double CPUFrequency  = 1789772.67; // 1.78977267Mhz
 // CPUFrequency / 44100Hz  = 40.5844142857 clocks per sample
 // CPUFrequency / 48000Hz  = 37.286930625  clocks per sample
 // CPUFrequency / 192000Hz = 9.32173265625 clocks per sample
-const int ClocksPerSample = CPUFrequency / frequency;
+constexpr int ClocksPerSample = CPUFrequency / frequency;
+
+
+uint64_t        apu_cycles_         = -1;
+uint64_t        next_clock_         = -1;
+uint8_t         clock_step_         = 0;
+APUFrameCounter frame_counter_      = {0};
+uint8_t         last_frame_counter_ = 0;
 
 }
 
@@ -55,20 +62,19 @@ Triangle  triangle;
 Noise     noise;
 DMC       dmc;
 
-uint64_t        apu_cycles_         = -1;
-uint64_t        next_clock_         = -1;
-uint8_t         clock_step_         = 0;
-APUStatus       status              = {0};
-APUFrameCounter frame_counter_      = {0};
-uint8_t         last_frame_counter_ = 0;
+
+
+
+APUStatus status = {0};
+
 
 circular_buffer<uint8_t, buffer_size> sample_buffer_;
 
-void clock_frame_mode_0();
-void clock_frame_mode_1();
-void clock_length();
-void clock_linear();
-uint8_t mix_channels();
+static void clock_frame_mode_0();
+static void clock_frame_mode_1();
+static void clock_length();
+static void clock_linear();
+static uint8_t mix_channels();
 
 //------------------------------------------------------------------------------
 // Name: reset
@@ -481,17 +487,6 @@ void tick() {
 
 	++apu_cycles_;
 }
-
-//------------------------------------------------------------------------------
-// Name: run
-//------------------------------------------------------------------------------
-void run(int cycles) {
-
-	while(cycles-- > 0) {
-		tick();
-	}
-}
-
 
 //------------------------------------------------------------------------------
 // Name: mix_channels

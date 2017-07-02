@@ -45,7 +45,6 @@ bool flag_z();
 uint64_t cycle_count();
 void clear_irq(IRQ_SOURCE source);
 void clear_nmi();
-void exec(int cycles);
 void irq(IRQ_SOURCE source);
 void nmi();
 void schedule_spr_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
