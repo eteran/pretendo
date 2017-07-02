@@ -15,7 +15,7 @@ using std::uint64_t;
 class LengthCounter {
 public:
 	LengthCounter();
-	~LengthCounter();
+	~LengthCounter() = default;
 
 private:
 	LengthCounter(const LengthCounter &) = delete;

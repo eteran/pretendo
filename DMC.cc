@@ -149,7 +149,6 @@ uint16_t DMC::bytes_remaining() const {
 //------------------------------------------------------------------------------
 void DMC::tick() {
 
-
 	timer_.tick([this]() {
 
 		if(bits_remaining_ != 0) {
