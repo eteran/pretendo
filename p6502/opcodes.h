@@ -2,15 +2,14 @@
 #ifndef OPCODES_20121204_H_
 #define OPCODES_20121204_H_
 
-struct operation_type {};
-struct operation_none        : operation_type {};
-struct operation_read        : operation_type {};
-struct operation_modify      : operation_type {};
-struct operation_write       : operation_type {};
-struct operation_stack_read  : operation_type {};
-struct operation_stack_write : operation_type {};
-struct operation_jump        : operation_type {};
-struct operation_branch      : operation_type {};
+struct operation_none        {};
+struct operation_read        {};
+struct operation_modify      {};
+struct operation_write       {};
+struct operation_stack_read  {};
+struct operation_stack_write {};
+struct operation_jump        {};
+struct operation_branch      {};
 
 #include "opcodes/adc.h"
 #include "opcodes/and.h"
