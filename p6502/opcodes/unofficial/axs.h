@@ -6,7 +6,7 @@
 // Desc: Transfer A to X
 //------------------------------------------------------------------------------
 struct opcode_axs {
-	typedef operation_read memory_access;
+	using memory_access = operation_read;
 	
 	static void execute(uint8_t data) {
 		const uint16_t new_x = (X & A) - data;

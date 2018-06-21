@@ -123,7 +123,7 @@ private:
 			// write to effective address
 			{
 				uint16_t address = effective_address16_.raw;
-				uint8_t  value   = Op::execute(address);
+                const uint8_t  value = Op::execute(address);
 				write_byte(address, value);
 			}
 			OPCODE_COMPLETE;

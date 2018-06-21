@@ -3,7 +3,7 @@
 #define BRANCH_20121206_H_
 
 struct branch {
-	typedef operation_branch memory_access;
+    using memory_access = operation_branch;
 
 protected:
 	// branch conditions

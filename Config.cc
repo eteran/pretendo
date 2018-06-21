@@ -10,13 +10,6 @@
 #include <boost/filesystem.hpp>
 #include <pwd.h>
 
-#ifdef __HAIKU__
-	#include <FindDirectory.h>
-	#include <fs_info.h>
-	#include <Path.h>
-	#include <Directory.h>
-#endif
-
 
 namespace {
 //------------------------------------------------------------------------------
@@ -99,25 +92,10 @@ inline std::vector<std::string> explode(const std::string &delimeter, const std:
 
 }
 
-Config::Config()
-{
-#ifdef __HAIKU__
-		BPath path;
-		BDirectory *dir;
-
-		find_directory(B_USER_SETTINGS_DIRECTORY, &path, false);
-		filename_ = path.Path();
-		dir = new BDirectory(filename_.c_str());
-		dir->CreateDirectory("Pretendo", NULL);
-		filename_ += "/Pretendo/pretendo.config";
-#else
-
+Config::Config() {
 	const std::string config_path = configDirectory();
 	boost::filesystem::create_directories(config_path);
-	
 	filename_ = config_path + "/pretendo.conf";
-#endif
-
 	Load();
 }
 
@@ -131,7 +109,7 @@ bool
 Config::Load() {
 
 	std::cout << "Loading config from file..." << std::endl;
-	std::ifstream file(filename_.c_str());
+    std::ifstream file(filename_);
 
 	if(! file) {
 		// file does not exist, make a new one with some defaults

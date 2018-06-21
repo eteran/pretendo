@@ -8,7 +8,7 @@
 //------------------------------------------------------------------------------
 struct opcode_sxa {
 
-	typedef operation_write memory_access;
+	using memory_access = operation_write;
 
 	static uint8_t execute(uint16_t &address) {
 	

@@ -11,17 +11,13 @@ using std::uint8_t;
 using std::uint16_t;
 
 class LFSR {
-private:
-	LFSR(const LFSR &) = delete;
+public:
+    LFSR()                        = default;
+    ~LFSR()                       = default;
+    LFSR(const LFSR &)            = delete;
 	LFSR &operator=(const LFSR &) = delete;
 
 public:
-	//-------------------------------------------------------------------
-	// Name: ShiftRegister
-	//-------------------------------------------------------------------
-	LFSR() : value_(1), mode_(0) {
-	}
-
 	//-------------------------------------------------------------------
 	// Name: set_mode
 	//-------------------------------------------------------------------
@@ -65,8 +61,8 @@ private:
 	}
 
 private:
-	uint16_t value_;
-	uint8_t  mode_;
+    uint16_t value_ = 1;
+    uint8_t  mode_  = 0;
 };
 
 }

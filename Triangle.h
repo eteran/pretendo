@@ -18,11 +18,9 @@ using std::uint64_t;
 
 class Triangle {
 public:
-	Triangle();
-	~Triangle() = default;
-
-private:
-	Triangle(const Triangle &) = delete;
+    Triangle()                            = default;
+    ~Triangle()                           = default;
+    Triangle(const Triangle &)            = delete;
 	Triangle &operator=(const Triangle &) = delete;
 
 public:
@@ -47,9 +45,9 @@ public:
 	uint8_t output() const;
 
 private:
-	bool          enabled_;
-	uint16_t      timer_load_;
-	size_t        sequence_index_;
+    bool          enabled_        = false;
+    uint16_t      timer_load_     = 0;
+    size_t        sequence_index_ = 0;
 	Timer         timer_;
 };
 

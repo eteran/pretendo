@@ -23,22 +23,22 @@ uint64_t executed_cycles;
 
 
 // internal registers
-uint16_t   instruction_;
-int        cycle_;
+static uint16_t   instruction_;
+static int        cycle_;
 
 // internal registers (which get trashed by instructions)
-register16 effective_address16_;
-register16 data16_;
-register16 old_pc_;
-register16 new_pc_;
-uint8_t    data8_;
+static register16 effective_address16_;
+static register16 data16_;
+static register16 old_pc_;
+static register16 new_pc_;
+static uint8_t    data8_;
 
-bool     irq_executing_;
-bool     nmi_executing_;
-bool     rst_executing_;
-bool     irq_asserted_;
-bool     nmi_asserted_;
-bool     rst_asserted_;
+static bool irq_executing_;
+static bool nmi_executing_;
+static bool rst_executing_;
+static bool irq_asserted_;
+static bool nmi_asserted_;
+static bool rst_asserted_;
 
 namespace {
 
@@ -59,12 +59,12 @@ constexpr uint16_t IRQ_VECTOR_ADDRESS = 0xfffe;
 constexpr uint16_t STACK_ADDRESS      = 0x0100;
 
 
-dma_handler_t spr_dma_handler_        = 0;
+dma_handler_t spr_dma_handler_        = nullptr;
 uint16_t      spr_dma_source_address_ = 0;
 uint16_t      spr_dma_count_          = 0;
 uint8_t       spr_dma_byte_           = 0;
 
-dma_handler_t dmc_dma_handler_        = 0;
+dma_handler_t dmc_dma_handler_        = nullptr;
 uint16_t      dmc_dma_source_address_ = 0;
 uint16_t      dmc_dma_count_          = 0;
 uint8_t       dmc_dma_byte_           = 0;

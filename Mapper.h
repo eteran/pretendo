@@ -18,7 +18,7 @@ using std::uint64_t;
 
 class Mapper;
 
-typedef std::function<std::shared_ptr<Mapper>()> create_func;
+using create_func = std::function<std::shared_ptr<Mapper>()>;
 
 class Mapper {
 public:
@@ -39,9 +39,7 @@ public:
 
 protected:
 	Mapper();
-
-private:
-	Mapper(const Mapper &) = delete;
+    Mapper(const Mapper &)            = delete;
 	Mapper &operator=(const Mapper &) = delete;
 
 public:

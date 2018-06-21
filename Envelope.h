@@ -14,11 +14,9 @@ using std::uint64_t;
 
 class Envelope {
 public:
-	Envelope();
-	~Envelope();
-
-private:
-	Envelope(const Envelope &) = delete;
+    Envelope()                            = default;
+    ~Envelope()                           = default;
+    Envelope(const Envelope &)            = delete;
 	Envelope &operator=(const Envelope &) = delete;
 
 public:
@@ -31,10 +29,10 @@ private:
 	void clock_divider();
 
 private:
-	bool    start_;
-	uint8_t counter_;
-	uint8_t divider_;
-	uint8_t control_;
+    bool    start_   = false;
+    uint8_t counter_ = 0;
+    uint8_t divider_ = 0xff;
+    uint8_t control_ = 0;
 };
 
 }

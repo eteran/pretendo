@@ -2,7 +2,7 @@
 #define COMPARE_20121206_H_
 
 struct compare {
-	typedef operation_read memory_access;
+	using memory_access = operation_read;
 
 protected:
 	static void do_compare(uint8_t reg, uint8_t data) {

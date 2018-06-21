@@ -18,11 +18,8 @@ public:
 	using difference_type = ptrdiff_t;
 	
 public:
-	circular_buffer() : head_(0), tail_(0), size_(0) {
-	}
-	
-	~circular_buffer() {
-	}
+    circular_buffer()  = default;
+    ~circular_buffer() = default;
 	
 public:
 	reference front()             { assert(!empty()); return array_[head_]; }
@@ -32,8 +29,8 @@ public:
 	
 public:
 	void clear() {
-		head_         = 0;
-		tail_         = 0;
+        head_ = 0;
+        tail_ = 0;
 		size_ = 0;
 	}
 	
@@ -88,9 +85,9 @@ private:
 	
 private:
 	std::array<T, N> array_;
-	size_t           head_;
-	size_t           tail_;
-	size_t           size_;
+    size_t           head_ = 0;
+    size_t           tail_ = 0;
+    size_t           size_ = 0;
 };
 
 #endif

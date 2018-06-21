@@ -4,14 +4,16 @@
 
 #include <string>
 #include <cstdint>
+#include <memory>
+#include <functional>
 
 class MemoryMappedFile {
 public:
-    MemoryMappedFile();
     MemoryMappedFile(const std::string &filename, size_t size);
-    MemoryMappedFile(MemoryMappedFile &&other);
-    MemoryMappedFile& operator=(MemoryMappedFile &&rhs);
-    MemoryMappedFile(const MemoryMappedFile &) = delete;
+    MemoryMappedFile()                                    = default;
+    MemoryMappedFile(MemoryMappedFile &&)                 = default;
+    MemoryMappedFile& operator=(MemoryMappedFile &&)      = default;
+    MemoryMappedFile(const MemoryMappedFile &)            = delete;
     MemoryMappedFile& operator=(const MemoryMappedFile &) = delete;
     ~MemoryMappedFile();
 
@@ -19,13 +21,10 @@ public:
     uint8_t operator[](size_t index) const;
     uint8_t& operator[](size_t index);
 
-public:
-    void swap(MemoryMappedFile &other);
-
 private:
-    uint8_t *ptr_;
-    size_t size_;
-    bool memory_;
+    uint8_t *                      ptr_ = nullptr;
+    std::function<void(uint8_t *)> deleter_;
 };
+
 
 #endif

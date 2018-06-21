@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_jmp {
 
-	typedef operation_jump memory_access;
+    using memory_access = operation_jump;
 
 	static void execute(uint16_t data) {
 		PC.raw = data;

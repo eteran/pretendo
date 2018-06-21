@@ -24,11 +24,9 @@ union DMCControl {
 
 class DMC {
 public:
-	DMC();
-	~DMC() = default;
-
-private:
-	DMC(const DMC &) = delete;
+    DMC()                       = default;
+    ~DMC()                      = default;
+    DMC(const DMC &)            = delete;
 	DMC &operator=(const DMC &) = delete;
 
 public:
@@ -55,17 +53,18 @@ private:
 	bool loop() const;
 
 private:
-	bool                   muted_;
-	uint16_t               sample_pointer_;
-	uint16_t               sample_address_;
-	uint16_t               bytes_remaining_;
-	uint16_t               sample_length_;
-	uint8_t                bits_remaining_;
-	ShiftRegister<uint8_t> sample_buffer_;
-	Timer                  timer_;
-	uint8_t                output_;
-	DMCControl             control_;
+    bool                   muted_           = false;
+    uint16_t               sample_pointer_  = 0xc000;
+    uint16_t               sample_address_  = 0xc000;
+    uint16_t               bytes_remaining_ = 0;
+    uint16_t               sample_length_   = 0;
+    uint8_t                bits_remaining_  = 0;
+    uint8_t                output_          = 0;
+    ShiftRegister<uint8_t> sample_buffer_{0};
+    DMCControl             control_{0};
+    Timer                  timer_;
 };
+
 
 }
 }

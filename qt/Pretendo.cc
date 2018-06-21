@@ -27,8 +27,8 @@
 
 namespace {
 
-//const int TimerInterval = 1000. / 60;
-const int TimerInterval = 0;
+constexpr int TimerInterval = 1000. / 60;
+//constexpr int TimerInterval = 0;
 
 }
 

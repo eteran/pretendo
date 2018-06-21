@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_clv {
 
-	typedef operation_none memory_access;
+	using memory_access = operation_none;
 
 	static void execute() {
 		clear_flag<V_MASK>();

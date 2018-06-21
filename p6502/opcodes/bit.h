@@ -8,7 +8,7 @@
 //------------------------------------------------------------------------------
 struct opcode_bit {
 
-	typedef operation_read memory_access;
+	using memory_access = operation_read;
 
 	static void execute(uint8_t data) {
 		set_flag_condition<Z_MASK>(!(data & A));

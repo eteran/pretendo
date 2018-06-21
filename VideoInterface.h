@@ -4,9 +4,6 @@
 
 #include "Palette.h"
 
-class color_emphasis_t;
-class rgb_color_t;
-
 class VideoInterface {
 public:
 	virtual ~VideoInterface() {}

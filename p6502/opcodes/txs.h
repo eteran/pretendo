@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_txs {
 
-	typedef operation_none memory_access;
+	using memory_access = operation_none;
 
 	static void execute() {
 		S = X;

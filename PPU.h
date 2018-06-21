@@ -60,11 +60,11 @@ union PPUMask {
 
 void reset(Reset reset_type);
 
-static const uint8_t mirror_single_low  = 0x00;
-static const uint8_t mirror_single_high = 0x55;
-static const uint8_t mirror_vertical    = 0x44;
-static const uint8_t mirror_horizontal  = 0x50;
-static const uint8_t mirror_4screen     = 0xe4;
+constexpr uint8_t mirror_single_low  = 0x00;
+constexpr uint8_t mirror_single_high = 0x55;
+constexpr uint8_t mirror_vertical    = 0x44;
+constexpr uint8_t mirror_horizontal  = 0x50;
+constexpr uint8_t mirror_4screen     = 0xe4;
 
 void write2000(uint8_t value);
 void write2001(uint8_t value);

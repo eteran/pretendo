@@ -51,9 +51,9 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 	const uint8_t level = color < 0xE ? (pixel >> 4) & 3 : 1;
 
 	// Voltage levels, relative to synch voltage
-	static const float black       = 0.518f;
-	static const float white       = 1.962f;
-	static const float attenuation = 0.746f;
+    static constexpr float black       = 0.518f;
+    static constexpr float white       = 1.962f;
+    static constexpr float attenuation = 0.746f;
 
 	static const float levels[8] = {
 		0.350f, 0.518f, 0.962f, 1.550f, // Signal low
@@ -111,7 +111,6 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 // Name: NTSC
 //------------------------------------------------------------------------------
 const rgb_color_t *Palette::NTSC(float saturation, float hue, float contrast, float brightness, float gamma) {
-
 
 	std::cout << "Creating Palette: <" << saturation << "," << hue << "," << contrast << "," << brightness << "," << gamma << ">" << std::endl;
 	static rgb_color_t color_list[64];

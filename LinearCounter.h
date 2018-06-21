@@ -11,11 +11,9 @@ using std::uint8_t;
 
 class LinearCounter {
 public:
-	LinearCounter();
-	~LinearCounter() = default;
-
-private:
-	LinearCounter(const LinearCounter &) = delete;
+    LinearCounter()                                 = default;
+    ~LinearCounter()                                = default;
+    LinearCounter(const LinearCounter &)            = delete;
 	LinearCounter &operator=(const LinearCounter &) = delete;
 
 public:
@@ -25,9 +23,9 @@ public:
 	void set_control(uint8_t value);
 
 private:
-	uint8_t value_;
-	uint8_t control_;
-	bool    reload_;
+    uint8_t value_   = 0;
+    uint8_t control_ = 0;
+    bool    reload_  = false;
 };
 
 }

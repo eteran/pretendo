@@ -18,11 +18,9 @@ using std::uint64_t;
 
 class Noise {
 public:
-	Noise();
-	~Noise() = default;
-
-private:
-	Noise(const Noise &) = delete;
+    Noise()                         = default;
+    ~Noise()                        = default;
+    Noise(const Noise &)            = delete;
 	Noise &operator=(const Noise &) = delete;
 
 public:
@@ -47,7 +45,7 @@ public:
 	Envelope      envelope;
 
 private:
-	bool          enabled_;
+    bool          enabled_ = false;
 	Timer         timer_;
 	LFSR          lfsr_;
 };

@@ -6,8 +6,12 @@
 
 namespace nes {
 namespace input {
+namespace {
 
-uint8_t    strobe_      = 0;
+uint8_t strobe_ = 0;
+
+}
+
 Controller controller1;
 Controller controller2;
 Controller controller3;

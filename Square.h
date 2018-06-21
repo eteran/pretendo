@@ -15,15 +15,14 @@ using std::uint8_t;
 using std::uint16_t;
 
 template <int Channel>
-class Square {
+class Square {    
 	friend class Sweep<Channel>;
+    static_assert(Channel >= 0 && Channel < 2, "only channels 0 and 1 are valid");
 
 public:
-	Square();
-	~Square() = default;
-
-private:
-	Square(const Square &) = delete;
+    Square()                          = default;
+    ~Square()                         = default;
+    Square(const Square &)            = delete;
 	Square &operator=(const Square &) = delete;
 
 public:
@@ -47,14 +46,14 @@ public:
 public:
 	LengthCounter  length_counter;
 	Envelope       envelope;
-	Sweep<Channel> sweep;
+    Sweep<Channel> sweep { this };
 
 private:
 	Timer          timer_;
-	uint16_t       timer_reload_;
-	uint8_t        duty_;
-	uint8_t        sequence_index_;
-	bool           enabled_;
+    uint16_t       timer_reload_   = 0;
+    uint8_t        duty_           = 0;
+    uint8_t        sequence_index_ = 0;
+    bool           enabled_        = false;
 };
 
 }

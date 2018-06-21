@@ -38,11 +38,11 @@ private:
 
 private:
 	Square<Channel> *const square_;
-	uint16_t      pulse_period_;
-	uint8_t       counter_;
-	uint8_t       control_;
-	bool          reload_;
-	bool          silenced_;
+    uint16_t      pulse_period_ = 0;
+    uint8_t       counter_      = 0;
+    uint8_t       control_      = 0;
+    bool          reload_       = false;
+    bool          silenced_     = false;
 };
 
 }

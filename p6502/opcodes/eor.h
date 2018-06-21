@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_eor {
 
-	typedef operation_read memory_access;
+	using memory_access = operation_read;
 
 	static void execute(uint8_t data) {
 		A ^= data;

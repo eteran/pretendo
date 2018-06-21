@@ -13,6 +13,8 @@ using std::uint32_t;
 using std::uint64_t;
 using std::uint8_t;
 
+using dma_handler_t = void (*)(uint8_t);
+
 union register16 {
 	uint16_t raw;
 	bitfield<0,8> lo;
@@ -25,14 +27,6 @@ void write_handler(uint16_t address, uint8_t value);
 void jam_handler();
 void sync_handler();
 
-
-namespace {
-
-
-
-typedef void (*dma_handler_t)(uint8_t);
-
-}
 
 enum DMA_SOURCE {
 	SPR_DMA = 0,

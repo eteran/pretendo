@@ -21,13 +21,12 @@ public:
 	static std::string configDirectory();
 	static std::string cacheDirectory();
 	
-
 private:
 	Config(const Config &) = delete;
 	Config &operator=(const Config &) = delete;
 
 private:
-	typedef std::map<std::string, std::string> section_type;
+    using section_type = std::map<std::string, std::string>;
 
 public:
 	bool Load();

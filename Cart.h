@@ -11,12 +11,11 @@ class Mapper;
 
 class Cart {
 public:
-	Cart();
-	~Cart();
+    Cart()                        = default;
+    Cart(const Cart &)            = delete;
+    Cart &operator=(const Cart &) = delete;
+    ~Cart();
 
-private:
-	Cart(const Cart &) = delete;
-	Cart &operator=(const Cart &) = delete;
 
 public:
 	enum MIRRORING {
@@ -46,12 +45,12 @@ public:
 
 private:    
 	std::shared_ptr<iNES::Rom> rom_;
-	uint32_t                   prg_mask_;
-	uint32_t                   chr_mask_;
-	uint32_t                   prg_hash_;
-	uint32_t                   chr_hash_;
-	uint32_t                   rom_hash_;
-	MIRRORING                  mirroring_;
+    uint32_t                   prg_mask_  = 0;
+    uint32_t                   chr_mask_  = 0;
+    uint32_t                   prg_hash_  = 0;
+    uint32_t                   chr_hash_  = 0;
+    uint32_t                   rom_hash_  = 0;
+    MIRRORING                  mirroring_ = MIR_HORIZONTAL;
 	std::shared_ptr<Mapper>    mapper_;
     std::string                filename_;
 };

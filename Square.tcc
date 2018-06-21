@@ -6,17 +6,6 @@ namespace nes {
 namespace apu {
 
 //------------------------------------------------------------------------------
-// Name: Square
-//------------------------------------------------------------------------------
-template <int Channel>
-Square<Channel>::Square() : sweep(this), timer_reload_(0), duty_(0),
-		sequence_index_(0), enabled_(false) {
-
-	static_assert(Channel >= 0 && Channel < 2, "only channels 0 and 1 are valid");
-
-}
-
-//------------------------------------------------------------------------------
 // Name: set_enabled
 //------------------------------------------------------------------------------
 template <int Channel>
@@ -125,10 +114,10 @@ template <int Channel>
 uint8_t Square<Channel>::output() const {
 
 	static const uint8_t sequence[4][8] = {
-		{ 0,1,0,0,0,0,0,0 },
-		{ 0,1,1,0,0,0,0,0 },
-		{ 0,1,1,1,1,0,0,0 },
-		{ 1,0,0,1,1,1,1,1 }
+	    { 0,1,0,0,0,0,0,0 },
+	    { 0,1,1,0,0,0,0,0 },
+	    { 0,1,1,1,1,0,0,0 },
+	    { 1,0,0,1,1,1,1,1 }
 	};
 
 	if((timer_.frequency - 1) < 8) {

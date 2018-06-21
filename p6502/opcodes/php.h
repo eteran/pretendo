@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_php {
 
-	typedef operation_stack_write memory_access;
+	using memory_access = operation_stack_write;
 
 	static uint8_t execute() {
 		return P | B_MASK | R_MASK;

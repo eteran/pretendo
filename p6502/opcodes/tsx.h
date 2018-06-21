@@ -6,7 +6,7 @@
 // Desc: Transfer S to X
 //------------------------------------------------------------------------------
 struct opcode_tsx {
-	typedef operation_none memory_access;
+	using memory_access = operation_none;
 	
 	static void execute() {
 		X = S;

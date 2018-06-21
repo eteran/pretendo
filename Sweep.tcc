@@ -12,9 +12,7 @@ namespace apu {
 // Name: Sweep
 //------------------------------------------------------------------------------
 template <int Channel>
-Sweep<Channel>::Sweep(Square<Channel> *square) : square_(square),
-		pulse_period_(0), counter_(0), control_(0), reload_(false),
-		silenced_(false) {
+Sweep<Channel>::Sweep(Square<Channel> *square) : square_(square) {
 
 }
 

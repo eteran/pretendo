@@ -122,8 +122,8 @@ private:
 			LAST_CYCLE;
 			// write to effective address
 			{
-				uint16_t address = effective_address16_.raw;
-				const uint8_t  value   = Op::execute(address);
+                uint16_t address = effective_address16_.raw;
+                const uint8_t value = Op::execute(address);
 				write_byte(address, value);
 			}
 			OPCODE_COMPLETE;

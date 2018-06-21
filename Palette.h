@@ -22,11 +22,11 @@ struct color_emphasis_t {
 
 namespace Palette {
 
-static const float default_saturation = 1.0f;
-static const float default_hue        = 0.0f;
-static const float default_contrast   = 1.0f;
-static const float default_brightness = 1.0f;
-static const float default_gamma      = 1.4f;
+constexpr float default_saturation = 1.0f;
+constexpr float default_hue        = 0.0f;
+constexpr float default_contrast   = 1.0f;
+constexpr float default_brightness = 1.0f;
+constexpr float default_gamma      = 1.4f;
 
 const rgb_color_t *NTSC(float saturation, float hue, float contrast, float brightness, float gamma);
 
@@ -45,7 +45,7 @@ neutral color (ie: grey or white) when a certain color is being emphasized
 through $2001.
 */
 
-const color_emphasis_t intensity[8] = {
+constexpr const color_emphasis_t intensity[8] = {
 	{ 1.000, 1.000, 1.000 },
 	{ 1.239, 0.915, 0.743 },
 	{ 0.794, 1.086, 0.882 },

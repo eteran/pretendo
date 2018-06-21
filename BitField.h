@@ -15,13 +15,13 @@ namespace {
 
 template <size_t LastBit>
 struct MinimumTypeHelper {
-	typedef
+    using type =
 		typename std::conditional<LastBit == 0 , void,
 		typename std::conditional<LastBit <= 8 , uint8_t,
 		typename std::conditional<LastBit <= 16, uint16_t,
 		typename std::conditional<LastBit <= 32, uint32_t,
 		typename std::conditional<LastBit <= 64, uint64_t,
-		void>::type>::type>::type>::type>::type type;
+        void>::type>::type>::type>::type>::type;
 };
 
 }
@@ -33,7 +33,7 @@ private:
 		Mask = (1u << Bits) - 1u
 	};
 
-	typedef typename MinimumTypeHelper<Index + Bits>::type T;
+    using T = typename MinimumTypeHelper<Index + Bits>::type;
 	
 public:
 	template <class T2>
@@ -61,7 +61,7 @@ private:
 		Mask = 0x01
 	};
 
-	typedef typename MinimumTypeHelper<Index + Bits>::type T;
+    using T = typename MinimumTypeHelper<Index + Bits>::type;
 
 public:
 	BitField &operator=(bool value) {

@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_cli {
 
-	typedef operation_none memory_access;
+	using memory_access = operation_none;
 
 	static void execute() {
 		clear_flag<I_MASK>();

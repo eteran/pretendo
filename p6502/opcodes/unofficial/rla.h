@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_rla {
 
-	typedef operation_modify memory_access;
+	using memory_access = operation_modify;
 	
 	static void execute(uint8_t &data) {
 		// only correct because C_MASK is 0x01, we basically want to shift in a 1

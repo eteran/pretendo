@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_isc : compare {
 
-	typedef operation_modify memory_access;
+	using memory_access = operation_modify;
 	
 	static void execute(uint8_t &data) {
 		++data;

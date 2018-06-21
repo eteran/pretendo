@@ -51,10 +51,13 @@ enum : uint8_t {
 	N_MASK = 0x80
 };
 
-static constexpr unsigned int page_count = 32;
-static constexpr unsigned int page_size  = 0x10000 / page_count;
-static constexpr unsigned int page_mask  = page_size - 1;
-static constexpr unsigned int page_shift = 11;
+
+constexpr unsigned int page_count = 32;
+constexpr unsigned int page_size  = 0x10000 / page_count;
+constexpr unsigned int page_mask  = page_size - 1;
+constexpr unsigned int page_shift = 11;
+
+namespace {
 
 uint8_t ram_[0x800];
 uint8_t irq_sources_ = 0x00;
@@ -70,36 +73,38 @@ struct static_initializer {
 		page_[0x01] = ram_;
 		page_[0x02] = ram_;
 		page_[0x03] = ram_;
-		page_[0x04] = 0;
-		page_[0x05] = 0;
-		page_[0x06] = 0;
-		page_[0x07] = 0;
-		page_[0x08] = 0;
-		page_[0x09] = 0;
-		page_[0x0a] = 0;
-		page_[0x0b] = 0;
-		page_[0x0c] = 0;
-		page_[0x0d] = 0;
-		page_[0x0e] = 0;
-		page_[0x0f] = 0;
-		page_[0x10] = 0;
-		page_[0x11] = 0;
-		page_[0x12] = 0;
-		page_[0x13] = 0;
-		page_[0x14] = 0;
-		page_[0x15] = 0;
-		page_[0x16] = 0;
-		page_[0x17] = 0;
-		page_[0x18] = 0;
-		page_[0x19] = 0;
-		page_[0x1a] = 0;
-		page_[0x1b] = 0;
-		page_[0x1c] = 0;
-		page_[0x1d] = 0;
-		page_[0x1e] = 0;
-		page_[0x1f] = 0;	
+        page_[0x04] = nullptr;
+        page_[0x05] = nullptr;
+        page_[0x06] = nullptr;
+        page_[0x07] = nullptr;
+        page_[0x08] = nullptr;
+        page_[0x09] = nullptr;
+        page_[0x0a] = nullptr;
+        page_[0x0b] = nullptr;
+        page_[0x0c] = nullptr;
+        page_[0x0d] = nullptr;
+        page_[0x0e] = nullptr;
+        page_[0x0f] = nullptr;
+        page_[0x10] = nullptr;
+        page_[0x11] = nullptr;
+        page_[0x12] = nullptr;
+        page_[0x13] = nullptr;
+        page_[0x14] = nullptr;
+        page_[0x15] = nullptr;
+        page_[0x16] = nullptr;
+        page_[0x17] = nullptr;
+        page_[0x18] = nullptr;
+        page_[0x19] = nullptr;
+        page_[0x1a] = nullptr;
+        page_[0x1b] = nullptr;
+        page_[0x1c] = nullptr;
+        page_[0x1d] = nullptr;
+        page_[0x1e] = nullptr;
+        page_[0x1f] = nullptr;
 	}
 } static_initializer_;
+
+}
 
 }
 

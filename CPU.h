@@ -7,6 +7,7 @@
 #include "APU.h"
 #include <memory>
 #include <cstdint>
+
 class Mapper;
 
 namespace nes {

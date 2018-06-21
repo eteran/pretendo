@@ -11,19 +11,8 @@ public:
 	explicit ShiftRegister(T value = 0) : data_(value) {
 	}
 
-	//-------------------------------------------------------------------
-	// Name: ShiftRegister
-	//-------------------------------------------------------------------
-	ShiftRegister(const ShiftRegister &other) : data_(other.data_) {
-	}
-
-	//-------------------------------------------------------------------
-	// Name: operator=
-	//-------------------------------------------------------------------
-	ShiftRegister &operator=(const ShiftRegister &rhs) {
-		data_ = rhs.data_;
-		return *this;
-	}
+    ShiftRegister(const ShiftRegister &other)           = default;
+    ShiftRegister &operator=(const ShiftRegister &rhs)  = default;
 
 	//-------------------------------------------------------------------
 	// Name: load

@@ -6,7 +6,7 @@
 // Desc: Transfer A to Y
 //------------------------------------------------------------------------------
 struct opcode_tay {
-	typedef operation_none memory_access;
+	using memory_access = operation_none;
 	
 	static void execute() {
 		Y = A;

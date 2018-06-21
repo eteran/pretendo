@@ -61,20 +61,151 @@ Square<1> square_1;
 Triangle  triangle;
 Noise     noise;
 DMC       dmc;
-
-
-
-
 APUStatus status = {0};
-
 
 circular_buffer<uint8_t, buffer_size> sample_buffer_;
 
-static void clock_frame_mode_0();
-static void clock_frame_mode_1();
-static void clock_length();
-static void clock_linear();
-static uint8_t mix_channels();
+//------------------------------------------------------------------------------
+// Name: clock_linear
+//------------------------------------------------------------------------------
+void clock_linear() {
+    triangle.linear_counter.clock();
+
+    square_0.envelope.clock();
+    square_1.envelope.clock();
+    noise.envelope.clock();
+}
+
+//------------------------------------------------------------------------------
+// Name: clock_length
+//------------------------------------------------------------------------------
+void clock_length() {
+    square_0.length_counter.clock();
+    square_1.length_counter.clock();
+    triangle.length_counter.clock();
+    noise.length_counter.clock();
+
+    square_0.sweep.clock();
+    square_1.sweep.clock();
+}
+
+//------------------------------------------------------------------------------
+// Name: clock_frame_mode_0
+//------------------------------------------------------------------------------
+void clock_frame_mode_0() {
+
+    // 4 step sequence
+    switch(clock_step_) {
+    case 0:
+        clock_linear();
+        next_clock_ += 7456;
+        break;
+
+    case 1:
+        clock_linear();
+        clock_length();
+        next_clock_ += 7458;
+        break;
+
+    case 2:
+        clock_linear();
+        next_clock_ += 7457;
+        break;
+
+    case 3:
+        if(!(frame_counter_.inihibit_frame_irq)) {
+            status.frame_irq = true;
+        }
+
+        ++next_clock_;
+        break;
+
+    case 4:
+        clock_linear();
+        clock_length();
+        if(!(frame_counter_.inihibit_frame_irq)) {
+            status.frame_irq = true;
+        }
+
+        ++next_clock_;
+        break;
+
+    case 5:
+        if(!(frame_counter_.inihibit_frame_irq)) {
+            status.frame_irq = true;
+        }
+
+        next_clock_ += 7457;
+        break;
+    }
+
+    clock_step_ = (clock_step_ + 1) % 6;
+}
+
+//------------------------------------------------------------------------------
+// Name: clock_frame_mode_1
+//------------------------------------------------------------------------------
+void clock_frame_mode_1() {
+
+    // 5 step sequence
+    switch(clock_step_) {
+    case 0:
+        clock_linear();
+        clock_length();
+        next_clock_ += 7458;
+        break;
+
+    case 1:
+        clock_linear();
+        next_clock_ += 7456;
+        break;
+
+    case 2:
+        clock_linear();
+        clock_length();
+        next_clock_ += 7458;
+        break;
+
+    case 3:
+        clock_linear();
+        next_clock_ += 7456;
+        break;
+
+    case 4:
+        next_clock_ += 7454;
+        break;
+    }
+
+    clock_step_ = (clock_step_ + 1) % 5;
+}
+
+//------------------------------------------------------------------------------
+// Name: mix_channels
+//------------------------------------------------------------------------------
+uint8_t mix_channels() {
+
+    const int pulse1_out   = square_0.output();
+    const int pulse2_out   = square_1.output();
+    const int triangle_out = triangle.output();
+    const int noise_out    = noise.output();
+    const int dmc_out      = dmc.output();
+
+#if 1
+    const double pulse_out = 0.00752 * (pulse1_out + pulse2_out);
+    const double tnd_out = 0.00851 * triangle_out + 0.00494 * noise_out + 0.00335 * dmc_out;
+    const int result = (pulse_out + tnd_out) * 255.0;
+#else
+    const int result = (
+        pulse1_out   +
+        pulse2_out   +
+        triangle_out +
+        noise_out    +
+        dmc_out      +
+        0);
+#endif
+
+    return bound(0, result, 255);
+}
 
 //------------------------------------------------------------------------------
 // Name: reset
@@ -346,120 +477,6 @@ void write4017(uint8_t value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: clock_length
-//------------------------------------------------------------------------------
-void clock_length() {
-	square_0.length_counter.clock();
-	square_1.length_counter.clock();
-	triangle.length_counter.clock();
-	noise.length_counter.clock();
-
-	square_0.sweep.clock();
-	square_1.sweep.clock();
-}
-
-//------------------------------------------------------------------------------
-// Name: clock_linear
-//------------------------------------------------------------------------------
-void clock_linear() {
-	triangle.linear_counter.clock();
-
-	square_0.envelope.clock();
-	square_1.envelope.clock();
-	noise.envelope.clock();
-}
-
-//------------------------------------------------------------------------------
-// Name: clock_frame_mode_0
-//------------------------------------------------------------------------------
-void clock_frame_mode_0() {
-
-	// 4 step sequence
-	switch(clock_step_) {
-	case 0:
-		clock_linear();
-		next_clock_ += 7456;
-		break;
-
-	case 1:
-		clock_linear();
-		clock_length();
-		next_clock_ += 7458;
-		break;
-
-	case 2:
-		clock_linear();
-		next_clock_ += 7457;
-		break;
-
-	case 3:
-		if(!(frame_counter_.inihibit_frame_irq)) {
-			status.frame_irq = true;
-		}
-
-		++next_clock_;
-		break;
-
-	case 4:
-		clock_linear();
-		clock_length();
-		if(!(frame_counter_.inihibit_frame_irq)) {
-			status.frame_irq = true;
-		}
-
-		++next_clock_;
-		break;
-
-	case 5:
-		if(!(frame_counter_.inihibit_frame_irq)) {
-			status.frame_irq = true;
-		}
-
-		next_clock_ += 7457;
-		break;
-	}
-
-	clock_step_ = (clock_step_ + 1) % 6;
-}
-
-//------------------------------------------------------------------------------
-// Name: clock_frame_mode_1
-//------------------------------------------------------------------------------
-void clock_frame_mode_1() {
-
-	// 5 step sequence
-	switch(clock_step_) {
-	case 0:
-		clock_linear();
-		clock_length();
-		next_clock_ += 7458;
-		break;
-
-	case 1:
-		clock_linear();
-		next_clock_ += 7456;
-		break;
-
-	case 2:
-		clock_linear();
-		clock_length();
-		next_clock_ += 7458;
-		break;
-
-	case 3:
-		clock_linear();
-		next_clock_ += 7456;
-		break;
-
-	case 4:
-		next_clock_ += 7454;
-		break;
-	}
-
-	clock_step_ = (clock_step_ + 1) % 5;
-}
-
-//------------------------------------------------------------------------------
 // Name: tick
 //------------------------------------------------------------------------------
 void tick() {
@@ -486,34 +503,6 @@ void tick() {
 	square_1.tick();
 
 	++apu_cycles_;
-}
-
-//------------------------------------------------------------------------------
-// Name: mix_channels
-//------------------------------------------------------------------------------
-uint8_t mix_channels() {
-
-	const int pulse1_out   = square_0.output();
-	const int pulse2_out   = square_1.output();
-	const int triangle_out = triangle.output();
-	const int noise_out    = noise.output();
-	const int dmc_out      = dmc.output();
-
-#if 1
-	const double pulse_out = 0.00752 * (pulse1_out + pulse2_out);
-	const double tnd_out = 0.00851 * triangle_out + 0.00494 * noise_out + 0.00335 * dmc_out;
-	const int result = (pulse_out + tnd_out) * 255.0;
-#else
-	const int result = (
-		pulse1_out   +
-		pulse2_out   +
-		triangle_out +
-		noise_out    +
-		dmc_out      +
-		0);
-#endif
-
-	return bound(0, result, 255);
 }
 
 //------------------------------------------------------------------------------

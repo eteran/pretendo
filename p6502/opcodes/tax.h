@@ -6,7 +6,7 @@
 // Desc: Transfer A to X
 //------------------------------------------------------------------------------
 struct opcode_tax {
-	typedef operation_none memory_access;
+	using memory_access = operation_none;
 	
 	static void execute() {
 		X = A;

@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_inx {
 
-	typedef operation_none memory_access;
+	using memory_access = operation_none;
 
 	static void execute() {
 		update_nz_flags(++X);

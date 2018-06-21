@@ -6,7 +6,7 @@
 // Desc: Transfer X to A
 //------------------------------------------------------------------------------
 struct opcode_txa {
-	typedef operation_none memory_access;
+	using memory_access = operation_none;
 	
 	static void execute() {
 		A = X;

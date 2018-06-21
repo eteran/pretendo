@@ -28,6 +28,7 @@ Config nes::config;
  * timestamp system which would possibly be very beneficial
  */
 
+
 namespace nes {
 namespace {
 

@@ -10,10 +10,8 @@ using std::uint8_t;
 
 class Controller {
 public:
-	Controller();
-
-private:
-	Controller(const Controller &) = delete;
+    Controller()                              = default;
+    Controller(const Controller &)            = delete;
 	Controller &operator=(const Controller &) = delete;
 
 public:
@@ -36,9 +34,9 @@ public:
 	std::bitset<8>  keystate_;
 
 private:
-	ShiftRegister<uint8_t> data_;
-	uint8_t                read_index_;
-	bool                   connected_;
+    ShiftRegister<uint8_t> data_{ 0 };
+    uint8_t                read_index_ = 0;
+    bool                   connected_ = true;
 };
 
 

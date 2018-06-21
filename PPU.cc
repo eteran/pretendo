@@ -15,8 +15,8 @@
 
 namespace {
 
-const unsigned int cycles_per_scanline = 341u;
-const unsigned int cpu_alignment       = 0u;
+constexpr unsigned int cycles_per_scanline = 341u;
+constexpr unsigned int cpu_alignment       = 0u;
 
 enum {
 	STATUS_OVERFLOW = 0x20,
@@ -112,7 +112,7 @@ struct SpriteEntry {
 	};
 };
 
-
+namespace {
 // internal variables
 SpriteEntry* current_sprite_         = nullptr;
 VRAMBank     vram_banks_[0x10];
@@ -147,12 +147,13 @@ bool         sprite_init_            = false;
 bool         write_latch_            = false;
 bool         write_block_            = false;
 uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
-									 // 4 nametables, each $03c0 bytes in
-									 // size plus 4 corresponding $40 byte
-									 // attribute tables
-									 // even though the real thing only has 2
-									 // tables, we currently simulate 4 for
-									 // simplicity
+                                     // 4 nametables, each $03c0 bytes in
+                                     // size plus 4 corresponding $40 byte
+                                     // attribute tables
+                                     // even though the real thing only has 2
+                                     // tables, we currently simulate 4 for
+                                     // simplicity
+}
 
 // internal functions
 static uint16_t background_pattern_table();
@@ -534,7 +535,7 @@ void write4014(uint8_t value) {
 		write2004(cart.mapper()->read_memory(sprite_addr++));
 	}
 #else
-	const uint16_t sprite_addr = (value << 8);
+    const auto sprite_addr = static_cast<uint16_t>(value << 8);
 	cpu::schedule_spr_dma(write2004, sprite_addr, 256);
 #endif
 }
