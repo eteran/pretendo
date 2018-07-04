@@ -31,7 +31,7 @@ AudioViewer::~AudioViewer() {
 void AudioViewer::update() {
 	using std::memcpy;
 	if(Pretendo *const p = qobject_cast<Pretendo *>(parent())) {
-		memcpy(audio_buffer_, p->audio_buffer_, sizeof(audio_buffer_));
+        memcpy(audio_buffer_, &p->audio_buffer_[0], sizeof(audio_buffer_));
 		emit ui_.widget->repaint();
 	}
 }

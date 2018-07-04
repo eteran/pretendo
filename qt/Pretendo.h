@@ -2,6 +2,7 @@
 #ifndef PRETENDO_20120301_H_
 #define PRETENDO_20120301_H_
 
+#include "APU.h"
 #include <QMainWindow>
 #include <QTime>
 
@@ -26,7 +27,7 @@ class Pretendo : public QMainWindow {
 	friend class AudioViewer;
 
 public:
-	Pretendo(QWidget *parent = nullptr, Qt::WindowFlags flags = 0);
+    Pretendo(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
 	virtual ~Pretendo();
 
 private Q_SLOTS:
@@ -74,7 +75,7 @@ private:
 #else
 	NullAudio *audio_;
 #endif
-	uint8_t *audio_buffer_;
+    std::array<uint8_t, nes::apu::buffer_size> audio_buffer_;
 
 };
 

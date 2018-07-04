@@ -69,10 +69,10 @@ struct static_initializer {
 	static_initializer() {
 		P6502::init();
 
-		page_[0x00] = ram_;
-		page_[0x01] = ram_;
-		page_[0x02] = ram_;
-		page_[0x03] = ram_;
+        page_[0x00] = ram_;
+        page_[0x01] = ram_;
+        page_[0x02] = ram_;
+        page_[0x03] = ram_;
         page_[0x04] = nullptr;
         page_[0x05] = nullptr;
         page_[0x06] = nullptr;

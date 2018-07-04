@@ -11,7 +11,7 @@ namespace {
 //------------------------------------------------------------------------------
 // Name: create_mask
 //------------------------------------------------------------------------------
-size_t create_mask(size_t size) {
+uint32_t create_mask(uint32_t size) {
 
 	// returns 1 less than closest fitting power of 2
 	// is this number not a power of two or 0?

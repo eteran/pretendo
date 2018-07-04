@@ -38,8 +38,6 @@ constexpr int TimerInterval = 1000. / 60;
 Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(nullptr), timer_(nullptr), fps_label_(nullptr), framecount_(0), paused_(false) {
 	ui_.setupUi(this);
 	
-	audio_buffer_ = new uint8_t[nes::apu::buffer_size];
-
 	// make only one of these selectable at a time
 	QActionGroup *const zoom_group = new QActionGroup(this);
 	zoom_group->addAction(ui_.action1x);
@@ -116,7 +114,6 @@ Pretendo::~Pretendo() {
 	on_action_Stop_triggered();
 	on_action_Free_ROM_triggered();
 	delete audio_;
-	delete [] audio_buffer_;
 }
 
 //------------------------------------------------------------------------------
@@ -125,18 +122,19 @@ Pretendo::~Pretendo() {
 void Pretendo::update() {
 
 	// idle processing loop (the emulation loop)
-
 	ui_.video->start_frame();
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
-	
 	// get a copy of the audio buffer...
-	for(size_t i = 0; i < nes::apu::sample_buffer_.size(); ++i) {
-		audio_buffer_[i] = nes::apu::sample_buffer_[i];
-	}
+    size_t i      = 0;
+    size_t total = audio_buffer_.size();
+    while(!nes::apu::sample_buffer_.empty() && i < total) {
+        audio_buffer_[i++] = nes::apu::sample_buffer_.front();
+        nes::apu::sample_buffer_.pop_front();
+    }
 	
-	audio_->write(audio_buffer_, nes::apu::buffer_size);
+    audio_->write(&audio_buffer_[0], i);
 
 	// FPS calculation
 	if(time_.elapsed() > 1000) {
