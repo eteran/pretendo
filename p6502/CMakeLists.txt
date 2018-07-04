@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_library (p6502
-	P6502.cc
+	P6502.cpp
 	P6502.h
 	bitfield.h
 	P6502.h
