@@ -1,5 +1,6 @@
 
 #include "P6502.h"
+#include "../Compiler.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4127)
@@ -725,7 +726,7 @@ void execute_opcode() {
 //------------------------------------------------------------------------------
 void clock() {
 
-	if(dmc_dma_count_) {
+	if(UNLIKELY(dmc_dma_count_)) {
 
 		// the count will always be initially even (we multiply by 2)
 		// so, this forces us to idle for 1 cycle if
@@ -743,7 +744,7 @@ void clock() {
 			--dmc_dma_count_;
 		}
 		
-	} else if(spr_dma_count_) {
+	} else if(UNLIKELY(spr_dma_count_)) {
 
 		// the count will always be initially even (we multiply by 2)
 		// so, this forces us to idle for 1 cycle if

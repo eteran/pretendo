@@ -5,6 +5,7 @@
 #include "Cart.h"
 #include "Mapper.h"
 #include "VRAMBank.h"
+#include "Compiler.h"
 
 #include <iostream>
 #include <cstring>
@@ -95,6 +96,7 @@ union PPUStatus {
 };
 
 bool show_sprites_ = true;
+bool system_paused = false;
 
 struct SpriteEntry {
 	uint8_t pattern[2];
@@ -699,7 +701,7 @@ void evaluate_sprites_even() {
 		sprite_data_[(index >> 2) & 0x07].sprite_bytes[index & 0x03] = sprite_buffer_;
 		printf("SETTING: S-OAM[%d][%d] = %02x\n", (index >> 2) & 0x07, index & 0x03, sprite_buffer_);
 #endif
-	} else if(hpos_ == 256) {
+	} else if(UNLIKELY(hpos_ == 256)) {
 		// TODO: do this part incrementally during cycles 0-255 like the real thing
 		if(ppu_control_.large_sprites) {
 			evaluate_sprites<16>();
@@ -946,7 +948,7 @@ uint8_t select_pixel(uint8_t index) {
 							status_.sprite0 = true;
 						}
 
-						if((!p->priority || ((pixel & 0x03) == 0x00)) && show_sprites_) {
+						if((!p->priority || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites_)) {
 							pixel = 0x10 | sprite_pixel | (p->color << 2);
 						}
 
@@ -1021,7 +1023,7 @@ void read_tile_index() {
 //------------------------------------------------------------------------------
 void clock_x() {
 	// wrap X at 31 and flip bit 10, or just increment
-	if((vram_address_ & 0x1f) == 0x1f) {
+	if(UNLIKELY((vram_address_ & 0x1f) == 0x1f)) {
 		vram_address_ ^= 0x41f;
 	} else {
 		++vram_address_;
@@ -1041,7 +1043,7 @@ void clock_y() {
 	//    switched when it's incremented from _29_.
 	//
 	//    Y scroll still wraps from 31, but without flipping bit 11
-	if((vram_address_ & 0x7000) == 0x7000) {
+	if(UNLIKELY((vram_address_ & 0x7000) == 0x7000)) {
 
 		// tile Y wraps from 7 -> 0
 		vram_address_ &= 0x0fff;
@@ -1078,7 +1080,7 @@ void enter_vblank() {
 
 	// Reading one PPU clock before reads it as clear and never sets the flag
 	// or generates NMI for that frame.
-	if(ppu_cycle_ != (ppu_read_2002_cycle_ + 1)) {
+	if(UNLIKELY(ppu_cycle_ != (ppu_read_2002_cycle_ + 1))) {
 		status_.vblank = true;
 	}
 }
@@ -1100,7 +1102,7 @@ void render_pixel(uint8_t *dest_buffer) {
 	const uint8_t index = hpos_ - 1;
 	const uint8_t pixel = select_pixel(index);
 
-	if(ppu_mask_.monochrome) {
+	if(UNLIKELY(ppu_mask_.monochrome)) {
 		dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00] & 0x30;
 	} else {
 		dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00];
@@ -1170,12 +1172,12 @@ void execute_cycle(const scanline_prerender &) {
 
 	assert(vpos_ == 0);
 
-	if(hpos_ == 1) {
+	if(UNLIKELY(hpos_ == 1)) {
 		exit_vblank();
 	}
 
-	if(ppu_mask_.screen_enabled) {
-		if(hpos_ < 1) {
+	if(LIKELY(ppu_mask_.screen_enabled)) {
+		if(UNLIKELY(hpos_ < 1)) {
 			// idle
 		} else if(hpos_ < 257) {
 			switch(hpos_ & 0x07) {
@@ -1189,12 +1191,12 @@ void execute_cycle(const scanline_prerender &) {
 			case 0: evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
 			}
 
-			if(hpos_ == 256) {
+			if(UNLIKELY(hpos_ == 256)) {
 				clock_y();
 			}
 		} else if(hpos_ < 281) {
 
-			if(hpos_ == 257) {
+			if(UNLIKELY(hpos_ == 257)) {
 				update_x_scroll();
 			}
 
@@ -1263,13 +1265,13 @@ void execute_cycle(const scanline_prerender &) {
 //------------------------------------------------------------------------------
 void execute_cycle(const scanline_render &target) {
 
-	if(!ppu_mask_.screen_enabled) {
+	if(UNLIKELY(!ppu_mask_.screen_enabled)) {
 
 		if(hpos_ < 1) {
 			// idle
 		} else if(hpos_ < 257) {
 			const uint8_t pixel = select_blank_pixel();
-			if(ppu_mask_.monochrome) {
+			if(UNLIKELY(ppu_mask_.monochrome)) {
 				target.buffer[hpos_ - 1] = palette_[pixel] & 0x30;
 			} else {
 				target.buffer[hpos_ - 1] = palette_[pixel];
@@ -1287,6 +1289,7 @@ void execute_cycle(const scanline_render &target) {
 				// idle
 			}
 		} else if(hpos_ < 257) {
+			// NOTE(eteran): on my machine, this code "costs" about 200 FPS
 			switch(hpos_ & 0x07) {
 			case 1: render_pixel(target.buffer); evaluate_sprites_odd();  open_tile_index(); break;
 			case 2: render_pixel(target.buffer); evaluate_sprites_even(); read_tile_index(); break;
@@ -1295,11 +1298,10 @@ void execute_cycle(const scanline_render &target) {
 			case 5: render_pixel(target.buffer); evaluate_sprites_odd();  open_background_pattern<pattern_0>(); break;
 			case 6: render_pixel(target.buffer); evaluate_sprites_even(); read_background_pattern<pattern_0>(); break;
 			case 7: render_pixel(target.buffer); evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
-			case 0: render_pixel(target.buffer); evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); if(hpos_ == 256) { clock_y(); } break;
+			case 0: render_pixel(target.buffer); evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); if(UNLIKELY(hpos_ == 256)) { clock_y(); } break;
 			}
-
 		} else if(hpos_ < 321) {
-
+			// NOTE(eteran): on my machine, this code "costs" about 100 FPS
 			switch(hpos_ & 0x07) {
 			case 1: if(hpos_ == 257) { update_x_scroll(); } update_sprite_registers(); open_tile_index(); break;           // open the bus for nametable fetch (garbage)
 			case 2: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
@@ -1311,7 +1313,7 @@ void execute_cycle(const scanline_render &target) {
 			case 0: update_sprite_registers(); if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 337) {
-
+			// NOTE(eteran): on my machine, this code "costs" about 50 FPS
 			// fetch first 2 tiles of NEXT scanline
 			switch(hpos_ & 0x07) {
 			case 1: open_tile_index(); break;           // open the bus for nametable fetch
@@ -1353,7 +1355,7 @@ void execute_cycle(const scanline_vblank &target) {
 
 	// I know this should be 241 in theory, but we consider the pre-rendering
 	// scanline to be #0 for now
-	if(vpos_ == 242) {
+	if(UNLIKELY(vpos_ == 242)) {
 		switch(hpos_) {
 		case 1:
 			enter_vblank();
@@ -1399,14 +1401,17 @@ uint16_t background_pattern_table() {
 //------------------------------------------------------------------------------
 template <class T>
 void execute_scanline(const T &target) {
-	for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-	#if 0
-		printf("PPU Executing: HPOS: %d, VPOS: %d, ODD: %d, ENABLED: %02x\n", hpos_, vpos_, odd_frame_, (int)ppu_mask_.screen_enabled);
-	#endif
-		execute_cycle(target);
-		clock_cpu();
+
+	if(LIKELY(!system_paused)) {
+		for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
+		#if 0
+			printf("PPU Executing: HPOS: %d, VPOS: %d, ODD: %d, ENABLED: %02x\n", hpos_, vpos_, odd_frame_, (int)ppu_mask_.screen_enabled);
+		#endif
+			execute_cycle(target);
+			clock_cpu();
+		}
+		++vpos_;
 	}
-	++vpos_;
 }
 
 //------------------------------------------------------------------------------
