@@ -40,12 +40,12 @@ int main(int argc, char *argv[]) {
 		} else if(strcmp(argv[i], "--help") == 0) {
 			usage(argv[0]);
 		} else {
-			rom = argv[i];
+			rom = argv[i++];
 			break;
 		}
 	}
 	
-	if(i != (argc - 1)) {
+	if(i != argc) {
 		usage(argv[0]);
 	}
 
