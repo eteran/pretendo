@@ -127,7 +127,7 @@ void reset(Reset reset_type) {
 //-------------------------------------------------------------------
 void write(uint16_t address, uint8_t value) {
 
-	if(LIKELY(!!page_[address >> page_shift])) {
+	if(LIKELY(page_[address >> page_shift])) {
 		page_[address >> page_shift][address & page_mask] = value;
 	}
 }
@@ -137,7 +137,7 @@ void write(uint16_t address, uint8_t value) {
 //-------------------------------------------------------------------
 uint8_t read(uint16_t address) {
 
-	if(LIKELY(!!page_[address >> page_shift])) {
+	if(LIKELY(page_[address >> page_shift])) {
 		return page_[address >> page_shift][address & page_mask];
 	} else {
 		// simulate open bus

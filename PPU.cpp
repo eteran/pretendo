@@ -621,10 +621,10 @@ void end_frame() {
 //------------------------------------------------------------------------------
 void write_vram(uint16_t address, uint8_t value) {
 
-	assert(vram_banks_[(address >> 10) & 0x0f]);
-	assert(vram_banks_[(address >> 10) & 0x0f].writeable());
-
-	vram_banks_[(address >> 10) & 0x0f][address & 0x03ff] = value;
+	VRAMBank &bank = vram_banks_[(address >> 10) & 0x0f];
+	if(LIKELY(bank && bank.writeable())) {
+		bank[address & 0x03ff] = value;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -632,8 +632,12 @@ void write_vram(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 uint8_t read_vram(uint16_t address) {
 
-	assert(vram_banks_[(address >> 10) & 0x0f]);
-	return vram_banks_[(address >> 10) & 0x0f][address & 0x03ff];
+	const VRAMBank &bank = vram_banks_[(address >> 10) & 0x0f];
+	if(LIKELY(bank)) {
+		return bank[address & 0x03ff];
+	}
+
+	return 0xff;
 }
 
 //------------------------------------------------------------------------------
