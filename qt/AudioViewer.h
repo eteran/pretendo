@@ -11,18 +11,16 @@ class AudioViewer : public QDialog {
 	Q_OBJECT
 
 public:
-	AudioViewer(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
-	virtual ~AudioViewer();
+	AudioViewer(QWidget *parent = nullptr, Qt::WindowFlags f = nullptr);
 
 protected Q_SLOTS:
-	bool eventFilter(QObject *watched, QEvent *event);
+	bool eventFilter(QObject *watched, QEvent *event) override;
 
 public Q_SLOTS:
 	void update();
 
 private:
 	Ui::AudioViewer ui_;
-	uint8_t audio_buffer_[nes::apu::buffer_size];
 };
 
 #endif

@@ -96,13 +96,6 @@ find_package(Boost 1.35 COMPONENTS system filesystem REQUIRED)
 find_package(OpenGL REQUIRED)
 
 
-set(UI_FILES ${UI_FILES}
-	qt/Pretendo.ui
-	qt/Preferences.ui
-	qt/About.ui
-	qt/AudioViewer.ui
-)
-
 set(SOURCE_FILES ${SOURCE_FILES}
 	APU.cpp
 	APU.h
@@ -167,6 +160,11 @@ set(SOURCE_FILES ${SOURCE_FILES}
 	qt/QtVideo.h
 	qt/SortFilterProxyModel.cpp
 	qt/SortFilterProxyModel.h
+
+	qt/Pretendo.ui
+	qt/Preferences.ui
+	qt/About.ui
+	qt/AudioViewer.ui
 )
 
 add_executable(pretendo ${SOURCE_FILES})

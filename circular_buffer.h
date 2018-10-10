@@ -28,6 +28,11 @@ public:
 	const_reference back() const  { assert(!empty()); return array_[tail_]; }
 	
 public:
+	const T *buffer() const { return &array_[0]; }
+	size_t head() const     { return head_; }
+    size_t tail() const     { return tail_; }
+	
+public:
 	void clear() {
         head_ = 0;
         tail_ = 0;

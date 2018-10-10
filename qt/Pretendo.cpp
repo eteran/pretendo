@@ -141,15 +141,19 @@ void Pretendo::update() {
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
-	// get a copy of the audio buffer...
-    size_t i      = 0;
-    size_t total = audio_buffer_.size();
-    while(!nes::apu::sample_buffer_.empty() && i < total) {
-        audio_buffer_[i++] = nes::apu::sample_buffer_.front();
-        nes::apu::sample_buffer_.pop_front();
-    }
-	
-    audio_->write(&audio_buffer_[0], i);
+	const size_t audio_head     = nes::apu::sample_buffer_.head();
+	const size_t audio_tail     = nes::apu::sample_buffer_.tail();
+	const size_t audio_capacity = nes::apu::sample_buffer_.capacity();
+	const auto audio_buffer     = nes::apu::sample_buffer_.buffer();
+		
+	if(audio_head >= audio_tail) {
+		audio_->write(&audio_buffer[audio_head], audio_capacity - audio_head);
+		audio_->write(&audio_buffer[0], audio_tail);
+	} else {
+		audio_->write(&audio_buffer[audio_head], audio_tail - audio_head);
+	}
+	nes::apu::sample_buffer_.clear();
+
 
 	// FPS calculation
 	if(time_.elapsed() > 1000) {

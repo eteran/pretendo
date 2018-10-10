@@ -1,8 +1,32 @@
 
 #include "AudioViewer.h"
 #include "Pretendo.h"
+#include "APU.h"
+#include "Square.h"
+#include "Triangle.h"
+#include "DMC.h"
+#include "Noise.h"
 #include <QPainter>
 #include <cstring>
+
+namespace {
+
+void drawBar(QPainter *painter, int index, int value) {
+
+	QRect rect;
+	rect.setLeft((index * 20) + 10);
+	rect.setBottom(256);
+	rect.setWidth(10);
+	rect.setTop(256 - value * 3);
+
+	QLinearGradient gradient(rect.topLeft(), rect.bottomRight()); // diagonal gradient from top-left to bottom-right
+	gradient.setColorAt(1, Qt::green);
+	gradient.setColorAt(0, Qt::red);
+	painter->fillRect(rect, gradient);
+
+}
+
+}
 
 //------------------------------------------------------------------------------
 // Name: AudioViewer
@@ -11,29 +35,14 @@ AudioViewer::AudioViewer(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f
 		
 	ui_.setupUi(this);
 	ui_.widget->installEventFilter(this);
-	ui_.widget->resize(nes::apu::buffer_size, ui_.widget->height());
-	
-	using std::memset;
-	memset(audio_buffer_, 0, sizeof(audio_buffer_));
-	
-}
-
-//------------------------------------------------------------------------------
-// Name: ~AudioViewer
-//------------------------------------------------------------------------------
-AudioViewer::~AudioViewer() {
-
+	ui_.widget->resize(nes::apu::buffer_size, ui_.widget->height());	
 }
 
 //------------------------------------------------------------------------------
 // Name: update
 //------------------------------------------------------------------------------
 void AudioViewer::update() {
-	using std::memcpy;
-	if(Pretendo *const p = qobject_cast<Pretendo *>(parent())) {
-        memcpy(audio_buffer_, &p->audio_buffer_[0], sizeof(audio_buffer_));
-		emit ui_.widget->repaint();
-	}
+	Q_EMIT ui_.widget->repaint();
 }
 
 //------------------------------------------------------------------------------
@@ -43,31 +52,25 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 
 	if(watched == ui_.widget && event->type() == QEvent::Paint) {
 	
-		QPixmap back_buffer(sizeof(audio_buffer_), 300);
+		const int pulse1_out   = nes::apu::square_0.output();
+		const int pulse2_out   = nes::apu::square_1.output();
+		const int triangle_out = nes::apu::triangle.output();
+		const int noise_out    = nes::apu::noise.output();
+		const int dmc_out      = nes::apu::dmc.output();
+
+		QPixmap back_buffer(110, 256);
 		QPainter painter;
 		if(painter.begin(&back_buffer)) {	
 			
-
 			// draw stuff...
-			painter.fillRect(back_buffer.rect(), Qt::blue);
-			
-			painter.setPen(Qt::red);
-			painter.drawLine(0, 0xff, sizeof(audio_buffer_), 0xff);
-			
-			painter.setPen(Qt::yellow);
-			int prev = -1;
-			for(size_t i = 0; i < sizeof(audio_buffer_); ++i) {
+			painter.fillRect(back_buffer.rect(), Qt::black);
 
-				const int current_value = audio_buffer_[i];
+			drawBar(&painter, 0, pulse1_out);
+			drawBar(&painter, 1, pulse2_out);
+			drawBar(&painter, 2, triangle_out);
+			drawBar(&painter, 3, noise_out);
+			drawBar(&painter, 4, dmc_out);
 
-				if(prev == -1) {
-					painter.drawPoint(i, 0xff - current_value);
-				} else {
-					painter.drawLine(i - 1, 0xff - prev, i, 0xff - current_value);
-				}
-				
-				prev = current_value;
-			}
 			painter.end();
 		}
 		

@@ -78,8 +78,6 @@ private:
 #else
 	NullAudio *audio_;
 #endif
-    std::array<uint8_t, nes::apu::buffer_size> audio_buffer_;
-
 };
 
 #endif
