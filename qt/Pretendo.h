@@ -27,8 +27,11 @@ class Pretendo : public QMainWindow {
 	friend class AudioViewer;
 
 public:
-    Pretendo(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
-	virtual ~Pretendo();
+	Pretendo(const QString &filename = QString(), QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
+	~Pretendo() override;
+	
+public:
+	void setFrameRate(int framerate);
 
 private Q_SLOTS:
 	void picked(const QModelIndex &index);
@@ -51,24 +54,24 @@ private Q_SLOTS:
 	void on_action_Audio_Viewer_triggered();
 
 protected:
-	virtual void keyPressEvent(QKeyEvent *event);
-	virtual void keyReleaseEvent(QKeyEvent *event);
-	virtual void showEvent(QShowEvent *event);
+	void keyPressEvent(QKeyEvent *event) override;
+	void keyReleaseEvent(QKeyEvent *event) override;
 	
 private:
 	void zoom(int scale);
 
 private:
 	Ui::Pretendo           ui_;
-	Preferences           *preferences_;
-	QFileSystemModel      *filesystem_model_;
-	QSortFilterProxyModel *filter_model_;
-	QTimer                *timer_;
-	QLabel                *fps_label_;
+	Preferences           *preferences_      = nullptr;
+	QFileSystemModel      *filesystem_model_ = nullptr;
+	QSortFilterProxyModel *filter_model_     = nullptr;
+	QTimer                *timer_            = nullptr;
+	QLabel                *fps_label_        = nullptr;
 	Qt::Key                player_1_[8];
 	QTime                  time_;
-	quint64                framecount_;
-	bool                   paused_;
+	quint64                framecount_       = 0;
+	bool                   paused_           = false;
+	int                    framerate_        = 60;
 
 #if defined(PULSE_AUDIO_SOUND)
 	PulseAudio *audio_;

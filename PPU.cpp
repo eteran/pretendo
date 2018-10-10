@@ -132,7 +132,7 @@ uint16_t     vram_address_           = 0; // loopy's "v"
 uint16_t     hpos_                   = 0; // pixel counter
 uint16_t     vpos_                   = 0; // scanline counter
 uint8_t      next_pattern_[2];
-uint8_t      latch_                  = 0;
+uint16_t     latch_                  = 0;
 uint8_t      next_attribute_         = 0;
 uint8_t      next_tile_index_        = 0;
 PPUControl   ppu_control_            = {0};
@@ -436,6 +436,7 @@ uint8_t read200x() {
 // Name: read2002
 //------------------------------------------------------------------------------
 uint8_t read2002() {
+
 	// upper 3 bits of status
 	// lower 5 bits of garbage (latch)
 	const uint8_t ret =
@@ -501,14 +502,17 @@ uint8_t read2007() {
 	}
 
 	cart.mapper()->vram_change_hook(vram_address_);
+	
+	const uint8_t decay_value = latch_;
 
 	latch_ = register_2007_buffer_;
 	register_2007_buffer_ = cart.mapper()->read_vram(temp_address);
 
 	if((temp_address & 0x3f00) == 0x3f00) {
-		latch_ = palette_[temp_address & 0x1f];
-		if(ppu_mask_.monochrome) {
-			latch_ &= 0x30;
+	
+		latch_ = palette_[temp_address & 0x1f] | (decay_value & 0xc0);
+		if(UNLIKELY(ppu_mask_.monochrome)) {
+			latch_ &= 0xf0;
 		}
 	}
 
@@ -601,6 +605,13 @@ void start_frame() {
 void end_frame() {
 	odd_frame_ = !odd_frame_;
 	rendering_ = false;
+	
+	// we use the upper bits to count frames, so the upper byte should be about 0x3c 
+	// within one second
+	latch_ += 0x100;
+	if(latch_ > 0x3c00) {
+		latch_ = 0;
+	}
 
 	cart.mapper()->ppu_end_frame();
 }

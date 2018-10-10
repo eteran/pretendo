@@ -25,17 +25,10 @@
 #include "NullAudio.h"
 #endif
 
-namespace {
-
-constexpr int TimerInterval = 1000. / 60;
-//constexpr int TimerInterval = 0;
-
-}
-
 //------------------------------------------------------------------------------
 // Name: Pretendo
 //------------------------------------------------------------------------------
-Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags), preferences_(nullptr), timer_(nullptr), fps_label_(nullptr), framecount_(0), paused_(false) {
+Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
 	ui_.setupUi(this);
 	
 	// make only one of these selectable at a time
@@ -77,7 +70,7 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 	connect(ui_.lineEdit, SIGNAL(textChanged(const QString &)), filter_model_, SLOT(setFilterFixedString(const QString &)));
 
 	timer_ = new QTimer(this);
-	connect(timer_, SIGNAL(timeout()), this, SLOT(update()));
+	connect(timer_, &QTimer::timeout, this, &Pretendo::update);
 
 #if defined(PULSE_AUDIO_SOUND)
 	audio_ = new PulseAudio();
@@ -104,7 +97,20 @@ Pretendo::Pretendo(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent,
 	player_1_[Controller::INDEX_DOWN]   = Qt::Key_Down;
 	player_1_[Controller::INDEX_LEFT]   = Qt::Key_Left;
 	player_1_[Controller::INDEX_RIGHT]  = Qt::Key_Right;
+	
+	if(!filename.isNull()) {
+		const QString rom = filename;
 
+		// make the ROM viewer default to the location of the run ROM
+		const QFileInfo info(rom);
+		const QModelIndex root_model_index = filesystem_model_->setRootPath(info.absolutePath());
+		ui_.listView->setRootIndex(filter_model_->mapFromSource(root_model_index));
+
+		if(info.isFile()) {
+			nes::cart.load(rom.toStdString());
+			on_action_Run_triggered();
+		}
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -114,6 +120,16 @@ Pretendo::~Pretendo() {
 	on_action_Stop_triggered();
 	on_action_Free_ROM_triggered();
 	delete audio_;
+}
+
+//------------------------------------------------------------------------------
+// Name: setFrameRate
+//------------------------------------------------------------------------------
+void Pretendo::setFrameRate(int framerate) {
+	framerate_ = framerate;
+	if(timer_->isActive()) {
+		timer_->start(1000. / framerate_);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -214,7 +230,7 @@ void Pretendo::on_action_Run_triggered() {
 
 				nes::reset(nes::Reset::Hard);
 
-				timer_->start(TimerInterval);
+				timer_->start(1000. / framerate_);
 				audio_->start();
 				paused_ = false;
 
@@ -349,27 +365,6 @@ void Pretendo::on_actionReset_triggered() {
 
 	if(timer_->isActive()) {
 		nes::reset(nes::Reset::Soft);
-	}
-}
-
-//------------------------------------------------------------------------------
-// Name: showEvent
-//------------------------------------------------------------------------------
-void Pretendo::showEvent(QShowEvent *event) {
-	Q_UNUSED(event);
-
-	if(qApp->arguments().size() == 2) {
-		const QString rom = qApp->arguments()[1];
-
-		// make the ROM viewer default to the location of the run ROM
-		const QFileInfo info(rom);
-		const QModelIndex root_model_index = filesystem_model_->setRootPath(info.absolutePath());
-		ui_.listView->setRootIndex(filter_model_->mapFromSource(root_model_index));
-
-		if(info.isFile()) {
-            nes::cart.load(rom.toStdString());
-			on_action_Run_triggered();
-		}
 	}
 }
 
