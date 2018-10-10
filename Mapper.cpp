@@ -7,6 +7,7 @@
 #include "Config.h"
 #include "NES.h"
 #include "PPU.h"
+#include "Compiler.h"
 
 #include <algorithm>
 #include <cassert>
@@ -569,152 +570,167 @@ void Mapper::set_prg_89abcdef(int num) const {
 // Name: set_chr_0000_03ff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_03ff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (1 * 1024);
+		nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_0400_07ff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0400_07ff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (1 * 1024);
+		nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_0800_0bff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0800_0bff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (1 * 1024);
+		nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_0c00_0fff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0c00_0fff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (1 * 1024);
+		nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_1000_13ff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1000_13ff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (1 * 1024);
+		nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_1400_17ff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1400_17ff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (1 * 1024);
+		nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_1800_1bff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1800_1bff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (1 * 1024);
+		nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_1c00_1fff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1c00_1fff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (1 * 1024);
+		nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_0000_07ff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_07ff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (2 * 1024);
-	nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (2 * 1024);
+		nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_0800_0fff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0800_0fff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (2 * 1024);
-	nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (2 * 1024);
+		nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_1000_17ff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1000_17ff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (2 * 1024);
-	nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (2 * 1024);
+		nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_1800_1fff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1800_1fff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (2 * 1024);
-	nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (2 * 1024);
+		nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_0000_0fff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_0fff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (4 * 1024);
-	nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (4 * 1024);
+		nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_1000_1fff
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1000_1fff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (4 * 1024);
-	nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (4 * 1024);
+		nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: set_chr_0000_1fff
 //------------------------------------------------------------------------------
-void Mapper::set_chr_0000_1fff(int num) const {
-	assert(nes::cart.has_chr_rom());
-	num *= (8 * 1024);
-	nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x1000) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x1400) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x1800) & nes::cart.chr_mask()), false);
-	nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x1c00) & nes::cart.chr_mask()), false);
+void Mapper::set_chr_0000_1fff(int num) const {	
+	if(LIKELY(nes::cart.has_chr_rom())) {
+		num *= (8 * 1024);
+		nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x1000) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x1400) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x1800) & nes::cart.chr_mask()), false);
+		nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x1c00) & nes::cart.chr_mask()), false);
+	}
 }
 
 //------------------------------------------------------------------------------
