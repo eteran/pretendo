@@ -14,7 +14,6 @@ Mapper3::Mapper3() {
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 
-	assert(nes::cart.has_chr_rom());
 	set_chr_0000_1fff(0);
 }
 

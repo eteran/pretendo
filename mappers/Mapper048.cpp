@@ -17,7 +17,6 @@ Mapper48::Mapper48() : prev_ppu_cycle_(0), prev_vram_address_(0xffff), irq_latch
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 
-	assert(nes::cart.has_chr_rom());
 	set_chr_0000_1fff(0);
 }
 

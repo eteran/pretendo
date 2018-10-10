@@ -38,8 +38,6 @@ Mapper5::Mapper5() :
 	memset(prg_ram_[0], 0x00, sizeof(prg_ram_[0]));
 	memset(prg_ram_[1], 0x00, sizeof(prg_ram_[1]));
 
-	assert(nes::cart.has_chr_rom());
-
 	prev_vram_address_[0] = 0xffff;
 	prev_vram_address_[1] = 0xffff;
 

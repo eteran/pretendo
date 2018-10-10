@@ -15,7 +15,6 @@ Mapper68::Mapper68() : reg_e000_(0) {
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 
-	assert(nes::cart.has_chr_rom());
 	set_chr_0000_1fff(0);
 
 	chr_rom_reg_[0] = 0x80;

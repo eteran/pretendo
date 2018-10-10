@@ -15,7 +15,6 @@ Mapper10::Mapper10() : latch1_(true), latch2_(true), latch1_lo_(0), latch1_hi_(0
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 
-	assert(nes::cart.has_chr_rom());
 	set_chr_0000_1fff(0);
 }
 
