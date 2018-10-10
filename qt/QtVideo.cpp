@@ -30,7 +30,7 @@ QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags 
 	setMouseTracking(false);
 	setBaseSize(Width, Height);
 
-	connect(this, SIGNAL(render_frame()), this, SLOT(updateGL()));
+	connect(this, &QtVideo::render_frame, this, &QtVideo::updateGL);
 
 	std::cout << "[QtVideo::QtVideo]" << std::endl;
 }
@@ -179,12 +179,6 @@ void QtVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t *
 
 		}
 	}
-}
-
-//------------------------------------------------------------------------------
-// Name: start_frame
-//------------------------------------------------------------------------------
-void QtVideo::start_frame() {
 }
 
 //------------------------------------------------------------------------------

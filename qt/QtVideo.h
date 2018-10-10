@@ -14,15 +14,14 @@ public:
 
 public:
 	// required functions
-	void submit_scanline(int scanline, int intensity, const uint8_t *source);
-	void set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal);
-	void start_frame();
-	void end_frame();
+	void submit_scanline(int scanline, int intensity, const uint8_t *source) override;
+	void set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal) override;
+	void end_frame() override;
 
 protected:
-	virtual void initializeGL();
-	virtual void paintGL();
-	virtual void resizeGL(int width, int height);
+	void initializeGL() override;
+	void paintGL() override;
+	void resizeGL(int width, int height) override;
 
 Q_SIGNALS:
 	void render_frame();
