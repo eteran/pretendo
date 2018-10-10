@@ -122,7 +122,6 @@ Pretendo::~Pretendo() {
 void Pretendo::update() {
 
 	// idle processing loop (the emulation loop)
-	ui_.video->start_frame();
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
