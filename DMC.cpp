@@ -162,19 +162,36 @@ bool DMC::output_clock() {
 // Name: start_cycle
 //------------------------------------------------------------------------------
 void DMC::start_cycle() {
+
 	// immediate load the first byte if the shift counter is empty
 	if(bytes_remaining_ != 0) {
 
 		// 1. The bits-remaining counter is loaded with 8.
 		bits_remaining_ = 8;
 
+		// 2. If the sample buffer is empty, then the silence flag is set;
+		// otherwise, the silence flag is cleared and the sample buffer is emptied into the shift register.
+		if(sample_buffer_empty) {
+			// TODO...
+		} else {
+			// TODO...
+		}
+
+		// M1. The CPU is stalled for up to 4 CPU cycles to allow the longest possible write (the return address and write after an IRQ) to finish.
+		// If OAM DMA is in progress, it is paused for two cycles.[2]
+
+		// M2. The sample buffer is filled with the next sample byte read from the current address,
+		// subject to whatever mapping hardware is present.
 		nes::cpu::schedule_dmc_dma([](uint8_t value){
 			nes::apu::dmc.load_sample_buffer(value);
 		}, sample_pointer_, 1);
 
+		// M3. The address is incremented; if it exceeds $FFFF, it is wrapped around to $8000.
 		sample_pointer_ = ((sample_pointer_ + 1) & 0xffff) | 0x8000;
 
-		// last byte of the sample?
+		// M4. The bytes remaining counter is decremented;
+		// if it becomes zero and the loop flag is set, the sample is restarted (see above);
+		// otherwise, if the bytes remaining counter becomes zero and the IRQ enabled flag is set, the interrupt flag is set.
 		if(--bytes_remaining_ == 0) {
 			if(loop()) {
 				bytes_remaining_ = sample_length_;
