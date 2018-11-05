@@ -53,17 +53,19 @@ private:
 	bool loop() const;
 	bool output_clock();
 	void start_cycle();
+	void refill_sample_buffer();
 
 
 private:
-	bool                   muted_              = false;
-	bool                   sample_buffer_empty = true;
-	uint16_t               sample_pointer_     = 0xc000;
-	uint16_t               sample_address_     = 0xc000;
-	uint16_t               bytes_remaining_    = 0;
-	uint16_t               sample_length_      = 0;
-	uint8_t                bits_remaining_     = 0;
-	uint8_t                output_             = 0;
+	bool                   muted_               = false;
+	bool                   sample_buffer_empty_ = true;
+	uint16_t               sample_pointer_      = 0xc000;
+	uint16_t               sample_address_      = 0xc000;
+	uint16_t               bytes_remaining_     = 0;
+	uint16_t               sample_length_       = 0;
+	uint8_t                bits_remaining_      = 0;
+	uint8_t                output_              = 0;
+	uint8_t                sample_buffer_       = 0;
 	ShiftRegister<uint8_t> shift_register_{0};
     DMCControl             control_{0};
     Timer                  timer_;
