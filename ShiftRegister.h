@@ -1,6 +1,6 @@
 
-#ifndef SHIFTREGISTER_20080314_H_
-#define SHIFTREGISTER_20080314_H_
+#ifndef SHIFT_REGISTER_20080314_H_
+#define SHIFT_REGISTER_20080314_H_
 
 template <class T>
 class ShiftRegister {
@@ -25,9 +25,23 @@ public:
 	// Name: read
 	//-------------------------------------------------------------------
 	T read() {
-		const T ret = (data_ & 0x1);
-		data_ >>= 1;
+		const T ret = value();
+		clock();
 		return ret;
+	}
+
+	//-------------------------------------------------------------------
+	// Name: value
+	//-------------------------------------------------------------------
+	T value() const {
+		return (data_ & 0x1);
+	}
+
+	//-------------------------------------------------------------------
+	// Name: clock
+	//-------------------------------------------------------------------
+	void clock() {
+		data_ >>= 1;
 	}
 
 private:
