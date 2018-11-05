@@ -7,7 +7,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(32)
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper32::Mapper32() : prg_8000_(0), prg_a000_(0), prg_mode_(0) {
+Mapper32::Mapper32() {
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
@@ -58,7 +58,7 @@ void Mapper32::write_9(uint16_t address, uint8_t value) {
 	sync_prg();
 
 #if 1
-	// this code should be off for major league
+	// NOTE(eteran): this code should be off for major league
 	if(value & 0x01) {
 		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 	} else {

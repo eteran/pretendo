@@ -14,14 +14,7 @@ Mapper4::Mapper4() : mapper_(
 	 nes::cart.rom_hash() == 0xa512bdf6 ||
 	 nes::cart.rom_hash() == 0x633afe6f ||
 	 nes::cart.rom_hash() == 0x1335cb05
-	 ) ? static_cast<Mapper *>(new MMC3A) : static_cast<Mapper *>(new MMC3B)) {
-}
-
-//------------------------------------------------------------------------------
-// Name: ~Mapper4
-//------------------------------------------------------------------------------
-Mapper4::~Mapper4() {
-	delete mapper_;
+     ) ? static_cast<Mapper *>(new MMC3A) : static_cast<Mapper *>(new MMC3B)) {
 }
 
 //------------------------------------------------------------------------------

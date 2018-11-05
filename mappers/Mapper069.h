@@ -5,7 +5,7 @@
 #include "Mapper.h"
 #include "BitField.h"
 
-class Mapper69 : public Mapper {
+class Mapper69 final : public Mapper {
 public:
 	union IRQControl {
 		uint8_t raw;
@@ -23,29 +23,31 @@ public:
 	Mapper69();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
-	virtual uint8_t read_6(uint16_t address);
-	virtual uint8_t read_7(uint16_t address);
+	uint8_t read_6(uint16_t address) override;
+	uint8_t read_7(uint16_t address) override;
 
-	virtual void write_6(uint16_t address, uint8_t value);
-	virtual void write_7(uint16_t address, uint8_t value);
-	virtual void write_8(uint16_t address, uint8_t value);
-	virtual void write_a(uint16_t address, uint8_t value);
-	virtual void write_c(uint16_t address, uint8_t value);
-	virtual void write_e(uint16_t address, uint8_t value);
+	void write_6(uint16_t address, uint8_t value) override;
+	void write_7(uint16_t address, uint8_t value) override;
+	void write_8(uint16_t address, uint8_t value) override;
+	void write_a(uint16_t address, uint8_t value) override;
+	void write_c(uint16_t address, uint8_t value) override;
+	void write_e(uint16_t address, uint8_t value) override;
 
 public:
-	virtual void cpu_sync();
+	void cpu_sync() override;
 
 private:
 	uint8_t    chr_ram_[0x2000];
-	IRQCounter irq_counter_;
-	IRQControl irq_control_;
-	uint8_t    command_8000_;
-	uint8_t    command_c000_;
-	uint8_t    prg_mode_;
-    MemoryMappedFile    prg_ptr_;
+	IRQCounter irq_counter_  = { 0 };
+	IRQControl irq_control_  = { 0 };
+	uint8_t    command_8000_ = 0;
+	uint8_t    command_c000_ = 0;
+	uint8_t    prg_mode_     = 0;
+
+private:
+	MemoryMappedFile prg_ptr_;
 };
 
 #endif

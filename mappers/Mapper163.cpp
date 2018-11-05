@@ -10,15 +10,11 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(163)
 //------------------------------------------------------------------------------
 // Name: Mapper163
 //------------------------------------------------------------------------------
-Mapper163::Mapper163() : reg_5101_(0) {
+Mapper163::Mapper163() {
 
     prg_ptr_ = open_sram(0x2000);
 
 	set_prg_89abcdef(0);
-	
-	prg_      = 0;
-	security_ = 0;
-	trigger_  = 0;
 	
 	memset(chr_ram_, 0, sizeof(chr_ram_));
 

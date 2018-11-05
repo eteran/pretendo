@@ -21,13 +21,7 @@ enum {
 //------------------------------------------------------------------------------
 // Name: Mapper5
 //------------------------------------------------------------------------------
-Mapper5::Mapper5() :
-		irq_enabled_(false), bg_char_upper_(0x00), fetch_count_(0),
-		chr_mode_(0), exram_mode_(0), fill_mode_attr_(0), fill_mode_tile_(0),
-		irq_counter_(0), irq_status_({0}), irq_target_(0), mirroring_mode_(0),
-		multiplier_1_(0), multiplier_2_(0), prg_mode_(0x03), prg_ram_protect1_(0),
-		prg_ram_protect2_(0), sprite_size_(8), vertical_split_mode_(0),
-		vertical_split_scroll_(0), vertical_split_bank_(0), last_chr_write_(CHR_BANK_A) {
+Mapper5::Mapper5() {
 
 	set_prg_89(-1);
 	set_prg_ab(-1);

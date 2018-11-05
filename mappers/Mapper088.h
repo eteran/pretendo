@@ -4,18 +4,18 @@
 
 #include "Mapper.h"
 
-class Mapper88 : public Mapper {
+class Mapper88 final : public Mapper {
 public:
 	Mapper88();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
 public:
-	virtual void write_8(uint16_t address, uint8_t value);
+	void write_8(uint16_t address, uint8_t value) override;
 
 private:
-	uint8_t command_;
+	uint8_t command_ = 0;
 };
 
 #endif

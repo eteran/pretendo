@@ -6,7 +6,6 @@
 #include <cstring>
 #include <iostream>
 
-
 SETUP_STATIC_INES_MAPPER_REGISTRAR(1)
 
 namespace {
@@ -26,7 +25,7 @@ enum {
 //------------------------------------------------------------------------------
 // Name: Mapper1
 //------------------------------------------------------------------------------
-Mapper1::Mapper1() : cpu_cycles_(0), latch_(0), write_counter_(0) {
+Mapper1::Mapper1() {
 	
     prg_ptr_ = open_sram(0x2000);
 

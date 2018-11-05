@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 // Name: MMC3
 //------------------------------------------------------------------------------
-MMC3::MMC3() : prev_ppu_cycle_(0), prev_vram_address_(0xffff), command_(0), irq_latch_(0), irq_counter_(0), irq_enabled_(false), irq_reload_(false), save_ram_enabled_(false), save_ram_writable_(false) {
+MMC3::MMC3() {
 
     prg_ptr_ = open_sram(0x2000);
 

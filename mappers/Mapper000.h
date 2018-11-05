@@ -4,12 +4,12 @@
 
 #include "Mapper.h"
 
-class Mapper0 : public Mapper {
+class Mapper0 final : public Mapper {
 public:
 	Mapper0();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
 private:
 	uint8_t chr_ram_[0x2000];

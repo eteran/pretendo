@@ -12,7 +12,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(48)
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper48::Mapper48() : prev_ppu_cycle_(0), prev_vram_address_(0xffff), irq_latch_(0), irq_counter_(0), irq_enabled_(false), irq_reload_(false) {
+Mapper48::Mapper48() {
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);

@@ -25,7 +25,7 @@ enum {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper64::Mapper64() : prev_ppu_cycle_(0), prev_vram_address_(0xffff), command_(0), irq_latch_(0), irq_counter_(0), irq_mode_(0), cpu_cycles_(0), irq_enabled_(false), irq_reload_(false) {
+Mapper64::Mapper64() {
 
 	prg_bank_[PRG_6] = 0;
 	prg_bank_[PRG_7] = 1;

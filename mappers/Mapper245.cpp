@@ -16,7 +16,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(245)
 //------------------------------------------------------------------------------
 // Name: Mapper245
 //------------------------------------------------------------------------------
-Mapper245::Mapper245() : prev_ppu_cycle_(0), prev_vram_address_(0xffff), command_(0), irq_latch_(0), irq_counter_(0), irq_enabled_(false), irq_reload_(false), save_ram_enabled_(true), save_ram_writable_(true) {
+Mapper245::Mapper245() {
 
     prg_ptr_ = open_sram(0x2000);
 

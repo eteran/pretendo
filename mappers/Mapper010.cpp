@@ -10,7 +10,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(10)
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper10::Mapper10() : latch1_(true), latch2_(true), latch1_lo_(0), latch1_hi_(0), latch2_lo_(0), latch2_hi_(0) {
+Mapper10::Mapper10() {
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);

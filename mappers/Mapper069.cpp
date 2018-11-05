@@ -11,7 +11,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(69)
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper69::Mapper69() : irq_counter_({0}), irq_control_({0}), command_8000_(0), command_c000_(0), prg_mode_(0) {
+Mapper69::Mapper69() {
 
     prg_ptr_ = open_sram(0x2000);
 

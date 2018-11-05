@@ -4,26 +4,26 @@
 
 #include "Mapper.h"
 
-class Mapper40 : public Mapper {
+class Mapper40 final : public Mapper {
 public:
 	Mapper40();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
-	virtual void write_8(uint16_t address, uint8_t value);
-	virtual void write_9(uint16_t address, uint8_t value);
-	virtual void write_a(uint16_t address, uint8_t value);
-	virtual void write_b(uint16_t address, uint8_t value);
-	virtual void write_e(uint16_t address, uint8_t value);
-	virtual void write_f(uint16_t address, uint8_t value);
+	void write_8(uint16_t address, uint8_t value) override;
+	void write_9(uint16_t address, uint8_t value) override;
+	void write_a(uint16_t address, uint8_t value) override;
+	void write_b(uint16_t address, uint8_t value) override;
+	void write_e(uint16_t address, uint8_t value) override;
+	void write_f(uint16_t address, uint8_t value) override;
 
 public:
-	virtual void cpu_sync();
+	void cpu_sync() override;
 
 private:
-	uint16_t irq_counter_;
-	bool     irq_enabled_;
+	uint16_t irq_counter_ = 0;
+	bool     irq_enabled_ = false;
 };
 
 #endif

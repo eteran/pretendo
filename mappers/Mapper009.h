@@ -4,32 +4,32 @@
 
 #include "Mapper.h"
 
-class Mapper9 : public Mapper {
+class Mapper9 final : public Mapper {
 public:
 	Mapper9();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
 public:
-	virtual void write_a(uint16_t address, uint8_t value);
-	virtual void write_b(uint16_t address, uint8_t value);
-	virtual void write_c(uint16_t address, uint8_t value);
-	virtual void write_d(uint16_t address, uint8_t value);
-	virtual void write_e(uint16_t address, uint8_t value);
-	virtual void write_f(uint16_t address, uint8_t value);
+	void write_a(uint16_t address, uint8_t value) override;
+	void write_b(uint16_t address, uint8_t value) override;
+	void write_c(uint16_t address, uint8_t value) override;
+	void write_d(uint16_t address, uint8_t value) override;
+	void write_e(uint16_t address, uint8_t value) override;
+	void write_f(uint16_t address, uint8_t value) override;
 
 public:
-	virtual uint8_t read_vram(uint16_t address);
+	uint8_t read_vram(uint16_t address) override;
 
 private:
 	uint8_t chr_ram_[0x2000];
-	bool    latch1_;
-	bool    latch2_;
-	uint8_t latch1_lo_;
-	uint8_t latch1_hi_;
-	uint8_t latch2_lo_;
-	uint8_t latch2_hi_;
+	bool    latch1_    = true;
+	bool    latch2_    = true;
+	uint8_t latch1_lo_ = 0;
+	uint8_t latch1_hi_ = 0;
+	uint8_t latch2_lo_ = 0;
+	uint8_t latch2_hi_ = 0;
 };
 
 #endif

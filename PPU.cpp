@@ -26,13 +26,13 @@ enum {
 };
 
 struct pattern_0 {
-	static const int     index  = 0;
-	static const uint8_t offset = 0;
+	static constexpr int     index  = 0;
+	static constexpr uint8_t offset = 0;
 };
 
 struct pattern_1 {
-	static const int     index  = 1;
-	static const uint8_t offset = 8;
+	static constexpr int     index  = 1;
+	static constexpr uint8_t offset = 8;
 };
 
 const uint8_t reverse_bits[256] = {

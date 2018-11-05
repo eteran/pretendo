@@ -5,7 +5,7 @@
 #include "Mapper.h"
 #include "BitField.h"
 
-class Mapper18 : public Mapper {
+class Mapper18 final : public Mapper {
 private:
 	union IRQControl {
 		uint8_t raw;
@@ -34,28 +34,28 @@ public:
 	Mapper18();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
 public:
-	virtual void write_8(uint16_t address, uint8_t value);
-	virtual void write_9(uint16_t address, uint8_t value);
-	virtual void write_a(uint16_t address, uint8_t value);
-	virtual void write_b(uint16_t address, uint8_t value);
-	virtual void write_c(uint16_t address, uint8_t value);
-	virtual void write_d(uint16_t address, uint8_t value);
-	virtual void write_e(uint16_t address, uint8_t value);
-	virtual void write_f(uint16_t address, uint8_t value);
+	void write_8(uint16_t address, uint8_t value) override;
+	void write_9(uint16_t address, uint8_t value) override;
+	void write_a(uint16_t address, uint8_t value) override;
+	void write_b(uint16_t address, uint8_t value) override;
+	void write_c(uint16_t address, uint8_t value) override;
+	void write_d(uint16_t address, uint8_t value) override;
+	void write_e(uint16_t address, uint8_t value) override;
+	void write_f(uint16_t address, uint8_t value) override;
 
 public:
-	virtual void cpu_sync();
+	void cpu_sync() override;
 
 private:
 	uint8_t    chr_ram_[0x2000];
 	uint8_t    chr_[16];
 	uint8_t    prg_[8]; // upper 2 are unneccessary, but simpler this way
-	IRQCounter irq_counter_;
-	IRQLatch   irq_latch_;
-	IRQControl irq_control_;
+	IRQCounter irq_counter_ = { 0 };
+	IRQLatch   irq_latch_   = { 0 };
+	IRQControl irq_control_ = { 0 };
 };
 
 #endif

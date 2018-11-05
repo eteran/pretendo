@@ -16,26 +16,26 @@ public:
 	Bandai();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
 public:
-	virtual uint8_t read_6(uint16_t address);
-	virtual uint8_t read_7(uint16_t address);
+	uint8_t read_6(uint16_t address) override;
+	uint8_t read_7(uint16_t address) override;
 
 public:
-	virtual void write_6(uint16_t address, uint8_t value);
-	virtual void write_7(uint16_t address, uint8_t value);
-	virtual void write_8(uint16_t address, uint8_t value);
-	virtual void write_9(uint16_t address, uint8_t value);
-	virtual void write_a(uint16_t address, uint8_t value);
-	virtual void write_b(uint16_t address, uint8_t value);
-	virtual void write_c(uint16_t address, uint8_t value);
-	virtual void write_d(uint16_t address, uint8_t value);
-	virtual void write_e(uint16_t address, uint8_t value);
-	virtual void write_f(uint16_t address, uint8_t value);
+	void write_6(uint16_t address, uint8_t value) override;
+	void write_7(uint16_t address, uint8_t value) override;
+	void write_8(uint16_t address, uint8_t value) override;
+	void write_9(uint16_t address, uint8_t value) override;
+	void write_a(uint16_t address, uint8_t value) override;
+	void write_b(uint16_t address, uint8_t value) override;
+	void write_c(uint16_t address, uint8_t value) override;
+	void write_d(uint16_t address, uint8_t value) override;
+	void write_e(uint16_t address, uint8_t value) override;
+	void write_f(uint16_t address, uint8_t value) override;
 
 public:
-	virtual void cpu_sync();
+	void cpu_sync() override;
 
 private:
 	void write_handler(uint16_t address, uint8_t value);
@@ -43,9 +43,8 @@ private:
 
 private:
 	uint8_t    chr_ram_[0x2000];
-	IRQCounter irq_counter_;
-	bool       irq_enabled_;
-
+	IRQCounter irq_counter_ = { 0 };
+	bool       irq_enabled_ = false;
 };
 
 #endif

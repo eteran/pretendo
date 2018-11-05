@@ -10,22 +10,15 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(34)
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper34::Mapper34() {
+Mapper34::Mapper34()  {
 
 	// for now, this is how we tell the difference, iNES2.0 sub mappers
 	// or UNIF would be preferable
 	if(nes::cart.has_chr_rom()) {
-		mapper_ = new NINA_001;
+		mapper_ = std::make_unique<NINA_001>();
 	} else {
-		mapper_ = new BNROM;
+		mapper_ = std::make_unique<BNROM>();
 	}
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-Mapper34::~Mapper34() {
-	delete mapper_;
 }
 
 //------------------------------------------------------------------------------

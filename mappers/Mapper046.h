@@ -4,32 +4,32 @@
 
 #include "Mapper.h"
 
-class Mapper46 : public Mapper {
+class Mapper46 final : public Mapper {
 public:
 	Mapper46();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
 public:
-	virtual void write_6(uint16_t address, uint8_t value);
-	virtual void write_7(uint16_t address, uint8_t value);
-	virtual void write_8(uint16_t address, uint8_t value);
-	virtual void write_9(uint16_t address, uint8_t value);
-	virtual void write_a(uint16_t address, uint8_t value);
-	virtual void write_b(uint16_t address, uint8_t value);
-	virtual void write_c(uint16_t address, uint8_t value);
-	virtual void write_d(uint16_t address, uint8_t value);
-	virtual void write_e(uint16_t address, uint8_t value);
-	virtual void write_f(uint16_t address, uint8_t value);
+	void write_6(uint16_t address, uint8_t value) override;
+	void write_7(uint16_t address, uint8_t value) override;
+	void write_8(uint16_t address, uint8_t value) override;
+	void write_9(uint16_t address, uint8_t value) override;
+	void write_a(uint16_t address, uint8_t value) override;
+	void write_b(uint16_t address, uint8_t value) override;
+	void write_c(uint16_t address, uint8_t value) override;
+	void write_d(uint16_t address, uint8_t value) override;
+	void write_e(uint16_t address, uint8_t value) override;
+	void write_f(uint16_t address, uint8_t value) override;
 
 private:
 	void write67(uint16_t address, uint8_t value);
 	void write89ABCDEF(uint16_t address, uint8_t value);
 
 private:
-	uint8_t prg_;
-	uint8_t chr_;
+	uint8_t prg_ = 0;
+	uint8_t chr_ = 0;
 };
 
 #endif

@@ -17,29 +17,29 @@ public:
 	VRC6();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
 public:
-	virtual void write_8(uint16_t address, uint8_t value);
-	virtual void write_9(uint16_t address, uint8_t value);
-	virtual void write_a(uint16_t address, uint8_t value);
-	virtual void write_b(uint16_t address, uint8_t value);
-	virtual void write_c(uint16_t address, uint8_t value);
-	virtual void write_d(uint16_t address, uint8_t value);
-	virtual void write_e(uint16_t address, uint8_t value);
-	virtual void write_f(uint16_t address, uint8_t value);
+	void write_8(uint16_t address, uint8_t value) override;
+	void write_9(uint16_t address, uint8_t value) override;
+	void write_a(uint16_t address, uint8_t value) override;
+	void write_b(uint16_t address, uint8_t value) override;
+	void write_c(uint16_t address, uint8_t value) override;
+	void write_d(uint16_t address, uint8_t value) override;
+	void write_e(uint16_t address, uint8_t value) override;
+	void write_f(uint16_t address, uint8_t value) override;
 
 public:
-	virtual void cpu_sync();
+	void cpu_sync() override;
 
 private:
 	void clock_irq();
 
 private:
-	uint8_t    irq_latch_;
-	IRQControl irq_control_;
-	uint8_t    irq_counter_;
-	int        irq_prescaler_;
+	uint8_t    irq_latch_     = 0;
+	IRQControl irq_control_   = { 0 };
+	uint8_t    irq_counter_   = 0;
+	int        irq_prescaler_ = 341;
 };
 
 #endif

@@ -10,7 +10,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(18)
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper18::Mapper18() : irq_counter_({0}), irq_latch_({0}), irq_control_({0}) {
+Mapper18::Mapper18() {
 
 	memset(prg_, 0, sizeof(prg_));
 	memset(chr_, 0, sizeof(chr_));

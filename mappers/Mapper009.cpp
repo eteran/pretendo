@@ -10,7 +10,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(9)
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper9::Mapper9() : latch1_(true), latch2_(true), latch1_lo_(0), latch1_hi_(0), latch2_lo_(0), latch2_hi_(0) {
+Mapper9::Mapper9() {
 
 	memset(chr_ram_, 0, sizeof(chr_ram_));
 

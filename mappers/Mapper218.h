@@ -4,16 +4,16 @@
 
 #include "Mapper.h"
 
-class Mapper218 : public Mapper {
+class Mapper218 final : public Mapper {
 public:
 	Mapper218();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
 public:
-	virtual uint8_t read_vram(uint16_t address);
-	virtual void write_vram(uint16_t address, uint8_t value);
+	uint8_t read_vram(uint16_t address) override;
+	void write_vram(uint16_t address, uint8_t value) override;
 };
 
 #endif

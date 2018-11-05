@@ -9,7 +9,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(228)
 
 namespace {
 const uint8_t *prg_chips[4];
-const uint32_t ChipSize = 0x080000;
+constexpr uint32_t ChipSize = 0x080000;
 }
 
 //------------------------------------------------------------------------------

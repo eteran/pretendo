@@ -180,7 +180,7 @@ struct MapperRegisterObject {
 // macro to hide details of setting up a static instance of the previously
 // mentioned class. The first line of each Mapper[NNN].cpp file should be
 // a call to this macro passing the appropriate mapper number
-#define SETUP_STATIC_INES_MAPPER_REGISTRAR(N)     namespace { static MapperRegisterObject<Mapper##N> MapperRegister(N); }
+#define SETUP_STATIC_INES_MAPPER_REGISTRAR(N) namespace { static MapperRegisterObject<Mapper##N> MapperRegister(N); }
 
 #endif
 

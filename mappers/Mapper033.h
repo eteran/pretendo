@@ -4,17 +4,17 @@
 
 #include "Mapper.h"
 
-class Mapper33 : public Mapper {
+class Mapper33 final : public Mapper {
 public:
 	Mapper33();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
-	virtual void write_8(uint16_t address, uint8_t value);
-	virtual void write_9(uint16_t address, uint8_t value);
-	virtual void write_a(uint16_t address, uint8_t value);
-	virtual void write_b(uint16_t address, uint8_t value);
+	void write_8(uint16_t address, uint8_t value) override;
+	void write_9(uint16_t address, uint8_t value) override;
+	void write_a(uint16_t address, uint8_t value) override;
+	void write_b(uint16_t address, uint8_t value) override;
 
 private:
 	void write_handler(uint16_t address, uint8_t value);

@@ -36,10 +36,7 @@ const uint8_t reverse_bits[256] = {
 //------------------------------------------------------------------------------
 // Name: Mapper90
 //------------------------------------------------------------------------------
-Mapper90::Mapper90() : multiply_1_(0), multiply_2_(0), prg_ram_(0) {
-
-	bank_control_ = { 0 };
-	chr_control_  = { 0 };
+Mapper90::Mapper90() {
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);

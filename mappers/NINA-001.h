@@ -9,10 +9,10 @@ public:
 	NINA_001();
 
 public:
-	virtual std::string name() const;
+	std::string name() const override;
 
 public:
-	virtual void write_7(uint16_t address, uint8_t value);
+	void write_7(uint16_t address, uint8_t value) override;
 };
 
 #endif
