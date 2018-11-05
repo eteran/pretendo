@@ -17,7 +17,7 @@ public:
 	void stop();
 	
 private:
-	pa_simple *stream_;
+	pa_simple *stream_ = nullptr;
 };
 
 #endif
