@@ -10,15 +10,15 @@
 
 namespace {
 
-const int Width  = 256;
-const int Height = 240;
+constexpr int Width  = 256;
+constexpr int Height = 240;
 
 }
 
 //------------------------------------------------------------------------------
 // Name: QtVideo
 //------------------------------------------------------------------------------
-QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f) : QGLWidget(parent, shareWidget, f), buffer_(0), texture_(0) {
+QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f) : QGLWidget(parent, shareWidget, f) {
 
 	buffer_ = new uint32_t[Width * Height]();
 	for(int i = 0; i < Height; ++i) {

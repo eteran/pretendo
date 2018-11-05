@@ -4,13 +4,13 @@
 
 #include <QSortFilterProxyModel>
 
-class SortFilterProxyModel : public QSortFilterProxyModel {
+class SortFilterProxyModel final : public QSortFilterProxyModel {
 	Q_OBJECT
 public:
 	explicit SortFilterProxyModel(QObject *parent = nullptr);
 
 protected:
-	virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
+	bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
 };
 
 #endif

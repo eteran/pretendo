@@ -8,7 +8,6 @@ SortFilterProxyModel::SortFilterProxyModel(QObject *parent) : QSortFilterProxyMo
 
 bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const {
 
-
 	QAbstractItemModel *model = sourceModel();
 	if(QFileSystemModel *const fs = qobject_cast<QFileSystemModel*>(model)) {
 		const QModelIndex rootPathIndex = fs->index(fs->rootPath());

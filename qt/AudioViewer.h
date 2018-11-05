@@ -7,7 +7,7 @@
 #include <cstdint>
 #include "ui_AudioViewer.h"
 
-class AudioViewer : public QDialog {
+class AudioViewer final : public QDialog {
 	Q_OBJECT
 
 public:

@@ -5,14 +5,16 @@
 #include <QDialog>
 #include "ui_Preferences.h"
 
-class Preferences : public QDialog {
+class Preferences final : public QDialog {
 	Q_OBJECT
 public:
-	Preferences(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
-	virtual ~Preferences();
+	Preferences(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+	~Preferences() override;
 	
+protected:
+	bool eventFilter(QObject *watched, QEvent *event) override;
+
 protected Q_SLOTS:
-	bool eventFilter(QObject *watched, QEvent *event);
 	void on_hue_valueChanged(int value);
 	void on_saturation_valueChanged(int value);
 	void on_contrast_valueChanged(int value);

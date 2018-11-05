@@ -6,7 +6,7 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
-class PulseAudio {
+class PulseAudio final {
 public:
 	PulseAudio();
 	~PulseAudio();

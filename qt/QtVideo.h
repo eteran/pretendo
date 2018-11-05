@@ -6,11 +6,11 @@
 #include "VideoInterface.h"
 #include <QGLWidget>
 
-class QtVideo : public QGLWidget, public VideoInterface {
+class QtVideo final : public QGLWidget, public VideoInterface {
 	Q_OBJECT
 public:
-	QtVideo(QWidget *parent = 0, const QGLWidget *shareWidget = 0, Qt::WindowFlags f = 0);
-	virtual ~QtVideo();
+	QtVideo(QWidget *parent = nullptr, const QGLWidget *shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+	~QtVideo() override;
 
 public:
 	// required functions
@@ -29,8 +29,8 @@ Q_SIGNALS:
 private:
 	uint32_t *scanlines_[240];
 	uint32_t  palette_[8][64];
-	uint32_t *buffer_;
-	GLuint    texture_;
+	uint32_t *buffer_  = nullptr;
+	GLuint    texture_ = 0;
 };
 
 #endif

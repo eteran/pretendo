@@ -18,7 +18,7 @@ PulseAudio::PulseAudio() {
     int error;
 
     // Create a new playback stream
-    if (!(stream_ = pa_simple_new(NULL, "pretendo", PA_STREAM_PLAYBACK, NULL, "playback", &ss, NULL, NULL, &error))) {
+	if (!(stream_ = pa_simple_new(nullptr, "pretendo", PA_STREAM_PLAYBACK, nullptr, "playback", &ss, nullptr, nullptr, &error))) {
         fprintf(stderr, __FILE__": pa_simple_new() failed: %s\n", pa_strerror(error));
         abort();
     }

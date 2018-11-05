@@ -21,13 +21,13 @@ class Preferences;
 	class NullAudio;
 #endif
 
-class Pretendo : public QMainWindow {
+class Pretendo final : public QMainWindow {
 	Q_OBJECT
 	friend class Preferences;
 	friend class AudioViewer;
 
 public:
-	Pretendo(const QString &filename = QString(), QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
+	Pretendo(const QString &filename = QString(), QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 	~Pretendo() override;
 	
 public:

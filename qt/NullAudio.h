@@ -4,7 +4,7 @@
 
 #include <cstddef>
 
-class NullAudio {
+class NullAudio final {
 public:
 	NullAudio();
 	~NullAudio();

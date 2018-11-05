@@ -5,12 +5,12 @@
 #include <QDialog>
 #include "ui_About.h"
 
-class About : public QDialog {
+class About final : public QDialog {
 	Q_OBJECT
 	friend class Pretendo;
 public:
-	About(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
-	virtual ~About();
+	About(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+	~About() override;
 	
 private:
 	Ui::About ui_;
