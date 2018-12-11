@@ -4,7 +4,6 @@
 
 #include "Reset.h"
 #include "P6502.h"
-#include "APU.h"
 #include <memory>
 #include <cstdint>
 
@@ -54,7 +53,6 @@ void schedule_dmc_dma(P6502::dma_handler_t dma_handler, uint16_t source_address,
 template <int N>
 void exec() {
 	P6502::run<N>();
-	apu::run<N>();
 }
 
 void swap_01(uint8_t *ptr);

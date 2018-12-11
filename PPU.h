@@ -13,19 +13,16 @@ using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 
-struct scanline {
+struct scanline_vblank  {
 };
 
-struct scanline_vblank : scanline {
+struct scanline_prerender {
 };
 
-struct scanline_prerender : scanline {
+struct scanline_postrender {
 };
 
-struct scanline_postrender : scanline {
-};
-
-struct scanline_render : scanline {
+struct scanline_render {
 	explicit scanline_render(uint8_t *p) : buffer(p) {
 	}
 	uint8_t *const buffer;
@@ -102,6 +99,7 @@ uint16_t hpos();
 uint16_t vpos();
 
 extern bool show_sprites_;
+extern bool system_paused;
 
 }
 }

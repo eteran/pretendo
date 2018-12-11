@@ -1,5 +1,6 @@
 
 #include "PPU.h"
+#include "APU.h"
 #include "CPU.h"
 #include "NES.h"
 #include "Cart.h"
@@ -163,16 +164,15 @@ static uint16_t sprite_pattern_table();
 static uint8_t select_bg_pixel(uint8_t index);
 static uint8_t select_blank_pixel();
 static uint8_t select_pixel(uint8_t index);
-static void clock_cpu();
 static void clock_x();
 static void clock_y();
 static void enter_vblank();
 static void evaluate_sprites_even();
 static void evaluate_sprites_odd();
-static void execute_cycle(const scanline_postrender &target);
-static void execute_cycle(const scanline_prerender &target);
-static void execute_cycle(const scanline_render &target);
-static void execute_cycle(const scanline_vblank &target);
+static void clock_ppu(const scanline_postrender &target);
+static void clock_ppu(const scanline_prerender &target);
+static void clock_ppu(const scanline_render &target);
+static void clock_ppu(const scanline_vblank &target);
 static void exit_vblank();
 static void open_background_attribute();
 static void open_tile_index();
@@ -1181,9 +1181,9 @@ void update_vram_address() {
 }
 
 //------------------------------------------------------------------------------
-// Name: execute_cycle
+// Name: clock_ppu
 //------------------------------------------------------------------------------
-void execute_cycle(const scanline_prerender &) {
+void clock_ppu(const scanline_prerender &) {
 
 	assert(vpos_ == 0);
 
@@ -1276,9 +1276,9 @@ void execute_cycle(const scanline_prerender &) {
 }
 
 //------------------------------------------------------------------------------
-// Name: execute_cycle
+// Name: clock_ppu
 //------------------------------------------------------------------------------
-void execute_cycle(const scanline_render &target) {
+void clock_ppu(const scanline_render &target) {
 
 	if(UNLIKELY(!ppu_mask_.screen_enabled)) {
 
@@ -1355,16 +1355,16 @@ void execute_cycle(const scanline_render &target) {
 }
 
 //------------------------------------------------------------------------------
-// Name: execute_scanline
+// Name: clock_ppu
 //------------------------------------------------------------------------------
-void execute_cycle(const scanline_postrender &target) {
+void clock_ppu(const scanline_postrender &target) {
 	(void)target;
 }
 
 //------------------------------------------------------------------------------
-// Name: execute_scanline
+// Name: clock_ppu
 //------------------------------------------------------------------------------
-void execute_cycle(const scanline_vblank &target) {
+void clock_ppu(const scanline_vblank &target) {
 
 	(void)target;
 
@@ -1381,17 +1381,6 @@ void execute_cycle(const scanline_vblank &target) {
 			}
 			break;
 		}
-	}
-}
-
-//------------------------------------------------------------------------------
-// Name: clock_cpu
-// Desc: optionally executes a CPU cycle returns the number of CPU cycles
-//       executed
-//------------------------------------------------------------------------------
-void clock_cpu() {
-	if((ppu_cycle_ % 3) == cpu_alignment) {
-		cpu::exec<1>();
 	}
 }
 
@@ -1419,11 +1408,11 @@ void execute_scanline(const T &target) {
 
 	if(LIKELY(!system_paused)) {
 		for(hpos_ = 0; hpos_ < cycles_per_scanline; ++hpos_, ++ppu_cycle_) {
-		#if 0
-			printf("PPU Executing: HPOS: %d, VPOS: %d, ODD: %d, ENABLED: %02x\n", hpos_, vpos_, odd_frame_, (int)ppu_mask_.screen_enabled);
-		#endif
-			execute_cycle(target);
-			clock_cpu();
+			clock_ppu(target);
+			if((ppu_cycle_ % 3) == cpu_alignment) {
+				cpu::exec<1>();
+				apu::exec<1>();
+			}
 		}
 		++vpos_;
 	}

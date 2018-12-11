@@ -265,7 +265,7 @@ void reset(Reset reset_type) {
 	//       nop
 	//     reset:
 	if(reset_type == Reset::Hard) {
-		run<2>();
+		exec<2>();
 	}
 
 	std::cout << "APU reset complete" << std::endl;

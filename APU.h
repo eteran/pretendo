@@ -67,12 +67,11 @@ uint64_t cycle_count();
 void tick();
 
 template <int Cycles>
-void run() {
+void exec() {
 	for(int i = 0; i < Cycles; ++i) {
 		tick();
 	}
 }
-
 
 extern Square<0> square_0;
 extern Square<1> square_1;
