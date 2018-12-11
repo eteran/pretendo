@@ -18,12 +18,16 @@
 
 #include <boost/filesystem.hpp>
 
+#ifdef __linux__
 #include <pwd.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#endif
+
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/mman.h>
-#include <unistd.h>
+
 
 //------------------------------------------------------------------------------
 // Name: Mapper

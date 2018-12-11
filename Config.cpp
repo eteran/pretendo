@@ -8,7 +8,9 @@
 #include <sys/stat.h>
 
 #include <boost/filesystem.hpp>
+#ifdef __linux__
 #include <pwd.h>
+#endif
 
 
 namespace {

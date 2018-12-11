@@ -59,7 +59,7 @@ uint8_t Mapper19::read_5(uint16_t address) {
 		return irq_control_.lo;
 	case 0x5800:
 		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
-		return irq_control_.hi;
+		return static_cast<uint8_t>(irq_control_.hi);
 	default:
 		return Mapper::read_5(address);
 	}

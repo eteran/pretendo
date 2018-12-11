@@ -429,7 +429,7 @@ void write2007(uint8_t value) {
 // Name: read200x
 //------------------------------------------------------------------------------
 uint8_t read200x() {
-	return latch_;
+	return static_cast<uint8_t>(latch_);
 }
 
 //------------------------------------------------------------------------------
@@ -503,7 +503,7 @@ uint8_t read2007() {
 
 	cart.mapper()->vram_change_hook(vram_address_);
 	
-	const uint8_t decay_value = latch_;
+	const auto decay_value = static_cast<uint8_t>(latch_);
 
 	latch_ = register_2007_buffer_;
 	register_2007_buffer_ = cart.mapper()->read_vram(temp_address);
@@ -665,7 +665,7 @@ void open_sprite_pattern() {
 	current_sprite_ = &sprite_data_[((hpos_ - 1) >> 3) & 0x07];
 
 	if(current_sprite_->y != 0xff) {
-		const uint8_t index = current_sprite_->index;
+		const auto index = static_cast<uint8_t>(current_sprite_->index);
 		uint8_t sprite_line = current_sprite_->y;
 
 		// vertical flip
@@ -780,10 +780,10 @@ void evaluate_sprites() {
 					
 					const uint8_t new_x = sprite_ram_[index + 3];
 				
-					sprite_entry.bytes[0] = sprite_line;                   // y
-					sprite_entry.bytes[1] = sprite_ram_[index + 1];        // index
-					sprite_entry.bytes[2] = sprite_ram_[index + 2] & 0xe3; // attributes
-					sprite_entry.bytes[3] = sprite_ram_[index + 3];        // x
+					sprite_entry.bytes[0] = static_cast<uint8_t>(sprite_line); // y
+					sprite_entry.bytes[1] = sprite_ram_[index + 1];            // index
+					sprite_entry.bytes[2] = sprite_ram_[index + 2] & 0xe3;     // attributes
+					sprite_entry.bytes[3] = sprite_ram_[index + 3];            // x
 
 					// note that we found sprite 0
 					if(index == start_address) {
