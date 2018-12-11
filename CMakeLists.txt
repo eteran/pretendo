@@ -91,7 +91,7 @@ if(ENABLE_LTO)
 endif()
 
 find_package(Qt5 5.4.0 REQUIRED Widgets OpenGL)
-find_package(Boost 1.35 COMPONENTS system filesystem REQUIRED)
+find_package(Boost 1.35 COMPONENTS "system" "filesystem" REQUIRED)
 
 find_package(OpenGL REQUIRED)
 

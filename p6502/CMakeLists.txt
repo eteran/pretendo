@@ -117,7 +117,9 @@ target_include_directories (p6502 PUBLIC
 target_link_libraries(p6502 LINK_PUBLIC
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -pedantic -Wunused -Wuseless-cast")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -pedantic -Wunused -Wuseless-cast")
+endif()
 
 set_property(TARGET p6502 PROPERTY CXX_STANDARD 14)
 set_property(TARGET p6502 PROPERTY CXX_EXTENSIONS OFF)
