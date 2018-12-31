@@ -201,7 +201,15 @@ template <class Pattern>
 static void open_background_pattern();
 
 template <int Size, class Pattern>
-static uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line);
+static constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
+	if(Size == 16) {
+		// 8x16. even sprites use $0000, odd $1000
+		return ((index & 1) << 12) | ((index & 0xfe) << 4) | Pattern::offset | (sprite_line & 7) | ((sprite_line & 0x08) << 1);
+	} else {
+		// 8x8
+		return sprite_pattern_table() | (index << 4) | Pattern::offset | sprite_line;
+	}
+}
 
 //------------------------------------------------------------------------------
 // Name: reset
@@ -639,22 +647,6 @@ uint8_t read_vram(uint16_t address) {
 
 	return 0xff;
 }
-
-//------------------------------------------------------------------------------
-// Name: sprite_pattern_address
-//------------------------------------------------------------------------------
-template <int Size, class Pattern>
-uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
-
-	if(Size == 16) {
-		// 8x16. even sprites use $0000, odd $1000
-		return ((index & 1) << 12) | ((index & 0xfe) << 4) | Pattern::offset | (sprite_line & 7) | ((sprite_line & 0x08) << 1);
-	} else {
-		// 8x8
-		return sprite_pattern_table() | (index << 4) | Pattern::offset | sprite_line;
-	}
-}
-
 
 //------------------------------------------------------------------------------
 // Name: open_sprite_pattern
