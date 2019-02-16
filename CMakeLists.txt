@@ -1,7 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 project (pretendo CXX)
 
-
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
@@ -25,8 +24,13 @@ if(ENABLE_STL_DEBUG)
 	add_definitions(-D_GLIBCXX_DEBUG_PEDANTIC)
 endif()
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -pedantic -Wunused -Wuseless-cast")
+endif()
+
 if(ENABLE_PROFILING)
 	set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS}        -pg -no-pie")
+	set(CMAKE_C_FLAGS          "${CMAKE_C_FLAGS}          -pg -no-pie")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 endif()
 
@@ -59,7 +63,6 @@ if(ENABLE_LTO)
 endif()
 
 if(ENABLE_AUDIO)
-
 	find_package(PulseAudio REQUIRED)
 
 	add_definitions(-DPULSE_AUDIO_SOUND)
@@ -70,33 +73,19 @@ if(ENABLE_AUDIO)
 	
 	set(INCLUDES ${INCLUDES} ${PULSEAUDIO_INCLUDE_DIR})
 	set(LIBRARIES ${LIBRARIES} ${PULSEAUDIO_LIBRARY} -lpulse-simple)	
-
 else()
 	set(SOURCE_FILES ${SOURCE_FILES}
 		qt/NullAudio.cpp
 	)
 endif()
 
-
-if(ENABLE_PROFILING)
-	set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -pg")
-	set(CMAKE_C_FLAGS          "${CMAKE_C_FLAGS} -pg")
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
-endif()
-
-if(ENABLE_LTO)
-	set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -flto")
-	set(CMAKE_C_FLAGS          "${CMAKE_C_FLAGS} -flto")
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
-endif()
-
 find_package(Qt5 5.4.0 REQUIRED Widgets OpenGL)
-find_package(Boost 1.35 COMPONENTS "system" "filesystem" REQUIRED)
-
+find_package(Boost 1.35 COMPONENTS system filesystem REQUIRED)
 find_package(OpenGL REQUIRED)
 
-
-set(SOURCE_FILES ${SOURCE_FILES}
+add_executable(pretendo 
+	${SOURCE_FILES}
+	
 	APU.cpp
 	APU.h
 	BitField.h
@@ -167,22 +156,18 @@ set(SOURCE_FILES ${SOURCE_FILES}
 	qt/AudioViewer.ui
 )
 
-add_executable(pretendo ${SOURCE_FILES})
-
 add_dependencies(pretendo mappers)
 
-target_include_directories(pretendo PUBLIC
+target_include_directories(pretendo PRIVATE
 	${PROJECT_SOURCE_DIR}/qt
-	${PROJECT_SOURCE_DIR}/p6502
-	${PROJECT_SOURCE_DIR}/libines2/include
 	${Boost_INCLUDE_DIR}
 	${INCLUDES}
-	${OPENGL_INCLUDE_DIRS}
 )
 
 target_link_libraries(pretendo LINK_PUBLIC
-	Qt5::Widgets Qt5::OpenGL
-	${OPENGL_LIBRARIES}
+	Qt5::Widgets
+	Qt5::OpenGL
+	OpenGL::GL
 	${Boost_LIBRARIES}
 	${LIBRARIES}
 	ines2

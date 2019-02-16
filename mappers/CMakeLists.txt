@@ -152,9 +152,5 @@ target_include_directories (mappers PUBLIC
 	${PROJECT_SOURCE_DIR}
 )
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -pedantic -Wunused -Wuseless-cast")
-endif()
-
 set_property(TARGET p6502 PROPERTY CXX_STANDARD 14)
 set_property(TARGET p6502 PROPERTY CXX_EXTENSIONS OFF)
