@@ -169,6 +169,8 @@ set(SOURCE_FILES ${SOURCE_FILES}
 
 add_executable(pretendo ${SOURCE_FILES})
 
+add_dependencies(pretendo mappers)
+
 target_include_directories(pretendo PUBLIC
 	${PROJECT_SOURCE_DIR}/qt
 	${PROJECT_SOURCE_DIR}/p6502
