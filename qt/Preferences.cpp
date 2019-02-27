@@ -24,19 +24,12 @@ Preferences::Preferences(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f
 	ui_.setupUi(this);
 	ui_.palette->installEventFilter(this);
 	
-	ui_.hue       ->setValue(current_hue_        * 1000);
-	ui_.saturation->setValue(current_saturation_ * 100);
-	ui_.contrast  ->setValue(current_contrast_   * 100);
-	ui_.brightness->setValue(current_brightness_ * 100);
-	ui_.gamma     ->setValue(current_gamma_      * 100);
+	ui_.hue       ->setValue(current_hue_        * 1000.0f);
+	ui_.saturation->setValue(current_saturation_ * 100.0f);
+	ui_.contrast  ->setValue(current_contrast_   * 100.0f);
+	ui_.brightness->setValue(current_brightness_ * 100.0f);
+	ui_.gamma     ->setValue(current_gamma_      * 100.0f);
 	
-}
-
-//------------------------------------------------------------------------------
-// Name: ~Preferences
-//------------------------------------------------------------------------------
-Preferences::~Preferences() {
-
 }
 
 //------------------------------------------------------------------------------
@@ -78,7 +71,7 @@ bool Preferences::eventFilter(QObject *watched, QEvent *event) {
 // Name: on_hue_valueChanged
 //------------------------------------------------------------------------------
 void Preferences::on_hue_valueChanged(int value) {
-	current_hue_ = static_cast<float>(value) / 1000.0;
+	current_hue_ = static_cast<float>(value) / 1000.0f;
 	ui_.palette->update();
 }
 
@@ -86,7 +79,7 @@ void Preferences::on_hue_valueChanged(int value) {
 // Name: on_saturation_valueChanged
 //------------------------------------------------------------------------------
 void Preferences::on_saturation_valueChanged(int value) {
-	current_saturation_ = static_cast<float>(value) / 100.0;
+	current_saturation_ = static_cast<float>(value) / 100.0f;
 	ui_.palette->update();
 }
 
@@ -94,7 +87,7 @@ void Preferences::on_saturation_valueChanged(int value) {
 // Name: on_contrast_valueChanged
 //------------------------------------------------------------------------------
 void Preferences::on_contrast_valueChanged(int value) {
-	current_contrast_ = static_cast<float>(value) / 100.0;
+	current_contrast_ = static_cast<float>(value) / 100.0f;
 	ui_.palette->update();
 }
 
@@ -102,7 +95,7 @@ void Preferences::on_contrast_valueChanged(int value) {
 // Name: on_brightness_valueChanged
 //------------------------------------------------------------------------------
 void Preferences::on_brightness_valueChanged(int value) {
-	current_brightness_ = static_cast<float>(value) / 100.0;
+	current_brightness_ = static_cast<float>(value) / 100.0f;
 	ui_.palette->update();
 }
 
@@ -110,7 +103,7 @@ void Preferences::on_brightness_valueChanged(int value) {
 // Name: on_gamma_valueChanged
 //------------------------------------------------------------------------------
 void Preferences::on_gamma_valueChanged(int value) {
-	current_gamma_ = static_cast<float>(value) / 100.0;
+	current_gamma_ = static_cast<float>(value) / 100.0f;
 	ui_.palette->update();
 }
 
@@ -120,11 +113,11 @@ void Preferences::on_gamma_valueChanged(int value) {
 void Preferences::on_buttonBox_clicked(QAbstractButton *button) {
 
 	if(ui_.buttonBox->standardButton(button) == QDialogButtonBox::RestoreDefaults) {
-		ui_.hue       ->setValue(Palette::default_hue        * 1000);
-		ui_.saturation->setValue(Palette::default_saturation * 100);
-		ui_.contrast  ->setValue(Palette::default_contrast   * 100);
-		ui_.brightness->setValue(Palette::default_brightness * 100);
-		ui_.gamma     ->setValue(Palette::default_gamma      * 100);
+		ui_.hue       ->setValue(Palette::default_hue        * 1000.0f);
+		ui_.saturation->setValue(Palette::default_saturation * 100.0f);
+		ui_.contrast  ->setValue(Palette::default_contrast   * 100.0f);
+		ui_.brightness->setValue(Palette::default_brightness * 100.0f);
+		ui_.gamma     ->setValue(Palette::default_gamma      * 100.0f);
 	}
 }
 

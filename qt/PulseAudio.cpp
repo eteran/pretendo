@@ -8,7 +8,7 @@
 PulseAudio::PulseAudio() {
 	std::cout << "[PulseAudio::PulseAudio]" << std::endl;
 	
-    static const pa_sample_spec ss = { 
+	static const pa_sample_spec ss = {
 		PA_SAMPLE_U8,
 		44100,
 		1

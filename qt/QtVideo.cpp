@@ -20,7 +20,7 @@ constexpr int Height = 240;
 //------------------------------------------------------------------------------
 QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f) : QGLWidget(parent, shareWidget, f) {
 
-	buffer_ = new uint32_t[Width * Height]();
+	buffer_ = std::make_unique<uint32_t[]>(Width * Height);
 	for(int i = 0; i < Height; ++i) {
 		scanlines_[i] = &buffer_[i * Width];
 	}
@@ -33,13 +33,6 @@ QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags 
 	connect(this, &QtVideo::render_frame, this, &QtVideo::updateGL);
 
 	std::cout << "[QtVideo::QtVideo]" << std::endl;
-}
-
-//------------------------------------------------------------------------------
-// Name: ~QtVideo
-//------------------------------------------------------------------------------
-QtVideo::~QtVideo() {
-	delete [] buffer_;
 }
 
 //------------------------------------------------------------------------------
@@ -73,7 +66,7 @@ void QtVideo::initializeGL() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	
 	// link the texture with the buffer
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer_);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
 	
 
 	
@@ -211,7 +204,7 @@ void QtVideo::paintGL() {
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, !smooth_scaling ? GL_NEAREST : GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, !smooth_scaling ? GL_NEAREST : GL_LINEAR);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer_);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
 
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(0.0, 0.0); glVertex3i(0, output_height, 0);

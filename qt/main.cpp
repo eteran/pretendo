@@ -5,13 +5,14 @@
 
 namespace {
 
+[[noreturn]]
 void usage(const char *arg0) {
 	
 	std::cout << std::endl;
-	std::cout << "usage: " << arg0 << " [OPTIONS] (path | filename.nes)" << std::endl;
-	std::cout << std::endl;
-	std::cout << "OPTIONS:" << std::endl;
-	std::cout << "\t--fps <NUM>" << std::endl;
+	std::cout << "usage: " << arg0 << " [OPTIONS] (path | filename.nes)\n";
+	std::cout << "\n";
+	std::cout << "OPTIONS:\n";
+	std::cout << "\t--fps <NUM>\n";
 	std::cout << "\t--help" << std::endl;
 	exit(0);
 

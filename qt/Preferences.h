@@ -9,7 +9,7 @@ class Preferences final : public QDialog {
 	Q_OBJECT
 public:
 	Preferences(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-	~Preferences() override;
+	~Preferences() override = default;
 	
 protected:
 	bool eventFilter(QObject *watched, QEvent *event) override;

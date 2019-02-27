@@ -8,10 +8,3 @@ About::About(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f) {
 	ui_.setupUi(this);
 	setFixedSize(width(), height());
 }
-
-//------------------------------------------------------------------------------
-// Name: ~About
-//------------------------------------------------------------------------------
-About::~About() {
-
-}

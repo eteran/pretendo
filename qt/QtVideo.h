@@ -5,12 +5,13 @@
 #include "Palette.h"
 #include "VideoInterface.h"
 #include <QGLWidget>
+#include <memory>
 
 class QtVideo final : public QGLWidget, public VideoInterface {
 	Q_OBJECT
 public:
 	QtVideo(QWidget *parent = nullptr, const QGLWidget *shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-	~QtVideo() override;
+	~QtVideo() override = default;
 
 public:
 	// required functions
@@ -27,10 +28,10 @@ Q_SIGNALS:
 	void render_frame();
 
 private:
-	uint32_t *scanlines_[240];
-	uint32_t  palette_[8][64];
-	uint32_t *buffer_  = nullptr;
-	GLuint    texture_ = 0;
+	uint32_t*                   scanlines_[240];
+	uint32_t                    palette_[8][64];
+	std::unique_ptr<uint32_t[]> buffer_;
+	GLuint                      texture_ = 0;
 };
 
 #endif

@@ -10,7 +10,7 @@ class About final : public QDialog {
 	friend class Pretendo;
 public:
 	About(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-	~About() override;
+	~About() override = default;
 	
 private:
 	Ui::About ui_;

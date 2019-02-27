@@ -7,7 +7,7 @@
 class NullAudio final {
 public:
 	NullAudio();
-	~NullAudio();
+	~NullAudio() = default;
 
 public:
 	void write(const void *p, size_t n);

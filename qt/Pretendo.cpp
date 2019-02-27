@@ -128,7 +128,7 @@ Pretendo::~Pretendo() {
 void Pretendo::setFrameRate(int framerate) {
 	framerate_ = framerate;
 	if(timer_->isActive()) {
-		timer_->start(1000. / framerate_);
+		timer_->start(1000.0f / framerate_);
 	}
 }
 
@@ -234,7 +234,7 @@ void Pretendo::on_action_Run_triggered() {
 
 				nes::reset(nes::Reset::Hard);
 
-				timer_->start(1000. / framerate_);
+				timer_->start(1000.0f / framerate_);
 				audio_->start();
 				paused_ = false;
 
