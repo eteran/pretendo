@@ -1,8 +1,8 @@
 
 #include "CPU.h"
-#include "../NES.h"
-#include "../Cart.h"
-#include "../Mapper.h"
+#include "NES.h"
+#include "Cart.h"
+#include "Mapper.h"
 #include "Compiler.h"
 #include <iostream>
 #include <algorithm>

@@ -109,6 +109,7 @@ add_library (p6502
 
 target_include_directories (p6502 PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR} 
+	${PROJECT_SOURCE_DIR}/src
 )
 
 target_link_libraries(p6502 LINK_PUBLIC

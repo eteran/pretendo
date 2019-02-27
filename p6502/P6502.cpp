@@ -1,6 +1,6 @@
 
 #include "P6502.h"
-#include "../Compiler.h"
+#include "Compiler.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4127)

@@ -148,9 +148,9 @@ add_library (mappers OBJECT
 target_include_directories (mappers PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR} 
 	${PROJECT_SOURCE_DIR}/p6502
-	${PROJECT_SOURCE_DIR}/libines2/include
-	${PROJECT_SOURCE_DIR}
+	${PROJECT_SOURCE_DIR}/src
+	${PROJECT_SOURCE_DIR}/libines2/lib/include
 )
 
-set_property(TARGET p6502 PROPERTY CXX_STANDARD 14)
-set_property(TARGET p6502 PROPERTY CXX_EXTENSIONS OFF)
+set_property(TARGET mappers PROPERTY CXX_STANDARD 14)
+set_property(TARGET mappers PROPERTY CXX_EXTENSIONS OFF)
