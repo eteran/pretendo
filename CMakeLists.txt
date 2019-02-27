@@ -25,7 +25,7 @@ if(ENABLE_STL_DEBUG)
 endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -pedantic -Wunused -Wuseless-cast")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -pedantic -Wunused")
 endif()
 
 if(ENABLE_PROFILING)
@@ -66,4 +66,3 @@ add_subdirectory(src)
 add_subdirectory(mappers)
 add_subdirectory(libines2/lib)
 add_subdirectory(p6502)
-
