@@ -2,7 +2,7 @@
 #ifndef P6502_20080314_H_
 #define P6502_20080314_H_
 
-#include "bitfield.h"
+#include "P6502bitfield.h"
 #include <cstdint>
 
 namespace P6502 {
