@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 add_library (p6502
 	P6502.cpp
 	P6502.h
-	p6502bitfield.h
+	P6502bitfield.h
 	P6502.h
 	opcodes/adc.h
 	opcodes/branch.h

@@ -15,9 +15,6 @@ option(ENABLE_LTO           "Enable Link Time Optimization")
 option(ENABLE_STL_DEBUG     "Enable STL container debugging")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
 
 if(ENABLE_STL_DEBUG)
 	add_definitions(-D_GLIBCXX_DEBUG)
