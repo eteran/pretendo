@@ -20,7 +20,6 @@ public:
 
 public:
 	void write_2(uint16_t address, uint8_t value) override;
-	void write_3(uint16_t address, uint8_t value) override;
 	void write_5(uint16_t address, uint8_t value) override;
 	void write_6(uint16_t address, uint8_t value) override;
 	void write_7(uint16_t address, uint8_t value) override;
@@ -80,7 +79,7 @@ private:
 	uint8_t   prg_mode_              = 0x03;
 	uint8_t   prg_ram_protect1_      = 0;
 	uint8_t   prg_ram_protect2_      = 0;
-	uint8_t   sprite_size_           = 8;
+	bool      large_sprites_         = false;
 	uint8_t   vertical_split_mode_   = 0;
 	uint8_t   vertical_split_scroll_ = 0;
 	uint8_t   vertical_split_bank_   = 0;

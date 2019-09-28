@@ -347,8 +347,6 @@ void Mapper5::write_handler(uint16_t address, uint8_t value) {
 
 	if(prg_ram_protect1_ == 0x02 && prg_ram_protect2_ == 0x01 && prg_ram_banks_[bank]) {
 		prg_ram_banks_[bank][address & 0x0fff] = value;
-	} else {
-		nes::cpu::write(address, value);
 	}
 }
 
@@ -464,7 +462,7 @@ uint8_t Mapper5::read_handler(uint16_t address) {
 		return prg_ram_banks_[bank][address & 0x0fff];
 	}
 
-	return nes::cpu::read(address);
+	return (address >> 8) & 0xff;
 }
 
 //------------------------------------------------------------------------------
@@ -537,7 +535,7 @@ uint8_t Mapper5::read_vram(uint16_t address) {
 		// CHR-ROM ($0000 - $1fff)
 		const uint8_t *chr_selector;
 
-		if(sprite_size_ == 16) {
+		if(large_sprites_) {
 			// there seems to be 128 fetches of tiles before sprites..
 			if(fetch_count_ > 128 && fetch_count_ < 160) {
 				chr_selector = sp_chr_banks_;
@@ -674,47 +672,23 @@ void Mapper5::write_vram(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper5::write_2(uint16_t address, uint8_t value) {
 
-	switch(address & 0x07) {
-	case 0x00:
-		sprite_size_ = (value & 0x20) ? 16 : 8;
+	switch(address) {
+	case 0x2000:
+		large_sprites_ = (value & 0x20);
 		break;
-	case 0x01:
+	case 0x2001:
 		// sprites and background disabled
 		if(!(value & 0x18)) {
 			irq_status_.in_frame = false;
 		}
 		break;
 	}
-
-	Mapper::write_2(address, value);
-}
-
-//------------------------------------------------------------------------------
-// Name: write_3
-//------------------------------------------------------------------------------
-void Mapper5::write_3(uint16_t address, uint8_t value) {
-
-	switch(address & 0x07) {
-	case 0x00:
-		sprite_size_ = (value & 0x20) ? 16 : 8;
-		break;
-	case 0x01:
-		// sprites and background disabled
-		if(!(value & 0x18)) {
-			irq_status_.in_frame = false;
-		}
-		break;
-	}
-
-	Mapper::write_3(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: vram_change_hook
 //------------------------------------------------------------------------------
 void Mapper5::vram_change_hook(uint16_t vram_address) {
-
-
 
 	// when this is > 128 (32 * 4), we are fetching sprites, not BG tiles
 	++fetch_count_;

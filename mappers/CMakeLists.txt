@@ -152,5 +152,5 @@ target_include_directories (mappers PUBLIC
 	${PROJECT_SOURCE_DIR}/libines2/lib/include
 )
 
-set_property(TARGET mappers PROPERTY CXX_STANDARD 14)
+set_property(TARGET mappers PROPERTY CXX_STANDARD 17)
 set_property(TARGET mappers PROPERTY CXX_EXTENSIONS OFF)
