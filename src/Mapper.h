@@ -93,66 +93,66 @@ public:
 protected:
 	// ---- PRG ROM ----
 	// 8K swaps
-	void set_prg_67(int num) const;
-	void set_prg_89(int num) const;
-	void set_prg_ab(int num) const;
-	void set_prg_cd(int num) const;
-	void set_prg_ef(int num) const;
+	void set_prg_67(int num);
+	void set_prg_89(int num);
+	void set_prg_ab(int num);
+	void set_prg_cd(int num);
+	void set_prg_ef(int num);
 
 	// 16K swaps
-	void set_prg_89ab(int num) const;
-	void set_prg_cdef(int num) const;
+	void set_prg_89ab(int num);
+	void set_prg_cdef(int num);
 
 	// 32K swap
-	void set_prg_89abcdef(int num) const;
+	void set_prg_89abcdef(int num);
 
 	// ---- CHR ROM ----
 	// 1K-swaps
-	void set_chr_0000_03ff(int num) const;
-	void set_chr_0400_07ff(int num) const;
-	void set_chr_0800_0bff(int num) const;
-	void set_chr_0c00_0fff(int num) const;
-	void set_chr_1000_13ff(int num) const;
-	void set_chr_1400_17ff(int num) const;
-	void set_chr_1800_1bff(int num) const;
-	void set_chr_1c00_1fff(int num) const;
+	void set_chr_0000_03ff(int num);
+	void set_chr_0400_07ff(int num);
+	void set_chr_0800_0bff(int num);
+	void set_chr_0c00_0fff(int num);
+	void set_chr_1000_13ff(int num);
+	void set_chr_1400_17ff(int num);
+	void set_chr_1800_1bff(int num);
+	void set_chr_1c00_1fff(int num);
 
 	// 2K swaps
-	void set_chr_0000_07ff(int num) const;
-	void set_chr_0800_0fff(int num) const;
-	void set_chr_1000_17ff(int num) const;
-	void set_chr_1800_1fff(int num) const;
+	void set_chr_0000_07ff(int num);
+	void set_chr_0800_0fff(int num);
+	void set_chr_1000_17ff(int num);
+	void set_chr_1800_1fff(int num);
 
 	// 4K swaps
-	void set_chr_0000_0fff(int num) const;
-	void set_chr_1000_1fff(int num) const;
+	void set_chr_0000_0fff(int num);
+	void set_chr_1000_1fff(int num);
 
 	// 8K swaps
-	void set_chr_0000_1fff(int num) const;
+	void set_chr_0000_1fff(int num);
 
 	// ---- CHR RAM ----
 	// 1K-swaps
-	void set_chr_0000_03ff_ram(uint8_t *p, int num) const;
-	void set_chr_0400_07ff_ram(uint8_t *p, int num) const;
-	void set_chr_0800_0bff_ram(uint8_t *p, int num) const;
-	void set_chr_0c00_0fff_ram(uint8_t *p, int num) const;
-	void set_chr_1000_13ff_ram(uint8_t *p, int num) const;
-	void set_chr_1400_17ff_ram(uint8_t *p, int num) const;
-	void set_chr_1800_1bff_ram(uint8_t *p, int num) const;
-	void set_chr_1c00_1fff_ram(uint8_t *p, int num) const;
+	void set_chr_0000_03ff_ram(uint8_t *p, int num);
+	void set_chr_0400_07ff_ram(uint8_t *p, int num);
+	void set_chr_0800_0bff_ram(uint8_t *p, int num);
+	void set_chr_0c00_0fff_ram(uint8_t *p, int num);
+	void set_chr_1000_13ff_ram(uint8_t *p, int num);
+	void set_chr_1400_17ff_ram(uint8_t *p, int num);
+	void set_chr_1800_1bff_ram(uint8_t *p, int num);
+	void set_chr_1c00_1fff_ram(uint8_t *p, int num);
 
 	// 2K swaps
-	void set_chr_0000_07ff_ram(uint8_t *p, int num) const;
-	void set_chr_0800_0fff_ram(uint8_t *p, int num) const;
-	void set_chr_1000_17ff_ram(uint8_t *p, int num) const;
-	void set_chr_1800_1fff_ram(uint8_t *p, int num) const;
+	void set_chr_0000_07ff_ram(uint8_t *p, int num);
+	void set_chr_0800_0fff_ram(uint8_t *p, int num);
+	void set_chr_1000_17ff_ram(uint8_t *p, int num);
+	void set_chr_1800_1fff_ram(uint8_t *p, int num);
 
 	// 4K swaps
-	void set_chr_0000_0fff_ram(uint8_t *p, int num) const;
-	void set_chr_1000_1fff_ram(uint8_t *p, int num) const;
+	void set_chr_0000_0fff_ram(uint8_t *p, int num);
+	void set_chr_1000_1fff_ram(uint8_t *p, int num);
 
 	// 8K swaps
-	void set_chr_0000_1fff_ram(uint8_t *p, int num) const;
+	void set_chr_0000_1fff_ram(uint8_t *p, int num);
 
 private:
 	// we use a function here to return a static object

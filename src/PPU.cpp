@@ -434,7 +434,7 @@ void write2007(uint8_t value) {
 			palette_[palette_address ^ 0x10] = value & 0x3f;
 		}
 
-	} else if(vram_banks_[temp_address >> 10].writeable()) {
+	} else {
 		cart.mapper()->write_vram(temp_address, value);
 	}
 }
