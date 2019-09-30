@@ -15,6 +15,9 @@
 
 //#define SPRITE_ZERO_HACK
 
+VRAMBank     vram_banks_[0x10];
+
+
 namespace {
 
 constexpr unsigned int cycles_per_scanline = 341u;
@@ -86,6 +89,8 @@ constexpr uint16_t tile_address(uint16_t vram_address) {
 namespace nes {
 namespace ppu {
 
+
+
 union PPUStatus {
 	uint8_t     raw;
 	
@@ -122,7 +127,7 @@ uint8_t      sprite_data_x[8];
 uint8_t      sprite_data_index[8];
 sprite_attr  sprite_data_attr[8];
 
-VRAMBank     vram_banks_[0x10];
+
 uint8_t      sprite_ram_[0x100];
 uint8_t      left_most_sprite_x_     = 0xff;
 uint8_t      palette_[0x20];
@@ -152,13 +157,8 @@ bool         rendering_              = false;
 bool         sprite_init_            = false;
 bool         write_latch_            = false;
 bool         write_block_            = false;
-uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
-                                     // 4 nametables, each $03c0 bytes in
-                                     // size plus 4 corresponding $40 byte
-                                     // attribute tables
-                                     // even though the real thing only has 2
-                                     // tables, we currently simulate 4 for
-                                     // simplicity
+
+
 }
 
 // internal functions
@@ -223,7 +223,6 @@ void reset(Reset reset_type) {
 	std::generate(sprite_ram_, sprite_ram_ + 0x100,  rand);
 #endif
 	if(reset_type == Reset::Hard) {
-		std::fill_n(nametables_, 0x1000, 0);
 		std::fill_n(sprite_ram_, 0x0100, 0);
 
 		for(int i = 0; i < 8; ++i) {
@@ -562,51 +561,6 @@ void write4014(uint8_t value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: set_mirroring
-//------------------------------------------------------------------------------
-void set_mirroring(uint8_t mir) {
-
-	// utilizes the concept of a mirroring control byte
-	// each pair of bits represents a table to be mirrored from
-	// bits 0/1 are for bank 8/c
-	// bits 2/3 are for bank 9/d
-	// bits 4/5 are for bank a/e
-	// bits 6/7 are for bank b/f
-
-	// so:
-	// vertical:   01000100b, or $44
-	// horizontal: 01010000b, or $50
-	// 4 screen:   11100100b, or $e4
-	// single lo:  00000000b, or $00
-	// single hi:  01010101b, or $55
-
-	vram_banks_[0x08] = VRAMBank(&nametables_[(mir << 0xa) & 0x0c00], true);
-	vram_banks_[0x09] = VRAMBank(&nametables_[(mir << 0x8) & 0x0c00], true);
-	vram_banks_[0x0a] = VRAMBank(&nametables_[(mir << 0x6) & 0x0c00], true);
-	vram_banks_[0x0b] = VRAMBank(&nametables_[(mir << 0x4) & 0x0c00], true);
-
-	// [$3000, $4000) mirrors [$2000, $3000)
-	vram_banks_[0x0c] = VRAMBank(&nametables_[(mir << 0xa) & 0x0c00], true);
-	vram_banks_[0x0d] = VRAMBank(&nametables_[(mir << 0x8) & 0x0c00], true);
-	vram_banks_[0x0e] = VRAMBank(&nametables_[(mir << 0x6) & 0x0c00], true);
-	vram_banks_[0x0f] = VRAMBank(&nametables_[(mir << 0x4) & 0x0c00], true);
-}
-
-//------------------------------------------------------------------------------
-// Name: unset_vram_bank
-//------------------------------------------------------------------------------
-void unset_vram_bank(uint8_t bank) {
-	vram_banks_[bank] = VRAMBank();
-}
-
-//------------------------------------------------------------------------------
-// Name: set_vram_bank
-//------------------------------------------------------------------------------
-void set_vram_bank(uint8_t bank, uint8_t *p, bool writeable) {
-	vram_banks_[bank] = VRAMBank(p, writeable);
-}
-
-//------------------------------------------------------------------------------
 // Name: start_frame
 //------------------------------------------------------------------------------
 void start_frame() {
@@ -629,30 +583,6 @@ void end_frame() {
 	}
 
 	cart.mapper()->ppu_end_frame();
-}
-
-//------------------------------------------------------------------------------
-// Name: write_vram
-//------------------------------------------------------------------------------
-void write_vram(uint16_t address, uint8_t value) {
-
-	VRAMBank &bank = vram_banks_[(address >> 10) & 0x0f];
-	if(LIKELY(bank && bank.writeable())) {
-		bank[address & 0x03ff] = value;
-	}
-}
-
-//------------------------------------------------------------------------------
-// Name: read_vram
-//------------------------------------------------------------------------------
-uint8_t read_vram(uint16_t address) {
-
-	const VRAMBank &bank = vram_banks_[(address >> 10) & 0x0f];
-	if(LIKELY(bank)) {
-		return bank[address & 0x03ff];
-	}
-
-	return 0xff;
 }
 
 //------------------------------------------------------------------------------

@@ -160,6 +160,15 @@ protected:
 	void unset_vram_bank(uint8_t bank);
 
 private:
+	uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
+										 // 4 nametables, each $03c0 bytes in
+										 // size plus 4 corresponding $40 byte
+										 // attribute tables
+										 // even though the real thing only has 2
+										 // tables, we currently simulate 4 for
+										 // simplicity
+
+private:
 	// we use a function here to return a static object
 	// to ensure order of initialization, otherwise, the mappers
 	// could try to register themselves before the map was constructed

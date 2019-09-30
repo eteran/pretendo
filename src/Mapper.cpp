@@ -36,6 +36,8 @@ Mapper::Mapper() {
 
 	// NOTE: we're not supporting trainers anymore, that's why the code is gone
 
+	std::fill_n(nametables_, 0x1000, 0);
+
 	switch(nes::cart.mirroring()) {
 	case Cart::MIR_VERTICAL:    set_mirroring(nes::ppu::mirror_vertical);    break;
 	case Cart::MIR_HORIZONTAL:  set_mirroring(nes::ppu::mirror_horizontal);  break;
@@ -491,14 +493,22 @@ uint8_t Mapper::read_f(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper::write_vram(uint16_t address, uint8_t value) {
-	nes::ppu::write_vram(address, value);
+	VRAMBank &bank = vram_banks_[(address >> 10) & 0x0f];
+	if(LIKELY(bank && bank.writeable())) {
+		bank[address & 0x03ff] = value;
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_vram(uint16_t address) {
-	return nes::ppu::read_vram(address);
+	const VRAMBank &bank = vram_banks_[(address >> 10) & 0x0f];
+	if(LIKELY(bank)) {
+		return bank[address & 0x03ff];
+	}
+
+	return 0xff;
 }
 
 //------------------------------------------------------------------------------
@@ -932,21 +942,44 @@ uint8_t Mapper::read_memory(uint16_t address) {
 // Name: set_mirroring
 //------------------------------------------------------------------------------
 void Mapper::set_mirroring(uint8_t mir) {
-	nes::ppu::set_mirroring(mir);
+	// utilizes the concept of a mirroring control byte
+	// each pair of bits represents a table to be mirrored from
+	// bits 0/1 are for bank 8/c
+	// bits 2/3 are for bank 9/d
+	// bits 4/5 are for bank a/e
+	// bits 6/7 are for bank b/f
+
+	// so:
+	// vertical:   01000100b, or $44
+	// horizontal: 01010000b, or $50
+	// 4 screen:   11100100b, or $e4
+	// single lo:  00000000b, or $00
+	// single hi:  01010101b, or $55
+
+	vram_banks_[0x08] = VRAMBank(&nametables_[(mir << 0xa) & 0x0c00], true);
+	vram_banks_[0x09] = VRAMBank(&nametables_[(mir << 0x8) & 0x0c00], true);
+	vram_banks_[0x0a] = VRAMBank(&nametables_[(mir << 0x6) & 0x0c00], true);
+	vram_banks_[0x0b] = VRAMBank(&nametables_[(mir << 0x4) & 0x0c00], true);
+
+	// [$3000, $4000) mirrors [$2000, $3000)
+	vram_banks_[0x0c] = VRAMBank(&nametables_[(mir << 0xa) & 0x0c00], true);
+	vram_banks_[0x0d] = VRAMBank(&nametables_[(mir << 0x8) & 0x0c00], true);
+	vram_banks_[0x0e] = VRAMBank(&nametables_[(mir << 0x6) & 0x0c00], true);
+	vram_banks_[0x0f] = VRAMBank(&nametables_[(mir << 0x4) & 0x0c00], true);
 }
 
 //------------------------------------------------------------------------------
 // Name: set_vram_bank
 //------------------------------------------------------------------------------
 void Mapper::set_vram_bank(uint8_t bank, uint8_t *p, bool writeable) {
-	nes::ppu::set_vram_bank(bank, p, writeable);
+	vram_banks_[bank] = VRAMBank(p, writeable);
 }
 
 //------------------------------------------------------------------------------
 // Name: set_vram_bank
 //------------------------------------------------------------------------------
 void Mapper::unset_vram_bank(uint8_t bank) {
-	nes::ppu::unset_vram_bank(bank);
+	vram_banks_[bank] = VRAMBank();
 }
 
 //------------------------------------------------------------------------------
