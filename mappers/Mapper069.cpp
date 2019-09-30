@@ -113,10 +113,10 @@ void Mapper69::write_a(uint16_t address, uint8_t value) {
 	case 0x0b: set_prg_cd(value); break;
 	case 0x0c:
 		switch(value & 0x3) {
-		case 0: nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
-		case 1: nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
-		case 2: nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
-		case 3: nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
+		case 0: set_mirroring(nes::ppu::mirror_vertical);    break;
+		case 1: set_mirroring(nes::ppu::mirror_horizontal);  break;
+		case 2: set_mirroring(nes::ppu::mirror_single_low);  break;
+		case 3: set_mirroring(nes::ppu::mirror_single_high); break;
 		}
 		break;
 

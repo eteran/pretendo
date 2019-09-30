@@ -60,9 +60,9 @@ void Mapper32::write_9(uint16_t address, uint8_t value) {
 #if 1
 	// NOTE(eteran): this code should be off for major league
 	if(value & 0x01) {
-		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(nes::ppu::mirror_horizontal);
 	} else {
-		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(nes::ppu::mirror_vertical);
 	}
 #endif
 }

@@ -33,9 +33,9 @@ void Mapper71::write_8(uint16_t address, uint8_t value) {
 #if 0
 	// firehawk only
 	if(value & 0x10) {
-		nes::ppu::set_mirroring(nes::ppu::mirror_single_high);
+		set_mirroring(nes::ppu::mirror_single_high);
 	} else {
-		nes::ppu::set_mirroring(nes::ppu::mirror_single_low);
+		set_mirroring(nes::ppu::mirror_single_low);
 	}
 #endif
 }

@@ -95,9 +95,9 @@ void Mapper9::write_e(uint16_t address, uint8_t value) {
 void Mapper9::write_f(uint16_t address, uint8_t value) {
 	(void)address;
 	if(value & 0x01) {
-		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(nes::ppu::mirror_horizontal);
 	} else {
-		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(nes::ppu::mirror_vertical);
 	}
 }
 

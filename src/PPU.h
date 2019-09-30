@@ -78,9 +78,6 @@ uint8_t read2004();
 uint8_t read2007();
 uint8_t read200x();
 
-void write_vram(uint16_t address, uint8_t value);
-uint8_t read_vram(uint16_t address);
-
 void end_frame();
 
 PPUMask mask();
@@ -89,10 +86,7 @@ PPUControl control();
 template <class T>
 void execute_scanline(const T &target);
 
-void set_mirroring(uint8_t mir);
-void set_vram_bank(uint8_t bank, uint8_t *p, bool writeable);
 void start_frame();
-void unset_vram_bank(uint8_t bank);
 
 uint64_t cycle_count();
 uint16_t hpos();

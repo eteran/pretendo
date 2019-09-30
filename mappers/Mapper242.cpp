@@ -94,8 +94,8 @@ void Mapper242::write_handler(uint16_t address, uint8_t value) {
 	set_prg_89abcdef((address >> 3) & 0x0f);
 
 	if(address & 0x02) {
-		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(nes::ppu::mirror_horizontal);
 	} else {
-		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(nes::ppu::mirror_vertical);
 	}
 }

@@ -56,9 +56,9 @@ void Mapper33::write_handler(uint16_t address, uint8_t value) {
 	switch(address & 0xa003) {
 	case 0x8000:
 		if(!(value & 0x40)) {
-			nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
+			set_mirroring(nes::ppu::mirror_vertical);
 		} else {
-			nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
+			set_mirroring(nes::ppu::mirror_horizontal);
 		}
 		set_prg_89(value & 0x3f);
 		break;
