@@ -421,8 +421,6 @@ void write2007(uint8_t value) {
 		}
 	}
 
-	cart.mapper()->vram_change_hook(vram_address_);
-
 	// palette write
 	if((temp_address & 0x3f00) == 0x3f00) {
 
@@ -435,6 +433,7 @@ void write2007(uint8_t value) {
 		}
 
 	} else {
+		cart.mapper()->vram_change_hook(vram_address_);
 		cart.mapper()->write_vram(temp_address, value);
 	}
 }
