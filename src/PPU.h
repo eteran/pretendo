@@ -25,7 +25,7 @@ struct scanline_postrender {
 struct scanline_render {
 	explicit scanline_render(uint8_t *p) : buffer(p) {
 	}
-	uint8_t *buffer;
+	uint8_t *const buffer;
 };
 
 namespace nes {
@@ -83,8 +83,8 @@ uint8_t read_vram(uint16_t address);
 
 void end_frame();
 
-PPUMask mask();
-PPUControl control();
+const PPUMask &mask();
+const PPUControl &control();
 
 template <class T>
 void execute_scanline(const T &target);

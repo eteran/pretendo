@@ -17,7 +17,7 @@ private:
 		case 1:
 			LAST_CYCLE;
 			// read next instruction byte (and throw it away)
-			read_handler(PC.raw);
+			read_byte(PC.raw);
 			Op::execute();
 			OPCODE_COMPLETE;
 		default:

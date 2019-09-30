@@ -31,8 +31,6 @@ add_executable(pretendo
 	APU.cpp
 	APU.h
 	BitField.h
-    Bus.cpp
-    Bus.h
 	Cart.cpp
 	Cart.h
 	circular_buffer.h
@@ -119,6 +117,6 @@ target_link_libraries(pretendo LINK_PUBLIC
 	$<TARGET_OBJECTS:mappers>
 )
 
-set_property(TARGET pretendo PROPERTY CXX_STANDARD 17)
+set_property(TARGET pretendo PROPERTY CXX_STANDARD 14)
 set_property(TARGET pretendo PROPERTY CXX_EXTENSIONS OFF)
 set_property(TARGET pretendo PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")

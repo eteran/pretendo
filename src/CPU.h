@@ -24,6 +24,24 @@ enum IRQ_SOURCE {
 	ALL_IRQ    = 0xff
 };
 
+void write(uint16_t address, uint8_t value);
+uint8_t read(uint16_t address);
+
+uint16_t pc();
+uint8_t a();
+uint8_t p();
+uint8_t s();
+uint8_t x();
+uint8_t y();
+
+// uneccessary, but can help keep debugger code clean
+bool flag_c();
+bool flag_d();
+bool flag_i();
+bool flag_n();
+bool flag_v();
+bool flag_z();
+
 uint64_t cycle_count();
 void clear_irq(IRQ_SOURCE source);
 void clear_nmi();
@@ -37,6 +55,25 @@ void exec() {
 	P6502::run<N>();
 }
 
+void swap_01(uint8_t *ptr);
+void swap_23(uint8_t *ptr);
+void swap_45(uint8_t *ptr);
+void swap_67(uint8_t *ptr);
+void swap_89(uint8_t *ptr);
+void swap_ab(uint8_t *ptr);
+void swap_cd(uint8_t *ptr);
+void swap_ef(uint8_t *ptr);
+
+void unmap_01();
+void unmap_23();
+void unmap_45();
+void unmap_67();
+void unmap_89();
+void unmap_ab();
+void unmap_cd();
+void unmap_ef();
+
+void trash_ram();
 void reset(Reset reset_type);
 
 }

@@ -89,6 +89,7 @@ add_library (p6502
 	opcodes/bpl.h
 	opcodes/rol.h
 	opcodes.h
+	memory.h
 	address_modes/absolute_x.h
 	address_modes/indexed_indirect.h
 	address_modes/zero_page_y.h
@@ -114,5 +115,5 @@ target_include_directories (p6502 PUBLIC
 target_link_libraries(p6502 LINK_PUBLIC
 )
 
-set_property(TARGET p6502 PROPERTY CXX_STANDARD 17)
+set_property(TARGET p6502 PROPERTY CXX_STANDARD 14)
 set_property(TARGET p6502 PROPERTY CXX_EXTENSIONS OFF)

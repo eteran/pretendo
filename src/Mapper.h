@@ -25,6 +25,9 @@ public:
 	static std::shared_ptr<Mapper> create_mapper(int num);
 	static void register_mapper(int num, create_func create_ptr);
 
+	void write_memory(uint16_t address, uint8_t value);
+	uint8_t read_memory(uint16_t address);
+
 public:
     MemoryMappedFile open_sram(size_t size);
 
@@ -62,6 +65,10 @@ public:
 	virtual void write_f(uint16_t address, uint8_t value);
 
 	// read routines
+	virtual uint8_t read_0(uint16_t address);
+	virtual uint8_t read_1(uint16_t address);
+	virtual uint8_t read_2(uint16_t address);
+	virtual uint8_t read_3(uint16_t address);
 	virtual uint8_t read_4(uint16_t address);
 	virtual uint8_t read_5(uint16_t address);
 	virtual uint8_t read_6(uint16_t address);
@@ -83,41 +90,21 @@ public:
 	virtual void ppu_end_frame();
 	virtual void vram_change_hook(uint16_t vram_address);
 
-private:
-	void swap_01(uint8_t *ptr) { page_[0x00] = ptr + 0x0000; page_[0x01] = ptr + 0x0800; page_[0x02] = ptr + 0x1000; page_[0x03] = ptr + 0x1800; }
-	void swap_23(uint8_t *ptr) { page_[0x04] = ptr + 0x0000; page_[0x05] = ptr + 0x0800; page_[0x06] = ptr + 0x1000; page_[0x07] = ptr + 0x1800; }
-	void swap_45(uint8_t *ptr) { page_[0x08] = ptr + 0x0000; page_[0x09] = ptr + 0x0800; page_[0x0a] = ptr + 0x1000; page_[0x0b] = ptr + 0x1800; }
-	void swap_67(uint8_t *ptr) { page_[0x0c] = ptr + 0x0000; page_[0x0d] = ptr + 0x0800; page_[0x0e] = ptr + 0x1000; page_[0x0f] = ptr + 0x1800; }
-	void swap_89(uint8_t *ptr) { page_[0x10] = ptr + 0x0000; page_[0x11] = ptr + 0x0800; page_[0x12] = ptr + 0x1000; page_[0x13] = ptr + 0x1800; }
-	void swap_ab(uint8_t *ptr) { page_[0x14] = ptr + 0x0000; page_[0x15] = ptr + 0x0800; page_[0x16] = ptr + 0x1000; page_[0x17] = ptr + 0x1800; }
-	void swap_cd(uint8_t *ptr) { page_[0x18] = ptr + 0x0000; page_[0x19] = ptr + 0x0800; page_[0x1a] = ptr + 0x1000; page_[0x1b] = ptr + 0x1800; }
-	void swap_ef(uint8_t *ptr) { page_[0x1c] = ptr + 0x0000; page_[0x1d] = ptr + 0x0800; page_[0x1e] = ptr + 0x1000; page_[0x1f] = ptr + 0x1800; }
-
-protected:
-	void unmap_01() { page_[0x00] = nullptr; page_[0x01] = nullptr; page_[0x02] = nullptr; page_[0x03] = nullptr; }
-	void unmap_23() { page_[0x04] = nullptr; page_[0x05] = nullptr; page_[0x06] = nullptr; page_[0x07] = nullptr; }
-	void unmap_45() { page_[0x08] = nullptr; page_[0x09] = nullptr; page_[0x0a] = nullptr; page_[0x0b] = nullptr; }
-	void unmap_67() { page_[0x0c] = nullptr; page_[0x0d] = nullptr; page_[0x0e] = nullptr; page_[0x0f] = nullptr; }
-	void unmap_89() { page_[0x10] = nullptr; page_[0x11] = nullptr; page_[0x12] = nullptr; page_[0x13] = nullptr; }
-	void unmap_ab() { page_[0x14] = nullptr; page_[0x15] = nullptr; page_[0x16] = nullptr; page_[0x17] = nullptr; }
-	void unmap_cd() { page_[0x18] = nullptr; page_[0x19] = nullptr; page_[0x1a] = nullptr; page_[0x1b] = nullptr; }
-	void unmap_ef() { page_[0x1c] = nullptr; page_[0x1d] = nullptr; page_[0x1e] = nullptr; page_[0x1f] = nullptr; }
-
 protected:
 	// ---- PRG ROM ----
 	// 8K swaps
-	void set_prg_67(int num);
-	void set_prg_89(int num);
-	void set_prg_ab(int num);
-	void set_prg_cd(int num);
-	void set_prg_ef(int num);
+	void set_prg_67(int num) const;
+	void set_prg_89(int num) const;
+	void set_prg_ab(int num) const;
+	void set_prg_cd(int num) const;
+	void set_prg_ef(int num) const;
 
 	// 16K swaps
-	void set_prg_89ab(int num);
-	void set_prg_cdef(int num);
+	void set_prg_89ab(int num) const;
+	void set_prg_cdef(int num) const;
 
 	// 32K swap
-	void set_prg_89abcdef(int num);
+	void set_prg_89abcdef(int num) const;
 
 	// ---- CHR ROM ----
 	// 1K-swaps
@@ -166,14 +153,6 @@ protected:
 
 	// 8K swaps
 	void set_chr_0000_1fff_ram(uint8_t *p, int num) const;
-
-protected:
-	static constexpr unsigned int page_count = 32;
-	static constexpr unsigned int page_size  = 0x10000 / page_count;
-	static constexpr unsigned int page_mask  = page_size - 1;
-	static constexpr unsigned int page_shift = 11;
-
-	uint8_t *page_[page_count] = {};
 
 private:
 	// we use a function here to return a static object

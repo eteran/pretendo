@@ -16,7 +16,7 @@ private:
 		case 1:
 			LAST_CYCLE;
 			// fetch value, increment PC
-			Op::execute(read_handler(PC.raw++));
+			Op::execute(read_byte(PC.raw++));
 			OPCODE_COMPLETE;
 		default:
 			abort();

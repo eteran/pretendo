@@ -24,23 +24,24 @@ uint64_t executed_cycles;
 
 
 // internal registers
-namespace {
-uint16_t   instruction_;
-int        cycle_;
+static uint16_t   instruction_;
+static int        cycle_;
 
 // internal registers (which get trashed by instructions)
-register16 effective_address16_;
-register16 data16_;
-register16 old_pc_;
-register16 new_pc_;
-uint8_t    data8_;
+static register16 effective_address16_;
+static register16 data16_;
+static register16 old_pc_;
+static register16 new_pc_;
+static uint8_t    data8_;
 
-bool irq_executing_;
-bool nmi_executing_;
-bool rst_executing_;
-bool irq_asserted_;
-bool nmi_asserted_;
-bool rst_asserted_;
+static bool irq_executing_;
+static bool nmi_executing_;
+static bool rst_executing_;
+static bool irq_asserted_;
+static bool nmi_asserted_;
+static bool rst_asserted_;
+
+namespace {
 
 enum : uint8_t {
 	C_MASK = 0x01,
@@ -171,6 +172,7 @@ void update_nz_flags(uint8_t value) {
 }
 
 // opcode implementation
+#include "memory.h"
 #include "opcodes.h"
 #include "address_modes.h"
 
@@ -733,7 +735,7 @@ void clock() {
 		if((dmc_dma_count_ & 1) == (executed_cycles & 1)) {
 			if((dmc_dma_count_ & 1) == 0) {
 				// read cycle
-				dmc_dma_byte_ = read_handler(dmc_dma_source_address_++);
+				dmc_dma_byte_ = read_byte(dmc_dma_source_address_++);
 			} else {
 				// write cycle
 				(*dmc_dma_handler_)(dmc_dma_byte_);
@@ -751,7 +753,7 @@ void clock() {
 		if((spr_dma_count_ & 1) == (executed_cycles & 1)) {
 			if((executed_cycles & 1) == 0) {
 				// read cycle
-				spr_dma_byte_ = read_handler(spr_dma_source_address_++);
+				spr_dma_byte_ = read_byte(spr_dma_source_address_++);
 			} else {
 				// write cycle
 				(*spr_dma_handler_)(spr_dma_byte_);
@@ -768,16 +770,16 @@ void clock() {
 			// first cycle is always instruction fetch
 			// or do we force an interrupt?
 			if(rst_executing_) {
-				read_handler(PC.raw);
+				read_byte(PC.raw);
 				instruction_ = 0x100;
 			} else if(nmi_executing_) {
-				read_handler(PC.raw);
+				read_byte(PC.raw);
 				instruction_ = 0x101;
 			} else if(irq_executing_) {
-				read_handler(PC.raw);
+				read_byte(PC.raw);
 				instruction_ = 0x102;
 			} else {
-				instruction_ = read_handler(PC.raw++);
+				instruction_ = read_byte(PC.raw++);
 			}
 
 		} else {

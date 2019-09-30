@@ -53,6 +53,13 @@ Mapper::Mapper() {
 // Name: ~Mapper()
 //------------------------------------------------------------------------------
 Mapper::~Mapper() {
+	// reset banks to not point anywhere
+	nes::cpu::unmap_67();
+	nes::cpu::unmap_89();
+	nes::cpu::unmap_ab();
+	nes::cpu::unmap_cd();
+	nes::cpu::unmap_ef();
+
 	nes::ppu::unset_vram_bank(0);
 	nes::ppu::unset_vram_bank(1);
 	nes::ppu::unset_vram_bank(2);
@@ -97,40 +104,159 @@ std::shared_ptr<Mapper> Mapper::create_mapper(int num) {
 // Name: write_0
 //------------------------------------------------------------------------------
 void Mapper::write_0(uint16_t address, uint8_t value) {
-	(void)address;
-	(void)value;
+	nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_1
 //------------------------------------------------------------------------------
 void Mapper::write_1(uint16_t address, uint8_t value) {
-	(void)address;
-	(void)value;
+	nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_2
 //------------------------------------------------------------------------------
 void Mapper::write_2(uint16_t address, uint8_t value) {
-	(void)address;
-	(void)value;
+
+	switch(address & 0x07) {
+	case 0x00:
+		nes::ppu::write2000(value);
+		break;
+	case 0x01:
+		nes::ppu::write2001(value);
+		break;
+	case 0x02:
+		nes::ppu::write2002(value);
+		break;
+	case 0x03:
+		nes::ppu::write2003(value);
+		break;
+	case 0x04:
+		nes::ppu::write2004(value);
+		break;
+	case 0x05:
+		nes::ppu::write2005(value);
+		break;
+	case 0x06:
+		nes::ppu::write2006(value);
+		break;
+	case 0x07:
+		nes::ppu::write2007(value);
+		break;
+	default:
+		abort();
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: write_3
 //------------------------------------------------------------------------------
 void Mapper::write_3(uint16_t address, uint8_t value) {
-	(void)address;
-	(void)value;
+
+	switch(address & 0x07) {
+	case 0x00:
+		nes::ppu::write2000(value);
+		break;
+	case 0x01:
+		nes::ppu::write2001(value);
+		break;
+	case 0x02:
+		nes::ppu::write2002(value);
+		break;
+	case 0x03:
+		nes::ppu::write2003(value);
+		break;
+	case 0x04:
+		nes::ppu::write2004(value);
+		break;
+	case 0x05:
+		nes::ppu::write2005(value);
+		break;
+	case 0x06:
+		nes::ppu::write2006(value);
+		break;
+	case 0x07:
+		nes::ppu::write2007(value);
+		break;
+	default:
+		abort();
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: Write4
 //------------------------------------------------------------------------------
 void Mapper::write_4(uint16_t address, uint8_t value) {
-	(void)address;
-	(void)value;
+
+	switch(address) {
+	case 0x4000:
+		nes::apu::write4000(value);
+		break;
+	case 0x4001:
+		nes::apu::write4001(value);
+		break;
+	case 0x4002:
+		nes::apu::write4002(value);
+		break;
+	case 0x4003:
+		nes::apu::write4003(value);
+		break;
+	case 0x4004:
+		nes::apu::write4004(value);
+		break;
+	case 0x4005:
+		nes::apu::write4005(value);
+		break;
+	case 0x4006:
+		nes::apu::write4006(value);
+		break;
+	case 0x4007:
+		nes::apu::write4007(value);
+		break;
+	case 0x4008:
+		nes::apu::write4008(value);
+		break;
+	case 0x400a:
+		nes::apu::write400A(value);
+		break;
+	case 0x400b:
+		nes::apu::write400B(value);
+		break;
+	case 0x400c:
+		nes::apu::write400C(value);
+		break;
+	case 0x400e:
+		nes::apu::write400E(value);
+		break;
+	case 0x400f:
+		nes::apu::write400F(value);
+		break;
+	case 0x4010:
+		nes::apu::write4010(value);
+		break;
+	case 0x4011:
+		nes::apu::write4011(value);
+		break;
+	case 0x4012:
+		nes::apu::write4012(value);
+		break;
+	case 0x4013:
+		nes::apu::write4013(value);
+		break;
+	case 0x4014:
+		nes::ppu::write4014(value);
+		break;
+	case 0x4015:
+		nes::apu::write4015(value);
+		break;
+	case 0x4016:
+		nes::input::write4016(value);
+		break;
+	case 0x4017:
+		nes::apu::write4017(value);
+		break;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -139,22 +265,22 @@ void Mapper::write_4(uint16_t address, uint8_t value) {
 void Mapper::write_5(uint16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
+	// Dead end write, expansion port maybe?
+	//nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_6
 //------------------------------------------------------------------------------
 void Mapper::write_6(uint16_t address, uint8_t value) {
-	(void)address;
-	(void)value;
+	nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_7
 //------------------------------------------------------------------------------
 void Mapper::write_7(uint16_t address, uint8_t value) {
-	(void)address;
-	(void)value;
+	nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -163,6 +289,7 @@ void Mapper::write_7(uint16_t address, uint8_t value) {
 void Mapper::write_8(uint16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
+	//nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -171,6 +298,7 @@ void Mapper::write_8(uint16_t address, uint8_t value) {
 void Mapper::write_9(uint16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
+	//nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -179,6 +307,7 @@ void Mapper::write_9(uint16_t address, uint8_t value) {
 void Mapper::write_a(uint16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
+	//nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -187,6 +316,7 @@ void Mapper::write_a(uint16_t address, uint8_t value) {
 void Mapper::write_b(uint16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
+	//nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -195,6 +325,7 @@ void Mapper::write_b(uint16_t address, uint8_t value) {
 void Mapper::write_c(uint16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
+	//nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -203,6 +334,7 @@ void Mapper::write_c(uint16_t address, uint8_t value) {
 void Mapper::write_d(uint16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
+	//nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -211,6 +343,7 @@ void Mapper::write_d(uint16_t address, uint8_t value) {
 void Mapper::write_e(uint16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
+	//nes::cpu::write(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -219,150 +352,139 @@ void Mapper::write_e(uint16_t address, uint8_t value) {
 void Mapper::write_f(uint16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
+	//nes::cpu::write(address, value);
+}
+
+//------------------------------------------------------------------------------
+// Name: read_0
+//------------------------------------------------------------------------------
+uint8_t Mapper::read_0(uint16_t address) {
+	return nes::cpu::read(address);
+}
+
+//------------------------------------------------------------------------------
+// Name: read_1
+//------------------------------------------------------------------------------
+uint8_t Mapper::read_1(uint16_t address) {
+	return nes::cpu::read(address);
+}
+
+//------------------------------------------------------------------------------
+// Name: read_2
+//------------------------------------------------------------------------------
+uint8_t Mapper::read_2(uint16_t address) {
+
+	switch(address & 0x07) {
+	case 0x02: return nes::ppu::read2002();
+	case 0x04: return nes::ppu::read2004();
+	case 0x07: return nes::ppu::read2007();
+	default:
+		return nes::ppu::read200x();
+	}
+}
+
+//------------------------------------------------------------------------------
+// Name: read_3
+//------------------------------------------------------------------------------
+uint8_t Mapper::read_3(uint16_t address) {
+	switch(address & 0x07) {
+	case 0x02: return nes::ppu::read2002();
+	case 0x04: return nes::ppu::read2004();
+	case 0x07: return nes::ppu::read2007();
+	default:
+		return nes::ppu::read200x();
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: read_4
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_4(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
 
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	switch(address) {
+	case 0x4015: return nes::apu::read4015();
+	case 0x4016: return nes::input::read4016();
+	case 0x4017: return nes::input::read4017();
+	default:
+		return static_cast<uint8_t>(address >> 8);
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: read_5
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_5(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_6
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_6(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_7
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_7(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_8
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_8(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_9
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_9(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_a
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_a(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_b
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_b(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_c
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_c(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_d
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_d(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_e
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_e(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_f
 //------------------------------------------------------------------------------
 uint8_t Mapper::read_f(uint16_t address) {
-	if(LIKELY(page_[address >> page_shift])) {
-		return page_[address >> page_shift][address & page_mask];
-	}
-
-	// simulate open bus
-	return (address >> 8) & 0xff;
+	return nes::cpu::read(address);
 }
 
 //------------------------------------------------------------------------------
@@ -382,70 +504,70 @@ uint8_t Mapper::read_vram(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name: set_prg_67
 //------------------------------------------------------------------------------
-void Mapper::set_prg_67(int num) {
+void Mapper::set_prg_67(int num) const {
 	num *= (8 * 1024);
-	swap_67(nes::cart.prg() + (num & nes::cart.prg_mask()));
+	nes::cpu::swap_67(nes::cart.prg() + (num & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
 // Name: set_prg_89
 //------------------------------------------------------------------------------
-void Mapper::set_prg_89(int num) {
+void Mapper::set_prg_89(int num) const {
 	num *= (8 * 1024);
-	swap_89(nes::cart.prg() + (num & nes::cart.prg_mask()));
+	nes::cpu::swap_89(nes::cart.prg() + (num & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
 // Name: set_prg_ab
 //------------------------------------------------------------------------------
-void Mapper::set_prg_ab(int num) {
+void Mapper::set_prg_ab(int num) const {
 	num *= (8 * 1024);
-	swap_ab(nes::cart.prg() + (num & nes::cart.prg_mask()));
+	nes::cpu::swap_ab(nes::cart.prg() + (num & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
 // Name: set_prg_cd
 //------------------------------------------------------------------------------
-void Mapper::set_prg_cd(int num) {
+void Mapper::set_prg_cd(int num) const {
 	num *= (8 * 1024);
-	swap_cd(nes::cart.prg() + (num & nes::cart.prg_mask()));
+	nes::cpu::swap_cd(nes::cart.prg() + (num & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
 // Name: set_prg_ef
 //------------------------------------------------------------------------------
-void Mapper::set_prg_ef(int num) {
+void Mapper::set_prg_ef(int num) const {
 	num *= (8 * 1024);
-	swap_ef(nes::cart.prg() + (num & nes::cart.prg_mask()));
+	nes::cpu::swap_ef(nes::cart.prg() + (num & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
 // Name: set_prg_89ab
 //------------------------------------------------------------------------------
-void Mapper::set_prg_89ab(int num) {
+void Mapper::set_prg_89ab(int num) const {
 	num *= (16 * 1024);
-	swap_89(nes::cart.prg() + ((num + 0x0000) & nes::cart.prg_mask()));
-	swap_ab(nes::cart.prg() + ((num + 0x2000) & nes::cart.prg_mask()));
+	nes::cpu::swap_89(nes::cart.prg() + ((num + 0x0000) & nes::cart.prg_mask()));
+	nes::cpu::swap_ab(nes::cart.prg() + ((num + 0x2000) & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
 // Name: set_prg_cdef
 //------------------------------------------------------------------------------
-void Mapper::set_prg_cdef(int num) {
+void Mapper::set_prg_cdef(int num) const {
 	num *= (16 * 1024);
-	swap_cd(nes::cart.prg() + ((num + 0x0000) & nes::cart.prg_mask()));
-	swap_ef(nes::cart.prg() + ((num + 0x2000) & nes::cart.prg_mask()));
+	nes::cpu::swap_cd(nes::cart.prg() + ((num + 0x0000) & nes::cart.prg_mask()));
+	nes::cpu::swap_ef(nes::cart.prg() + ((num + 0x2000) & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
 // Name: set_prg_89abcdef
 //------------------------------------------------------------------------------
-void Mapper::set_prg_89abcdef(int num) {
+void Mapper::set_prg_89abcdef(int num) const {
 	num *= (32 * 1024);
-	swap_89(nes::cart.prg() + ((num + 0x0000) & nes::cart.prg_mask()));
-	swap_ab(nes::cart.prg() + ((num + 0x2000) & nes::cart.prg_mask()));
-	swap_cd(nes::cart.prg() + ((num + 0x4000) & nes::cart.prg_mask()));
-	swap_ef(nes::cart.prg() + ((num + 0x6000) & nes::cart.prg_mask()));
+	nes::cpu::swap_89(nes::cart.prg() + ((num + 0x0000) & nes::cart.prg_mask()));
+	nes::cpu::swap_ab(nes::cart.prg() + ((num + 0x2000) & nes::cart.prg_mask()));
+	nes::cpu::swap_cd(nes::cart.prg() + ((num + 0x4000) & nes::cart.prg_mask()));
+	nes::cpu::swap_ef(nes::cart.prg() + ((num + 0x6000) & nes::cart.prg_mask()));
 }
 
 //------------------------------------------------------------------------------
@@ -752,6 +874,59 @@ void Mapper::set_chr_0000_1fff_ram(uint8_t *p, int num) const {
 	nes::ppu::set_vram_bank(0x07, p + num + 0x1c00, true);
 }
 
+//------------------------------------------------------------------------------
+// Name: write_memory
+//------------------------------------------------------------------------------
+void Mapper::write_memory(uint16_t address, uint8_t value) {
+
+	switch((address >> 12) & 0xf) {
+	case 0x0000: write_0(address, value); break;
+	case 0x0001: write_1(address, value); break;
+	case 0x0002: write_2(address, value); break;
+	case 0x0003: write_3(address, value); break;
+	case 0x0004: write_4(address, value); break;
+	case 0x0005: write_5(address, value); break;
+	case 0x0006: write_6(address, value); break;
+	case 0x0007: write_7(address, value); break;
+	case 0x0008: write_8(address, value); break;
+	case 0x0009: write_9(address, value); break;
+	case 0x000a: write_a(address, value); break;
+	case 0x000b: write_b(address, value); break;
+	case 0x000c: write_c(address, value); break;
+	case 0x000d: write_d(address, value); break;
+	case 0x000e: write_e(address, value); break;
+	case 0x000f: write_f(address, value); break;
+	default:
+		abort();
+	}
+}
+
+
+//------------------------------------------------------------------------------
+// Name: read_memory
+//------------------------------------------------------------------------------
+uint8_t Mapper::read_memory(uint16_t address) {
+	switch((address >> 12) & 0xf) {
+	case 0x0000: return read_0(address);
+	case 0x0001: return read_1(address);
+	case 0x0002: return read_2(address);
+	case 0x0003: return read_3(address);
+	case 0x0004: return read_4(address);
+	case 0x0005: return read_5(address);
+	case 0x0006: return read_6(address);
+	case 0x0007: return read_7(address);
+	case 0x0008: return read_8(address);
+	case 0x0009: return read_9(address);
+	case 0x000a: return read_a(address);
+	case 0x000b: return read_b(address);
+	case 0x000c: return read_c(address);
+	case 0x000d: return read_d(address);
+	case 0x000e: return read_e(address);
+	case 0x000f: return read_f(address);
+	default:
+		abort();
+	}
+}
 
 //------------------------------------------------------------------------------
 // Name: cpu_sync

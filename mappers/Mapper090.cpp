@@ -278,10 +278,8 @@ void Mapper90::sync_prg() {
 		break;
 	}
 
-
-
 	if(!bank_control_.map_67) {
-		unmap_67();
+		nes::cpu::unmap_67();
 	}
 }
 

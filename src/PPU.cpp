@@ -88,11 +88,11 @@ namespace ppu {
 
 union PPUStatus {
 	uint8_t     raw;
-
+	
 	BitField<5> overflow;
 	BitField<6> sprite0;
 	BitField<7> vblank;
-
+	
 	BitField<5,3> flags;
 };
 
@@ -101,30 +101,30 @@ bool system_paused = false;
 
 namespace {
 
-constexpr uint8_t SpriteVFlip    = 0x80;
-constexpr uint8_t SpriteHFlip    = 0x40;
-constexpr uint8_t SpritePriority = 0x20;
-constexpr uint8_t SpriteZero     = 0x10;
-constexpr uint8_t SpriteColor    = 0x03;
+struct sprite_attr {
+	union {
+		uint8_t       bits;
+		
+		BitField<7>   vflip;
+		BitField<6>   hflip;
+		BitField<5>   priority;
+		BitField<4>   zero;    // internal flag
+		BitField<0,2> color;
+	};
+};
 
 // internal variables
 
-struct SpriteRenderData {
-	uint8_t patterns[2];
-	uint8_t x;
-	uint8_t y;
-	uint8_t attr;
-	uint8_t index;
-};
-
-SpriteRenderData  sprite_render_buffer[8];
-uint8_t      aux_sprite_data[32];
-uint8_t      sprite_ram_[0x100];
-uint8_t      sprite_address_    = 0;
-uint8_t      sprite_count_      = 0;
-uint8_t      aux_sprite_count = 0;
+uint8_t      sprite_patterns_[8][2];
+uint8_t      current_sprite_index_   = 0;
+uint8_t      sprite_data_y[8];
+uint8_t      sprite_data_x[8];
+uint8_t      sprite_data_index[8];
+sprite_attr  sprite_data_attr[8];
 
 VRAMBank     vram_banks_[0x10];
+uint8_t      sprite_ram_[0x100];
+uint8_t      left_most_sprite_x_     = 0xff;
 uint8_t      palette_[0x20];
 uint64_t     ppu_cycle_              = 0;
 uint64_t     ppu_read_2002_cycle_    = 0;
@@ -142,6 +142,8 @@ uint8_t      next_tile_index_        = 0;
 PPUControl   ppu_control_            = {0};
 PPUMask      ppu_mask_               = {0};
 uint8_t      register_2007_buffer_   = 0;
+uint8_t      sprite_address_         = 0;
+uint8_t      sprite_data_index_      = 0;
 PPUStatus    status_                 = {0};
 uint8_t      tile_offset_            = 0; // loopy's "x"
 uint8_t      sprite_buffer_          = 0xff;
@@ -151,12 +153,12 @@ bool         sprite_init_            = false;
 bool         write_latch_            = false;
 bool         write_block_            = false;
 uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
-									 // 4 nametables, each $03c0 bytes in
-									 // size plus 4 corresponding $40 byte
-									 // attribute tables
-									 // even though the real thing only has 2
-									 // tables, we currently simulate 4 for
-									 // simplicity
+                                     // 4 nametables, each $03c0 bytes in
+                                     // size plus 4 corresponding $40 byte
+                                     // attribute tables
+                                     // even though the real thing only has 2
+                                     // tables, we currently simulate 4 for
+                                     // simplicity
 }
 
 // internal functions
@@ -201,10 +203,8 @@ static void read_background_pattern();
 template <class Pattern>
 static void open_background_pattern();
 
-namespace {
-
 template <int Size, class Pattern>
-constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
+static constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
 	if(Size == 16) {
 		// 8x16. even sprites use $0000, odd $1000
 		return ((index & 1) << 12) | ((index & 0xfe) << 4) | Pattern::offset | (sprite_line & 7) | ((sprite_line & 0x08) << 1);
@@ -214,25 +214,26 @@ constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
 	}
 }
 
-}
-
 //------------------------------------------------------------------------------
 // Name: reset
 //------------------------------------------------------------------------------
 void reset(Reset reset_type) {
 
+#if 0
+	std::generate(sprite_ram_, sprite_ram_ + 0x100,  rand);
+#endif
 	if(reset_type == Reset::Hard) {
 		std::fill_n(nametables_, 0x1000, 0);
 		std::fill_n(sprite_ram_, 0x0100, 0);
-		std::fill_n(aux_sprite_data, 32, 0xff);
 
 		for(int i = 0; i < 8; ++i) {
-			sprite_render_buffer[i].patterns[0] = 0;
-			sprite_render_buffer[i].patterns[1] = 0;
-			sprite_render_buffer[i].x = 0;
-			sprite_render_buffer[i].y = 0;
-			sprite_render_buffer[i].attr = 0;
-			sprite_render_buffer[i].index = 0;
+			sprite_patterns_[i][0] = 0;
+			sprite_patterns_[i][1] = 0;
+			
+			sprite_data_x[i]         = 0xff;
+			sprite_data_y[i]         = 0xff;
+			sprite_data_index[i]     = 0xff;
+			sprite_data_attr[i].bits = 0xff;
 		}
 
 		memcpy(palette_, powerup_palette, sizeof(palette_));
@@ -257,7 +258,8 @@ void reset(Reset reset_type) {
 	rendering_              = false;
 	sprite_address_         = 0;
 	sprite_buffer_          = 0xff;
-	sprite_count_           = 0;
+	sprite_data_index_      = 0;
+	left_most_sprite_x_     = 0xff;
 	status_.raw             = 0;
 	tile_offset_            = 0;
 	vpos_                   = 0;
@@ -353,18 +355,18 @@ void write2005(uint8_t value) {
 
 	if(write_latch_) {
 		// 2005 first write:
-		// t:0000000000011111=d:11111000
-		// x=d:00000111
-		nametable_   &= 0x7fe0;
-		nametable_   |= (value & 0xf8) >> 3;
-		tile_offset_ = value & 0x07;
+        // t:0000000000011111=d:11111000
+        // x=d:00000111
+        nametable_   &= 0x7fe0;
+        nametable_   |= (value & 0xf8) >> 3;
+        tile_offset_ = value & 0x07;
 	} else {
 		// 2005 second write:
-		// t:0000001111100000=d:11111000
-		// t:0111000000000000=d:00000111
-		nametable_ &= ~0x73e0;
+        // t:0000001111100000=d:11111000
+        // t:0111000000000000=d:00000111
+        nametable_ &= ~0x73e0;
 		nametable_ |= (value & 0xf8) << 2;
-		nametable_ |= (value & 0x07) << 12;
+        nametable_ |= (value & 0x07) << 12;
 	}
 }
 
@@ -382,16 +384,16 @@ void write2006(uint8_t value) {
 
 	if(write_latch_) {
 		// 2006 first write:
-		// t:0011111100000000=d:00111111
-		// t:1100000000000000=0
-		nametable_ &= 0x00ff;
-		nametable_ |= (value & 0x3f) << 8;
+	    // t:0011111100000000=d:00111111
+	    // t:1100000000000000=0
+	    nametable_ &= 0x00ff;
+	    nametable_ |= (value & 0x3f) << 8;
 	} else {
 		// 2006 second write:
-		// t:0000000011111111=d:11111111
-		// v=t
-		nametable_    = (nametable_ & 0x7f00) | (value & 0xff);
-		vram_address_ = nametable_;
+	    // t:0000000011111111=d:11111111
+	    // v=t
+	    nametable_    = (nametable_ & 0x7f00) | (value & 0xff);
+	    vram_address_ = nametable_;
 
 		cart.mapper()->vram_change_hook(vram_address_);
 	}
@@ -514,21 +516,21 @@ uint8_t read2007() {
 	}
 
 	cart.mapper()->vram_change_hook(vram_address_);
-
+	
 	const auto decay_value = static_cast<uint8_t>(latch_);
 
 	latch_ = register_2007_buffer_;
 	register_2007_buffer_ = cart.mapper()->read_vram(temp_address);
 
 	if((temp_address & 0x3f00) == 0x3f00) {
-
+	
 		latch_ = palette_[temp_address & 0x1f] | (decay_value & 0xc0);
 		if(UNLIKELY(ppu_mask_.monochrome)) {
 			latch_ &= 0xf0;
 		}
 	}
 
-	return latch_ & 0xff;
+	return latch_;
 }
 
 //------------------------------------------------------------------------------
@@ -539,8 +541,23 @@ void write4014(uint8_t value) {
 	// the procedure takes 513 CPU cycles (+1 on odd CPU cycles):
 	// first one (or two) idle cycles, and then 256 pairs of alternating
 	// read/write cycles.
-	const auto sprite_addr = static_cast<uint16_t>(value << 8);
+#if 0
+	if((cpu::cycle_count() & 1)) {
+		cpu::burn(514);
+	} else {
+		cpu::burn(513);
+	}
+
+	uint16_t sprite_addr = (value << 8);
+
+	// do the copy with wrapping
+	for(int i = 0; i < 256; ++i) {
+		write2004(cart.mapper()->read_memory(sprite_addr++));
+	}
+#else
+    const auto sprite_addr = static_cast<uint16_t>(value << 8);
 	cpu::schedule_spr_dma(write2004, sprite_addr, 256);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -602,8 +619,8 @@ void start_frame() {
 void end_frame() {
 	odd_frame_ = !odd_frame_;
 	rendering_ = false;
-
-	// we use the upper bits to count frames, so the upper byte should be about 0x3c
+	
+	// we use the upper bits to count frames, so the upper byte should be about 0x3c 
 	// within one second
 	latch_ += 0x100;
 	if(latch_ > 0x3c00) {
@@ -638,62 +655,32 @@ uint8_t read_vram(uint16_t address) {
 }
 
 //------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-uint8_t aux_sprite_y(int index) {
-	return aux_sprite_data[index * 4 + 0];
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-uint8_t aux_sprite_index(int index) {
-	return aux_sprite_data[index * 4 + 1];
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-uint8_t aux_sprite_attr(int index) {
-	return aux_sprite_data[index * 4 + 2];
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-uint8_t aux_sprite_x(int index) {
-	return aux_sprite_data[index * 4 + 3];
-}
-
-//------------------------------------------------------------------------------
 // Name: open_sprite_pattern
 //------------------------------------------------------------------------------
 template <int Size, class Pattern>
 void open_sprite_pattern() {
 
-	const uint8_t current_sprite = ((hpos_ - 1) >> 3) & 0x07;
+	current_sprite_index_ = ((hpos_ - 1) >> 3) & 0x07;
 
-	SpriteRenderData &current = sprite_render_buffer[current_sprite];
+	if(sprite_data_y[current_sprite_index_] != 0xff) {
+		const uint8_t index = sprite_data_index[current_sprite_index_];
+		uint8_t sprite_line = sprite_data_y[current_sprite_index_];
 
-	if constexpr (Pattern::index == 0) {
-		// copy the secondary OAM buffer to the render buffers
-		current.x     = aux_sprite_x(current_sprite);
-		current.y     = static_cast<uint8_t>((vpos_ - 1) - aux_sprite_y(current_sprite));
-		current.attr  = aux_sprite_attr(current_sprite);
-		current.index = aux_sprite_index(current_sprite);
-
-		// vertical flip if necessary
-		if(current.attr & SpriteVFlip) {
+		// vertical flip
+		if(sprite_data_attr[current_sprite_index_].vflip) {
 			if(Size == 16) {
-				current.y ^= 0x0f;
+				sprite_line ^= 0x0F;
 			} else {
-				current.y ^= 0x07;
+				sprite_line ^= 0x07;
 			}
 		}
-	}
 
-	// get the address for fetching sprite pattern
-	next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(current.index, current.y);
+		// fetch the actual sprite data
+		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(index, sprite_line);
+	} else {
+		// fetch the actual sprite data (dummy)
+		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(0xff, 0xff);
+	}
 
 	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
 }
@@ -704,18 +691,16 @@ void open_sprite_pattern() {
 template <int Size, class Pattern>
 void read_sprite_pattern() {
 
-	const uint8_t current_sprite = ((hpos_ - 1) >> 3) & 0x07;
-	SpriteRenderData &current = sprite_render_buffer[current_sprite];
-
-	// fetch the actual sprite pattern
 	uint8_t pattern = cart.mapper()->read_vram(next_ppu_fetch_address_);
 
-	// horizontal flip if necessary
-	if(current.attr & SpriteHFlip) {
-		pattern = reverse_bits[pattern];
+	if(sprite_data_y[current_sprite_index_] != 0xff) {
+		// horizontal flip
+		if(sprite_data_attr[current_sprite_index_].hflip) {
+			pattern = reverse_bits[pattern];
+		}
 	}
-
-	current.patterns[Pattern::index] = pattern;
+	
+	sprite_patterns_[current_sprite_index_][Pattern::index] = pattern;
 }
 
 //------------------------------------------------------------------------------
@@ -724,20 +709,18 @@ void read_sprite_pattern() {
 void evaluate_sprites_even() {
 	// write cycle
 	if(hpos_ < 64) {
-
-	} else if(UNLIKELY(hpos_ == 64)) {
+#if 0
+		uint8_t index = hpos_ >> 1;
+		sprite_data_[(index >> 2) & 0x07].sprite_bytes[index & 0x03] = sprite_buffer_;
+		printf("SETTING: S-OAM[%d][%d] = %02x\n", (index >> 2) & 0x07, index & 0x03, sprite_buffer_);
+#endif
+	} else if(UNLIKELY(hpos_ == 256)) {
 		// TODO: do this part incrementally during cycles 0-255 like the real thing
 		if(ppu_control_.large_sprites) {
 			evaluate_sprites<16>();
 		} else {
 			evaluate_sprites<8>();
 		}
-
-
-	}
-
-	if(UNLIKELY(hpos_ == 256)) {
-		sprite_count_ = aux_sprite_count;
 	}
 }
 
@@ -758,43 +741,26 @@ void evaluate_sprites_odd() {
 // Name: evaluate_sprites
 //------------------------------------------------------------------------------
 template <int Size>
-bool sprite_y_in_range(uint8_t value) {
-	return static_cast<uint16_t>((vpos_ - 1) - value) < Size;
-}
-
-//------------------------------------------------------------------------------
-// Name: evaluate_sprites
-//------------------------------------------------------------------------------
-template <int Size>
 void evaluate_sprites() {
+	sprite_data_index_ = 0;
 
-	aux_sprite_count = 0;
-	const uint8_t start_address = 0;
+#if 0
+	for(int i = 0; i < 8; ++i) {
+		sprite_data_x[i]         = 0xff;
+		sprite_data_y[i]         = 0xff;
+		sprite_data_index[i]     = 0xff;
+		sprite_data_attr[i].bits = 0xff;
+	}
+#endif
 
+	constexpr uint8_t start_address = 0x00; // sprite_address_
 
-	union OAMIndex {
-		uint8_t     raw;
-		BitField<2,6> n;
-		BitField<0,2> m;
-
-		uint8_t operator()() const {
-			return raw;
-		}
-	};
-
-
-	OAMIndex index = { start_address };
+	uint8_t index = start_address;
 
 	enum State {
 		STATE_1,
-		STATE_1B,
-		STATE_1C,
-		STATE_1D,
 		STATE_2,
 		STATE_3,
-		STATE_3B,
-		STATE_3C,
-		STATE_3D,
 		STATE_4
 	} state = STATE_1;
 
@@ -804,143 +770,81 @@ void evaluate_sprites() {
 			// 1. Starting at n = 0, read a sprite's Y-coordinate (OAM[n][0], copying it to
 			//    the next open slot in secondary OAM (unless 8 sprites have been found, in
 			//    which case the write is ignored).
-			if(aux_sprite_count < 8) {
-
-				const uint8_t sprite_buffer = sprite_ram_[index()];
-				++index.m;
+			if(sprite_data_index_ < 8) {
+				const uint16_t sprite_line = (vpos_ - 1) - sprite_ram_[index];
 
 				// 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
-				if(sprite_y_in_range<Size>(sprite_buffer)) {
-					aux_sprite_data[aux_sprite_count * 4 + 0] = sprite_buffer; // y
-					state = STATE_1B;
-					break;
+				if(sprite_line < Size) {
+				
+					const uint8_t new_x = sprite_ram_[index + 3];
+					
+					sprite_data_y[sprite_data_index_]         = static_cast<uint8_t>(sprite_line); // y
+					sprite_data_x[sprite_data_index_]         = new_x;                             // x
+					sprite_data_index[sprite_data_index_]     = sprite_ram_[index + 1];            // index
+					sprite_data_attr[sprite_data_index_].bits = sprite_ram_[index + 2] & 0xe3;     // attributes
+					
+					// note that we found sprite 0
+					if(index == start_address) {
+						sprite_data_attr[sprite_data_index_].zero = true;
+					}
+
+					left_most_sprite_x_ = std::min(left_most_sprite_x_, new_x);
+
+					++sprite_data_index_;
 				}
-
-				--index.m;
 			}
 			state = STATE_2;
 			break;
-		case STATE_1B: {
-
-			const uint8_t sprite_buffer = sprite_ram_[index()];
-			++index.m;
-
-			aux_sprite_data[aux_sprite_count * 4 + 1] = sprite_buffer; // index
-			state = STATE_1C;
-			break;
-		}
-		case STATE_1C: {
-
-			const uint8_t sprite_buffer = sprite_ram_[index()];
-			++index.m;
-
-			aux_sprite_data[aux_sprite_count * 4 + 2] = sprite_buffer & 0xe3; // attributes
-
-			// note that we found sprite 0
-			if(index.n == 0) {
-				aux_sprite_data[aux_sprite_count * 4 + 2] |= 0x10;
-			}
-
-			state = STATE_1D;
-			break;
-		}
-		case STATE_1D: {
-
-			const uint8_t sprite_buffer = sprite_ram_[index()];
-			++index.m;
-
-			aux_sprite_data[aux_sprite_count * 4 + 3] = sprite_buffer; // x
-			++aux_sprite_count;
-			state = STATE_2;
-			break;
-		}
 		case STATE_2:
 			// 2. Increment n
-			++index.n;
+			index += 4;
 
 			// 2a. If n has overflowed back to zero (all 64 sprites evaluated), go to 4
-			if((index() & 0xfc) == 0x00) {
+			if((index & 0xfc) == 0x00) {
 				state = STATE_4;
 				break;
 			}
 
 			// 2b. If less than 8 sprites have been found, go to 1
-			if(aux_sprite_count < 8) {
+			if(sprite_data_index_ < 8) {
 				state = STATE_1;
 				break;
 			}
 
 			// 2c. If exactly 8 sprites have been found, disable writes to secondary OAM.
 			//     This causes sprites in back to drop out.
-			if(aux_sprite_count == 8) {
+			if(sprite_data_index_ == 8) {
 				state = STATE_3;
 				break;
 			}
 
 			state = STATE_3;
 			break;
-		case STATE_3: {
-				const uint8_t sprite_buffer = sprite_ram_[index()];
-			
+		case STATE_3:
+			{
 				// 3. Starting at m = 0, evaluate OAM[n][m] as a Y-coordinate.
-				if(sprite_y_in_range<Size>(sprite_buffer)) {
-					// 3a. If the value is in range, set the sprite overflow flag in $2002 and read
-					//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
-					//     'n' when 'm' overflows); if m = 3, increment n
+				const uint16_t sprite_line = (vpos_ - 1) - (sprite_ram_[index]);
 
+				// 3a. If the value is in range, set the sprite overflow flag in $2002 and read
+				//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
+				//     'n' when 'm' overflows); if m = 3, increment n
+				if(sprite_line < Size) {
 					status_.overflow = true;
-					state = STATE_3B;
-					break;
-				} 
-				
-				// 3b. If the value is not in range, increment n AND m (without carry). If n overflows
-				//     to 0, go to 4; otherwise go to 3
-
-				// The m increment is a hardware bug - if only n was incremented, the overflow flag would be set whenever more than
-				// 8 sprites were present on the same scanline, as expected.
-				++index.m;
-				if(++index.n == 0x00) {
+					++index;
+				} else {
+					// 3b. If the value is not in range, increment n AND m (without carry). If n overflows
+					//     to 0, go to 4; otherwise go to 3
+					index = (index & 0x03) | (((index & 0xfc) + 4) & 0xfc);
+					index = (index & 0xfc) | (((index & 0x03) + 1) & 0x03);
+				}
+				if((index & 0xfc) == 0x00) {
 					state = STATE_4;
 				}
-				
-				break;
 			}
-		case STATE_3B:
-			++index.m;
-			if(index.m == 0) {
-				if(++index.n == 0x00) {
-					state = STATE_4;
-					break;
-				}
-			}
-			state = STATE_3C;
 			break;
-		case STATE_3C:
-			++index.m;
-			if(index.m == 0) {
-				if(++index.n == 0x00) {
-					state = STATE_4;
-					break;
-				}
-			}
-			state = STATE_3D;
-			break;
-		case STATE_3D:
-			++index.m;
-			if(index.m == 0) {
-				if(++index.n == 0x00) {
-					state = STATE_4;
-					break;
-				}
-			}
-			state = STATE_3;
-			break;
-		case STATE_4:
-			// Attempt (and fail) to copy OAM[n][0] into the next free slot in secondary OAM, and increment n (repeat until HBLANK is reached)
-			// NOTE(eteran): not really much to emulate as I don't think there is much as far as visible side effects here..
-			++index.n;
-			break;
+		default:
+			abort();
 		}
 	}
 }
@@ -973,10 +877,10 @@ uint8_t select_bg_pixel(uint8_t index) {
 		const uint16_t mask  = (0x8000 >> tile_offset_);
 
 		return((pattern_queue_[0]   & mask) >> (15 - tile_offset_)) |
-			  ((pattern_queue_[1]   & mask) >> (14 - tile_offset_)) |
-			  ((attribute_queue_[0] & mask) >> (13 - tile_offset_)) |
-			  ((attribute_queue_[1] & mask) >> (12 - tile_offset_));
-
+		      ((pattern_queue_[1]   & mask) >> (14 - tile_offset_)) |
+		      ((attribute_queue_[0] & mask) >> (13 - tile_offset_)) |
+		      ((attribute_queue_[1] & mask) >> (12 - tile_offset_));
+			  
 	} else {
 		return 0x00;
 	}
@@ -993,45 +897,59 @@ uint8_t select_pixel(uint8_t index) {
 	// default to displaying the BG pixel
 	uint8_t pixel = select_bg_pixel(index);
 
-	// see if any of the sprites belong..
-	if((ppu_mask_.sprite_clipping || index >= 8) && ppu_mask_.sprites_visible) {
+	// are ANY sprites possibly in range?
+	if(left_most_sprite_x_ <= index) {
 
-		// this will loop at most 8 times
-		for(uint8_t spr = 0; spr != sprite_count_; ++spr) {
-			const uint16_t x_offset = index - sprite_render_buffer[spr].x;
+		// then see if any of the sprites belong..
+		if((ppu_mask_.sprite_clipping || index >= 8) && ppu_mask_.sprites_visible) {
 
-			// is this sprite visible on this pixel?
-			if(x_offset < 8) {
+			// this will loop at most 8 times
+			for(uint8_t spr = 0; spr != sprite_data_index_; ++spr) {
+				const uint16_t x_offset = index - sprite_data_x[spr];
 
-				const uint8_t p0 = sprite_render_buffer[spr].patterns[0];
-				const uint8_t p1 = sprite_render_buffer[spr].patterns[1];
-				const uint16_t shift = 7 - x_offset;
+				// is this sprite visible on this pixel?
+				if(x_offset < 8) {
 
-				const uint8_t sprite_pixel =
-						(((p0 >> shift) & 0x01) << 0x00) |
-						(((p1 >> shift) & 0x01) << 0x01);
+					const uint8_t p0 = sprite_patterns_[spr][0];
+					const uint8_t p1 = sprite_patterns_[spr][1];
+					const uint16_t shift = 7 - x_offset;
 
-				// this pixel is visible..
-				if(sprite_pixel & 0x03) {
-					// we rendered a sprite0 pixel which collided with a BG pixel
-					// NOTE: according to blargg's tests, a collision doesn't seem
-					//       possible to occur on the rightmost pixel
-					if((sprite_render_buffer[spr].attr & SpriteZero) && (index < 255)) {
+				#if 1
+					const uint8_t sprite_pixel =
+							(((p0 >> shift) & 0x01) << 0x00) |
+							(((p1 >> shift) & 0x01) << 0x01);
+				#else
+					switch(x_offset) {
+					case 0: sprite_pixel = ((p0 >> 7) & 0x01) | ((p1 >> 6) & 0x02); break;
+					case 1: sprite_pixel = ((p0 >> 6) & 0x01) | ((p1 >> 5) & 0x02); break;
+					case 2: sprite_pixel = ((p0 >> 5) & 0x01) | ((p1 >> 4) & 0x02); break;
+					case 3: sprite_pixel = ((p0 >> 4) & 0x01) | ((p1 >> 3) & 0x02); break;
+					case 4: sprite_pixel = ((p0 >> 3) & 0x01) | ((p1 >> 2) & 0x02); break;
+					case 5: sprite_pixel = ((p0 >> 2) & 0x01) | ((p1 >> 1) & 0x02); break;
+					case 6: sprite_pixel = ((p0 >> 1) & 0x01) | ((p1 >> 0) & 0x02); break;
+					case 7: sprite_pixel = ((p0 >> 0) & 0x01) | ((p1 << 1) & 0x02); break;
+					}
+				#endif
 
+					// this pixel is visible..
+					if(sprite_pixel & 0x03) {
+						// we rendered a sprite0 pixel which collided with a BG pixel
+						// NOTE: according to blargg's tests, a collision doesn't seem
+						//       possible to occur on the rightmost pixel
 					#ifndef SPRITE_ZERO_HACK
-						if(pixel & 0x03) {
+						if(sprite_data_attr[spr].zero && (index < 255) && (pixel & 0x03)) {
 					#else
-						if(true) {
+						if(sprite_data_attr[spr].zero && (index < 255)) {
 					#endif
 							status_.sprite0 = true;
 						}
-					}
 
-					if(((sprite_render_buffer[spr].attr & SpritePriority) == 0|| ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites_)) {
-						pixel = (0x10 | sprite_pixel | ((sprite_render_buffer[spr].attr & SpriteColor) << 2)) & 0xff;
+						if((!sprite_data_attr[spr].priority || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites_)) {
+							pixel = 0x10 | sprite_pixel | (sprite_data_attr[spr].color << 2);
+						}
+						
+						return pixel;
 					}
-
-					return pixel;
 				}
 			}
 		}
@@ -1326,9 +1244,9 @@ void clock_ppu(const scanline_prerender &) {
 			// dummy fetches
 			case 337: open_tile_index(); break;
 			case 338: read_tile_index(); break;
-			case 339: open_tile_index(); if(odd_frame_) {
-					++hpos_;
-				} break; // skip one clock if the first visible line on odd frames
+            case 339: open_tile_index(); if(odd_frame_) {
+                    ++hpos_;
+                } break; // skip one clock if the first visible line on odd frames
 			case 340: read_tile_index(); break;
 			default:
 				abort();
@@ -1504,14 +1422,14 @@ uint16_t vpos() {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-PPUMask mask() {
+const PPUMask &mask() {
 	return ppu_mask_;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-PPUControl control() {
+const PPUControl &control() {
 	return ppu_control_;
 }
 
