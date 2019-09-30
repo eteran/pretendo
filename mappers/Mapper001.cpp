@@ -191,10 +191,10 @@ void Mapper1::write_handler(uint16_t address, uint8_t value) {
 
 			// set mirroring
 			switch(regs_[REG_8000_9FFF] & 0x3) {
-			case 0: nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
-			case 1: nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
-			case 2: nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
-			case 3: nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
+			case 0: set_mirroring(nes::ppu::mirror_single_low);  break;
+			case 1: set_mirroring(nes::ppu::mirror_single_high); break;
+			case 2: set_mirroring(nes::ppu::mirror_vertical);    break;
+			case 3: set_mirroring(nes::ppu::mirror_horizontal);  break;
 			}
 
 			// set CHR-ROM

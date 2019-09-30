@@ -70,10 +70,10 @@ void VRC2::write_9(uint16_t address, uint8_t value) {
 	case 0x9002:
 	case 0x9003:
 		switch(value & 0x03) {
-		case 0x00: nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
-		case 0x01: nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
-		case 0x02: nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
-		case 0x03: nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
+		case 0x00: set_mirroring(nes::ppu::mirror_vertical);    break;
+		case 0x01: set_mirroring(nes::ppu::mirror_horizontal);  break;
+		case 0x02: set_mirroring(nes::ppu::mirror_single_low);  break;
+		case 0x03: set_mirroring(nes::ppu::mirror_single_high); break;
 		}
 		break;
 	}

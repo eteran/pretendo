@@ -95,9 +95,9 @@ void Mapper58::write_hander(uint16_t address, uint8_t value) {
 	(void)value;
 
 	if(address & 0x80) {
-		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(nes::ppu::mirror_horizontal);
 	} else {
-		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(nes::ppu::mirror_vertical);
 	}
 
 	if(address & 0x40) {

@@ -154,6 +154,10 @@ protected:
 	// 8K swaps
 	void set_chr_0000_1fff_ram(uint8_t *p, int num);
 
+protected:
+	void set_mirroring(uint8_t mir);
+	void set_vram_bank(uint8_t bank, uint8_t *p, bool writeable);
+
 private:
 	// we use a function here to return a static object
 	// to ensure order of initialization, otherwise, the mappers

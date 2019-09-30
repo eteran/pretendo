@@ -37,11 +37,11 @@ Mapper::Mapper() {
 	// NOTE: we're not supporting trainers anymore, that's why the code is gone
 
 	switch(nes::cart.mirroring()) {
-	case Cart::MIR_VERTICAL:    nes::ppu::set_mirroring(nes::ppu::mirror_vertical);    break;
-	case Cart::MIR_HORIZONTAL:  nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);  break;
-	case Cart::MIR_SINGLE_LOW:  nes::ppu::set_mirroring(nes::ppu::mirror_single_low);  break;
-	case Cart::MIR_SINGLE_HIGH: nes::ppu::set_mirroring(nes::ppu::mirror_single_high); break;
-	case Cart::MIR_4SCREEN:     nes::ppu::set_mirroring(nes::ppu::mirror_4screen);     break;
+	case Cart::MIR_VERTICAL:    set_mirroring(nes::ppu::mirror_vertical);    break;
+	case Cart::MIR_HORIZONTAL:  set_mirroring(nes::ppu::mirror_horizontal);  break;
+	case Cart::MIR_SINGLE_LOW:  set_mirroring(nes::ppu::mirror_single_low);  break;
+	case Cart::MIR_SINGLE_HIGH: set_mirroring(nes::ppu::mirror_single_high); break;
+	case Cart::MIR_4SCREEN:     set_mirroring(nes::ppu::mirror_4screen);     break;
 	case Cart::MIR_MAPPER:
 	default:
 		// Nothing, handled by Mapper
@@ -576,7 +576,7 @@ void Mapper::set_prg_89abcdef(int num) {
 void Mapper::set_chr_0000_03ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
-		nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -586,7 +586,7 @@ void Mapper::set_chr_0000_03ff(int num) {
 void Mapper::set_chr_0400_07ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
-		nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -596,7 +596,7 @@ void Mapper::set_chr_0400_07ff(int num) {
 void Mapper::set_chr_0800_0bff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
-		nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -606,7 +606,7 @@ void Mapper::set_chr_0800_0bff(int num) {
 void Mapper::set_chr_0c00_0fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
-		nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -616,7 +616,7 @@ void Mapper::set_chr_0c00_0fff(int num) {
 void Mapper::set_chr_1000_13ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
-		nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -626,7 +626,7 @@ void Mapper::set_chr_1000_13ff(int num) {
 void Mapper::set_chr_1400_17ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
-		nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -636,7 +636,7 @@ void Mapper::set_chr_1400_17ff(int num) {
 void Mapper::set_chr_1800_1bff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
-		nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -646,7 +646,7 @@ void Mapper::set_chr_1800_1bff(int num) {
 void Mapper::set_chr_1c00_1fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
-		nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -656,8 +656,8 @@ void Mapper::set_chr_1c00_1fff(int num) {
 void Mapper::set_chr_0000_07ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (2 * 1024);
-		nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -667,8 +667,8 @@ void Mapper::set_chr_0000_07ff(int num) {
 void Mapper::set_chr_0800_0fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (2 * 1024);
-		nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -678,8 +678,8 @@ void Mapper::set_chr_0800_0fff(int num) {
 void Mapper::set_chr_1000_17ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (2 * 1024);
-		nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -689,8 +689,8 @@ void Mapper::set_chr_1000_17ff(int num) {
 void Mapper::set_chr_1800_1fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (2 * 1024);
-		nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -700,10 +700,10 @@ void Mapper::set_chr_1800_1fff(int num) {
 void Mapper::set_chr_0000_0fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (4 * 1024);
-		nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -713,10 +713,10 @@ void Mapper::set_chr_0000_0fff(int num) {
 void Mapper::set_chr_1000_1fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (4 * 1024);
-		nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -726,14 +726,14 @@ void Mapper::set_chr_1000_1fff(int num) {
 void Mapper::set_chr_0000_1fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (8 * 1024);
-		nes::ppu::set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x04, nes::cart.chr() + ((num + 0x1000) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x05, nes::cart.chr() + ((num + 0x1400) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x06, nes::cart.chr() + ((num + 0x1800) & nes::cart.chr_mask()), false);
-		nes::ppu::set_vram_bank(0x07, nes::cart.chr() + ((num + 0x1c00) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0800) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0c00) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x04, nes::cart.chr() + ((num + 0x1000) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x05, nes::cart.chr() + ((num + 0x1400) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x06, nes::cart.chr() + ((num + 0x1800) & nes::cart.chr_mask()), false);
+		set_vram_bank(0x07, nes::cart.chr() + ((num + 0x1c00) & nes::cart.chr_mask()), false);
 	}
 }
 
@@ -742,7 +742,7 @@ void Mapper::set_chr_0000_1fff(int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_03ff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x00, p + num + 0x0000, true);
+	set_vram_bank(0x00, p + num + 0x0000, true);
 }
 
 //------------------------------------------------------------------------------
@@ -750,7 +750,7 @@ void Mapper::set_chr_0000_03ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0400_07ff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x01, p + num + 0x0000, true);
+	set_vram_bank(0x01, p + num + 0x0000, true);
 }
 
 //------------------------------------------------------------------------------
@@ -758,7 +758,7 @@ void Mapper::set_chr_0400_07ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0800_0bff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x02, p + num + 0x0000, true);
+	set_vram_bank(0x02, p + num + 0x0000, true);
 }
 
 //------------------------------------------------------------------------------
@@ -766,7 +766,7 @@ void Mapper::set_chr_0800_0bff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0c00_0fff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x03, p + num + 0x0000, true);
+	set_vram_bank(0x03, p + num + 0x0000, true);
 }
 
 //------------------------------------------------------------------------------
@@ -774,7 +774,7 @@ void Mapper::set_chr_0c00_0fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1000_13ff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x04, p + num + 0x0000, true);
+	set_vram_bank(0x04, p + num + 0x0000, true);
 }
 
 //------------------------------------------------------------------------------
@@ -782,7 +782,7 @@ void Mapper::set_chr_1000_13ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1400_17ff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x05, p + num + 0x0000, true);
+	set_vram_bank(0x05, p + num + 0x0000, true);
 }
 
 //------------------------------------------------------------------------------
@@ -790,7 +790,7 @@ void Mapper::set_chr_1400_17ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1800_1bff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x06, p + num + 0x0000, true);
+	set_vram_bank(0x06, p + num + 0x0000, true);
 }
 
 //------------------------------------------------------------------------------
@@ -798,7 +798,7 @@ void Mapper::set_chr_1800_1bff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1c00_1fff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	nes::ppu::set_vram_bank(0x07, p + num + 0x0000, true);
+	set_vram_bank(0x07, p + num + 0x0000, true);
 }
 
 //------------------------------------------------------------------------------
@@ -806,8 +806,8 @@ void Mapper::set_chr_1c00_1fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_07ff_ram(uint8_t *p, int num) {
 	num *= (2 * 1024);
-	nes::ppu::set_vram_bank(0x00, p + num + 0x0000, true);
-	nes::ppu::set_vram_bank(0x01, p + num + 0x0400, true);
+	set_vram_bank(0x00, p + num + 0x0000, true);
+	set_vram_bank(0x01, p + num + 0x0400, true);
 }
 
 //------------------------------------------------------------------------------
@@ -815,8 +815,8 @@ void Mapper::set_chr_0000_07ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0800_0fff_ram(uint8_t *p, int num) {
 	num *= (2 * 1024);
-	nes::ppu::set_vram_bank(0x02, p + num + 0x0000, true);
-	nes::ppu::set_vram_bank(0x03, p + num + 0x0400, true);
+	set_vram_bank(0x02, p + num + 0x0000, true);
+	set_vram_bank(0x03, p + num + 0x0400, true);
 }
 
 //------------------------------------------------------------------------------
@@ -824,8 +824,8 @@ void Mapper::set_chr_0800_0fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1000_17ff_ram(uint8_t *p, int num) {
 	num *= (2 * 1024);
-	nes::ppu::set_vram_bank(0x04, p + num + 0x0000, true);
-	nes::ppu::set_vram_bank(0x05, p + num + 0x0400, true);
+	set_vram_bank(0x04, p + num + 0x0000, true);
+	set_vram_bank(0x05, p + num + 0x0400, true);
 }
 
 //------------------------------------------------------------------------------
@@ -833,8 +833,8 @@ void Mapper::set_chr_1000_17ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1800_1fff_ram(uint8_t *p, int num) {
 	num *= (2 * 1024);
-	nes::ppu::set_vram_bank(0x06, p + num + 0x0000, true);
-	nes::ppu::set_vram_bank(0x07, p + num + 0x0400, true);
+	set_vram_bank(0x06, p + num + 0x0000, true);
+	set_vram_bank(0x07, p + num + 0x0400, true);
 }
 
 //------------------------------------------------------------------------------
@@ -842,10 +842,10 @@ void Mapper::set_chr_1800_1fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_0fff_ram(uint8_t *p, int num) {
 	num *= (4 * 1024);
-	nes::ppu::set_vram_bank(0x00, p + num + 0x0000, true);
-	nes::ppu::set_vram_bank(0x01, p + num + 0x0400, true);
-	nes::ppu::set_vram_bank(0x02, p + num + 0x0800, true);
-	nes::ppu::set_vram_bank(0x03, p + num + 0x0c00, true);
+	set_vram_bank(0x00, p + num + 0x0000, true);
+	set_vram_bank(0x01, p + num + 0x0400, true);
+	set_vram_bank(0x02, p + num + 0x0800, true);
+	set_vram_bank(0x03, p + num + 0x0c00, true);
 }
 
 //------------------------------------------------------------------------------
@@ -853,10 +853,10 @@ void Mapper::set_chr_0000_0fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1000_1fff_ram(uint8_t *p, int num) {
 	num *= (4 * 1024);
-	nes::ppu::set_vram_bank(0x04, p + num + 0x0000, true);
-	nes::ppu::set_vram_bank(0x05, p + num + 0x0400, true);
-	nes::ppu::set_vram_bank(0x06, p + num + 0x0800, true);
-	nes::ppu::set_vram_bank(0x07, p + num + 0x0c00, true);
+	set_vram_bank(0x04, p + num + 0x0000, true);
+	set_vram_bank(0x05, p + num + 0x0400, true);
+	set_vram_bank(0x06, p + num + 0x0800, true);
+	set_vram_bank(0x07, p + num + 0x0c00, true);
 }
 
 //------------------------------------------------------------------------------
@@ -864,14 +864,14 @@ void Mapper::set_chr_1000_1fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_1fff_ram(uint8_t *p, int num) {
 	num *= (8 * 1024);
-	nes::ppu::set_vram_bank(0x00, p + num + 0x0000, true);
-	nes::ppu::set_vram_bank(0x01, p + num + 0x0400, true);
-	nes::ppu::set_vram_bank(0x02, p + num + 0x0800, true);
-	nes::ppu::set_vram_bank(0x03, p + num + 0x0c00, true);
-	nes::ppu::set_vram_bank(0x04, p + num + 0x1000, true);
-	nes::ppu::set_vram_bank(0x05, p + num + 0x1400, true);
-	nes::ppu::set_vram_bank(0x06, p + num + 0x1800, true);
-	nes::ppu::set_vram_bank(0x07, p + num + 0x1c00, true);
+	set_vram_bank(0x00, p + num + 0x0000, true);
+	set_vram_bank(0x01, p + num + 0x0400, true);
+	set_vram_bank(0x02, p + num + 0x0800, true);
+	set_vram_bank(0x03, p + num + 0x0c00, true);
+	set_vram_bank(0x04, p + num + 0x1000, true);
+	set_vram_bank(0x05, p + num + 0x1400, true);
+	set_vram_bank(0x06, p + num + 0x1800, true);
+	set_vram_bank(0x07, p + num + 0x1c00, true);
 }
 
 //------------------------------------------------------------------------------
@@ -926,6 +926,20 @@ uint8_t Mapper::read_memory(uint16_t address) {
 	default:
 		abort();
 	}
+}
+
+//------------------------------------------------------------------------------
+// Name: set_mirroring
+//------------------------------------------------------------------------------
+void Mapper::set_mirroring(uint8_t mir) {
+	nes::ppu::set_mirroring(mir);
+}
+
+//------------------------------------------------------------------------------
+// Name: set_vram_bank
+//------------------------------------------------------------------------------
+void Mapper::set_vram_bank(uint8_t bank, uint8_t *p, bool writeable) {
+	nes::ppu::set_vram_bank(bank, p, writeable);
 }
 
 //------------------------------------------------------------------------------

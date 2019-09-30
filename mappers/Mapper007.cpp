@@ -87,8 +87,8 @@ void Mapper7::write_handler(uint16_t address, uint8_t value) {
 	set_prg_89abcdef(value & 0x07);
 
 	if(value & 0x10) {
-		nes::ppu::set_mirroring(nes::ppu::mirror_single_high);
+		set_mirroring(nes::ppu::mirror_single_high);
 	} else {
-		nes::ppu::set_mirroring(nes::ppu::mirror_single_low);
+		set_mirroring(nes::ppu::mirror_single_low);
 	}
 }
