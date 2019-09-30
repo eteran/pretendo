@@ -5,6 +5,7 @@
 #include "CPU.h"
 #include "Cart.h"
 #include "MemoryMappedFile.h"
+#include "VRAMBank.h"
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -40,7 +41,7 @@ protected:
 	Mapper &operator=(const Mapper &) = delete;
 
 public:
-	virtual ~Mapper();
+	virtual ~Mapper() = default;
 
 public:
 	// write routines
@@ -83,6 +84,10 @@ public:
 	virtual void ppu_end_frame();
 	virtual void vram_change_hook(uint16_t vram_address);
 
+protected:
+	void set_vram_bank(uint8_t bank, uint8_t *p, bool writeable);
+	void set_mirroring(uint8_t mir);
+
 private:
 	void swap_01(uint8_t *ptr) { page_[0x00] = ptr + 0x0000; page_[0x01] = ptr + 0x0800; page_[0x02] = ptr + 0x1000; page_[0x03] = ptr + 0x1800; }
 	void swap_23(uint8_t *ptr) { page_[0x04] = ptr + 0x0000; page_[0x05] = ptr + 0x0800; page_[0x06] = ptr + 0x1000; page_[0x07] = ptr + 0x1800; }
@@ -121,51 +126,51 @@ protected:
 
 	// ---- CHR ROM ----
 	// 1K-swaps
-	void set_chr_0000_03ff(int num) const;
-	void set_chr_0400_07ff(int num) const;
-	void set_chr_0800_0bff(int num) const;
-	void set_chr_0c00_0fff(int num) const;
-	void set_chr_1000_13ff(int num) const;
-	void set_chr_1400_17ff(int num) const;
-	void set_chr_1800_1bff(int num) const;
-	void set_chr_1c00_1fff(int num) const;
+	void set_chr_0000_03ff(int num);
+	void set_chr_0400_07ff(int num);
+	void set_chr_0800_0bff(int num);
+	void set_chr_0c00_0fff(int num);
+	void set_chr_1000_13ff(int num);
+	void set_chr_1400_17ff(int num);
+	void set_chr_1800_1bff(int num);
+	void set_chr_1c00_1fff(int num);
 
 	// 2K swaps
-	void set_chr_0000_07ff(int num) const;
-	void set_chr_0800_0fff(int num) const;
-	void set_chr_1000_17ff(int num) const;
-	void set_chr_1800_1fff(int num) const;
+	void set_chr_0000_07ff(int num);
+	void set_chr_0800_0fff(int num);
+	void set_chr_1000_17ff(int num);
+	void set_chr_1800_1fff(int num);
 
 	// 4K swaps
-	void set_chr_0000_0fff(int num) const;
-	void set_chr_1000_1fff(int num) const;
+	void set_chr_0000_0fff(int num);
+	void set_chr_1000_1fff(int num);
 
 	// 8K swaps
-	void set_chr_0000_1fff(int num) const;
+	void set_chr_0000_1fff(int num);
 
 	// ---- CHR RAM ----
 	// 1K-swaps
-	void set_chr_0000_03ff_ram(uint8_t *p, int num) const;
-	void set_chr_0400_07ff_ram(uint8_t *p, int num) const;
-	void set_chr_0800_0bff_ram(uint8_t *p, int num) const;
-	void set_chr_0c00_0fff_ram(uint8_t *p, int num) const;
-	void set_chr_1000_13ff_ram(uint8_t *p, int num) const;
-	void set_chr_1400_17ff_ram(uint8_t *p, int num) const;
-	void set_chr_1800_1bff_ram(uint8_t *p, int num) const;
-	void set_chr_1c00_1fff_ram(uint8_t *p, int num) const;
+	void set_chr_0000_03ff_ram(uint8_t *p, int num);
+	void set_chr_0400_07ff_ram(uint8_t *p, int num);
+	void set_chr_0800_0bff_ram(uint8_t *p, int num);
+	void set_chr_0c00_0fff_ram(uint8_t *p, int num);
+	void set_chr_1000_13ff_ram(uint8_t *p, int num);
+	void set_chr_1400_17ff_ram(uint8_t *p, int num);
+	void set_chr_1800_1bff_ram(uint8_t *p, int num);
+	void set_chr_1c00_1fff_ram(uint8_t *p, int num);
 
 	// 2K swaps
-	void set_chr_0000_07ff_ram(uint8_t *p, int num) const;
-	void set_chr_0800_0fff_ram(uint8_t *p, int num) const;
-	void set_chr_1000_17ff_ram(uint8_t *p, int num) const;
-	void set_chr_1800_1fff_ram(uint8_t *p, int num) const;
+	void set_chr_0000_07ff_ram(uint8_t *p, int num);
+	void set_chr_0800_0fff_ram(uint8_t *p, int num);
+	void set_chr_1000_17ff_ram(uint8_t *p, int num);
+	void set_chr_1800_1fff_ram(uint8_t *p, int num);
 
 	// 4K swaps
-	void set_chr_0000_0fff_ram(uint8_t *p, int num) const;
-	void set_chr_1000_1fff_ram(uint8_t *p, int num) const;
+	void set_chr_0000_0fff_ram(uint8_t *p, int num);
+	void set_chr_1000_1fff_ram(uint8_t *p, int num);
 
 	// 8K swaps
-	void set_chr_0000_1fff_ram(uint8_t *p, int num) const;
+	void set_chr_0000_1fff_ram(uint8_t *p, int num);
 
 protected:
 	static constexpr unsigned int page_count = 32;
@@ -174,6 +179,15 @@ protected:
 	static constexpr unsigned int page_shift = 11;
 
 	uint8_t *page_[page_count] = {};
+	VRAMBank     vram_banks_[0x10];
+
+	uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
+										 // 4 nametables, each $03c0 bytes in
+										 // size plus 4 corresponding $40 byte
+										 // attribute tables
+										 // even though the real thing only has 2
+										 // tables, we currently simulate 4 for
+										 // simplicity
 
 private:
 	// we use a function here to return a static object

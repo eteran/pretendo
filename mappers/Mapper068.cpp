@@ -86,10 +86,10 @@ void Mapper68::write_e(uint16_t address, uint8_t value) {
 
 	switch(value & 0x01) {
 	case 0x00:
-		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(nes::ppu::mirror_horizontal);
 		break;
 	case 0x01:
-		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(nes::ppu::mirror_vertical);
 		break;
 	}
 }

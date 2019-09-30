@@ -186,9 +186,9 @@ void Mapper245::write_a(uint16_t address, uint8_t value) {
 	case 0x0000:
 		if(nes::cart.mirroring() != Cart::MIR_4SCREEN) {
 			if(value & 0x01) {
-				nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
+				set_mirroring(nes::ppu::mirror_horizontal);
 			} else {
-				nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
+				set_mirroring(nes::ppu::mirror_vertical);
 			}
 		}
 		break;
