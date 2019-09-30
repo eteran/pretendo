@@ -38,9 +38,9 @@ void Mapper75::write_8(uint16_t address, uint8_t value) {
 void Mapper75::write_9(uint16_t address, uint8_t value) {
 	(void)address;
 	if(value & 0x01) {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 	} else {
-		set_mirroring(nes::ppu::mirror_vertical);
+		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 	}
 
 	chr_reg_[0] = (chr_reg_[0] & 0x0f) | ((value << 3) & 0x10);

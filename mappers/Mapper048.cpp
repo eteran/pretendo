@@ -129,9 +129,9 @@ void Mapper48::write_handler(uint16_t address, uint8_t value) {
 		break;
 	case 0xe000:
 		if(!(value & 0x40)) {
-			set_mirroring(nes::ppu::mirror_vertical);
+			nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 		} else {
-			set_mirroring(nes::ppu::mirror_horizontal);
+			nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 		}
 		break;
 	}

@@ -108,7 +108,7 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 	case 0x5105:
 		mirroring_mode_ = value;
 		// we do this here so we can allow regular access to just "pass though" to the PPU
-		set_mirroring(value);
+		nes::ppu::set_mirroring(value);
 		break;
 
 	case 0x5106:

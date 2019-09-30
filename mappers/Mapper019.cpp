@@ -190,13 +190,13 @@ void Mapper19::write_c(uint16_t address, uint8_t value) {
 		// A value of $E0 or above will
 		// use VRAM instead
 		mirroring_ = (mirroring_ & 0xf3) | ((value & 0x01) << 2);
-		set_mirroring(mirroring_);
+		nes::ppu::set_mirroring(mirroring_);
 	} else {
 		// Select 1K VROM bank at PPU $2000
 		// A value of $E0 or above will
 		// use VRAM instead
 		mirroring_ = (mirroring_ & 0xfc) | (value & 0x01);
-		set_mirroring(mirroring_);
+		nes::ppu::set_mirroring(mirroring_);
 	}
 }
 
@@ -210,13 +210,13 @@ void Mapper19::write_d(uint16_t address, uint8_t value) {
 		// A value of $E0 or above will
 		// use VRAM instead
 		mirroring_ = (mirroring_ & 0x3f) | ((value & 0x01) << 6);
-		set_mirroring(mirroring_);
+		nes::ppu::set_mirroring(mirroring_);
 	} else {
 		//Select 1K VROM bank at PPU $2800
 		//A value of $E0 or above will
 		//use VRAM instead
 		mirroring_ = (mirroring_ & 0xcf) | ((value & 0x01) << 4);
-		set_mirroring(mirroring_);
+		nes::ppu::set_mirroring(mirroring_);
 	}
 }
 

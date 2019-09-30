@@ -91,9 +91,9 @@ void Mapper226::writer_handler(uint16_t address, uint8_t value) {
 	regs_[address & 0x0001] = value;
 
 	if(regs_[0] & 0x40) {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 	} else {
-		set_mirroring(nes::ppu::mirror_vertical);
+		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 	}
 
 	uint32_t prg_page = ((regs_[0] >> 1) & 0x0f) | ((regs_[0] >> 3) & 0x10) | ((regs_[1] & 0x01) << 5);

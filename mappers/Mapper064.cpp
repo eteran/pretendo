@@ -161,9 +161,9 @@ void Mapper64::write_a(uint16_t address, uint8_t value) {
 	switch(address & 1) {
 	case 0x0000:
 		if(value & 0x01) {
-			set_mirroring(nes::ppu::mirror_horizontal);
+			nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 		} else {
-			set_mirroring(nes::ppu::mirror_vertical);
+			nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 		}
 		break;
 	}

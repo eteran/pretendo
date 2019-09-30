@@ -54,9 +54,9 @@ void Mapper113::write_handler(uint16_t address, uint8_t value) {
 	set_chr_0000_1fff((value & 0x07) | ((value & 0x40) >> 3));
 
 	if(value & 0x80) {
-		set_mirroring(nes::ppu::mirror_vertical);
+		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 	} else {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 	}
 
 }

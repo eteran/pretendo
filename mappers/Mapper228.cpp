@@ -144,9 +144,9 @@ void Mapper228::write_f(uint16_t address, uint8_t value) {
 void Mapper228::write_hander(uint16_t address, uint8_t value) {
 
 	if(address & 0x2000) {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		nes::ppu::set_mirroring(nes::ppu::mirror_horizontal);
 	} else {
-		set_mirroring(nes::ppu::mirror_vertical);
+		nes::ppu::set_mirroring(nes::ppu::mirror_vertical);
 	}
 
 	uint8_t prg_chip_select        = (address >> 11) & 0x03;
