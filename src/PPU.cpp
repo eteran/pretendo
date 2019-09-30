@@ -514,6 +514,8 @@ uint8_t read2007() {
 		}
 	}
 
+	// TODO(eteran): should this be temp_address? That would make more sense
+	// since it is what ACTUALLY gets read here...
 	cart.mapper()->vram_change_hook(vram_address_);
 	
 	const auto decay_value = static_cast<uint8_t>(latch_);
