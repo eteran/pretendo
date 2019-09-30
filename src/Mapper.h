@@ -157,6 +157,7 @@ protected:
 protected:
 	void set_mirroring(uint8_t mir);
 	void set_vram_bank(uint8_t bank, uint8_t *p, bool writeable);
+	void unset_vram_bank(uint8_t bank);
 
 private:
 	// we use a function here to return a static object

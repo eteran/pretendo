@@ -60,23 +60,23 @@ Mapper::~Mapper() {
 	nes::cpu::unmap_cd();
 	nes::cpu::unmap_ef();
 
-	nes::ppu::unset_vram_bank(0);
-	nes::ppu::unset_vram_bank(1);
-	nes::ppu::unset_vram_bank(2);
-	nes::ppu::unset_vram_bank(3);
-	nes::ppu::unset_vram_bank(4);
-	nes::ppu::unset_vram_bank(5);
-	nes::ppu::unset_vram_bank(6);
-	nes::ppu::unset_vram_bank(7);
+	unset_vram_bank(0);
+	unset_vram_bank(1);
+	unset_vram_bank(2);
+	unset_vram_bank(3);
+	unset_vram_bank(4);
+	unset_vram_bank(5);
+	unset_vram_bank(6);
+	unset_vram_bank(7);
 	
-	nes::ppu::unset_vram_bank(8);
-	nes::ppu::unset_vram_bank(9);
-	nes::ppu::unset_vram_bank(10);
-	nes::ppu::unset_vram_bank(11);
-	nes::ppu::unset_vram_bank(12);
-	nes::ppu::unset_vram_bank(13);
-	nes::ppu::unset_vram_bank(14);
-	nes::ppu::unset_vram_bank(15);
+	unset_vram_bank(8);
+	unset_vram_bank(9);
+	unset_vram_bank(10);
+	unset_vram_bank(11);
+	unset_vram_bank(12);
+	unset_vram_bank(13);
+	unset_vram_bank(14);
+	unset_vram_bank(15);
 }
 
 //------------------------------------------------------------------------------
@@ -940,6 +940,13 @@ void Mapper::set_mirroring(uint8_t mir) {
 //------------------------------------------------------------------------------
 void Mapper::set_vram_bank(uint8_t bank, uint8_t *p, bool writeable) {
 	nes::ppu::set_vram_bank(bank, p, writeable);
+}
+
+//------------------------------------------------------------------------------
+// Name: set_vram_bank
+//------------------------------------------------------------------------------
+void Mapper::unset_vram_bank(uint8_t bank) {
+	nes::ppu::unset_vram_bank(bank);
 }
 
 //------------------------------------------------------------------------------
