@@ -5,6 +5,7 @@
 #include "CPU.h"
 #include "Cart.h"
 #include "MemoryMappedFile.h"
+#include "VRAMBank.h"
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -167,6 +168,7 @@ private:
 										 // even though the real thing only has 2
 										 // tables, we currently simulate 4 for
 										 // simplicity
+	VRAMBank     vram_banks_[0x10];
 
 private:
 	// we use a function here to return a static object

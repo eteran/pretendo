@@ -133,8 +133,6 @@ add_library (mappers OBJECT
 	Mapper243.h
 	Mapper245.cpp
 	Mapper245.h
-	MMC3.cpp
-	MMC3.h
 	NINA-001.cpp
 	NINA-001.h
 	VRC2.cpp

@@ -2,31 +2,15 @@
 #ifndef MAPPER024_20080314_H_
 #define MAPPER024_20080314_H_
 
-#include "Mapper.h"
-#include <memory>
+#include "VRC6.h"
+#include "BitField.h"
 
-class Mapper24 final : public Mapper {
+class Mapper24 final : public VRC6 {
 public:
-	Mapper24();
+	Mapper24() = default;
 
 public:
 	std::string name() const override;
-
-public:
-	void write_8(uint16_t address, uint8_t value) override;
-	void write_9(uint16_t address, uint8_t value) override;
-	void write_a(uint16_t address, uint8_t value) override;
-	void write_b(uint16_t address, uint8_t value) override;
-	void write_c(uint16_t address, uint8_t value) override;
-	void write_d(uint16_t address, uint8_t value) override;
-	void write_e(uint16_t address, uint8_t value) override;
-	void write_f(uint16_t address, uint8_t value) override;
-
-public:
-	void cpu_sync() override;
-
-private:
-	std::unique_ptr<Mapper> mapper_;
 };
 
 #endif

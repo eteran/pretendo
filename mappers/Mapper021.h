@@ -2,12 +2,11 @@
 #ifndef MAPPER021_20080314_H_
 #define MAPPER021_20080314_H_
 
-#include "Mapper.h"
-#include <memory>
+#include "VRC4.h"
 
-class Mapper21 final : public Mapper {
+class Mapper21 final : public VRC4 {
 public:
-	Mapper21();
+	Mapper21() = default;
 
 public:
 	std::string name() const override;
@@ -21,12 +20,6 @@ public:
 	void write_d(uint16_t address, uint8_t value) override;
 	void write_e(uint16_t address, uint8_t value) override;
 	void write_f(uint16_t address, uint8_t value) override;
-
-public:
-	void cpu_sync() override;
-
-private:
-	std::unique_ptr<Mapper> mapper_;
 };
 
 #endif
