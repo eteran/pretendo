@@ -16,7 +16,7 @@ MemoryMappedFile::MemoryMappedFile(const std::string &filename, size_t size) {
 #ifdef __linux__
     int fd = ::open(filename.c_str(), O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     if(fd != -1) {
-        ::ftruncate(fd, size);
+		(void)::ftruncate(fd, size);
 
         auto p = static_cast<uint8_t *>(mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
         if(p != MAP_FAILED) {

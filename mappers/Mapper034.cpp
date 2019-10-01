@@ -35,6 +35,8 @@ std::string Mapper34::name() const {
 	case BNROM:
 		return "BNROM";
 	}
+
+	return "NINA-001/BNROM";
 }
 
 //------------------------------------------------------------------------------

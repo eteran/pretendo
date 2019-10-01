@@ -4,7 +4,6 @@
 
 #include "Reset.h"
 #include "P6502.h"
-#include <memory>
 #include <cstdint>
 
 class Mapper;

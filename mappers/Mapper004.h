@@ -3,7 +3,6 @@
 #define MAPPER0004_20080314_H_
 
 #include "Mapper.h"
-#include <memory>
 
 class Mapper4 final : public Mapper {
 public:
