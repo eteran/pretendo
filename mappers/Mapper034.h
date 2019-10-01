@@ -3,7 +3,6 @@
 #define MAPPER034_20080314_H_
 
 #include "Mapper.h"
-#include <memory>
 
 class Mapper34 final : public Mapper {
 public:
@@ -23,7 +22,16 @@ public:
 	void write_f(uint16_t address, uint8_t value) override;
 
 private:
-	std::unique_ptr<Mapper> mapper_;
+	void write_handler(uint16_t address, uint8_t value);
+
+private:
+	uint8_t chr_ram_[0x2000];
+
+private:
+	enum Mode {
+		NINA_001,
+		BNROM,
+	} mode_;
 };
 
 #endif

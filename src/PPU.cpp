@@ -420,6 +420,8 @@ void write2007(uint8_t value) {
 		}
 	}
 
+	cart.mapper()->vram_change_hook(vram_address_);
+
 	// palette write
 	if((temp_address & 0x3f00) == 0x3f00) {
 
@@ -432,7 +434,6 @@ void write2007(uint8_t value) {
 		}
 
 	} else {
-		cart.mapper()->vram_change_hook(vram_address_);
 		cart.mapper()->write_vram(temp_address, value);
 	}
 }
@@ -894,7 +895,6 @@ uint8_t select_pixel(uint8_t index) {
 //------------------------------------------------------------------------------
 template <class Pattern>
 void open_background_pattern() {
-
 	const uint8_t tile_line = (vram_address_ & 0x7000) >> 12;
 	next_ppu_fetch_address_ = background_pattern_table() | (next_tile_index_ << 4) | Pattern::offset | tile_line;
 	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
@@ -905,7 +905,6 @@ void open_background_pattern() {
 //------------------------------------------------------------------------------
 template <class Pattern>
 void read_background_pattern() {
-
 	next_pattern_[Pattern::index] = cart.mapper()->read_vram(next_ppu_fetch_address_);
 }
 

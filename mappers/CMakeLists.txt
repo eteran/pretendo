@@ -5,8 +5,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_library (mappers OBJECT
 	Bandai.cpp
 	Bandai.h
-	BNROM.cpp
-	BNROM.h
 	Mapper000.cpp
 	Mapper000.h
 	Mapper001.cpp
@@ -133,8 +131,6 @@ add_library (mappers OBJECT
 	Mapper243.h
 	Mapper245.cpp
 	Mapper245.h
-	NINA-001.cpp
-	NINA-001.h
 	VRC2.cpp
 	VRC2.h
 	VRC4.cpp

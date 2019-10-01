@@ -956,8 +956,6 @@ void Mapper::set_mirroring(uint8_t mir) {
 	// single lo:  00000000b, or $00
 	// single hi:  01010101b, or $55
 
-	printf("%p\n", &nametables_[(mir << 0xa) & 0x0c00]);
-
 	vram_banks_[0x08] = VRAMBank(&nametables_[(mir << 0xa) & 0x0c00], true);
 	vram_banks_[0x09] = VRAMBank(&nametables_[(mir << 0x8) & 0x0c00], true);
 	vram_banks_[0x0a] = VRAMBank(&nametables_[(mir << 0x6) & 0x0c00], true);
