@@ -13,6 +13,15 @@ public:
     VRAMBank(const VRAMBank &other)          = default;
     VRAMBank &operator=(const VRAMBank &rhs) = default;
 
+	VRAMBank &operator=(nullptr_t) {
+		ptr_ = nullptr;
+		writeable_ = false;
+		return *this;
+	}
+
+	VRAMBank(nullptr_t) : ptr_(nullptr), writeable_(false) {
+	}
+
 	VRAMBank(uint8_t *p, bool writeable) : ptr_(p), writeable_(writeable) {
 	}
 

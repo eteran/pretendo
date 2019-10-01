@@ -63,7 +63,7 @@ uint8_t Mapper1::read_6(uint16_t address) {
 	if(!(regs_[REG_E000_FFFF] & 0x10)) {
 		return prg_ptr_[address & 0x1fff];
 	} else {
-		 return Mapper::read_6(address);
+		return Mapper::read_6(address);
 	}
 }
 

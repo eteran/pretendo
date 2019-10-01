@@ -19,15 +19,12 @@ using std::uint64_t;
 
 class Mapper;
 
-using create_func = std::function<std::shared_ptr<Mapper>()>;
+using create_func = std::function<std::unique_ptr<Mapper>()>;
 
 class Mapper {
 public:
-	static std::shared_ptr<Mapper> create_mapper(int num);
+	static std::unique_ptr<Mapper> create_mapper(int num);
 	static void register_mapper(int num, create_func create_ptr);
-
-	void write_memory(uint16_t address, uint8_t value);
-	uint8_t read_memory(uint16_t address);
 
 public:
     MemoryMappedFile open_sram(size_t size);
@@ -44,7 +41,7 @@ protected:
 	Mapper &operator=(const Mapper &) = delete;
 
 public:
-	virtual ~Mapper();
+	virtual ~Mapper() = default;
 
 public:
 	// write routines
@@ -90,6 +87,10 @@ public:
 	virtual void cpu_sync();
 	virtual void ppu_end_frame();
 	virtual void vram_change_hook(uint16_t vram_address);
+
+private:
+	void write_memory(uint16_t address, uint8_t value);
+	uint8_t read_memory(uint16_t address);
 
 protected:
 	// ---- PRG ROM ----
@@ -158,17 +159,43 @@ protected:
 protected:
 	void set_mirroring(uint8_t mir);
 	void set_vram_bank(uint8_t bank, uint8_t *p, bool writeable);
-	void unset_vram_bank(uint8_t bank);
+
+protected:
+	void swap_01(uint8_t *ptr) { page_[0x00] = ptr + 0x0000; page_[0x01] = ptr + 0x0800; page_[0x02] = ptr + 0x1000; page_[0x03] = ptr + 0x1800; }
+	void swap_23(uint8_t *ptr) { page_[0x04] = ptr + 0x0000; page_[0x05] = ptr + 0x0800; page_[0x06] = ptr + 0x1000; page_[0x07] = ptr + 0x1800; }
+	void swap_45(uint8_t *ptr) { page_[0x08] = ptr + 0x0000; page_[0x09] = ptr + 0x0800; page_[0x0a] = ptr + 0x1000; page_[0x0b] = ptr + 0x1800; }
+	void swap_67(uint8_t *ptr) { page_[0x0c] = ptr + 0x0000; page_[0x0d] = ptr + 0x0800; page_[0x0e] = ptr + 0x1000; page_[0x0f] = ptr + 0x1800; }
+	void swap_89(uint8_t *ptr) { page_[0x10] = ptr + 0x0000; page_[0x11] = ptr + 0x0800; page_[0x12] = ptr + 0x1000; page_[0x13] = ptr + 0x1800; }
+	void swap_ab(uint8_t *ptr) { page_[0x14] = ptr + 0x0000; page_[0x15] = ptr + 0x0800; page_[0x16] = ptr + 0x1000; page_[0x17] = ptr + 0x1800; }
+	void swap_cd(uint8_t *ptr) { page_[0x18] = ptr + 0x0000; page_[0x19] = ptr + 0x0800; page_[0x1a] = ptr + 0x1000; page_[0x1b] = ptr + 0x1800; }
+	void swap_ef(uint8_t *ptr) { page_[0x1c] = ptr + 0x0000; page_[0x1d] = ptr + 0x0800; page_[0x1e] = ptr + 0x1000; page_[0x1f] = ptr + 0x1800; }
+
+	void unmap_01() { page_[0x00] = nullptr; page_[0x01] = nullptr; page_[0x02] = nullptr; page_[0x03] = nullptr; }
+	void unmap_23() { page_[0x04] = nullptr; page_[0x05] = nullptr; page_[0x06] = nullptr; page_[0x07] = nullptr; }
+	void unmap_45() { page_[0x08] = nullptr; page_[0x09] = nullptr; page_[0x0a] = nullptr; page_[0x0b] = nullptr; }
+	void unmap_67() { page_[0x0c] = nullptr; page_[0x0d] = nullptr; page_[0x0e] = nullptr; page_[0x0f] = nullptr; }
+	void unmap_89() { page_[0x10] = nullptr; page_[0x11] = nullptr; page_[0x12] = nullptr; page_[0x13] = nullptr; }
+	void unmap_ab() { page_[0x14] = nullptr; page_[0x15] = nullptr; page_[0x16] = nullptr; page_[0x17] = nullptr; }
+	void unmap_cd() { page_[0x18] = nullptr; page_[0x19] = nullptr; page_[0x1a] = nullptr; page_[0x1b] = nullptr; }
+	void unmap_ef() { page_[0x1c] = nullptr; page_[0x1d] = nullptr; page_[0x1e] = nullptr; page_[0x1f] = nullptr; }
 
 private:
-	uint8_t      nametables_[4 * 0x400]; // nametable and attribute table data
-										 // 4 nametables, each $03c0 bytes in
-										 // size plus 4 corresponding $40 byte
-										 // attribute tables
-										 // even though the real thing only has 2
-										 // tables, we currently simulate 4 for
-										 // simplicity
-	VRAMBank     vram_banks_[0x10];
+	constexpr static unsigned int page_count = 32;
+	constexpr static unsigned int page_size  = 0x10000 / page_count;
+	constexpr static unsigned int page_mask  = page_size - 1;
+	constexpr static unsigned int page_shift = 11;
+
+private:
+	uint8_t nametables_[4 * 0x400]; // nametable and attribute table data
+									// 4 nametables, each $03c0 bytes in
+									// size plus 4 corresponding $40 byte
+									// attribute tables
+									// even though the real thing only has 2
+									// tables, we currently simulate 4 for
+									// simplicity
+	VRAMBank vram_banks_[0x10] = {};
+
+	uint8_t *page_[page_count] = {};
 
 private:
 	// we use a function here to return a static object
@@ -187,7 +214,7 @@ template<class T>
 struct MapperRegisterObject {
 	explicit MapperRegisterObject(int n) {
 		Mapper::register_mapper(n, []() {
-			return std::make_shared<T>();
+			return std::make_unique<T>();
 		});
 	}
 };

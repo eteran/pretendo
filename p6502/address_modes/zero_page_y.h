@@ -20,12 +20,12 @@ private:
 			break;
 		case 2:
 			// read from address, add index register to it
-			effective_address16_.raw = read_byte(effective_address16_.raw) + Y;
+			effective_address16_.raw = read_handler(effective_address16_.raw) + Y;
 			break;
 		case 3:
 			LAST_CYCLE;
 			// read from effective address
-            Op::execute(read_byte_zp(effective_address16_.lo));
+            Op::execute(read_handler(effective_address16_.lo));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -41,7 +41,7 @@ private:
 			break;
 		case 2:
 			// read from address, add index register to it
-			effective_address16_.raw = read_byte(effective_address16_.raw) + Y;
+			effective_address16_.raw = read_handler(effective_address16_.raw) + Y;
 			break;
 		case 3:
 			LAST_CYCLE;
@@ -49,7 +49,7 @@ private:
 			{
 				const uint16_t address = effective_address16_.lo;
 				const uint8_t  value   = Op::execute(address);
-            	write_byte_zp(address, value);
+            	write_handler(address, value);
 			}
 			OPCODE_COMPLETE;
 		default:

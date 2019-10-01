@@ -31,6 +31,8 @@ add_executable(pretendo
 	APU.cpp
 	APU.h
 	BitField.h
+    Bus.cpp
+    Bus.h
 	Cart.cpp
 	Cart.h
 	circular_buffer.h

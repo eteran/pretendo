@@ -172,7 +172,6 @@ void update_nz_flags(uint8_t value) {
 }
 
 // opcode implementation
-#include "memory.h"
 #include "opcodes.h"
 #include "address_modes.h"
 
@@ -735,7 +734,7 @@ void clock() {
 		if((dmc_dma_count_ & 1) == (executed_cycles & 1)) {
 			if((dmc_dma_count_ & 1) == 0) {
 				// read cycle
-				dmc_dma_byte_ = read_byte(dmc_dma_source_address_++);
+				dmc_dma_byte_ = read_handler(dmc_dma_source_address_++);
 			} else {
 				// write cycle
 				(*dmc_dma_handler_)(dmc_dma_byte_);
@@ -753,7 +752,7 @@ void clock() {
 		if((spr_dma_count_ & 1) == (executed_cycles & 1)) {
 			if((executed_cycles & 1) == 0) {
 				// read cycle
-				spr_dma_byte_ = read_byte(spr_dma_source_address_++);
+				spr_dma_byte_ = read_handler(spr_dma_source_address_++);
 			} else {
 				// write cycle
 				(*spr_dma_handler_)(spr_dma_byte_);
@@ -770,16 +769,16 @@ void clock() {
 			// first cycle is always instruction fetch
 			// or do we force an interrupt?
 			if(rst_executing_) {
-				read_byte(PC.raw);
+				read_handler(PC.raw);
 				instruction_ = 0x100;
 			} else if(nmi_executing_) {
-				read_byte(PC.raw);
+				read_handler(PC.raw);
 				instruction_ = 0x101;
 			} else if(irq_executing_) {
-				read_byte(PC.raw);
+				read_handler(PC.raw);
 				instruction_ = 0x102;
 			} else {
-				instruction_ = read_byte(PC.raw++);
+				instruction_ = read_handler(PC.raw++);
 			}
 
 		} else {

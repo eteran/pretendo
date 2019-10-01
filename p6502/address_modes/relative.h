@@ -34,14 +34,14 @@ private:
 		case 1:
 			LAST_CYCLE;
 			// fetch operand, increment PC
-			data8_ = read_byte(PC.raw++);
+			data8_ = read_handler(PC.raw++);
 			break;
 		case 2:
 		{
 			// Fetch opcode of next instruction,
 			// If branch is taken, add operand to PCL.
 			// Otherwise increment PC.
-			const uint8_t new_op = read_byte(PC.raw);
+			const uint8_t new_op = read_handler(PC.raw);
 
 			// ------
 			// A taken non-page-crossing branch ignores IRQ during
@@ -73,7 +73,7 @@ private:
 		{
 			// Fetch opcode of next instruction.
 			// Fix PCH. If it did not change, increment PC.
-			const uint8_t new_op = read_byte(PC.raw);
+			const uint8_t new_op = read_handler(PC.raw);
 
 			if(new_pc_.hi != old_pc_.hi) {
 				LAST_CYCLE_0;
@@ -94,7 +94,7 @@ private:
 		}
 		case 4:
 		{
-			const uint8_t new_op = read_byte(PC.raw);
+			const uint8_t new_op = read_handler(PC.raw);
 
 			if(rst_executing_) {
 				instruction_ = 0x100;

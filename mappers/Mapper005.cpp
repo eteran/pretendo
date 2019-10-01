@@ -348,7 +348,10 @@ void Mapper5::write_handler(uint16_t address, uint8_t value) {
 	if(prg_ram_protect1_ == 0x02 && prg_ram_protect2_ == 0x01 && prg_ram_banks_[bank]) {
 		prg_ram_banks_[bank][address & 0x0fff] = value;
 	} else {
+#if 0
+		// TODO(eteran): re-implement
 		nes::cpu::write(address, value);
+#endif
 	}
 }
 
@@ -464,7 +467,10 @@ uint8_t Mapper5::read_handler(uint16_t address) {
 		return prg_ram_banks_[bank][address & 0x0fff];
 	}
 
+#if 0
+	// TODO(eteran): re-implement
 	return nes::cpu::read(address);
+#endif
 }
 
 //------------------------------------------------------------------------------

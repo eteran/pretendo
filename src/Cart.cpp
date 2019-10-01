@@ -56,7 +56,7 @@ bool Cart::load(const std::string &s) {
 	
     try {
         filename_ = s;
-		rom_ = std::make_shared<iNES::Rom>(s.c_str());
+		rom_ = std::make_unique<iNES::Rom>(s.c_str());
 		
 		std::cout << " OK!" << std::endl;
 

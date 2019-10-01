@@ -44,7 +44,7 @@ public:
 	std::vector<uint8_t> raw_image() const;
 
 private:    
-	std::shared_ptr<iNES::Rom> rom_;
+	std::unique_ptr<iNES::Rom> rom_;
     uint32_t                   prg_mask_  = 0;
     uint32_t                   chr_mask_  = 0;
     uint32_t                   prg_hash_  = 0;
