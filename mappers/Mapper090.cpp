@@ -1,7 +1,7 @@
 
 #include "Mapper090.h"
-#include "PPU.h"
-#include "NES.h"
+#include "Ppu.h"
+#include "Nes.h"
 #include "Cart.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(90)

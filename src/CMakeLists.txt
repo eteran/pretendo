@@ -28,8 +28,8 @@ find_package(OpenGL REQUIRED)
 add_executable(pretendo 
 	${SOURCE_FILES}
 	
-	APU.cpp
-	APU.h
+	Apu.cpp
+	Apu.h
 	BitField.h
     Bus.cpp
     Bus.h
@@ -40,31 +40,31 @@ add_executable(pretendo
 	Config.h
 	Controller.cpp
 	Controller.h
-	CPU.cpp
-	CPU.h
-	DMC.cpp
-	DMC.h
+	Cpu.cpp
+	Cpu.h
+	Dmc.cpp
+	Dmc.h
 	Envelope.cpp
 	Envelope.h
 	Input.cpp
 	Input.h
 	LengthCounter.cpp
 	LengthCounter.h
-	LFSR.h
+	Lfsr.h
 	LinearCounter.cpp
 	LinearCounter.h
 	Mapper.cpp
 	Mapper.h
 	MemoryMappedFile.cpp
 	MemoryMappedFile.h
-	NES.cpp
-	NES.h
+	Nes.cpp
+	Nes.h
 	Noise.cpp
 	Noise.h
 	Palette.cpp
 	Palette.h
-	PPU.cpp
-	PPU.h
+	Ppu.cpp
+	Ppu.h
 	Reset.h
 	ShiftRegister.h
 	Square.h

@@ -2,7 +2,7 @@
 #ifndef MAPPER_20080314_H_
 #define MAPPER_20080314_H_
 
-#include "CPU.h"
+#include "Cpu.h"
 #include "Cart.h"
 #include "MemoryMappedFile.h"
 #include "VRAMBank.h"
@@ -88,7 +88,7 @@ public:
 	virtual void ppu_end_frame();
 	virtual void vram_change_hook(uint16_t vram_address);
 
-private:
+protected:
 	void write_memory(uint16_t address, uint8_t value);
 	uint8_t read_memory(uint16_t address);
 

@@ -2,7 +2,7 @@
 #ifndef AUDIO_VIEWER_H_
 #define AUDIO_VIEWER_H_
 
-#include "APU.h"
+#include "Apu.h"
 #include <QDialog>
 #include <cstdint>
 #include "ui_AudioViewer.h"

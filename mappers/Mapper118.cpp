@@ -1,8 +1,8 @@
 
 #include "Mapper118.h"
 #include "Cart.h"
-#include "NES.h"
-#include "PPU.h"
+#include "Nes.h"
+#include "Ppu.h"
 #include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(118)

@@ -1,8 +1,8 @@
 
 #include "Mapper057.h"
 #include "Cart.h"
-#include "PPU.h"
-#include "NES.h"
+#include "Ppu.h"
+#include "Nes.h"
 #include <cstring>
 #include <cassert>
 

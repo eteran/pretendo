@@ -1,10 +1,10 @@
 
-#include "Mapper005.h"
-#include "PPU.h"
-#include "NES.h"
 #include "Cart.h"
-#include <cstring>
+#include "Mapper005.h"
+#include "Nes.h"
+#include "Ppu.h"
 #include <cassert>
+#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(5)
 
@@ -28,7 +28,7 @@ Mapper5::Mapper5() {
 	set_prg_cd(-1);
 	set_prg_ef(-1);
 
-	memset(exram_,      0x00, sizeof(exram_));
+	memset(exram_, 0x00, sizeof(exram_));
 	memset(prg_ram_[0], 0x00, sizeof(prg_ram_[0]));
 	memset(prg_ram_[1], 0x00, sizeof(prg_ram_[1]));
 
@@ -84,7 +84,7 @@ std::string Mapper5::name() const {
 //------------------------------------------------------------------------------
 void Mapper5::write_5(uint16_t address, uint8_t value) {
 
-	switch(address) {
+	switch (address) {
 	case 0x5100:
 		prg_mode_ = value & 0x03;
 		break;
@@ -107,7 +107,6 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 
 	case 0x5105:
 		mirroring_mode_ = value;
-		// we do this here so we can allow regular access to just "pass though" to the PPU
 		set_mirroring(value);
 		break;
 
@@ -125,13 +124,13 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 		break;
 
 	case 0x5114:
-		switch(prg_mode_) {
+		switch (prg_mode_) {
 		case 0x00:
 		case 0x01:
 		case 0x02:
 			break;
 		case 0x03:
-			if(value & 0x80) {
+			if (value & 0x80) {
 				set_prg_89(value & 0x7f);
 				prg_ram_banks_[0x08] = nullptr;
 				prg_ram_banks_[0x09] = nullptr;
@@ -144,12 +143,12 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 		break;
 
 	case 0x5115:
-		switch(prg_mode_) {
+		switch (prg_mode_) {
 		case 0x00:
 			break;
 		case 0x01:
 		case 0x02:
-			if(value & 0x80) {
+			if (value & 0x80) {
 				set_prg_89ab((value & 0x7f) >> 1);
 				prg_ram_banks_[0x08] = nullptr;
 				prg_ram_banks_[0x09] = nullptr;
@@ -163,7 +162,7 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 			}
 			break;
 		case 0x03:
-			if(value & 0x80) {
+			if (value & 0x80) {
 				set_prg_ab(value & 0x7f);
 				prg_ram_banks_[0x0a] = nullptr;
 				prg_ram_banks_[0x0b] = nullptr;
@@ -176,13 +175,13 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 		break;
 
 	case 0x5116:
-		switch(prg_mode_) {
+		switch (prg_mode_) {
 		case 0x00:
 		case 0x01:
 			break;
 		case 0x02:
 		case 0x03:
-			if(value & 0x80) {
+			if (value & 0x80) {
 				set_prg_cd(value & 0x7f);
 				prg_ram_banks_[0x0c] = nullptr;
 				prg_ram_banks_[0x0d] = nullptr;
@@ -194,9 +193,8 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 		}
 		break;
 
-
 	case 0x5117:
-		switch(prg_mode_) {
+		switch (prg_mode_) {
 		case 0x00:
 			set_prg_89abcdef((value & 0x7f) >> 2);
 			prg_ram_banks_[0x08] = nullptr;
@@ -226,7 +224,7 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 	case 0x5125:
 	case 0x5126:
 	case 0x5127:
-		last_chr_write_ = CHR_BANK_A;
+		last_chr_write_               = CHR_BANK_A;
 		sp_chr_banks_[address & 0x07] = value;
 		break;
 
@@ -238,7 +236,7 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 	case 0x512d: // but are consistent with what makes sense, perhaps
 	case 0x512e: // $5128-$512b are partially decoded?
 	case 0x512f:
-		last_chr_write_ = CHR_BANK_B;
+		last_chr_write_                        = CHR_BANK_B;
 		bg_chr_banks_[(address & 0x07) ^ 0x00] = value;
 		bg_chr_banks_[(address & 0x07) ^ 0x04] = value;
 		break;
@@ -276,7 +274,7 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 		break;
 
 	default:
-		if(address >= 0x5c00 && (exram_mode_ & 0x03) == 0x02) {
+		if (address >= 0x5c00 && (exram_mode_ & 0x03) == 0x02) {
 			exram_[address & 0x03ff] = value;
 		}
 	}
@@ -345,13 +343,10 @@ void Mapper5::write_handler(uint16_t address, uint8_t value) {
 
 	const uint8_t bank = (address >> 12) & 0x0f;
 
-	if(prg_ram_protect1_ == 0x02 && prg_ram_protect2_ == 0x01 && prg_ram_banks_[bank]) {
+	if (prg_ram_protect1_ == 0x02 && prg_ram_protect2_ == 0x01 && prg_ram_banks_[bank]) {
 		prg_ram_banks_[bank][address & 0x0fff] = value;
 	} else {
-#if 0
-		// TODO(eteran): re-implement
-		nes::cpu::write(address, value);
-#endif
+		Mapper::write_memory(address, value);
 	}
 }
 
@@ -463,14 +458,11 @@ uint8_t Mapper5::read_handler(uint16_t address) {
 
 	const uint8_t bank = (address >> 12) & 0x0f;
 
-	if(prg_ram_banks_[bank]) {
+	if (prg_ram_banks_[bank]) {
 		return prg_ram_banks_[bank][address & 0x0fff];
 	}
 
-#if 0
-	// TODO(eteran): re-implement
-	return nes::cpu::read(address);
-#endif
+	return Mapper::read_memory(address);
 }
 
 //------------------------------------------------------------------------------
@@ -543,7 +535,7 @@ uint8_t Mapper5::read_vram(uint16_t address) {
 		// CHR-ROM ($0000 - $1fff)
 		const uint8_t *chr_selector;
 
-		if(sprite_size_ == 16) {
+		if(large_sprites_) {
 			// there seems to be 128 fetches of tiles before sprites..
 			if(fetch_count_ > 128 && fetch_count_ < 160) {
 				chr_selector = sp_chr_banks_;
@@ -680,13 +672,13 @@ void Mapper5::write_vram(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper5::write_2(uint16_t address, uint8_t value) {
 
-	switch(address & 0x07) {
+	switch (address & 0x07) {
 	case 0x00:
-		sprite_size_ = (value & 0x20) ? 16 : 8;
+		large_sprites_ = (value & 0x20);
 		break;
 	case 0x01:
 		// sprites and background disabled
-		if(!(value & 0x18)) {
+		if (!(value & 0x18)) {
 			irq_status_.in_frame = false;
 		}
 		break;
@@ -700,13 +692,13 @@ void Mapper5::write_2(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper5::write_3(uint16_t address, uint8_t value) {
 
-	switch(address & 0x07) {
+	switch (address & 0x07) {
 	case 0x00:
-		sprite_size_ = (value & 0x20) ? 16 : 8;
+		large_sprites_ = (value & 0x20);
 		break;
 	case 0x01:
 		// sprites and background disabled
-		if(!(value & 0x18)) {
+		if (!(value & 0x18)) {
 			irq_status_.in_frame = false;
 		}
 		break;
@@ -720,13 +712,11 @@ void Mapper5::write_3(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper5::vram_change_hook(uint16_t vram_address) {
 
-
-
 	// when this is > 128 (32 * 4), we are fetching sprites, not BG tiles
 	++fetch_count_;
 
 	// 3 consecutive reads!
-	if(vram_address == prev_vram_address_[0] && vram_address == prev_vram_address_[1]) {
+	if (vram_address == prev_vram_address_[0] && vram_address == prev_vram_address_[1]) {
 		clock_irq();
 		fetch_count_ = 0;
 	}
@@ -742,18 +732,18 @@ void Mapper5::vram_change_hook(uint16_t vram_address) {
 void Mapper5::clock_irq() {
 
 	// if the In Frame signal is clear
-	if(!irq_status_.in_frame) {
+	if (!irq_status_.in_frame) {
 
 		// set it, reset the IRQ counter to 0, and clear the IRQ Pending flag
 		irq_status_.in_frame = true;
 		irq_status_.pending  = false;
-		irq_counter_ = 0;
+		irq_counter_         = 0;
 	} else {
 
 		// otherwise, increment the IRQ counter. If it now equals the IRQ scanline ($5203),
 		// raise IRQ Pending flag
-		if(++irq_counter_ == irq_target_) {
-			if(irq_enabled_) {
+		if (++irq_counter_ == irq_target_) {
+			if (irq_enabled_) {
 				nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 			}
 

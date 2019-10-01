@@ -1,6 +1,6 @@
 
 #include "Mapper034.h"
-#include "NES.h"
+#include "Nes.h"
 #include "Cart.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(34)

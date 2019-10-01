@@ -3,7 +3,7 @@
 #define INPUT_20080314_H_
 
 #include <cstdint>
-#include "NES.h"
+#include "Nes.h"
 
 class Controller;
 

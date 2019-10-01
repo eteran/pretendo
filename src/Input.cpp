@@ -1,7 +1,7 @@
 
 #include "Input.h"
 #include "Controller.h"
-#include "NES.h"
+#include "Nes.h"
 #include <iostream>
 
 namespace nes {

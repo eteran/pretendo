@@ -1,6 +1,6 @@
 
 #include "Mapper075.h"
-#include "PPU.h"
+#include "Ppu.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(75)
 

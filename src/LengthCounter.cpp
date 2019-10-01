@@ -1,6 +1,6 @@
 
 #include "LengthCounter.h"
-#include "APU.h"
+#include "Apu.h"
 
 namespace nes {
 namespace apu {

@@ -65,6 +65,7 @@ private:
 	uint8_t * prg_ram_banks_[0x10];
 
 	bool      irq_enabled_           = false;
+	bool      large_sprites_         = false;
 	uint16_t  bg_char_upper_         = 0x00;
 	uint16_t  fetch_count_           = 0;
 	uint8_t   chr_mode_              = 0;
@@ -72,7 +73,7 @@ private:
 	uint8_t   fill_mode_attr_        = 0;
 	uint8_t   fill_mode_tile_        = 0;
 	uint8_t   irq_counter_           = 0;
-	IRQStatus irq_status_            = { 0 };
+	IRQStatus irq_status_            = {0};
 	uint8_t   irq_target_            = 0;
 	uint8_t   mirroring_mode_        = 0;
 	uint8_t   multiplier_1_          = 0;
@@ -80,7 +81,6 @@ private:
 	uint8_t   prg_mode_              = 0x03;
 	uint8_t   prg_ram_protect1_      = 0;
 	uint8_t   prg_ram_protect2_      = 0;
-	uint8_t   sprite_size_           = 8;
 	uint8_t   vertical_split_mode_   = 0;
 	uint8_t   vertical_split_scroll_ = 0;
 	uint8_t   vertical_split_bank_   = 0;

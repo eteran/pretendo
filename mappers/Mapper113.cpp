@@ -1,6 +1,6 @@
 
 #include "Mapper113.h"
-#include "PPU.h"
+#include "Ppu.h"
 #include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(113)

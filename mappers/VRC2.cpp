@@ -1,7 +1,7 @@
 
 #include "VRC2.h"
-#include "CPU.h"
-#include "PPU.h"
+#include "Cpu.h"
+#include "Ppu.h"
 #include <cstring>
 
 //------------------------------------------------------------------------------

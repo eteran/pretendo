@@ -3,24 +3,24 @@
 #define NOISE_20130206_H_
 
 #include "Envelope.h"
-#include "LFSR.h"
 #include "LengthCounter.h"
+#include "Lfsr.h"
 #include "Timer.h"
 #include <cstdint>
 
 namespace nes {
 namespace apu {
 
-using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
+using std::uint8_t;
 
 class Noise {
 public:
-    Noise()                         = default;
-    ~Noise()                        = default;
-    Noise(const Noise &)            = delete;
+	Noise()              = default;
+	~Noise()             = default;
+	Noise(const Noise &) = delete;
 	Noise &operator=(const Noise &) = delete;
 
 public:
@@ -37,7 +37,7 @@ public:
 	bool enabled() const;
 
 public:
-	void tick();
+	void    tick();
 	uint8_t output() const;
 
 public:
@@ -45,9 +45,9 @@ public:
 	Envelope      envelope;
 
 private:
-    bool          enabled_ = false;
-	Timer         timer_;
-	LFSR          lfsr_;
+	bool  enabled_ = false;
+	Timer timer_;
+	LFSR  lfsr_;
 };
 
 }

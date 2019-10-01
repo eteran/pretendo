@@ -1,7 +1,7 @@
 
 #include "Mapper076.h"
 #include "Cart.h"
-#include "NES.h"
+#include "Nes.h"
 #include <cstring>
 #include <cassert>
 

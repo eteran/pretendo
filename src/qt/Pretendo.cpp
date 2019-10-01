@@ -6,8 +6,8 @@
 #include "Controller.h"
 #include "Input.h"
 #include "Mapper.h"
-#include "NES.h"
-#include "PPU.h"
+#include "Nes.h"
+#include "Ppu.h"
 #include "Preferences.h"
 #include "SortFilterProxyModel.h"
 

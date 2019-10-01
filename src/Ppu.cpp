@@ -1,8 +1,8 @@
 
-#include "PPU.h"
-#include "APU.h"
-#include "CPU.h"
-#include "NES.h"
+#include "Ppu.h"
+#include "Apu.h"
+#include "Cpu.h"
+#include "Nes.h"
 #include "Cart.h"
 #include "Mapper.h"
 #include "VRAMBank.h"

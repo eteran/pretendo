@@ -1,6 +1,6 @@
 
-#include "CPU.h"
-#include "NES.h"
+#include "Cpu.h"
+#include "Nes.h"
 #include "Bus.h"
 #include "Cart.h"
 #include "Mapper.h"

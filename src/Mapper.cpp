@@ -1,12 +1,12 @@
 
 #include "Mapper.h"
-#include "APU.h"
-#include "CPU.h"
+#include "Apu.h"
+#include "Cpu.h"
 #include "Cart.h"
 #include "Input.h"
 #include "Config.h"
-#include "NES.h"
-#include "PPU.h"
+#include "Nes.h"
+#include "Ppu.h"
 #include "Compiler.h"
 
 #include <algorithm>

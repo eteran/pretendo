@@ -1,6 +1,6 @@
 
 #include "Bandai.h"
-#include "PPU.h"
+#include "Ppu.h"
 #include <cstring>
 
 //------------------------------------------------------------------------------

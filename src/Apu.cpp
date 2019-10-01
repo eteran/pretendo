@@ -1,7 +1,7 @@
 
-#include "APU.h"
-#include "CPU.h"
-#include "DMC.h"
+#include "Apu.h"
+#include "Cpu.h"
+#include "Dmc.h"
 #include "Noise.h"
 #include "Square.h"
 #include "Triangle.h"

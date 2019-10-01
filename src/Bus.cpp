@@ -1,10 +1,10 @@
 
 #include "Bus.h"
-#include "NES.h"
-#include "PPU.h"
-#include "CPU.h"
+#include "Nes.h"
+#include "Ppu.h"
+#include "Cpu.h"
 #include "Cart.h"
-#include "APU.h"
+#include "Apu.h"
 #include "Input.h"
 #include "Mapper.h"
 #include <cstdlib>

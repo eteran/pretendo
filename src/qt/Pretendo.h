@@ -2,7 +2,7 @@
 #ifndef PRETENDO_20120301_H_
 #define PRETENDO_20120301_H_
 
-#include "APU.h"
+#include "Apu.h"
 #include <QMainWindow>
 #include <QTime>
 

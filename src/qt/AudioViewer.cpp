@@ -1,10 +1,10 @@
 
 #include "AudioViewer.h"
 #include "Pretendo.h"
-#include "APU.h"
+#include "Apu.h"
 #include "Square.h"
 #include "Triangle.h"
-#include "DMC.h"
+#include "Dmc.h"
 #include "Noise.h"
 #include <QPainter>
 #include <cstring>

@@ -1,10 +1,10 @@
 
-#include "NES.h"
-#include "PPU.h"
-#include "CPU.h"
+#include "Nes.h"
+#include "Ppu.h"
+#include "Cpu.h"
 #include "Cart.h"
 #include "Config.h"
-#include "APU.h"
+#include "Apu.h"
 #include "Input.h"
 #include "VideoInterface.h"
 #include <iostream>

@@ -1,7 +1,7 @@
 
-#include "DMC.h"
-#include "APU.h"
-#include "CPU.h"
+#include "Dmc.h"
+#include "Apu.h"
+#include "Cpu.h"
 #include "Mapper.h"
 
 namespace nes {
