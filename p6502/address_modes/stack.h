@@ -16,7 +16,7 @@ private:
 		switch(cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
-			read_handler(PC.raw);
+			read_byte(PC.raw);
 			break;
 		case 2:
 			// increment S
@@ -25,7 +25,7 @@ private:
 		case 3:
 			LAST_CYCLE;
 			// pull register from stack
-			Op::execute(read_handler(S + STACK_ADDRESS));
+			Op::execute(read_byte(S + STACK_ADDRESS));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -37,12 +37,12 @@ private:
 		switch(cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
-			read_handler(PC.raw);
+			read_byte(PC.raw);
 			break;
 		case 2:
 			LAST_CYCLE;
 			// push register on stack, decrement S
-			write_handler(S-- + STACK_ADDRESS, Op::execute());
+			write_byte(S-- + STACK_ADDRESS, Op::execute());
 			OPCODE_COMPLETE;
 		default:
 			abort();
