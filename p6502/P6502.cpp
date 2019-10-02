@@ -10,37 +10,6 @@
 #include <cstdlib>
 
 namespace P6502 {
-
-// public registers
-register16 PC;
-uint8_t    A;
-uint8_t    X;
-uint8_t    Y;
-uint8_t    S;
-uint8_t    P;
-
-// stats
-uint64_t executed_cycles;
-
-
-// internal registers
-static uint16_t   instruction_;
-static int        cycle_;
-
-// internal registers (which get trashed by instructions)
-static register16 effective_address16_;
-static register16 data16_;
-static register16 old_pc_;
-static register16 new_pc_;
-static uint8_t    data8_;
-
-static bool irq_executing_;
-static bool nmi_executing_;
-static bool rst_executing_;
-static bool irq_asserted_;
-static bool nmi_asserted_;
-static bool rst_asserted_;
-
 namespace {
 
 enum : uint8_t {
@@ -53,6 +22,24 @@ enum : uint8_t {
 	V_MASK = 0x40,
 	N_MASK = 0x80
 };
+
+// internal registers
+uint16_t   instruction_ = 0;
+int        cycle_ = 0;
+
+// internal registers (which get trashed by instructions)
+register16 effective_address16_ = {};
+register16 data16_  = {};
+register16 old_pc_  = {};
+register16 new_pc_  = {};
+uint8_t    data8_  = {};
+
+bool irq_asserted_ = false;
+bool nmi_asserted_ = false;
+bool rst_asserted_ = false;
+bool irq_executing_ = false;
+bool nmi_executing_ = false;
+bool rst_executing_ = true;
 
 constexpr uint16_t NMI_VECTOR_ADDRESS = 0xfffa;
 constexpr uint16_t RST_VECTOR_ADDRESS = 0xfffc;
@@ -70,6 +57,20 @@ uint16_t      dmc_dma_source_address_ = 0;
 uint16_t      dmc_dma_count_          = 0;
 uint8_t       dmc_dma_byte_           = 0;
 
+}
+
+// public registers
+register16 PC;
+uint8_t    A = 0;
+uint8_t    X = 0;
+uint8_t    Y = 0;
+uint8_t    S = 0;
+uint8_t    P = I_MASK | R_MASK;
+
+// stats
+uint64_t executed_cycles = 0;
+
+namespace {
 
 #define LAST_CYCLE                                    \
 do {                                                  \
@@ -856,14 +857,6 @@ void reset_irq() {
 //------------------------------------------------------------------------------
 void reset_nmi() {
 	nmi_asserted_ = false;
-}
-
-//------------------------------------------------------------------------------
-// Name: init
-// Desc:
-//------------------------------------------------------------------------------
-void init() {
-	stop();
 }
 
 //------------------------------------------------------------------------------

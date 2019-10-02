@@ -15,9 +15,6 @@
 
 //#define SPRITE_ZERO_HACK
 
-VRAMBank     vram_banks_[0x10];
-
-
 namespace {
 
 constexpr unsigned int cycles_per_scanline = 341u;
@@ -270,6 +267,25 @@ void reset(Reset reset_type) {
 }
 
 //------------------------------------------------------------------------------
+// Name: increment_vram_address
+//------------------------------------------------------------------------------
+void increment_vram_address() {
+	if(rendering_ && ppu_mask_.screen_enabled) {
+		if(ppu_control_.address_increment) {
+			clock_y();
+		} else {
+			clock_x();
+		}
+	} else {
+		if(ppu_control_.address_increment) {
+			vram_address_ += 32;
+		} else {
+			vram_address_ += 1;
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
 // Name: write2000
 //------------------------------------------------------------------------------
 void write2000(uint8_t value) {
@@ -404,28 +420,10 @@ void write2006(uint8_t value) {
 void write2007(uint8_t value) {
 	latch_ = value;
 
-	const uint16_t temp_address = vram_address_ & 0x3fff;
-
-	if(rendering_ && ppu_mask_.screen_enabled) {
-		if(ppu_control_.address_increment) {
-			clock_y();
-		} else {
-			clock_x();
-		}
-	} else {
-		if(ppu_control_.address_increment) {
-			vram_address_ += 32;
-		} else {
-			vram_address_ += 1;
-		}
-	}
-
-	cart.mapper()->vram_change_hook(vram_address_);
-
 	// palette write
-	if((temp_address & 0x3f00) == 0x3f00) {
+	if((vram_address_ & 0x3f00) == 0x3f00) {
 
-		const uint16_t palette_address = temp_address & 0x1f;
+		const uint16_t palette_address = vram_address_ & 0x1f;
 		palette_[palette_address] = value & 0x3f;
 
 		if((palette_address & 0x03) == 0x00) {
@@ -434,8 +432,11 @@ void write2007(uint8_t value) {
 		}
 
 	} else {
-		cart.mapper()->write_vram(temp_address, value);
+		cart.mapper()->write_vram(vram_address_ & 0x3fff, value);
 	}
+
+	increment_vram_address();
+	cart.mapper()->vram_change_hook(vram_address_);
 }
 
 //------------------------------------------------------------------------------
@@ -498,38 +499,21 @@ uint8_t read2007() {
 		return 0x00;
 	}
 
-	const uint16_t temp_address = vram_address_ & 0x3fff;
-
-	if(rendering_ && ppu_mask_.screen_enabled) {
-		if(ppu_control_.address_increment) {
-			clock_y();
-		} else {
-			clock_x();
-		}
-	} else {
-		if(ppu_control_.address_increment) {
-			vram_address_ += 32;
-		} else {
-			vram_address_ += 1;
-		}
-	}
-
-	// TODO(eteran): should this be temp_address? That would make more sense
-	// since it is what ACTUALLY gets read here...
-	cart.mapper()->vram_change_hook(vram_address_);
-	
 	const auto decay_value = static_cast<uint8_t>(latch_);
 
 	latch_ = register_2007_buffer_;
-	register_2007_buffer_ = cart.mapper()->read_vram(temp_address);
+	register_2007_buffer_ = cart.mapper()->read_vram(vram_address_ & 0x3fff);
 
-	if((temp_address & 0x3f00) == 0x3f00) {
+	if((vram_address_ & 0x3f00) == 0x3f00) {
 	
-		latch_ = palette_[temp_address & 0x1f] | (decay_value & 0xc0);
+		latch_ = palette_[vram_address_ & 0x1f] | (decay_value & 0xc0);
 		if(UNLIKELY(ppu_mask_.monochrome)) {
 			latch_ &= 0xf0;
 		}
 	}
+
+	increment_vram_address();
+	cart.mapper()->vram_change_hook(vram_address_);
 
 	return latch_;
 }

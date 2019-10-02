@@ -44,7 +44,6 @@ extern uint8_t    P;
 // stats
 extern uint64_t executed_cycles;
 
-void init();
 void reset();
 void stop();
 void irq();

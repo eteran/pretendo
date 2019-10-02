@@ -44,16 +44,6 @@ namespace {
 
 uint8_t irq_sources_ = 0x00;
 
-namespace {
-
-struct static_initializer {
-	static_initializer() {
-		P6502::init();
-	}
-} static_initializer_;
-
-}
-
 }
 
 //-------------------------------------------------------------------

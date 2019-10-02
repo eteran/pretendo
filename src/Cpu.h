@@ -16,7 +16,7 @@ using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 
-enum IRQ_SOURCE {
+enum IRQ_SOURCE : uint8_t {
 	MAPPER_IRQ = 0x01,
 	APU_IRQ    = 0x02,
 	FDS_IRQ    = 0x04,
@@ -30,13 +30,12 @@ void irq(IRQ_SOURCE source);
 void nmi();
 void schedule_spr_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
 void schedule_dmc_dma(P6502::dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
+void reset(Reset reset_type);
 
 template <int N>
 void exec() {
 	P6502::run<N>();
 }
-
-void reset(Reset reset_type);
 
 }
 }
