@@ -18,12 +18,6 @@ using std::uint8_t;
 
 class Noise {
 public:
-	Noise()              = default;
-	~Noise()             = default;
-	Noise(const Noise &) = delete;
-	Noise &operator=(const Noise &) = delete;
-
-public:
 	void enable();
 	void disable();
 	void set_enabled(bool value);

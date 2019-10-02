@@ -12,12 +12,6 @@ using std::uint16_t;
 
 class LFSR {
 public:
-    LFSR()                        = default;
-    ~LFSR()                       = default;
-    LFSR(const LFSR &)            = delete;
-	LFSR &operator=(const LFSR &) = delete;
-
-public:
 	//-------------------------------------------------------------------
 	// Name: set_mode
 	//-------------------------------------------------------------------

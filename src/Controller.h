@@ -10,11 +10,6 @@ using std::uint8_t;
 
 class Controller {
 public:
-    Controller()                              = default;
-    Controller(const Controller &)            = delete;
-	Controller &operator=(const Controller &) = delete;
-
-public:
 	uint8_t read();
 	void poll();
 

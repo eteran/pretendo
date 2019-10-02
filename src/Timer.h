@@ -11,11 +11,6 @@ using std::uint16_t;
 
 class Timer {
 public:
-	Timer();
-    Timer(const Timer &)            = delete;
-	Timer &operator=(const Timer &) = delete;
-
-public:
 	void reset();
 	uint16_t value() const;
 
@@ -29,10 +24,10 @@ public:
 	}
 
 public:
-    uint16_t frequency;
+	uint16_t frequency = 0xffff;
 
 private:
-	uint16_t timer_;
+	uint16_t timer_ = 0xffff;
 };
 
 }

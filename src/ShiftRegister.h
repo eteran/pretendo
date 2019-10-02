@@ -11,8 +11,8 @@ public:
 	explicit ShiftRegister(T value = 0) : data_(value) {
 	}
 
-    ShiftRegister(const ShiftRegister &other)           = default;
-    ShiftRegister &operator=(const ShiftRegister &rhs)  = default;
+	ShiftRegister(const ShiftRegister &other)           = default;
+	ShiftRegister &operator=(const ShiftRegister &rhs)  = default;
 
 	//-------------------------------------------------------------------
 	// Name: load
@@ -45,7 +45,7 @@ public:
 	}
 
 private:
-	T data_;
+	T data_ = 0;
 };
 
 #endif

@@ -18,8 +18,6 @@ class Sweep {
 public:
 	explicit Sweep(Square<Channel> *square);
 	~Sweep() = default;
-
-private:
 	Sweep(const Sweep &) = delete;
 	Sweep& operator=(const Sweep &) = delete;
 

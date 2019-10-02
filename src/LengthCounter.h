@@ -14,12 +14,6 @@ using std::uint64_t;
 
 class LengthCounter {
 public:
-    LengthCounter()                                 = default;
-    ~LengthCounter()                                = default;
-    LengthCounter(const LengthCounter &)            = delete;
-	LengthCounter &operator=(const LengthCounter &) = delete;
-
-public:
 	void clear();
 	void halt();
 	void load(uint8_t index);

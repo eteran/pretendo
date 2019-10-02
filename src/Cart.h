@@ -11,13 +11,6 @@ class Mapper;
 
 class Cart {
 public:
-    Cart()                        = default;
-    Cart(const Cart &)            = delete;
-    Cart &operator=(const Cart &) = delete;
-    ~Cart();
-
-
-public:
 	enum MIRRORING {
 		MIR_VERTICAL,
 		MIR_HORIZONTAL,

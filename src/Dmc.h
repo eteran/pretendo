@@ -24,12 +24,6 @@ union DMCControl {
 
 class DMC {
 public:
-    DMC()                       = default;
-    ~DMC()                      = default;
-    DMC(const DMC &)            = delete;
-	DMC &operator=(const DMC &) = delete;
-
-public:
 	void enable();
 	void disable();
 	void set_enabled(bool value);
@@ -54,7 +48,6 @@ private:
 	bool output_clock();
 	void start_cycle();
 	void refill_sample_buffer();
-
 
 private:
 	bool                   muted_               = false;

@@ -14,12 +14,6 @@ using std::uint64_t;
 
 class Envelope {
 public:
-    Envelope()                            = default;
-    ~Envelope()                           = default;
-    Envelope(const Envelope &)            = delete;
-	Envelope &operator=(const Envelope &) = delete;
-
-public:
 	void clock();
 	void start();
 	void set_control(uint8_t value);

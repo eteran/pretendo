@@ -20,12 +20,6 @@ class Square {
     static_assert(Channel >= 0 && Channel < 2, "only channels 0 and 1 are valid");
 
 public:
-    Square()                          = default;
-    ~Square()                         = default;
-    Square(const Square &)            = delete;
-	Square &operator=(const Square &) = delete;
-
-public:
 	void enable();
 	void disable();
 	void set_enabled(bool value);

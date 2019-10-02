@@ -11,12 +11,6 @@ using std::uint8_t;
 
 class LinearCounter {
 public:
-    LinearCounter()                                 = default;
-    ~LinearCounter()                                = default;
-    LinearCounter(const LinearCounter &)            = delete;
-	LinearCounter &operator=(const LinearCounter &) = delete;
-
-public:
 	uint8_t value() const { return value_; }
 	void clock();
 	void reload();

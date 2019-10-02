@@ -18,12 +18,6 @@ using std::uint64_t;
 
 class Triangle {
 public:
-    Triangle()                            = default;
-    ~Triangle()                           = default;
-    Triangle(const Triangle &)            = delete;
-	Triangle &operator=(const Triangle &) = delete;
-
-public:
 	void enable();
 	void disable();
 	void set_enabled(bool value);
