@@ -732,6 +732,7 @@ void clock() {
 	if(UNLIKELY(dmc_dma_count_)) {
 
 		if(dmc_dma_delay_ != 0) {
+			read_byte(dmc_dma_source_address_);
 			--dmc_dma_delay_;
 			return;
 		}
@@ -741,6 +742,7 @@ void clock() {
 		// the CPU starts DMA on an odd cycle
 		// after that, they should stay in sync
 		if((dmc_dma_count_ & 1) != (executed_cycles & 1)) {
+			read_byte(dmc_dma_source_address_);
 			return;
 		}
 
@@ -759,6 +761,7 @@ void clock() {
 
 
 		if(spr_dma_delay_ != 0) {
+			read_byte(spr_dma_source_address_);
 			--spr_dma_delay_;
 			return;
 		}
@@ -768,6 +771,7 @@ void clock() {
 		// the CPU starts DMA on an odd cycle
 		// after that, they should stay in sync
 		if((spr_dma_count_ & 1) != (executed_cycles & 1)) {
+			read_byte(spr_dma_source_address_);
 			return;
 		}
 
