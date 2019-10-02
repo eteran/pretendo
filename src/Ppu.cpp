@@ -432,7 +432,7 @@ void write2007(uint8_t value) {
 		}
 
 	} else {
-		cart.mapper()->write_vram(vram_address_ & 0x3fff, value);
+		cart.mapper()->write_vram(vram_address_, value);
 	}
 
 	increment_vram_address();
@@ -502,7 +502,7 @@ uint8_t read2007() {
 	const auto decay_value = static_cast<uint8_t>(latch_);
 
 	latch_ = register_2007_buffer_;
-	register_2007_buffer_ = cart.mapper()->read_vram(vram_address_ & 0x3fff);
+	register_2007_buffer_ = cart.mapper()->read_vram(vram_address_);
 
 	if((vram_address_ & 0x3f00) == 0x3f00) {
 	
@@ -522,27 +522,12 @@ uint8_t read2007() {
 // Name: write4014
 //------------------------------------------------------------------------------
 void write4014(uint8_t value) {
-	// drain current cycles, then go ahead and do the DMA
+	// go ahead and do the DMA
 	// the procedure takes 513 CPU cycles (+1 on odd CPU cycles):
 	// first one (or two) idle cycles, and then 256 pairs of alternating
 	// read/write cycles.
-#if 0
-	if((cpu::cycle_count() & 1)) {
-		cpu::burn(514);
-	} else {
-		cpu::burn(513);
-	}
-
-	uint16_t sprite_addr = (value << 8);
-
-	// do the copy with wrapping
-	for(int i = 0; i < 256; ++i) {
-		write2004(cart.mapper()->read_memory(sprite_addr++));
-	}
-#else
     const auto sprite_addr = static_cast<uint16_t>(value << 8);
 	cpu::schedule_spr_dma(write2004, sprite_addr, 256);
-#endif
 }
 
 //------------------------------------------------------------------------------

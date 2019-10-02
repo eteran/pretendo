@@ -51,11 +51,13 @@ dma_handler_t spr_dma_handler_        = nullptr;
 uint16_t      spr_dma_source_address_ = 0;
 uint16_t      spr_dma_count_          = 0;
 uint8_t       spr_dma_byte_           = 0;
+uint8_t       spr_dma_delay_          = 0;
 
 dma_handler_t dmc_dma_handler_        = nullptr;
 uint16_t      dmc_dma_source_address_ = 0;
 uint16_t      dmc_dma_count_          = 0;
 uint8_t       dmc_dma_byte_           = 0;
+uint8_t       dmc_dma_delay_          = 0;
 
 }
 
@@ -68,7 +70,7 @@ uint8_t    S = 0;
 uint8_t    P = I_MASK | R_MASK;
 
 // stats
-uint64_t executed_cycles = 0;
+uint64_t executed_cycles = 1; // NOTE(eteran): make's 4.irq_and_dma.nes pass...
 
 namespace {
 
@@ -729,40 +731,55 @@ void clock() {
 
 	if(UNLIKELY(dmc_dma_count_)) {
 
+		if(dmc_dma_delay_ != 0) {
+			--dmc_dma_delay_;
+			return;
+		}
+
 		// the count will always be initially even (we multiply by 2)
 		// so, this forces us to idle for 1 cycle if
 		// the CPU starts DMA on an odd cycle
 		// after that, they should stay in sync
-		if((dmc_dma_count_ & 1) == (executed_cycles & 1)) {
-			if((dmc_dma_count_ & 1) == 0) {
-				// read cycle
-				dmc_dma_byte_ = read_byte(dmc_dma_source_address_++);
-			} else {
-				// write cycle
-				(*dmc_dma_handler_)(dmc_dma_byte_);
-			}
-
-			--dmc_dma_count_;
+		if((dmc_dma_count_ & 1) != (executed_cycles & 1)) {
+			return;
 		}
+
+		if((dmc_dma_count_ & 1) == 0) {
+			// read cycle
+			dmc_dma_byte_ = read_byte(dmc_dma_source_address_++);
+		} else {
+			// write cycle
+			(*dmc_dma_handler_)(dmc_dma_byte_);
+		}
+
+		--dmc_dma_count_;
+
 		
 	} else if(UNLIKELY(spr_dma_count_)) {
 
+
+		if(spr_dma_delay_ != 0) {
+			--spr_dma_delay_;
+			return;
+		}
+
 		// the count will always be initially even (we multiply by 2)
 		// so, this forces us to idle for 1 cycle if
 		// the CPU starts DMA on an odd cycle
 		// after that, they should stay in sync
-		if((spr_dma_count_ & 1) == (executed_cycles & 1)) {
-			if((executed_cycles & 1) == 0) {
-				// read cycle
-				spr_dma_byte_ = read_byte(spr_dma_source_address_++);
-			} else {
-				// write cycle
-				(*spr_dma_handler_)(spr_dma_byte_);
-			}
-
-			--spr_dma_count_;
+		if((spr_dma_count_ & 1) != (executed_cycles & 1)) {
+			return;
 		}
-		
+
+		if((executed_cycles & 1) == 0) {
+			// read cycle
+			spr_dma_byte_ = read_byte(spr_dma_source_address_++);
+		} else {
+			// write cycle
+			(*spr_dma_handler_)(spr_dma_byte_);
+		}
+
+		--spr_dma_count_;
 	} else {
 		assert(cycle_ < 10);
 		
@@ -840,6 +857,7 @@ void reset() {
 		rst_asserted_ = true;
 		irq_asserted_ = false;
 		nmi_asserted_ = false;
+		executed_cycles  = 1;
 	}
 }
 
@@ -871,7 +889,7 @@ void stop() {
 	S = 0;
 	P = I_MASK | R_MASK;
 
-	executed_cycles  = 0;
+	executed_cycles        = 1;
 	irq_asserted_          = false;
 	nmi_asserted_          = false;
 	rst_asserted_          = false;
@@ -883,10 +901,12 @@ void stop() {
 	spr_dma_handler_ 	    = nullptr;
 	spr_dma_source_address_ = 0;
 	spr_dma_count_		    = 0;
+	spr_dma_delay_          = 0;
 
 	dmc_dma_handler_ 	    = nullptr;
 	dmc_dma_source_address_ = 0;
 	dmc_dma_count_		    = 0;
+	dmc_dma_delay_          = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -902,11 +922,13 @@ void schedule_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t c
 		spr_dma_handler_        = dma_handler;
 		spr_dma_source_address_ = source_address;
 		spr_dma_count_          = count * 2;
+		spr_dma_delay_          = 1;
 		break;
 	case DMC_DMA:
 		dmc_dma_handler_        = dma_handler;
 		dmc_dma_source_address_ = source_address;
 		dmc_dma_count_          = count * 2;
+		dmc_dma_delay_          = 1;
 		break;
 	}
 }
