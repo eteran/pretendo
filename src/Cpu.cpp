@@ -1,56 +1,54 @@
 
-#include "Cpu.h"
-#include "Compiler.h"
-
 #ifdef _MSC_VER
 #pragma warning(disable : 4127)
 #endif
+
 #include "Cpu.h"
-#include "Nes.h"
 #include "Bus.h"
 #include "Cart.h"
+#include "Compiler.h"
 #include "Mapper.h"
+#include "Nes.h"
 
-#include <iostream>
 #include <algorithm>
-#include <cstdlib>
-#include <cstring>
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
+#include <iostream>
 
-#define LAST_CYCLE                                        \
-	do {                                                  \
-		rst_executing_ = false;                           \
-		nmi_executing_ = false;                           \
-		irq_executing_ = false;                           \
-														  \
-		if(rst_asserted_) {                               \
-			rst_executing_ = true;                        \
-		} else if(nmi_asserted_) {                        \
-			nmi_executing_ = true;                        \
-		} else if(irq_asserted_ && ((P & I_MASK) == 0)) { \
-			irq_executing_ = true;                        \
-		}                                                 \
-		nmi_asserted_ = false;                            \
-		rst_asserted_ = false;                            \
-	} while(0)
+#define LAST_CYCLE                                         \
+	do {                                                   \
+		rst_executing_ = false;                            \
+		nmi_executing_ = false;                            \
+		irq_executing_ = false;                            \
+                                                           \
+		if (rst_asserted_) {                               \
+			rst_executing_ = true;                         \
+		} else if (nmi_asserted_) {                        \
+			nmi_executing_ = true;                         \
+		} else if (irq_asserted_ && ((P & I_MASK) == 0)) { \
+			irq_executing_ = true;                         \
+		}                                                  \
+		nmi_asserted_ = false;                             \
+		rst_asserted_ = false;                             \
+	} while (0)
 
 #define OPCODE_COMPLETE \
 	do {                \
 		cycle_ = -1;    \
 		return;         \
-	} while(0)
+	} while (0)
 
 namespace nes {
 namespace cpu {
 
 // public registers
 register16 PC = {};
-uint8_t    A = 0;
-uint8_t    X = 0;
-uint8_t    Y = 0;
-uint8_t    S = 0;
-uint8_t    P = I_MASK | R_MASK;
+uint8_t    A  = 0;
+uint8_t    X  = 0;
+uint8_t    Y  = 0;
+uint8_t    S  = 0;
+uint8_t    P  = I_MASK | R_MASK;
 
 namespace {
 
@@ -59,46 +57,10 @@ enum DMA_SOURCE {
 	DMC_DMA = 1
 };
 
-
-uint8_t irq_sources_ = 0x00;
-
-// internal registers
-uint16_t   instruction_ = 0;
-int        cycle_ = 0;
-
-// internal registers (which get trashed by instructions)
-register16 effective_address16_ = {};
-register16 data16_  = {};
-register16 old_pc_  = {};
-register16 new_pc_  = {};
-uint8_t    data8_  = {};
-
-bool irq_asserted_ = false;
-bool nmi_asserted_ = false;
-bool rst_asserted_ = false;
-bool irq_executing_ = false;
-bool nmi_executing_ = false;
-bool rst_executing_ = true;
-
-constexpr uint16_t NMI_VECTOR_ADDRESS = 0xfffa;
-constexpr uint16_t RST_VECTOR_ADDRESS = 0xfffc;
-constexpr uint16_t IRQ_VECTOR_ADDRESS = 0xfffe;
-constexpr uint16_t STACK_ADDRESS      = 0x0100;
-
-dma_handler_t spr_dma_handler_        = nullptr;
-uint16_t      spr_dma_source_address_ = 0;
-uint16_t      spr_dma_count_          = 0;
-uint8_t       spr_dma_byte_           = 0;
-uint8_t       spr_dma_delay_          = 0;
-
-dma_handler_t dmc_dma_handler_        = nullptr;
-uint16_t      dmc_dma_source_address_ = 0;
-uint16_t      dmc_dma_count_          = 0;
-uint8_t       dmc_dma_byte_           = 0;
-uint8_t       dmc_dma_delay_          = 0;
-
-// stats
-uint64_t executed_cycles_ = 1; // NOTE(eteran): make's 4.irq_and_dma.nes pass...
+constexpr uint16_t NmiVectorAddress = 0xfffa;
+constexpr uint16_t RstVectorAddress = 0xfffc;
+constexpr uint16_t IrqVectorAddress = 0xfffe;
+constexpr uint16_t StackAddress     = 0x0100;
 
 constexpr uint8_t flag_table_[256] = {
 	0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -134,6 +96,41 @@ constexpr uint8_t flag_table_[256] = {
 	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 };
+
+uint8_t irq_sources_ = 0x00;
+
+// internal registers
+uint16_t instruction_ = 0;
+int      cycle_       = 0;
+
+// internal registers (which get trashed by instructions)
+register16 effective_address16_ = {};
+register16 data16_              = {};
+register16 old_pc_              = {};
+register16 new_pc_              = {};
+uint8_t    data8_               = {};
+
+bool irq_asserted_  = false;
+bool nmi_asserted_  = false;
+bool rst_asserted_  = false;
+bool irq_executing_ = false;
+bool nmi_executing_ = false;
+bool rst_executing_ = true;
+
+dma_handler_t spr_dma_handler_        = nullptr;
+uint16_t      spr_dma_source_address_ = 0;
+uint16_t      spr_dma_count_          = 0;
+uint8_t       spr_dma_byte_           = 0;
+uint8_t       spr_dma_delay_          = 0;
+
+dma_handler_t dmc_dma_handler_        = nullptr;
+uint16_t      dmc_dma_source_address_ = 0;
+uint16_t      dmc_dma_count_          = 0;
+uint8_t       dmc_dma_byte_           = 0;
+uint8_t       dmc_dma_delay_          = 0;
+
+// stats
+uint64_t executed_cycles_ = 1; // NOTE(eteran): make's 4.irq_and_dma.nes pass...
 
 /**
  * @brief jam_handler
@@ -171,7 +168,7 @@ void clear_flag() {
  */
 template <uint8_t M>
 void set_flag_condition(bool cond) {
-	if(cond) {
+	if (cond) {
 		set_flag<M>();
 	} else {
 		clear_flag<M>();
@@ -195,7 +192,9 @@ void update_nz_flags(uint8_t value) {
 // opcode implementation
 #include "memory.h"
 #include "opcodes.h"
+
 #include "address_modes.h"
+
 
 /**
  * @brief execute_opcode
@@ -466,7 +465,7 @@ void execute_opcode() {
 		opcode_nmi::execute,
 		opcode_irq::execute,
 	};
-	
+
 	assert(instruction_ <= 0x102);
 	table[instruction_]();
 }
@@ -476,9 +475,9 @@ void execute_opcode() {
  */
 void clock() {
 
-	if(UNLIKELY(dmc_dma_count_)) {
+	if (UNLIKELY(dmc_dma_count_)) {
 
-		if(dmc_dma_delay_ != 0) {
+		if (dmc_dma_delay_ != 0) {
 			read_byte(dmc_dma_source_address_);
 			--dmc_dma_delay_;
 			return;
@@ -488,12 +487,12 @@ void clock() {
 		// so, this forces us to idle for 1 cycle if
 		// the CPU starts DMA on an odd cycle
 		// after that, they should stay in sync
-		if((dmc_dma_count_ & 1) != (executed_cycles_ & 1)) {
+		if ((dmc_dma_count_ & 1) != (executed_cycles_ & 1)) {
 			read_byte(dmc_dma_source_address_);
 			return;
 		}
 
-		if((dmc_dma_count_ & 1) == 0) {
+		if ((dmc_dma_count_ & 1) == 0) {
 			// read cycle
 			dmc_dma_byte_ = read_byte(dmc_dma_source_address_++);
 		} else {
@@ -503,11 +502,9 @@ void clock() {
 
 		--dmc_dma_count_;
 
-		
-	} else if(UNLIKELY(spr_dma_count_)) {
+	} else if (UNLIKELY(spr_dma_count_)) {
 
-
-		if(spr_dma_delay_ != 0) {
+		if (spr_dma_delay_ != 0) {
 			read_byte(spr_dma_source_address_);
 			--spr_dma_delay_;
 			return;
@@ -517,12 +514,12 @@ void clock() {
 		// so, this forces us to idle for 1 cycle if
 		// the CPU starts DMA on an odd cycle
 		// after that, they should stay in sync
-		if((spr_dma_count_ & 1) != (executed_cycles_ & 1)) {
+		if ((spr_dma_count_ & 1) != (executed_cycles_ & 1)) {
 			read_byte(spr_dma_source_address_);
 			return;
 		}
 
-		if((executed_cycles_ & 1) == 0) {
+		if ((executed_cycles_ & 1) == 0) {
 			// read cycle
 			spr_dma_byte_ = read_byte(spr_dma_source_address_++);
 		} else {
@@ -533,18 +530,18 @@ void clock() {
 		--spr_dma_count_;
 	} else {
 		assert(cycle_ < 10);
-		
-		if(cycle_ == 0) {
+
+		if (cycle_ == 0) {
 
 			// first cycle is always instruction fetch
 			// or do we force an interrupt?
-			if(rst_executing_) {
+			if (rst_executing_) {
 				read_byte(PC.raw);
 				instruction_ = 0x100;
-			} else if(nmi_executing_) {
+			} else if (nmi_executing_) {
 				read_byte(PC.raw);
 				instruction_ = 0x101;
-			} else if(irq_executing_) {
+			} else if (irq_executing_) {
 				read_byte(PC.raw);
 				instruction_ = 0x102;
 			} else {
@@ -578,7 +575,7 @@ void schedule_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t c
 
 	assert(dma_handler);
 
-	switch(source) {
+	switch (source) {
 	case SPR_DMA:
 		spr_dma_handler_        = dma_handler;
 		spr_dma_source_address_ = source_address;
@@ -594,7 +591,6 @@ void schedule_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t c
 	}
 }
 
-
 }
 
 //------------------------------------------------------------------------------
@@ -608,17 +604,6 @@ void tick() {
 	clock();
 	sync_handler();
 	++executed_cycles_;
-}
-
-/**
- * @brief run
- * @param cycles
- */
-void run(int cycles) {
-
-	while(cycles-- > 0) {
-		tick();
-	}
 }
 
 /**
@@ -639,15 +624,13 @@ void nmi() {
  * @brief reset
  */
 void reset() {
-	if(!rst_executing_) {
-		rst_asserted_ = true;
-		irq_asserted_ = false;
-		nmi_asserted_ = false;
+	if (!rst_executing_) {
+		rst_asserted_    = true;
+		irq_asserted_    = false;
+		nmi_asserted_    = false;
 		executed_cycles_ = 1;
 	}
 }
-
-
 
 /**
  * @brief clear_nmi
@@ -667,26 +650,25 @@ void stop() {
 	S = 0;
 	P = I_MASK | R_MASK;
 
-	executed_cycles_       = 1;
-	irq_asserted_          = false;
-	nmi_asserted_          = false;
-	rst_asserted_          = false;
-	irq_executing_         = false;
-	nmi_executing_         = false;
-	rst_executing_         = true;
-	cycle_                 = 0;
-		
-	spr_dma_handler_ 	    = nullptr;
+	executed_cycles_ = 1;
+	irq_asserted_    = false;
+	nmi_asserted_    = false;
+	rst_asserted_    = false;
+	irq_executing_   = false;
+	nmi_executing_   = false;
+	rst_executing_   = true;
+	cycle_           = 0;
+
+	spr_dma_handler_        = nullptr;
 	spr_dma_source_address_ = 0;
-	spr_dma_count_		    = 0;
+	spr_dma_count_          = 0;
 	spr_dma_delay_          = 0;
 
-	dmc_dma_handler_ 	    = nullptr;
+	dmc_dma_handler_        = nullptr;
 	dmc_dma_source_address_ = 0;
-	dmc_dma_count_		    = 0;
+	dmc_dma_count_          = 0;
 	dmc_dma_delay_          = 0;
 }
-
 
 /**
  * @brief reset
@@ -694,7 +676,7 @@ void stop() {
  */
 void reset(Reset reset_type) {
 
-	if(reset_type == Reset::Hard) {
+	if (reset_type == Reset::Hard) {
 		stop();
 		nes::bus::trash_ram();
 	}
@@ -702,8 +684,6 @@ void reset(Reset reset_type) {
 	reset();
 	std::cout << "CPU reset complete" << std::endl;
 }
-
-
 
 /**
  * @brief irq
@@ -713,7 +693,7 @@ void irq(IRQ_SOURCE source) {
 
 	irq_sources_ |= source;
 
-	if(irq_sources_) {
+	if (irq_sources_) {
 		irq();
 	}
 }
@@ -726,7 +706,7 @@ void clear_irq(IRQ_SOURCE source) {
 
 	irq_sources_ &= ~source;
 
-	if(!irq_sources_) {
+	if (!irq_sources_) {
 		reset_irq();
 	}
 }
@@ -740,7 +720,6 @@ void clear_irq(IRQ_SOURCE source) {
 void schedule_spr_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count) {
 	schedule_dma(dma_handler, source_address, count, SPR_DMA);
 }
-
 
 /**
  * @brief schedule_dmc_dma
@@ -756,7 +735,9 @@ void schedule_dmc_dma(dma_handler_t dma_handler, uint16_t source_address, uint16
  * @brief cycle_count
  * @return
  */
-uint64_t cycle_count() { return executed_cycles_; }
+uint64_t cycle_count() {
+	return executed_cycles_;
+}
 
 }
 }

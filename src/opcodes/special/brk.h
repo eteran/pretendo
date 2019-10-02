@@ -17,20 +17,20 @@ public:
 			break;
 		case 2:
 			// push PCH on stack, decrement S
-			write_byte(S-- + STACK_ADDRESS, PC.hi);
+			write_byte(S-- + StackAddress, PC.hi);
 			break;
 		case 3:
 			// push PCL on stack, decrement S
-			write_byte(S-- + STACK_ADDRESS, PC.lo);
+			write_byte(S-- + StackAddress, PC.lo);
 			break;
 		case 4:
 			// push P on stack, decrement S
-			write_byte(S-- + STACK_ADDRESS, P | B_MASK);
+			write_byte(S-- + StackAddress, P | B_MASK);
 			if(nmi_asserted_) {
-				effective_address16_.raw = NMI_VECTOR_ADDRESS;
+				effective_address16_.raw = NmiVectorAddress;
 				nmi_asserted_ = false;
 			} else {
-				effective_address16_.raw = IRQ_VECTOR_ADDRESS;
+				effective_address16_.raw = IrqVectorAddress;
 			}
 			break;
 		case 5:

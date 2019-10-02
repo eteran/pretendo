@@ -17,25 +17,25 @@ public:
 			break;
 		case 2:
 			// push PCH on stack, decrement S
-			write_byte(S-- + STACK_ADDRESS, PC.hi);
+			write_byte(S-- + StackAddress, PC.hi);
 			break;
 		case 3:
 			// push PCL on stack, decrement S
-			write_byte(S-- + STACK_ADDRESS, PC.lo);
+			write_byte(S-- + StackAddress, PC.lo);
 			break;
 		case 4:
 			// push P on stack, decrement S
-			write_byte(S-- + STACK_ADDRESS, P);
+			write_byte(S-- + StackAddress, P);
 			break;
 		case 5:
 			set_flag<I_MASK>();
 			// fetch PCL
-			PC.lo = read_byte(NMI_VECTOR_ADDRESS + 0);
+			PC.lo = read_byte(NmiVectorAddress + 0);
 			break;
 		case 6:
 			LAST_CYCLE;
 			// fetch PCH
-			PC.hi = read_byte(NMI_VECTOR_ADDRESS + 1);
+			PC.hi = read_byte(NmiVectorAddress + 1);
 			OPCODE_COMPLETE;
 		default:
 			abort();

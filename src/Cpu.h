@@ -2,14 +2,13 @@
 #ifndef CPU_20080314_H_
 #define CPU_20080314_H_
 
-#include "Reset.h"
 #include "BitField.h"
+#include "Reset.h"
 #include <cstdint>
 
 namespace nes {
 namespace cpu {
 
-using std::int8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
@@ -24,38 +23,36 @@ enum IRQ_SOURCE : uint8_t {
 	ALL_IRQ    = 0xff
 };
 
-union register16 {
-	uint16_t raw;
-	BitField<0,8> lo;
-	BitField<8,8> hi;
-};
-
-
 enum : uint8_t {
 	C_MASK = 0x01,
 	Z_MASK = 0x02,
 	I_MASK = 0x04,
 	D_MASK = 0x08,
 	B_MASK = 0x10,
-	R_MASK = 0x20,	// antisocial flag... always 1
+	R_MASK = 0x20, // antisocial flag... always 1
 	V_MASK = 0x40,
 	N_MASK = 0x80
 };
 
+union register16 {
+	uint16_t       raw;
+	BitField<0, 8> lo;
+	BitField<8, 8> hi;
+};
+
 // API
 uint64_t cycle_count();
-void clear_irq(IRQ_SOURCE source);
-void clear_nmi();
-void irq(IRQ_SOURCE source);
-void schedule_spr_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
-void schedule_dmc_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
-void reset(Reset reset_type);
-void reset();
-void stop();
-void irq();
-void nmi();
-void run(int cycles);
-void tick();
+void     clear_irq(IRQ_SOURCE source);
+void     clear_nmi();
+void     irq(IRQ_SOURCE source);
+void     schedule_spr_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
+void     schedule_dmc_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
+void     reset(Reset reset_type);
+void     reset();
+void     stop();
+void     irq();
+void     nmi();
+void     tick();
 
 // public registers
 extern register16 PC;
@@ -67,7 +64,7 @@ extern uint8_t    P;
 
 template <int Cycles>
 void exec() {
-	for(int i = 0; i < Cycles; ++i) {
+	for (int i = 0; i < Cycles; ++i) {
 		tick();
 	}
 }

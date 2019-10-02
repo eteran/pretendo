@@ -25,7 +25,7 @@ private:
 		case 3:
 			LAST_CYCLE;
 			// pull register from stack
-			Op::execute(read_byte(S + STACK_ADDRESS));
+			Op::execute(read_byte(S + StackAddress));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -42,7 +42,7 @@ private:
 		case 2:
 			LAST_CYCLE;
 			// push register on stack, decrement S
-			write_byte(S-- + STACK_ADDRESS, Op::execute());
+			write_byte(S-- + StackAddress, Op::execute());
 			OPCODE_COMPLETE;
 		default:
 			abort();
