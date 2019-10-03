@@ -1,7 +1,5 @@
 
 #include "Mapper226.h"
-#include "Ppu.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(226)
 
@@ -9,14 +7,9 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(226)
 // Name:
 //------------------------------------------------------------------------------
 Mapper226::Mapper226() {
-	memset(chr_ram_, 0, sizeof(chr_ram_));
-
-	regs_[0] = 0;
-	regs_[1] = 0;
 
 	writer_handler(0x8000, 0);
 	writer_handler(0x8001, 0);
-
 	set_chr_0000_1fff_ram(chr_ram_, 0);
 }
 
@@ -91,9 +84,9 @@ void Mapper226::writer_handler(uint16_t address, uint8_t value) {
 	regs_[address & 0x0001] = value;
 
 	if(regs_[0] & 0x40) {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(mirror_horizontal);
 	} else {
-		set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(mirror_vertical);
 	}
 
 	uint32_t prg_page = ((regs_[0] >> 1) & 0x0f) | ((regs_[0] >> 3) & 0x10) | ((regs_[1] & 0x01) << 5);

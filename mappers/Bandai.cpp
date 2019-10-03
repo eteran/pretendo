@@ -1,15 +1,10 @@
 
 #include "Bandai.h"
-#include "Ppu.h"
-#include <cstring>
 
 //------------------------------------------------------------------------------
 // Name: Bandai
 //------------------------------------------------------------------------------
 Bandai::Bandai() {
-
-	memset(chr_ram_, 0, sizeof(chr_ram_));
-
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 	set_chr_0000_1fff_ram(chr_ram_, 0);
@@ -133,10 +128,10 @@ void Bandai::write_handler(uint16_t address, uint8_t value) {
 		break;
 	case 0x09:
 		switch(value & 0x03) {
-		case 0: set_mirroring(nes::ppu::mirror_vertical);    break;
-		case 1: set_mirroring(nes::ppu::mirror_horizontal);  break;
-		case 2: set_mirroring(nes::ppu::mirror_single_low);  break;
-		case 3: set_mirroring(nes::ppu::mirror_single_high); break;
+		case 0: set_mirroring(mirror_vertical);    break;
+		case 1: set_mirroring(mirror_horizontal);  break;
+		case 2: set_mirroring(mirror_single_low);  break;
+		case 3: set_mirroring(mirror_single_high); break;
 		}
 		break;
 	case 0x0a:

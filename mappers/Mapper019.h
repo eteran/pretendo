@@ -46,7 +46,7 @@ public:
 	void cpu_sync() override;
 
 private:
-	uint8_t    chr_ram_[0x2000];
+	uint8_t    chr_ram_[0x2000] = {};
 	IRQControl irq_control_ = { 0 };
 	uint8_t    mirroring_   = 0;
 	MemoryMappedFile  prg_ptr_;

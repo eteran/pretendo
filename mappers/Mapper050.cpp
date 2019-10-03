@@ -2,7 +2,6 @@
 #include "Mapper050.h"
 #include "Cart.h"
 #include "Nes.h"
-#include <cstring>
 #include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(50)
@@ -17,8 +16,6 @@ Mapper50::Mapper50() {
 	set_prg_ab(0x09);
 	set_prg_cd(0);
 	set_prg_ef(0x0b);
-
-	memset(chr_ram_, 0, sizeof(chr_ram_));
 
 	if(nes::cart.has_chr_rom()) {
 		set_chr_0000_1fff(0);

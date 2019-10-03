@@ -1,6 +1,5 @@
 
 #include "Mapper033.h"
-#include "Ppu.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(33)
 
@@ -56,9 +55,9 @@ void Mapper33::write_handler(uint16_t address, uint8_t value) {
 	switch(address & 0xa003) {
 	case 0x8000:
 		if(!(value & 0x40)) {
-			set_mirroring(nes::ppu::mirror_vertical);
+			set_mirroring(mirror_vertical);
 		} else {
-			set_mirroring(nes::ppu::mirror_horizontal);
+			set_mirroring(mirror_horizontal);
 		}
 		set_prg_89(value & 0x3f);
 		break;

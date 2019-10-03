@@ -1,7 +1,6 @@
 
 #include "Mapper022.h"
 
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(22)
 

@@ -42,7 +42,7 @@ private:
 	uint8_t read_eeprom(uint16_t address);
 
 private:
-	uint8_t    chr_ram_[0x2000];
+	uint8_t    chr_ram_[0x2000] = {};
 	IRQCounter irq_counter_ = { 0 };
 	bool       irq_enabled_ = false;
 };

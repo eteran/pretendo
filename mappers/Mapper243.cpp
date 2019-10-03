@@ -1,6 +1,5 @@
 
 #include "Mapper243.h"
-#include "Ppu.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(243)
 
@@ -51,10 +50,10 @@ void Mapper243::write_4(uint16_t address, uint8_t value) {
 
 
 			switch(mir) {
-			case 0x00: set_mirroring(nes::ppu::mirror_horizontal);  break;
-			case 0x01: set_mirroring(nes::ppu::mirror_vertical);    break;
+			case 0x00: set_mirroring(mirror_horizontal);  break;
+			case 0x01: set_mirroring(mirror_vertical);    break;
 			case 0x02: set_mirroring(0x15);                    break;
-			case 0x03: set_mirroring(nes::ppu::mirror_single_high); break;
+			case 0x03: set_mirroring(mirror_single_high); break;
 			}
 			break;
 		}

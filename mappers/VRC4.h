@@ -36,8 +36,8 @@ private:
 	void clock_irq();
 
 private:
-	uint8_t    chr_[8];
-	uint8_t    prg_[2];
+	uint8_t    chr_[8] = {};
+	uint8_t    prg_[2] = {};
 
 	uint8_t    irq_latch_     = 0;
 	IRQControl irq_control_   = { 0 };

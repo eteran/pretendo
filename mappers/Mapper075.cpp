@@ -1,6 +1,5 @@
 
 #include "Mapper075.h"
-#include "Ppu.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(75)
 
@@ -8,10 +7,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(75)
 // Name:
 //------------------------------------------------------------------------------
 Mapper75::Mapper75() {
-
-	chr_reg_[0] = 0;
-	chr_reg_[1] = 0;
-
 	set_prg_89abcdef(0);
 	set_prg_ef(-1);
 	set_chr_0000_1fff(0);
@@ -38,9 +33,9 @@ void Mapper75::write_8(uint16_t address, uint8_t value) {
 void Mapper75::write_9(uint16_t address, uint8_t value) {
 	(void)address;
 	if(value & 0x01) {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(mirror_horizontal);
 	} else {
-		set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(mirror_vertical);
 	}
 
 	chr_reg_[0] = (chr_reg_[0] & 0x0f) | ((value << 3) & 0x10);

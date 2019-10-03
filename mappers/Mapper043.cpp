@@ -2,7 +2,6 @@
 #include "Mapper043.h"
 #include "Cart.h"
 #include "Nes.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(43)
 
@@ -11,10 +10,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(43)
 //------------------------------------------------------------------------------
 Mapper43::Mapper43() {
 
-	memset(chr_ram_, 0, sizeof(chr_ram_));
-
 	set_prg_89abcdef(0);
-
 	if(nes::cart.has_chr_rom()) {
 		set_chr_0000_1fff(0);
 	} else {

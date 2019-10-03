@@ -57,12 +57,12 @@ private:
 
 private:
 
-	uint8_t   prg_ram_[2][0x8000];
-	uint8_t   exram_[0x400];
-	uint8_t   bg_chr_banks_[8];
-	uint8_t   sp_chr_banks_[8];
-	uint16_t  prev_vram_address_[2];
-	uint8_t * prg_ram_banks_[0x10];
+	uint8_t   prg_ram_[2][0x8000]   = {};
+	uint8_t   exram_[0x400]         = {};
+	uint8_t   bg_chr_banks_[8]      = {};
+	uint8_t   sp_chr_banks_[8]      = {};
+	uint16_t  prev_vram_address_[2] = { 0xffff, 0xffff };
+	uint8_t * prg_ram_banks_[0x10]  = {};
 
 	bool      irq_enabled_           = false;
 	bool      large_sprites_         = false;

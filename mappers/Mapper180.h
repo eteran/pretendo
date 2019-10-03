@@ -22,7 +22,7 @@ public:
 	void write_f(uint16_t address, uint8_t value) override;
 
 private:
-	uint8_t chr_ram_[0x2000];
+	uint8_t chr_ram_[0x2000] = {};
 };
 
 #endif

@@ -1,6 +1,5 @@
 
 #include "Mapper206.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(206)
 
@@ -8,7 +7,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(206)
 // Name:
 //------------------------------------------------------------------------------
 Mapper206::Mapper206() {
-
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 	set_chr_0000_1fff(0);

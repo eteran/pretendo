@@ -1,10 +1,7 @@
 
 #include "Mapper069.h"
-#include "Ppu.h"
 #include "Nes.h"
 #include "Cart.h"
-#include <cstring>
-#include <iostream>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(69)
 
@@ -14,8 +11,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(69)
 Mapper69::Mapper69() {
 
     prg_ptr_ = open_sram(0x2000);
-
-	memset(chr_ram_, 0, sizeof(chr_ram_));
 
 	set_prg_67(0);
 	set_prg_89ab(0);
@@ -113,10 +108,10 @@ void Mapper69::write_a(uint16_t address, uint8_t value) {
 	case 0x0b: set_prg_cd(value); break;
 	case 0x0c:
 		switch(value & 0x3) {
-		case 0: set_mirroring(nes::ppu::mirror_vertical);    break;
-		case 1: set_mirroring(nes::ppu::mirror_horizontal);  break;
-		case 2: set_mirroring(nes::ppu::mirror_single_low);  break;
-		case 3: set_mirroring(nes::ppu::mirror_single_high); break;
+		case 0: set_mirroring(mirror_vertical);    break;
+		case 1: set_mirroring(mirror_horizontal);  break;
+		case 2: set_mirroring(mirror_single_low);  break;
+		case 3: set_mirroring(mirror_single_high); break;
 		}
 		break;
 

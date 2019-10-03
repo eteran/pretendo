@@ -15,7 +15,7 @@ public:
 	void write_4(uint16_t address, uint8_t value) override;
 
 private:	
-	uint8_t regs_[8];
+	uint8_t regs_[8] = {};
 	uint8_t address_ = 0;
 };
 

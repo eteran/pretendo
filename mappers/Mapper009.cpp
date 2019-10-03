@@ -1,9 +1,7 @@
 
 #include "Mapper009.h"
-#include "Ppu.h"
 #include "Nes.h"
 #include "Cart.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(9)
 
@@ -11,9 +9,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(9)
 // Name:
 //------------------------------------------------------------------------------
 Mapper9::Mapper9() {
-
-	memset(chr_ram_, 0, sizeof(chr_ram_));
-
 	set_prg_89(0);
 	set_prg_ab(-3);
 	set_prg_cd(-2);
@@ -95,9 +90,9 @@ void Mapper9::write_e(uint16_t address, uint8_t value) {
 void Mapper9::write_f(uint16_t address, uint8_t value) {
 	(void)address;
 	if(value & 0x01) {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(mirror_horizontal);
 	} else {
-		set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(mirror_vertical);
 	}
 }
 

@@ -1,6 +1,5 @@
 
 #include "Mapper228.h"
-#include "Ppu.h"
 #include "Nes.h"
 #include "Cart.h"
 #include <cassert>
@@ -8,7 +7,6 @@
 SETUP_STATIC_INES_MAPPER_REGISTRAR(228)
 
 namespace {
-const uint8_t *prg_chips[4];
 constexpr uint32_t ChipSize = 0x080000;
 }
 
@@ -17,24 +15,10 @@ constexpr uint32_t ChipSize = 0x080000;
 //------------------------------------------------------------------------------
 Mapper228::Mapper228() {
 
-	ram_[0] = 0;
-	ram_[1] = 0;
-	ram_[2] = 0;
-	ram_[3] = 0;
-
-	rom_[0] = nullptr;
-	rom_[1] = nullptr;
-	rom_[2] = nullptr;
-	rom_[3] = nullptr;
-	rom_[4] = nullptr;
-	rom_[5] = nullptr;
-	rom_[6] = nullptr;
-	rom_[7] = nullptr;
-
-	prg_chips[0] = nes::cart.prg() + ChipSize * 0;
-	prg_chips[1] = nes::cart.prg() + ChipSize * 1;
-	prg_chips[2] = nullptr;
-	prg_chips[3] = nes::cart.prg() + ChipSize * 2;
+	prg_chips_[0] = nes::cart.prg() + ChipSize * 0;
+	prg_chips_[1] = nes::cart.prg() + ChipSize * 1;
+	prg_chips_[2] = nullptr;
+	prg_chips_[3] = nes::cart.prg() + ChipSize * 2;
 
 	write_hander(0x8000, 0x00);
 }
@@ -144,9 +128,9 @@ void Mapper228::write_f(uint16_t address, uint8_t value) {
 void Mapper228::write_hander(uint16_t address, uint8_t value) {
 
 	if(address & 0x2000) {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(mirror_horizontal);
 	} else {
-		set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(mirror_vertical);
 	}
 
 	uint8_t prg_chip_select        = (address >> 11) & 0x03;
@@ -164,10 +148,10 @@ void Mapper228::write_hander(uint16_t address, uint8_t value) {
 		prg_chip_select = 0;
 	}
 
-	if(prg_chips[prg_chip_select]) {
+	if(prg_chips_[prg_chip_select]) {
 		if(prg_mode == 0) {
 
-			const uint8_t *const ptr = prg_chips[prg_chip_select] + (((prg_page_select >> 1) * 0x8000) & (ChipSize - 1));
+			const uint8_t *const ptr = prg_chips_[prg_chip_select] + (((prg_page_select >> 1) * 0x8000) & (ChipSize - 1));
 
 			rom_[0] = ptr + 0x0000;
 			rom_[1] = ptr + 0x1000;
@@ -180,7 +164,7 @@ void Mapper228::write_hander(uint16_t address, uint8_t value) {
 
 		} else if(prg_mode == 1) {
 
-			const uint8_t *const ptr = prg_chips[prg_chip_select] + ((prg_page_select * 0x4000) & (ChipSize - 1));
+			const uint8_t *const ptr = prg_chips_[prg_chip_select] + ((prg_page_select * 0x4000) & (ChipSize - 1));
 
 			rom_[0] = ptr + 0x0000;
 			rom_[1] = ptr + 0x1000;

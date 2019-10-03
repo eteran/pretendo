@@ -2,8 +2,6 @@
 #include "Mapper076.h"
 #include "Cart.h"
 #include "Nes.h"
-#include <cstring>
-#include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(76)
 
@@ -11,10 +9,8 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(76)
 // Name:
 //------------------------------------------------------------------------------
 Mapper76::Mapper76() {
-
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
-
 	set_chr_0000_1fff(0);
 }
 

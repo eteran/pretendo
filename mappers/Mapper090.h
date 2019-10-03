@@ -49,9 +49,9 @@ private:
 	void sync_chr();
 
 private:
-	uint8_t chr_hi_[8];
-	uint8_t chr_lo_[8];
-	uint8_t prg_[4];
+	uint8_t chr_hi_[8] = {};
+	uint8_t chr_lo_[8] = {};
+	uint8_t prg_[4]    = {};
 
 	BankControl bank_control_ = { 0 };
 	ChrControl  chr_control_  = { 0 };

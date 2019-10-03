@@ -28,8 +28,8 @@ private:
 	void clock_irq();
 
 private:
-	uint8_t chr_bank_[8];
-	uint8_t prg_bank_[3];
+	uint8_t chr_bank_[8] = {};
+	uint8_t prg_bank_[3] = {};
 
 	uint64_t cpu_cycles_        = 0;
 	uint64_t prev_ppu_cycle_    = 0;

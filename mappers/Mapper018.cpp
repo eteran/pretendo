@@ -1,9 +1,7 @@
 
 #include "Mapper018.h"
-#include "Ppu.h"
 #include "Nes.h"
 #include "Cart.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(18)
 
@@ -11,10 +9,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(18)
 // Name:
 //------------------------------------------------------------------------------
 Mapper18::Mapper18() {
-
-	memset(prg_, 0, sizeof(prg_));
-	memset(chr_, 0, sizeof(chr_));
-	memset(chr_ram_, 0, sizeof(chr_ram_));
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
@@ -139,10 +133,10 @@ void Mapper18::write_f(uint16_t address, uint8_t value) {
 
 	case 0x0002:
 		switch(value & 0x03) {
-		case 0x00: set_mirroring(nes::ppu::mirror_horizontal);  break;
-		case 0x01: set_mirroring(nes::ppu::mirror_vertical);    break;
-		case 0x02: set_mirroring(nes::ppu::mirror_single_low);  break;
-		case 0x03: set_mirroring(nes::ppu::mirror_single_high); break;
+		case 0x00: set_mirroring(mirror_horizontal);  break;
+		case 0x01: set_mirroring(mirror_vertical);    break;
+		case 0x02: set_mirroring(mirror_single_low);  break;
+		case 0x03: set_mirroring(mirror_single_high); break;
 		}
 		break;
 	}
@@ -154,7 +148,6 @@ void Mapper18::write_f(uint16_t address, uint8_t value) {
 void Mapper18::cpu_sync() {
 
 	bool wrap = false;
-	
 	if(irq_control_.mode_4bit) {
 		wrap = (--irq_counter_.counter_4bit == 0);
 	} else if(irq_control_.mode_8bit) {

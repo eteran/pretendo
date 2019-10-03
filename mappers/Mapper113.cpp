@@ -1,6 +1,5 @@
 
 #include "Mapper113.h"
-#include "Ppu.h"
 #include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(113)
@@ -54,9 +53,9 @@ void Mapper113::write_handler(uint16_t address, uint8_t value) {
 	set_chr_0000_1fff((value & 0x07) | ((value & 0x40) >> 3));
 
 	if(value & 0x80) {
-		set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(mirror_vertical);
 	} else {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(mirror_horizontal);
 	}
 
 }

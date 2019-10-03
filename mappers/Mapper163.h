@@ -22,7 +22,7 @@ public:
 	void write_7(uint16_t address, uint8_t value) override;
 
 private:
-	uint8_t chr_ram_[0x2000];
+	uint8_t chr_ram_[0x2000] = {};
 	uint8_t prg_      = 0;
 	uint8_t security_ = 0;
 	uint8_t trigger_  = 0;

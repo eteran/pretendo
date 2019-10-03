@@ -1,6 +1,5 @@
 
 #include "Mapper032.h"
-#include "Ppu.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(32)
 
@@ -60,9 +59,9 @@ void Mapper32::write_9(uint16_t address, uint8_t value) {
 #if 1
 	// NOTE(eteran): this code should be off for major league
 	if(value & 0x01) {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(mirror_horizontal);
 	} else {
-		set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(mirror_vertical);
 	}
 #endif
 }

@@ -9,19 +9,9 @@
 
 class Mapper;
 
-using std::uint8_t;
-using std::uint16_t;
-using std::uint32_t;
-using std::uint64_t;
-
-struct scanline_vblank  {
-};
-
-struct scanline_prerender {
-};
-
-struct scanline_postrender {
-};
+struct scanline_vblank     {};
+struct scanline_prerender  {};
+struct scanline_postrender {};
 
 struct scanline_render {
 	explicit scanline_render(uint8_t *p) : buffer(p) {
@@ -57,12 +47,6 @@ union PPUMask {
 };
 
 void reset(Reset reset_type);
-
-constexpr uint8_t mirror_single_low  = 0x00;
-constexpr uint8_t mirror_single_high = 0x55;
-constexpr uint8_t mirror_vertical    = 0x44;
-constexpr uint8_t mirror_horizontal  = 0x50;
-constexpr uint8_t mirror_4screen     = 0xe4;
 
 void write2000(uint8_t value);
 void write2001(uint8_t value);

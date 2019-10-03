@@ -1,7 +1,5 @@
 
 #include "Mapper071.h"
-#include "Ppu.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(71)
 
@@ -9,9 +7,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(71)
 // Name:
 //------------------------------------------------------------------------------
 Mapper71::Mapper71() {
-
-	memset(chr_ram_, 0, sizeof(chr_ram_));
-
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 	set_chr_0000_1fff_ram(chr_ram_, 0);
@@ -33,9 +28,9 @@ void Mapper71::write_8(uint16_t address, uint8_t value) {
 #if 0
 	// firehawk only
 	if(value & 0x10) {
-		set_mirroring(nes::ppu::mirror_single_high);
+		set_mirroring(mirror_single_high);
 	} else {
-		set_mirroring(nes::ppu::mirror_single_low);
+		set_mirroring(mirror_single_low);
 	}
 #endif
 }

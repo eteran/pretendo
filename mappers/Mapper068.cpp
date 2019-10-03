@@ -1,9 +1,7 @@
 
 #include "Mapper068.h"
-#include "Ppu.h"
 #include "Nes.h"
 #include "Cart.h"
-#include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(68)
 
@@ -11,14 +9,9 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(68)
 // Name: Mapper68
 //------------------------------------------------------------------------------
 Mapper68::Mapper68() {
-
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
-
 	set_chr_0000_1fff(0);
-
-	chr_rom_reg_[0] = 0x80;
-	chr_rom_reg_[1] = 0x80;
 }
 
 //------------------------------------------------------------------------------
@@ -86,10 +79,10 @@ void Mapper68::write_e(uint16_t address, uint8_t value) {
 
 	switch(value & 0x01) {
 	case 0x00:
-		set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(mirror_horizontal);
 		break;
 	case 0x01:
-		set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(mirror_vertical);
 		break;
 	}
 }

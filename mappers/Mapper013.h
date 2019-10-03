@@ -25,7 +25,7 @@ private:
 	void write_handler(uint16_t address, uint8_t value);
 
 private:
-	uint8_t chr_ram_[4 * 0x1000]; // 4 4KB pages
+	uint8_t chr_ram_[4 * 0x1000] = {}; // 4 4KB pages
 };
 
 #endif

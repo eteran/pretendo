@@ -1,6 +1,5 @@
 
 #include "Mapper090.h"
-#include "Ppu.h"
 #include "Nes.h"
 #include "Cart.h"
 
@@ -37,35 +36,9 @@ const uint8_t reverse_bits[256] = {
 // Name: Mapper90
 //------------------------------------------------------------------------------
 Mapper90::Mapper90() {
-
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
-
 	set_chr_0000_1fff(0);
-
-	prg_[0] = 0;
-	prg_[1] = 0;
-	prg_[2] = 0;
-	prg_[3] = 0;
-
-	chr_lo_[0] = 0;
-	chr_lo_[1] = 0;
-	chr_lo_[2] = 0;
-	chr_lo_[3] = 0;
-	chr_lo_[4] = 0;
-	chr_lo_[5] = 0;
-	chr_lo_[6] = 0;
-	chr_lo_[7] = 0;
-
-	chr_hi_[0] = 0;
-	chr_hi_[1] = 0;
-	chr_hi_[2] = 0;
-	chr_hi_[3] = 0;
-	chr_hi_[4] = 0;
-	chr_hi_[5] = 0;
-	chr_hi_[6] = 0;
-	chr_hi_[7] = 0;
-
 }
 
 //------------------------------------------------------------------------------
@@ -207,10 +180,10 @@ void Mapper90::write_d(uint16_t address, uint8_t value) {
 		break;
 	case 0x01:
 		switch(value & 0x03) {
-		case 0x00: set_mirroring(nes::ppu::mirror_vertical);    break;
-		case 0x01: set_mirroring(nes::ppu::mirror_horizontal);  break;
-		case 0x02: set_mirroring(nes::ppu::mirror_single_low);  break;
-		case 0x03: set_mirroring(nes::ppu::mirror_single_high); break;
+		case 0x00: set_mirroring(mirror_vertical);    break;
+		case 0x01: set_mirroring(mirror_horizontal);  break;
+		case 0x02: set_mirroring(mirror_single_low);  break;
+		case 0x03: set_mirroring(mirror_single_high); break;
 		}
 		break;
 	case 0x02:

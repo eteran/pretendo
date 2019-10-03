@@ -12,11 +12,6 @@
 #include <string>
 #include <functional>
 
-using std::uint8_t;
-using std::uint16_t;
-using std::uint32_t;
-using std::uint64_t;
-
 class Mapper;
 
 using create_func = std::function<std::unique_ptr<Mapper>()>;
@@ -179,6 +174,13 @@ protected:
 	void unmap_cd() { page_[0x18] = nullptr; page_[0x19] = nullptr; page_[0x1a] = nullptr; page_[0x1b] = nullptr; }
 	void unmap_ef() { page_[0x1c] = nullptr; page_[0x1d] = nullptr; page_[0x1e] = nullptr; page_[0x1f] = nullptr; }
 
+protected:
+	constexpr static uint8_t mirror_single_low  = 0x00;
+	constexpr static uint8_t mirror_single_high = 0x55;
+	constexpr static uint8_t mirror_vertical    = 0x44;
+	constexpr static uint8_t mirror_horizontal  = 0x50;
+	constexpr static uint8_t mirror_4screen     = 0xe4;
+
 private:
 	constexpr static unsigned int page_count = 32;
 	constexpr static unsigned int page_size  = 0x10000 / page_count;
@@ -186,13 +188,13 @@ private:
 	constexpr static unsigned int page_shift = 11;
 
 private:
-	uint8_t nametables_[4 * 0x400]; // nametable and attribute table data
-									// 4 nametables, each $03c0 bytes in
-									// size plus 4 corresponding $40 byte
-									// attribute tables
-									// even though the real thing only has 2
-									// tables, we currently simulate 4 for
-									// simplicity
+	uint8_t nametables_[4 * 0x400] = {}; // nametable and attribute table data
+										 // 4 nametables, each $03c0 bytes in
+										 // size plus 4 corresponding $40 byte
+										 // attribute tables
+										 // even though the real thing only has 2
+										 // tables, we currently simulate 4 for
+										 // simplicity
 	VRAMBank vram_banks_[0x10] = {};
 
 	uint8_t *page_[page_count] = {};

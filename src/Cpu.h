@@ -9,11 +9,6 @@
 namespace nes {
 namespace cpu {
 
-using std::uint16_t;
-using std::uint32_t;
-using std::uint64_t;
-using std::uint8_t;
-
 using dma_handler_t = void (*)(uint8_t);
 
 enum IRQ_SOURCE : uint8_t {

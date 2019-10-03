@@ -1,7 +1,5 @@
 
 #include "Mapper015.h"
-#include "Ppu.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(15)
 
@@ -9,8 +7,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(15)
 // Name:
 //------------------------------------------------------------------------------
 Mapper15::Mapper15() {
-	memset(chr_ram_, 0, sizeof(chr_ram_));
-
 	set_prg_89abcdef(0);
 	set_chr_0000_1fff_ram(chr_ram_, 0);
 }
@@ -129,8 +125,8 @@ void Mapper15::write_handler(uint16_t address, uint8_t value) {
 	set_prg_ef(pageEF);
 
 	if(value & 0x40) {
-		set_mirroring(nes::ppu::mirror_horizontal);
+		set_mirroring(mirror_horizontal);
 	} else {
-		set_mirroring(nes::ppu::mirror_vertical);
+		set_mirroring(mirror_vertical);
 	}
 }

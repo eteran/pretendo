@@ -39,7 +39,7 @@ public:
 	void cpu_sync() override;
 
 private:
-	uint8_t    chr_ram_[0x2000];
+	uint8_t    chr_ram_[0x2000] = {};
 	IRQCounter irq_counter_  = { 0 };
 	IRQControl irq_control_  = { 0 };
 	uint8_t    command_8000_ = 0;

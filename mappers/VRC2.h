@@ -25,9 +25,9 @@ public:
 	void write_e(uint16_t address, uint8_t value) override;
 
 private:
-	uint8_t chr_[8];
-	uint8_t latch_ = 0;
-	int     chr_shift_;
+	uint8_t chr_[8]    = {};
+	uint8_t latch_     = 0;
+	int     chr_shift_ = 0;
 };
 
 #endif

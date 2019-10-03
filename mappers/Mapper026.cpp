@@ -1,7 +1,6 @@
 
 #include "Mapper026.h"
 #include "VRC6.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(26)
 

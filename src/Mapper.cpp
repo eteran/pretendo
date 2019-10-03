@@ -37,14 +37,13 @@ Mapper::Mapper() {
 	// NOTE: we're not supporting trainers anymore, that's why the code is gone
 
 	std::fill(std::begin(nametables_), std::end(nametables_), 0);
-	std::fill(std::begin(page_), std::end(page_), nullptr);
 
 	switch(nes::cart.mirroring()) {
-	case Cart::MIR_VERTICAL:    set_mirroring(nes::ppu::mirror_vertical);    break;
-	case Cart::MIR_HORIZONTAL:  set_mirroring(nes::ppu::mirror_horizontal);  break;
-	case Cart::MIR_SINGLE_LOW:  set_mirroring(nes::ppu::mirror_single_low);  break;
-	case Cart::MIR_SINGLE_HIGH: set_mirroring(nes::ppu::mirror_single_high); break;
-	case Cart::MIR_4SCREEN:     set_mirroring(nes::ppu::mirror_4screen);     break;
+	case Cart::MIR_VERTICAL:    set_mirroring(mirror_vertical);    break;
+	case Cart::MIR_HORIZONTAL:  set_mirroring(mirror_horizontal);  break;
+	case Cart::MIR_SINGLE_LOW:  set_mirroring(mirror_single_low);  break;
+	case Cart::MIR_SINGLE_HIGH: set_mirroring(mirror_single_high); break;
+	case Cart::MIR_4SCREEN:     set_mirroring(mirror_4screen);     break;
 	case Cart::MIR_MAPPER:
 	default:
 		// Nothing, handled by Mapper

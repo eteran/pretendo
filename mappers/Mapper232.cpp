@@ -1,7 +1,5 @@
 
 #include "Mapper232.h"
-#include "Ppu.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(232)
 
@@ -9,8 +7,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(232)
 // Name:
 //------------------------------------------------------------------------------
 Mapper232::Mapper232() {
-
-	memset(chr_ram_, 0, sizeof(chr_ram_));
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
@@ -33,9 +29,9 @@ void Mapper232::write_8(uint16_t address, uint8_t value) {
 #if 0
 	// firehawk only
 	if(value & 0x10) {
-		set_mirroring(nes::ppu::mirror_single_high);
+		set_mirroring(mirror_single_high);
 	} else {
-		set_mirroring(nes::ppu::mirror_single_low);
+		set_mirroring(mirror_single_low);
 	}
 #endif
 

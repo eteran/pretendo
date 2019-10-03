@@ -36,10 +36,10 @@ private:
 	void clock_irq();
 
 protected:
-	uint8_t chr_ram_[0x40000]; // we should get this from iNES 2.0,
-							   // but this seems to do for now
-	uint8_t chr_bank_[8];
-	uint8_t prg_bank_[2];
+	uint8_t chr_ram_[0x40000] = {}; // we should get this from iNES 2.0,
+									// but this seems to do for now
+	uint8_t chr_bank_[8] = {};
+	uint8_t prg_bank_[2] = {};
 
 	uint64_t prev_ppu_cycle_    = 0;
 	uint16_t prev_vram_address_ = 0xffff;

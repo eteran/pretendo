@@ -1,8 +1,6 @@
 
 #include "VRC6.h"
 #include "Cpu.h"
-#include "Ppu.h"
-#include <cstring>
 
 //------------------------------------------------------------------------------
 // Name: VRC6
@@ -95,10 +93,10 @@ void VRC6::write_b(uint16_t address, uint8_t value) {
 		break;
 	case 0xb003:
 		switch((value >> 2) & 0x03) {
-		case 0x00: set_mirroring(nes::ppu::mirror_vertical);    break;
-		case 0x01: set_mirroring(nes::ppu::mirror_horizontal);  break;
-		case 0x02: set_mirroring(nes::ppu::mirror_single_low);  break;
-		case 0x03: set_mirroring(nes::ppu::mirror_single_high); break;
+		case 0x00: set_mirroring(mirror_vertical);    break;
+		case 0x01: set_mirroring(mirror_horizontal);  break;
+		case 0x02: set_mirroring(mirror_single_low);  break;
+		case 0x03: set_mirroring(mirror_single_high); break;
 		}
 		break;
 	}

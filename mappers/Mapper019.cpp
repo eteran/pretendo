@@ -1,10 +1,7 @@
 
 #include "Mapper019.h"
-#include "Ppu.h"
 #include "Nes.h"
 #include "Cart.h"
-#include <cstring>
-#include <iostream>
 
 // TODO: CHR-RAM swapping
 
@@ -16,8 +13,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(19)
 Mapper19::Mapper19() {
 
     prg_ptr_ = open_sram(0x2000);
-
-	memset(chr_ram_, 0, sizeof(chr_ram_));
 
 	set_prg_89abcdef(0);
 	set_prg_ef(-1);

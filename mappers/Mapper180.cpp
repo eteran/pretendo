@@ -1,6 +1,5 @@
 
 #include "Mapper180.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(180)
 
@@ -8,8 +7,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(180)
 // Name:
 //------------------------------------------------------------------------------
 Mapper180::Mapper180() {
-
-	memset(chr_ram_, 0, sizeof(chr_ram_));
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);

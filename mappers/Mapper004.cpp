@@ -3,7 +3,6 @@
 #include "Cart.h"
 #include "Nes.h"
 #include "Ppu.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(4)
 
@@ -28,10 +27,6 @@ Mapper4::Mapper4() {
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
-
-	memset(chr_ram_,  0, sizeof(chr_ram_));
-	memset(chr_bank_, 0, sizeof(chr_bank_));
-	memset(prg_bank_, 0, sizeof(prg_bank_));
 
 	if(nes::cart.has_chr_rom()) {
 		set_chr_0000_1fff(0);
@@ -202,9 +197,9 @@ void Mapper4::write_a(uint16_t address, uint8_t value) {
 	case 0x0000:
 		if(nes::cart.mirroring() != Cart::MIR_4SCREEN) {
 			if(value & 0x01) {
-				set_mirroring(nes::ppu::mirror_horizontal);
+				set_mirroring(mirror_horizontal);
 			} else {
-				set_mirroring(nes::ppu::mirror_vertical);
+				set_mirroring(mirror_vertical);
 			}
 		}
 		break;

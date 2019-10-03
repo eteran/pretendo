@@ -12,7 +12,7 @@ public:
 	std::string name() const override;
 
 private:
-	uint8_t chr_ram_[0x2000];
+	uint8_t chr_ram_[0x2000] = {};
 };
 
 #endif

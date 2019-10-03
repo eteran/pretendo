@@ -1,10 +1,7 @@
 
 #include "Mapper001.h"
-#include "Ppu.h"
 #include "Cart.h"
 #include "Nes.h"
-#include <cstring>
-#include <iostream>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(1)
 
@@ -19,7 +16,7 @@ enum {
 
 }
 
-// TODO: how the heck do we support the "256KB PRG ROM bank" of S[OUX]ROM?
+// TODO(eteran): how the heck do we support the "256KB PRG ROM bank" of S[OUX]ROM?
 // does that mean the chip # or something?
 
 //------------------------------------------------------------------------------
@@ -29,8 +26,6 @@ Mapper1::Mapper1() {
 	
     prg_ptr_ = open_sram(0x2000);
 
-	memset(chr_ram_, 0, sizeof(chr_ram_));
-
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 
@@ -39,11 +34,6 @@ Mapper1::Mapper1() {
 	} else {
 		set_chr_0000_1fff_ram(chr_ram_, 0);
 	}
-
-	regs_[REG_8000_9FFF] = 0;
-	regs_[REG_A000_BFFF] = 0;
-	regs_[REG_C000_DFFF] = 0;
-	regs_[REG_E000_FFFF] = 0;
 
 	// Reset mapper
 	write_handler(0x8000, 0x80);
@@ -62,9 +52,8 @@ std::string Mapper1::name() const {
 uint8_t Mapper1::read_6(uint16_t address) {
 	if(!(regs_[REG_E000_FFFF] & 0x10)) {
 		return prg_ptr_[address & 0x1fff];
-	} else {
-		return Mapper::read_6(address);
 	}
+	return Mapper::read_6(address);
 }
 
 //------------------------------------------------------------------------------
@@ -73,9 +62,8 @@ uint8_t Mapper1::read_6(uint16_t address) {
 uint8_t Mapper1::read_7(uint16_t address) {
 	if(!(regs_[REG_E000_FFFF] & 0x10)) {
 		return prg_ptr_[address & 0x1fff];
-	} else {
-		return Mapper::read_7(address);
 	}
+	return Mapper::read_7(address);
 }
 
 //------------------------------------------------------------------------------
@@ -191,10 +179,10 @@ void Mapper1::write_handler(uint16_t address, uint8_t value) {
 
 			// set mirroring
 			switch(regs_[REG_8000_9FFF] & 0x3) {
-			case 0: set_mirroring(nes::ppu::mirror_single_low);  break;
-			case 1: set_mirroring(nes::ppu::mirror_single_high); break;
-			case 2: set_mirroring(nes::ppu::mirror_vertical);    break;
-			case 3: set_mirroring(nes::ppu::mirror_horizontal);  break;
+			case 0: set_mirroring(mirror_single_low);  break;
+			case 1: set_mirroring(mirror_single_high); break;
+			case 2: set_mirroring(mirror_vertical);    break;
+			case 3: set_mirroring(mirror_horizontal);  break;
 			}
 
 			// set CHR-ROM

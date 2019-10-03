@@ -1,16 +1,13 @@
 
-#include "Cart.h"
 #include "Mapper005.h"
+#include "Cart.h"
 #include "Nes.h"
-#include "Ppu.h"
-#include <cassert>
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(5)
 
 namespace {
 
-enum {
+enum : uint8_t {
 	VSPLIT_ENABLE = 0x80,
 	VSPLIT_RIGHT  = 0x40,
 	VSPLIT_TILE   = 0x1f
@@ -22,54 +19,10 @@ enum {
 // Name: Mapper5
 //------------------------------------------------------------------------------
 Mapper5::Mapper5() {
-
 	set_prg_89(-1);
 	set_prg_ab(-1);
 	set_prg_cd(-1);
 	set_prg_ef(-1);
-
-	memset(exram_, 0x00, sizeof(exram_));
-	memset(prg_ram_[0], 0x00, sizeof(prg_ram_[0]));
-	memset(prg_ram_[1], 0x00, sizeof(prg_ram_[1]));
-
-	prev_vram_address_[0] = 0xffff;
-	prev_vram_address_[1] = 0xffff;
-
-	sp_chr_banks_[0] = 0;
-	sp_chr_banks_[1] = 0;
-	sp_chr_banks_[2] = 0;
-	sp_chr_banks_[3] = 0;
-	sp_chr_banks_[4] = 0;
-	sp_chr_banks_[5] = 0;
-	sp_chr_banks_[6] = 0;
-	sp_chr_banks_[7] = 0;
-
-	bg_chr_banks_[0] = 0;
-	bg_chr_banks_[1] = 0;
-	bg_chr_banks_[2] = 0;
-	bg_chr_banks_[3] = 0;
-	bg_chr_banks_[4] = 0;
-	bg_chr_banks_[5] = 0;
-	bg_chr_banks_[6] = 0;
-	bg_chr_banks_[7] = 0;
-
-	// entries will be NULL if ROM
-	prg_ram_banks_[0x00] = nullptr;
-	prg_ram_banks_[0x01] = nullptr;
-	prg_ram_banks_[0x02] = nullptr;
-	prg_ram_banks_[0x03] = nullptr;
-	prg_ram_banks_[0x04] = nullptr;
-	prg_ram_banks_[0x05] = nullptr;
-	prg_ram_banks_[0x06] = nullptr;
-	prg_ram_banks_[0x07] = nullptr;
-	prg_ram_banks_[0x08] = nullptr;
-	prg_ram_banks_[0x09] = nullptr;
-	prg_ram_banks_[0x0a] = nullptr;
-	prg_ram_banks_[0x0b] = nullptr;
-	prg_ram_banks_[0x0c] = nullptr;
-	prg_ram_banks_[0x0d] = nullptr;
-	prg_ram_banks_[0x0e] = nullptr;
-	prg_ram_banks_[0x0f] = nullptr;
 }
 
 //------------------------------------------------------------------------------

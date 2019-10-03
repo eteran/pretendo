@@ -1,7 +1,6 @@
 
 #include "Mapper013.h"
 #include "Cart.h"
-#include <cstring>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(13)
 
@@ -9,9 +8,6 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(13)
 // Name:
 //------------------------------------------------------------------------------
 Mapper13::Mapper13() {
-
-	memset(chr_ram_, 0, sizeof(chr_ram_));
-
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 	set_chr_0000_0fff_ram(chr_ram_, 0);

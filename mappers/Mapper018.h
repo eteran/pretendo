@@ -50,12 +50,12 @@ public:
 	void cpu_sync() override;
 
 private:
-	uint8_t    chr_ram_[0x2000];
-	uint8_t    chr_[16];
-	uint8_t    prg_[8]; // upper 2 are unneccessary, but simpler this way
-	IRQCounter irq_counter_ = { 0 };
-	IRQLatch   irq_latch_   = { 0 };
-	IRQControl irq_control_ = { 0 };
+	uint8_t    chr_ram_[0x2000] = {};
+	uint8_t    chr_[16]         = {};
+	uint8_t    prg_[8]          = {}; // upper 2 are unneccessary, but simpler this way
+	IRQCounter irq_counter_     = { 0 };
+	IRQLatch   irq_latch_       = { 0 };
+	IRQControl irq_control_     = { 0 };
 };
 
 #endif

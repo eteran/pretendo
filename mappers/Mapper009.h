@@ -23,7 +23,7 @@ public:
 	uint8_t read_vram(uint16_t address) override;
 
 private:
-	uint8_t chr_ram_[0x2000];
+	uint8_t chr_ram_[0x2000] = {};
 	bool    latch1_    = true;
 	bool    latch2_    = true;
 	uint8_t latch1_lo_ = 0;

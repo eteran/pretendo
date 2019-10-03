@@ -42,7 +42,6 @@ Mapper64::Mapper64() {
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
-
 	set_chr_0000_1fff(0);
 }
 
@@ -161,9 +160,9 @@ void Mapper64::write_a(uint16_t address, uint8_t value) {
 	switch(address & 1) {
 	case 0x0000:
 		if(value & 0x01) {
-			set_mirroring(nes::ppu::mirror_horizontal);
+			set_mirroring(mirror_horizontal);
 		} else {
-			set_mirroring(nes::ppu::mirror_vertical);
+			set_mirroring(mirror_vertical);
 		}
 		break;
 	}

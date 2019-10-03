@@ -25,8 +25,8 @@ private:
 	void writer_handler(uint16_t address, uint8_t value);
 
 private:
-	uint8_t chr_ram_[0x2000];
-	uint8_t regs_[2];
+	uint8_t chr_ram_[0x2000] = {};
+	uint8_t regs_[2] = {};
 };
 
 #endif
