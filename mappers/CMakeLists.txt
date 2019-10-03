@@ -5,6 +5,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_library (mappers OBJECT
 	Bandai.cpp
 	Bandai.h
+	MMC3.cpp
+	MMC3.h
 	Mapper000.cpp
 	Mapper000.h
 	Mapper001.cpp
@@ -141,7 +143,6 @@ add_library (mappers OBJECT
 
 target_include_directories (mappers PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR} 
-	${PROJECT_SOURCE_DIR}/p6502
 	${PROJECT_SOURCE_DIR}/src
 	${PROJECT_SOURCE_DIR}/libines2/lib/include
 )
