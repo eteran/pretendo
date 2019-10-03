@@ -7,9 +7,6 @@
 class Mapper4 final : public MMC3 {
 public:
 	Mapper4();
-
-public:
-	std::string name() const override;
 };
 
 #endif

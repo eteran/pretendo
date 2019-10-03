@@ -4,6 +4,8 @@
 #include "Nes.h"
 #include "Ppu.h"
 
+// TODO(eteran): implement the MMC6 SRAM stuff
+
 //------------------------------------------------------------------------------
 // Name: MMC3
 //------------------------------------------------------------------------------
@@ -53,9 +55,10 @@ std::string MMC3::name() const {
 	switch(mode_) {
 	case ModeA: return "MMC3A";
 	case ModeB: return "MMC3B";
+	case ModeMMC6: return "MMC6";
 	}
 
-	return "MMC3";
+	return "MMC3/MMC6";
 }
 
 //------------------------------------------------------------------------------
@@ -74,12 +77,7 @@ uint8_t MMC3::read_6(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t MMC3::read_7(uint16_t address) {
-
-	if(save_ram_enabled_ && nes::cart.mirroring() != Cart::MIR_4SCREEN) {
-		return prg_ptr_[address & 0x1fff];
-	} else {
-		return Mapper::read_7(address);
-	}
+	return read_6(address);
 }
 
 //------------------------------------------------------------------------------
@@ -98,12 +96,7 @@ void MMC3::write_6(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void MMC3::write_7(uint16_t address, uint8_t value) {
-
-	if(save_ram_enabled_ && save_ram_writable_ && nes::cart.mirroring() != Cart::MIR_4SCREEN) {
-		prg_ptr_[address & 0x1fff] = value;
-	} else {
-		Mapper::write_7(address, value);
-	}
+	return write_6(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -178,6 +171,13 @@ void MMC3::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
+void MMC3::write_9(uint16_t address, uint8_t value) {
+	write_8(address, value);
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
 void MMC3::write_a(uint16_t address, uint8_t value) {
 	switch(address & 0x0001) {
 	case 0x0000:
@@ -199,6 +199,13 @@ void MMC3::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
+void MMC3::write_b(uint16_t address, uint8_t value) {
+	write_a(address, value);
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
 void MMC3::write_c(uint16_t address, uint8_t value) {
 	switch(address & 0x0001) {
 	case 0x0000:
@@ -209,6 +216,13 @@ void MMC3::write_c(uint16_t address, uint8_t value) {
 		irq_reload_ = true;
 		break;
 	}
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+void MMC3::write_d(uint16_t address, uint8_t value) {
+	write_c(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -227,6 +241,13 @@ void MMC3::write_e(uint16_t address, uint8_t value) {
 		irq_enabled_ = true;
 		break;
 	}
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+void MMC3::write_f(uint16_t address, uint8_t value) {
+	write_e(address, value);
 }
 
 //------------------------------------------------------------------------------

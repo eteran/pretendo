@@ -24,15 +24,3 @@ Mapper4::Mapper4() {
 	}
 }
 
-//------------------------------------------------------------------------------
-// Name: name
-//------------------------------------------------------------------------------
-std::string Mapper4::name() const {
-	switch(mode_) {
-	case ModeA: return "MMC3A";
-	case ModeB: return "MMC3B";
-	}
-
-	return "MMC3";
-}
-
