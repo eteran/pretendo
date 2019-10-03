@@ -586,7 +586,7 @@ void schedule_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t c
 		dmc_dma_handler_        = dma_handler;
 		dmc_dma_source_address_ = source_address;
 		dmc_dma_count_          = count * 2;
-		dmc_dma_delay_          = 1;
+		dmc_dma_delay_          = 0;
 		break;
 	}
 }
