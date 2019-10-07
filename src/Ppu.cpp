@@ -103,8 +103,16 @@ constexpr uint8_t OamPriority = 0x20;
 constexpr uint8_t OamHFlip    = 0x40;
 constexpr uint8_t OamVFlip    = 0x80;
 
+struct SpritePatternData {
+	uint8_t patterns[2];
+	uint8_t x;
+	uint8_t y;
+	uint8_t index;
+	uint8_t attr;
+};
+
 // internal variables
-uint8_t  sprite_patterns_[8][2];
+SpritePatternData sprite_patterns_[8];
 uint8_t  current_sprite_index_   = 0;
 uint8_t  sprite_data_[32];
 
@@ -206,8 +214,12 @@ void reset(Reset reset_type) {
 		std::fill_n(sprite_ram_, 0x0100, 0);
 		std::fill_n(sprite_data_, 32, 0xff);
 		for(int i = 0; i < 8; ++i) {
-			sprite_patterns_[i][0] = 0;
-			sprite_patterns_[i][1] = 0;
+			sprite_patterns_[i].patterns[0] = 0;
+			sprite_patterns_[i].patterns[1] = 0;
+			sprite_patterns_[i].x           = 0;
+			sprite_patterns_[i].y           = 0;
+			sprite_patterns_[i].index       = 0;
+			sprite_patterns_[i].attr        = 0;
 		}
 
 		memcpy(palette_, powerup_palette, sizeof(palette_));
@@ -558,11 +570,18 @@ void open_sprite_pattern() {
 	current_sprite_index_ = ((hpos_ - 1) >> 3) & 0x07;
 
 	if(sprite_y(current_sprite_index_) != 0xff) {
-		const uint8_t index = sprite_index(current_sprite_index_);
-		uint8_t sprite_line = sprite_y(current_sprite_index_);
+
+		SpritePatternData &sprite = sprite_patterns_[current_sprite_index_];
+
+		sprite.y     = sprite_y(current_sprite_index_);
+		sprite.x     = sprite_x(current_sprite_index_);
+		sprite.attr  = sprite_attr(current_sprite_index_);
+		sprite.index = sprite_index(current_sprite_index_);
+
+		uint8_t sprite_line = sprite.y;
 
 		// vertical flip
-		if(sprite_attr(current_sprite_index_) & OamVFlip) {
+		if(sprite.attr & OamVFlip) {
 			if(Size == 16) {
 				sprite_line ^= 0x0F;
 			} else {
@@ -571,7 +590,7 @@ void open_sprite_pattern() {
 		}
 
 		// fetch the actual sprite data
-		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(index, sprite_line);
+		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(sprite.index, sprite_line);
 	} else {
 		// fetch the actual sprite data (dummy)
 		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(0xff, 0xff);
@@ -588,14 +607,17 @@ void read_sprite_pattern() {
 
 	uint8_t pattern = cart.mapper()->read_vram(next_ppu_fetch_address_);
 
-	if(sprite_y(current_sprite_index_) != 0xff) {
+	SpritePatternData &sprite = sprite_patterns_[current_sprite_index_];
+
+	if(sprite.y != 0xff) {
 		// horizontal flip
-		if(sprite_attr(current_sprite_index_) & OamHFlip) {
+		if(sprite.attr & OamHFlip) {
 			pattern = reverse_bits[pattern];
 		}
 	}
 	
-	sprite_patterns_[current_sprite_index_][Pattern::index] = pattern;
+	sprite_patterns_[current_sprite_index_].patterns[Pattern::index] = pattern;
+
 }
 
 //------------------------------------------------------------------------------
@@ -604,11 +626,7 @@ void read_sprite_pattern() {
 void evaluate_sprites_even() {
 	// write cycle
 	if(hpos_ < 64) {
-#if 0
-		uint8_t index = hpos_ >> 1;
-		sprite_data_[(index >> 2) & 0x07].sprite_bytes[index & 0x03] = sprite_buffer_;
-		printf("SETTING: S-OAM[%d][%d] = %02x\n", (index >> 2) & 0x07, index & 0x03, sprite_buffer_);
-#endif
+
 	} else if(UNLIKELY(hpos_ == 256)) {
 		// TODO: do this part incrementally during cycles 0-255 like the real thing
 		if(ppu_control_.large_sprites) {
@@ -741,7 +759,7 @@ uint8_t select_blank_pixel() {
 
 	assert(!ppu_mask_.screen_enabled);
 
-	if(UNLIKELY(vram_address_ & 0x3f00) == 0x3f00) {
+	if(UNLIKELY((vram_address_ & 0x3f00) == 0x3f00)) {
 		return vram_address_ & 0x1f;
 	}
 
@@ -793,13 +811,16 @@ uint8_t select_pixel(uint8_t index) {
 
 	// this will loop at most 8 times
 	for(uint8_t spr = 0; spr != sprite_data_index_; ++spr) {
-		const uint32_t x_offset = index - sprite_x(spr);
+		const SpritePatternData &sprite = sprite_patterns_[spr];
+
+
+		const uint32_t x_offset = index - sprite.x;
 
 		// is this sprite visible on this pixel?
 		if(x_offset < 8) {
 
-			const uint8_t p0 = sprite_patterns_[spr][0];
-			const uint8_t p1 = sprite_patterns_[spr][1];
+			const uint8_t p0 = sprite.patterns[0];
+			const uint8_t p1 = sprite.patterns[1];
 			const uint32_t shift = 7 - x_offset;
 
 			const uint8_t sprite_pixel =
@@ -812,15 +833,15 @@ uint8_t select_pixel(uint8_t index) {
 				// NOTE: according to blargg's tests, a collision doesn't seem
 				//       possible to occur on the rightmost pixel
 			#ifndef SPRITE_ZERO_HACK
-				if(UNLIKELY(sprite_attr(spr) & OamZero) && (index < 255) && (pixel & 0x03)) {
+				if(UNLIKELY(sprite.attr & OamZero) && (index < 255) && (pixel & 0x03)) {
 			#else
-				if(UNLIKELY(sprite_attr(spr) & OamZero) && (index < 255)) {
+				if(UNLIKELY(sprite.attr & OamZero) && (index < 255)) {
 			#endif
 					status_.sprite0 = true;
 				}
 
-				if((!(sprite_attr(spr) & OamPriority) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
-					pixel = (0x10 | sprite_pixel | ((sprite_attr(spr) & OamColor) << 2)) & 0xff;
+				if((!(sprite.attr & OamPriority) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
+					pixel = (0x10 | sprite_pixel | ((sprite.attr & OamColor) << 2)) & 0xff;
 				}
 
 				return pixel;
