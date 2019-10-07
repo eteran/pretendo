@@ -15,15 +15,31 @@
 
 //#define SPRITE_ZERO_HACK
 
+namespace nes {
+namespace ppu {
+
+union PPUStatus {
+	uint8_t     raw;
+
+	BitField<5> overflow;
+	BitField<6> sprite0;
+	BitField<7> vblank;
+
+	BitField<5,3> flags;
+};
+
+bool show_sprites = true;
+bool system_paused = false;
+
 namespace {
 
 constexpr unsigned int cycles_per_scanline = 341u;
 constexpr unsigned int cpu_alignment       = 0u;
 
-enum {
-	STATUS_OVERFLOW = 0x20,
-	STATUS_SPRITE0  = 0x40,
-	STATUS_VBLANK   = 0x80
+enum : uint8_t {
+	StatusOverflow = 0x20,
+	StatusSprite0  = 0x40,
+	StatusVBlank   = 0x80
 };
 
 struct pattern_0 {
@@ -81,49 +97,19 @@ constexpr uint16_t tile_address(uint16_t vram_address) {
 	return 0x2000 | (vram_address & 0x0fff);
 }
 
-}
-
-namespace nes {
-namespace ppu {
-
-
-
-union PPUStatus {
-	uint8_t     raw;
-	
-	BitField<5> overflow;
-	BitField<6> sprite0;
-	BitField<7> vblank;
-	
-	BitField<5,3> flags;
-};
-
-bool show_sprites_ = true;
-bool system_paused = false;
-
-namespace {
-
-struct sprite_attr {
-	union {
-		uint8_t       bits;
-		
-		BitField<7>   vflip;
-		BitField<6>   hflip;
-		BitField<5>   priority;
-		BitField<4>   zero;    // internal flag
-		BitField<0,2> color;
-	};
-};
+constexpr uint8_t OamColor    = 0x03;
+constexpr uint8_t OamZero     = 0x10; // internal flag
+constexpr uint8_t OamPriority = 0x20;
+constexpr uint8_t OamHFlip    = 0x40;
+constexpr uint8_t OamVFlip    = 0x80;
 
 // internal variables
-
-uint8_t      sprite_patterns_[8][2];
-uint8_t      current_sprite_index_   = 0;
-uint8_t      sprite_data_y[8];
-uint8_t      sprite_data_x[8];
-uint8_t      sprite_data_index[8];
-sprite_attr  sprite_data_attr[8];
-
+uint8_t  sprite_patterns_[8][2];
+uint8_t  current_sprite_index_   = 0;
+uint8_t  sprite_data_y[8];
+uint8_t  sprite_data_x[8];
+uint8_t  sprite_data_index[8];
+uint8_t  sprite_data_attr[8];
 
 uint8_t      sprite_ram_[0x100];
 uint8_t      left_most_sprite_x_     = 0xff;
@@ -226,10 +212,10 @@ void reset(Reset reset_type) {
 			sprite_patterns_[i][0] = 0;
 			sprite_patterns_[i][1] = 0;
 			
-			sprite_data_x[i]         = 0xff;
-			sprite_data_y[i]         = 0xff;
-			sprite_data_index[i]     = 0xff;
-			sprite_data_attr[i].bits = 0xff;
+			sprite_data_x[i]      = 0xff;
+			sprite_data_y[i]      = 0xff;
+			sprite_data_index[i]  = 0xff;
+			sprite_data_attr[i]   = 0xff;
 		}
 
 		memcpy(palette_, powerup_palette, sizeof(palette_));
@@ -454,8 +440,8 @@ uint8_t read2002() {
 	// upper 3 bits of status
 	// lower 5 bits of garbage (latch)
 	const uint8_t ret =
-		(status_.raw &  (STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK)) |
-		(latch_      & ~(STATUS_OVERFLOW | STATUS_SPRITE0 | STATUS_VBLANK));
+		(status_.raw &  (StatusOverflow | StatusSprite0 | StatusVBlank)) |
+		(latch_      & ~(StatusOverflow | StatusSprite0 | StatusVBlank));
 
 	// reset scroll/write latch
 	write_latch_ = false;
@@ -568,7 +554,7 @@ void open_sprite_pattern() {
 		uint8_t sprite_line = sprite_data_y[current_sprite_index_];
 
 		// vertical flip
-		if(sprite_data_attr[current_sprite_index_].vflip) {
+		if(sprite_data_attr[current_sprite_index_] & OamVFlip) {
 			if(Size == 16) {
 				sprite_line ^= 0x0F;
 			} else {
@@ -596,7 +582,7 @@ void read_sprite_pattern() {
 
 	if(sprite_data_y[current_sprite_index_] != 0xff) {
 		// horizontal flip
-		if(sprite_data_attr[current_sprite_index_].hflip) {
+		if(sprite_data_attr[current_sprite_index_] & OamHFlip) {
 			pattern = reverse_bits[pattern];
 		}
 	}
@@ -680,14 +666,14 @@ void evaluate_sprites() {
 				
 					const uint8_t new_x = sprite_ram_[index + 3];
 					
-					sprite_data_y[sprite_data_index_]         = static_cast<uint8_t>(sprite_line); // y
-					sprite_data_x[sprite_data_index_]         = new_x;                             // x
-					sprite_data_index[sprite_data_index_]     = sprite_ram_[index + 1];            // index
-					sprite_data_attr[sprite_data_index_].bits = sprite_ram_[index + 2] & 0xe3;     // attributes
+					sprite_data_y[sprite_data_index_]     = static_cast<uint8_t>(sprite_line); // y
+					sprite_data_x[sprite_data_index_]     = new_x;                             // x
+					sprite_data_index[sprite_data_index_] = sprite_ram_[index + 1];            // index
+					sprite_data_attr[sprite_data_index_]  = sprite_ram_[index + 2] & 0xe3;     // attributes
 					
 					// note that we found sprite 0
 					if(index == start_address) {
-						sprite_data_attr[sprite_data_index_].zero = true;
+						sprite_data_attr[sprite_data_index_] |= OamZero;
 					}
 
 					left_most_sprite_x_ = std::min(left_most_sprite_x_, new_x);
@@ -804,7 +790,7 @@ uint8_t select_pixel(uint8_t index) {
 	}
 
 	// do any of the sprites belong..
-	if((ppu_mask_.sprite_clipping && index < 8) || !ppu_mask_.sprites_visible) {
+	if((!ppu_mask_.sprite_clipping && index < 8) || !ppu_mask_.sprites_visible) {
 		return pixel;
 	}
 
@@ -829,22 +815,21 @@ uint8_t select_pixel(uint8_t index) {
 				// NOTE: according to blargg's tests, a collision doesn't seem
 				//       possible to occur on the rightmost pixel
 			#ifndef SPRITE_ZERO_HACK
-				if(UNLIKELY(sprite_data_attr[spr].zero) && (index < 255) && (pixel & 0x03)) {
+				if(UNLIKELY(sprite_data_attr[spr] & OamZero) && (index < 255) && (pixel & 0x03)) {
 			#else
-				if(UNLIKELY(sprite_data_attr[spr].zero) && (index < 255)) {
+				if(UNLIKELY(sprite_data_attr[spr] & OamZero) && (index < 255)) {
 			#endif
 					status_.sprite0 = true;
 				}
 
-				if((!sprite_data_attr[spr].priority || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites_)) {
-					pixel = 0x10 | sprite_pixel | (sprite_data_attr[spr].color << 2);
+				if((!(sprite_data_attr[spr] & OamPriority) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
+					pixel = (0x10 | sprite_pixel | ((sprite_data_attr[spr] & OamColor) << 2)) & 0xff;
 				}
 
 				return pixel;
 			}
 		}
 	}
-
 
 	return pixel;
 }

@@ -76,7 +76,7 @@ uint64_t cycle_count();
 uint16_t hpos();
 uint16_t vpos();
 
-extern bool show_sprites_;
+extern bool show_sprites;
 extern bool system_paused;
 
 

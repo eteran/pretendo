@@ -342,7 +342,7 @@ void Pretendo::keyReleaseEvent(QKeyEvent *event) {
 // Name: on_actionShow_Sprites_toggled
 //------------------------------------------------------------------------------
 void Pretendo::on_actionShow_Sprites_toggled(bool value) {
-	nes::ppu::show_sprites_ = value;
+	nes::ppu::show_sprites = value;
 }
 
 //------------------------------------------------------------------------------
