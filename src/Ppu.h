@@ -22,7 +22,17 @@ struct scanline_render {
 namespace nes {
 namespace ppu {
 
-union PPUControl {
+union Status {
+	uint8_t     raw;
+
+	BitField<5> overflow;
+	BitField<6> sprite0;
+	BitField<7> vblank;
+
+	BitField<5,3> flags;
+};
+
+union Control {
 	uint8_t raw;
 	BitField<0,2> nametable;
 	BitField<2>   address_increment;
@@ -33,7 +43,7 @@ union PPUControl {
 	BitField<7>   nmi_on_vblank;
 };
 
-union PPUMask {
+union Mask {
 	uint8_t raw;
 	BitField<0>   monochrome;
 	BitField<1>   background_clipping;
@@ -66,8 +76,8 @@ uint8_t read200x();
 void start_frame();
 void end_frame();
 
-const PPUMask &mask();
-const PPUControl &control();
+const Mask &mask();
+const Control &control();
 
 template <class T>
 void execute_scanline(const T &target);
@@ -78,7 +88,6 @@ uint16_t vpos();
 
 extern bool show_sprites;
 extern bool system_paused;
-
 
 }
 }
