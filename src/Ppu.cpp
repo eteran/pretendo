@@ -106,10 +106,7 @@ constexpr uint8_t OamVFlip    = 0x80;
 // internal variables
 uint8_t  sprite_patterns_[8][2];
 uint8_t  current_sprite_index_   = 0;
-uint8_t  sprite_data_y[8];
-uint8_t  sprite_data_x[8];
-uint8_t  sprite_data_index[8];
-uint8_t  sprite_data_attr[8];
+uint8_t  sprite_data_[32];
 
 uint8_t      sprite_ram_[0x100];
 uint8_t      left_most_sprite_x_     = 0xff;
@@ -207,15 +204,10 @@ void reset(Reset reset_type) {
 #endif
 	if(reset_type == Reset::Hard) {
 		std::fill_n(sprite_ram_, 0x0100, 0);
-
+		std::fill_n(sprite_data_, 32, 0xff);
 		for(int i = 0; i < 8; ++i) {
 			sprite_patterns_[i][0] = 0;
 			sprite_patterns_[i][1] = 0;
-			
-			sprite_data_x[i]      = 0xff;
-			sprite_data_y[i]      = 0xff;
-			sprite_data_index[i]  = 0xff;
-			sprite_data_attr[i]   = 0xff;
 		}
 
 		memcpy(palette_, powerup_palette, sizeof(palette_));
@@ -541,6 +533,22 @@ void end_frame() {
 	cart.mapper()->ppu_end_frame();
 }
 
+uint8_t sprite_y(uint8_t index) {
+	return sprite_data_[index * 4 + 0];
+}
+
+uint8_t sprite_index(uint8_t index) {
+	return sprite_data_[index * 4 + 1];
+}
+
+uint8_t sprite_attr(uint8_t index) {
+	return sprite_data_[index * 4 + 2];
+}
+
+uint8_t sprite_x(uint8_t index) {
+	return sprite_data_[index * 4 + 3];
+}
+
 //------------------------------------------------------------------------------
 // Name: open_sprite_pattern
 //------------------------------------------------------------------------------
@@ -549,12 +557,12 @@ void open_sprite_pattern() {
 
 	current_sprite_index_ = ((hpos_ - 1) >> 3) & 0x07;
 
-	if(sprite_data_y[current_sprite_index_] != 0xff) {
-		const uint8_t index = sprite_data_index[current_sprite_index_];
-		uint8_t sprite_line = sprite_data_y[current_sprite_index_];
+	if(sprite_y(current_sprite_index_) != 0xff) {
+		const uint8_t index = sprite_index(current_sprite_index_);
+		uint8_t sprite_line = sprite_y(current_sprite_index_);
 
 		// vertical flip
-		if(sprite_data_attr[current_sprite_index_] & OamVFlip) {
+		if(sprite_attr(current_sprite_index_) & OamVFlip) {
 			if(Size == 16) {
 				sprite_line ^= 0x0F;
 			} else {
@@ -580,9 +588,9 @@ void read_sprite_pattern() {
 
 	uint8_t pattern = cart.mapper()->read_vram(next_ppu_fetch_address_);
 
-	if(sprite_data_y[current_sprite_index_] != 0xff) {
+	if(sprite_y(current_sprite_index_) != 0xff) {
 		// horizontal flip
-		if(sprite_data_attr[current_sprite_index_] & OamHFlip) {
+		if(sprite_attr(current_sprite_index_) & OamHFlip) {
 			pattern = reverse_bits[pattern];
 		}
 	}
@@ -631,15 +639,6 @@ template <int Size>
 void evaluate_sprites() {
 	sprite_data_index_ = 0;
 
-#if 0
-	for(int i = 0; i < 8; ++i) {
-		sprite_data_x[i]         = 0xff;
-		sprite_data_y[i]         = 0xff;
-		sprite_data_index[i]     = 0xff;
-		sprite_data_attr[i].bits = 0xff;
-	}
-#endif
-
 	constexpr uint8_t start_address = 0x00; // sprite_address_
 
 	uint8_t index = start_address;
@@ -663,20 +662,18 @@ void evaluate_sprites() {
 				// 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
 				if(sprite_line < Size) {
-				
-					const uint8_t new_x = sprite_ram_[index + 3];
-					
-					sprite_data_y[sprite_data_index_]     = static_cast<uint8_t>(sprite_line); // y
-					sprite_data_x[sprite_data_index_]     = new_x;                             // x
-					sprite_data_index[sprite_data_index_] = sprite_ram_[index + 1];            // index
-					sprite_data_attr[sprite_data_index_]  = sprite_ram_[index + 2] & 0xe3;     // attributes
+
+					sprite_data_[sprite_data_index_ * 4 + 0] = static_cast<uint8_t>(sprite_line); // y
+					sprite_data_[sprite_data_index_ * 4 + 1] = sprite_ram_[index + 1];            // index
+					sprite_data_[sprite_data_index_ * 4 + 2] = sprite_ram_[index + 2] & 0xe3;     // attributes
+					sprite_data_[sprite_data_index_ * 4 + 3] = sprite_ram_[index + 3];                             // x
 					
 					// note that we found sprite 0
 					if(index == start_address) {
-						sprite_data_attr[sprite_data_index_] |= OamZero;
+						sprite_data_[sprite_data_index_ + 2] |= OamZero;
 					}
 
-					left_most_sprite_x_ = std::min(left_most_sprite_x_, new_x);
+					left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_ram_[index + 3]);
 
 					++sprite_data_index_;
 				}
@@ -796,7 +793,7 @@ uint8_t select_pixel(uint8_t index) {
 
 	// this will loop at most 8 times
 	for(uint8_t spr = 0; spr != sprite_data_index_; ++spr) {
-		const uint32_t x_offset = index - sprite_data_x[spr];
+		const uint32_t x_offset = index - sprite_x(spr);
 
 		// is this sprite visible on this pixel?
 		if(x_offset < 8) {
@@ -815,15 +812,15 @@ uint8_t select_pixel(uint8_t index) {
 				// NOTE: according to blargg's tests, a collision doesn't seem
 				//       possible to occur on the rightmost pixel
 			#ifndef SPRITE_ZERO_HACK
-				if(UNLIKELY(sprite_data_attr[spr] & OamZero) && (index < 255) && (pixel & 0x03)) {
+				if(UNLIKELY(sprite_attr(spr) & OamZero) && (index < 255) && (pixel & 0x03)) {
 			#else
-				if(UNLIKELY(sprite_data_attr[spr] & OamZero) && (index < 255)) {
+				if(UNLIKELY(sprite_attr(spr) & OamZero) && (index < 255)) {
 			#endif
 					status_.sprite0 = true;
 				}
 
-				if((!(sprite_data_attr[spr] & OamPriority) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
-					pixel = (0x10 | sprite_pixel | ((sprite_data_attr[spr] & OamColor) << 2)) & 0xff;
+				if((!(sprite_attr(spr) & OamPriority) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
+					pixel = (0x10 | sprite_pixel | ((sprite_attr(spr) & OamColor) << 2)) & 0xff;
 				}
 
 				return pixel;
