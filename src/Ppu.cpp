@@ -758,11 +758,11 @@ uint8_t select_blank_pixel() {
 
 	assert(!ppu_mask_.screen_enabled);
 
-	if((vram_address_ & 0x3f00) == 0x3f00) {
+	if(UNLIKELY(vram_address_ & 0x3f00) == 0x3f00) {
 		return vram_address_ & 0x1f;
-	} else {
-		return 0x00;
 	}
+
+	return 0x00;
 }
 
 //------------------------------------------------------------------------------
@@ -799,62 +799,52 @@ uint8_t select_pixel(uint8_t index) {
 	uint8_t pixel = select_bg_pixel(index);
 
 	// are ANY sprites possibly in range?
-	if(left_most_sprite_x_ <= index) {
+	if(left_most_sprite_x_ > index) {
+		return pixel;
+	}
 
-		// then see if any of the sprites belong..
-		if((ppu_mask_.sprite_clipping || index >= 8) && ppu_mask_.sprites_visible) {
+	// do any of the sprites belong..
+	if((ppu_mask_.sprite_clipping && index < 8) || !ppu_mask_.sprites_visible) {
+		return pixel;
+	}
 
-			// this will loop at most 8 times
-			for(uint8_t spr = 0; spr != sprite_data_index_; ++spr) {
-				const uint16_t x_offset = index - sprite_data_x[spr];
+	// this will loop at most 8 times
+	for(uint8_t spr = 0; spr != sprite_data_index_; ++spr) {
+		const uint32_t x_offset = index - sprite_data_x[spr];
 
-				// is this sprite visible on this pixel?
-				if(x_offset < 8) {
+		// is this sprite visible on this pixel?
+		if(x_offset < 8) {
 
-					const uint8_t p0 = sprite_patterns_[spr][0];
-					const uint8_t p1 = sprite_patterns_[spr][1];
-					const uint16_t shift = 7 - x_offset;
+			const uint8_t p0 = sprite_patterns_[spr][0];
+			const uint8_t p1 = sprite_patterns_[spr][1];
+			const uint32_t shift = 7 - x_offset;
 
-				#if 1
-					const uint8_t sprite_pixel =
-							(((p0 >> shift) & 0x01) << 0x00) |
-							(((p1 >> shift) & 0x01) << 0x01);
-				#else
-					switch(x_offset) {
-					case 0: sprite_pixel = ((p0 >> 7) & 0x01) | ((p1 >> 6) & 0x02); break;
-					case 1: sprite_pixel = ((p0 >> 6) & 0x01) | ((p1 >> 5) & 0x02); break;
-					case 2: sprite_pixel = ((p0 >> 5) & 0x01) | ((p1 >> 4) & 0x02); break;
-					case 3: sprite_pixel = ((p0 >> 4) & 0x01) | ((p1 >> 3) & 0x02); break;
-					case 4: sprite_pixel = ((p0 >> 3) & 0x01) | ((p1 >> 2) & 0x02); break;
-					case 5: sprite_pixel = ((p0 >> 2) & 0x01) | ((p1 >> 1) & 0x02); break;
-					case 6: sprite_pixel = ((p0 >> 1) & 0x01) | ((p1 >> 0) & 0x02); break;
-					case 7: sprite_pixel = ((p0 >> 0) & 0x01) | ((p1 << 1) & 0x02); break;
-					}
-				#endif
+			const uint8_t sprite_pixel =
+					(((p0 >> shift) & 0x01) << 0x00) |
+					(((p1 >> shift) & 0x01) << 0x01);
 
-					// this pixel is visible..
-					if(sprite_pixel & 0x03) {
-						// we rendered a sprite0 pixel which collided with a BG pixel
-						// NOTE: according to blargg's tests, a collision doesn't seem
-						//       possible to occur on the rightmost pixel
-					#ifndef SPRITE_ZERO_HACK
-						if(sprite_data_attr[spr].zero && (index < 255) && (pixel & 0x03)) {
-					#else
-						if(sprite_data_attr[spr].zero && (index < 255)) {
-					#endif
-							status_.sprite0 = true;
-						}
-
-						if((!sprite_data_attr[spr].priority || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites_)) {
-							pixel = 0x10 | sprite_pixel | (sprite_data_attr[spr].color << 2);
-						}
-						
-						return pixel;
-					}
+			// this pixel is visible..
+			if(sprite_pixel & 0x03) {
+				// we rendered a sprite0 pixel which collided with a BG pixel
+				// NOTE: according to blargg's tests, a collision doesn't seem
+				//       possible to occur on the rightmost pixel
+			#ifndef SPRITE_ZERO_HACK
+				if(UNLIKELY(sprite_data_attr[spr].zero) && (index < 255) && (pixel & 0x03)) {
+			#else
+				if(UNLIKELY(sprite_data_attr[spr].zero) && (index < 255)) {
+			#endif
+					status_.sprite0 = true;
 				}
+
+				if((!sprite_data_attr[spr].priority || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites_)) {
+					pixel = 0x10 | sprite_pixel | (sprite_data_attr[spr].color << 2);
+				}
+
+				return pixel;
 			}
 		}
 	}
+
 
 	return pixel;
 }
@@ -1094,37 +1084,46 @@ void clock_ppu(const scanline_prerender &) {
 				update_x_scroll();
 			}
 
+			update_sprite_registers();
+
 			switch(hpos_ & 0x07) {
-			case 1: update_sprite_registers(); open_tile_index(); break;           // open the bus for nametable fetch (garbage)
-			case 2: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
-			case 3: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-			case 4: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: update_sprite_registers(); if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: update_sprite_registers(); if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: update_sprite_registers(); if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 8: update_sprite_registers(); if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 1: open_tile_index(); break;           // open the bus for nametable fetch (garbage)
+			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
+			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
+			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+			case 8: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 305) {
+
+			update_vram_address();
+			update_sprite_registers();
+
 			switch(hpos_ & 0x07) {
-			case 1: update_vram_address(); update_sprite_registers(); open_tile_index(); break;           // open the bus for nametable fetch (garbage)
-			case 2: update_vram_address(); update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
-			case 3: update_vram_address(); update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-			case 4: update_vram_address(); update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: update_vram_address(); update_sprite_registers(); if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: update_vram_address(); update_sprite_registers(); if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: update_vram_address(); update_sprite_registers(); if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 0: update_vram_address(); update_sprite_registers(); if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 1: open_tile_index(); break;           // open the bus for nametable fetch (garbage)
+			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
+			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
+			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 321) {
+
+			update_sprite_registers();
+
 			switch(hpos_ & 0x07) {
-			case 1: update_sprite_registers(); open_tile_index(); break;           // open the bus for nametable fetch (garbage)
-			case 2: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
-			case 3: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-			case 4: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: update_sprite_registers(); if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: update_sprite_registers(); if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: update_sprite_registers(); if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 0: update_sprite_registers(); if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 1: open_tile_index(); break;           // open the bus for nametable fetch (garbage)
+			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
+			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
+			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 337) {
 			// fetch first 2 tiles of NEXT scanline
@@ -1183,28 +1182,41 @@ void clock_ppu(const scanline_render &target) {
 				// idle
 			}
 		} else if(hpos_ < 257) {
+
 			// NOTE(eteran): on my machine, this code "costs" about 200 FPS
+			render_pixel(target.buffer);
+
 			switch(hpos_ & 0x07) {
-			case 1: render_pixel(target.buffer); evaluate_sprites_odd();  open_tile_index(); break;
-			case 2: render_pixel(target.buffer); evaluate_sprites_even(); read_tile_index(); break;
-			case 3: render_pixel(target.buffer); evaluate_sprites_odd();  open_background_attribute(); break;
-			case 4: render_pixel(target.buffer); evaluate_sprites_even(); read_background_attribute(); break;
-			case 5: render_pixel(target.buffer); evaluate_sprites_odd();  open_background_pattern<pattern_0>(); break;
-			case 6: render_pixel(target.buffer); evaluate_sprites_even(); read_background_pattern<pattern_0>(); break;
-			case 7: render_pixel(target.buffer); evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
-			case 0: render_pixel(target.buffer); evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); if(UNLIKELY(hpos_ == 256)) { clock_y(); } break;
+			case 1: evaluate_sprites_odd();  open_tile_index(); break;
+			case 2: evaluate_sprites_even(); read_tile_index(); break;
+			case 3: evaluate_sprites_odd();  open_background_attribute(); break;
+			case 4: evaluate_sprites_even(); read_background_attribute(); break;
+			case 5: evaluate_sprites_odd();  open_background_pattern<pattern_0>(); break;
+			case 6: evaluate_sprites_even(); read_background_pattern<pattern_0>(); break;
+			case 7: evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
+			case 0: evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); break;
+			}
+
+			if(UNLIKELY(hpos_ == 256)) {
+				clock_y();
 			}
 		} else if(hpos_ < 321) {
 			// NOTE(eteran): on my machine, this code "costs" about 100 FPS
+			if(UNLIKELY(hpos_ == 257)) {
+				update_x_scroll();
+			}
+
+			update_sprite_registers();
+
 			switch(hpos_ & 0x07) {
-			case 1: if(hpos_ == 257) { update_x_scroll(); } update_sprite_registers(); open_tile_index(); break;           // open the bus for nametable fetch (garbage)
-			case 2: update_sprite_registers(); read_tile_index(); break;           // fetch the name table byte (garbage)
-			case 3: update_sprite_registers(); open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-			case 4: update_sprite_registers(); read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: update_sprite_registers(); if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: update_sprite_registers(); if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: update_sprite_registers(); if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 0: update_sprite_registers(); if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 1: open_tile_index(); break;           // open the bus for nametable fetch (garbage)
+			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
+			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
+			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
+			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
+			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
+			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
+			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 337) {
 			// NOTE(eteran): on my machine, this code "costs" about 50 FPS
