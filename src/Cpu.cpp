@@ -558,13 +558,6 @@ void clock() {
 }
 
 /**
- * @brief reset_irq
- */
-void reset_irq() {
-	irq_asserted_ = false;
-}
-
-/**
  * @brief schedule_dma
  * @param dma_handler
  * @param source_address
@@ -604,13 +597,6 @@ void tick() {
 	clock();
 	sync_handler();
 	++executed_cycles_;
-}
-
-/**
- * @brief irq
- */
-void irq() {
-	irq_asserted_ = true;
 }
 
 /**
@@ -689,12 +675,12 @@ void reset(Reset reset_type) {
  * @brief irq
  * @param source
  */
-void irq(IRQ_SOURCE source) {
+void irq(IrqSource source) {
 
 	irq_sources_ |= source;
 
 	if (irq_sources_) {
-		irq();
+		irq_asserted_ = true;
 	}
 }
 
@@ -702,12 +688,12 @@ void irq(IRQ_SOURCE source) {
  * @brief clear_irq
  * @param source
  */
-void clear_irq(IRQ_SOURCE source) {
+void clear_irq(IrqSource source) {
 
 	irq_sources_ &= ~source;
 
 	if (!irq_sources_) {
-		reset_irq();
+		irq_asserted_ = false;
 	}
 }
 

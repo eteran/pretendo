@@ -66,8 +66,8 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 	ui_.listView->setModel(filter_model_);
 	ui_.listView->setRootIndex(filter_model_->mapFromSource(root_model_index));
 
-	connect(ui_.listView, SIGNAL(activated(const QModelIndex &)), this, SLOT(picked(const QModelIndex &)));
-	connect(ui_.lineEdit, SIGNAL(textChanged(const QString &)), filter_model_, SLOT(setFilterFixedString(const QString &)));
+	connect(ui_.listView, &QListView::activated, this, &Pretendo::picked);
+	connect(ui_.lineEdit, &QLineEdit::textChanged, filter_model_, &QSortFilterProxyModel::setFilterFixedString);
 
 	timer_ = new QTimer(this);
 	connect(timer_, &QTimer::timeout, this, &Pretendo::update);
@@ -461,7 +461,7 @@ void Pretendo::on_action_Audio_Viewer_triggered() {
 	static AudioViewer *dialog = nullptr;
 	if(!dialog) {
 		dialog = new AudioViewer(this);
-		connect(timer_, SIGNAL(timeout()), dialog, SLOT(update()));
+		connect(timer_, &QTimer::timeout, dialog, &AudioViewer::update);
 	}
 	dialog->show();
 }

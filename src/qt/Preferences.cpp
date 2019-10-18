@@ -1,7 +1,7 @@
 
 #include "Preferences.h"
 #include "Pretendo.h"
-#include "../Palette.h"
+#include "Palette.h"
 #include <QPainter>
 #include <QAbstractButton>
 #include <QDebug>

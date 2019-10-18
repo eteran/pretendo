@@ -173,7 +173,6 @@ add_executable(pretendo
 	Timer.h
 	Triangle.cpp
 	Triangle.h
-	VideoInterface.h
 	VRAMBank.h
 
 	qt/About.cpp

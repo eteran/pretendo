@@ -11,7 +11,7 @@ namespace cpu {
 
 using dma_handler_t = void (*)(uint8_t);
 
-enum IRQ_SOURCE : uint8_t {
+enum IrqSource : uint8_t {
 	MAPPER_IRQ = 0x01,
 	APU_IRQ    = 0x02,
 	FDS_IRQ    = 0x04,
@@ -37,15 +37,14 @@ union register16 {
 
 // API
 uint64_t cycle_count();
-void     clear_irq(IRQ_SOURCE source);
+void     clear_irq(IrqSource source);
 void     clear_nmi();
-void     irq(IRQ_SOURCE source);
+void     irq(IrqSource source);
 void     schedule_spr_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
 void     schedule_dmc_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
 void     reset(Reset reset_type);
 void     reset();
 void     stop();
-void     irq();
 void     nmi();
 void     tick();
 

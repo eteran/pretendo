@@ -145,7 +145,7 @@ uint8_t *Cart::chr() const {
 //------------------------------------------------------------------------------
 // Name: mirroring
 //------------------------------------------------------------------------------
-Cart::MIRRORING Cart::mirroring() const {
+Cart::Mirroring Cart::mirroring() const {
 	return mirroring_;
 }
 

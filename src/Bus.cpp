@@ -7,8 +7,8 @@
 #include "Apu.h"
 #include "Input.h"
 #include "Mapper.h"
+#include <algorithm>
 #include <cstdlib>
-#include <cstring>
 
 namespace nes {
 namespace bus {
@@ -447,8 +447,11 @@ uint8_t read_memory(uint16_t address) {
 // Name: trash_ram
 //-------------------------------------------------------------------
 void trash_ram() {
-	//std::generate_n(ram_, sizeof(ram_), std::rand);
-	std::memset(ram_, 0xff, sizeof(ram_));
+#if 0
+	std::generate_n(ram_, sizeof(ram_), std::rand);
+#else
+	std::fill_n(ram_, sizeof(ram_), 0);
+#endif
 }
 
 }

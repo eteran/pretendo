@@ -11,7 +11,7 @@ class Mapper;
 
 class Cart {
 public:
-	enum MIRRORING {
+	enum Mirroring {
 		MIR_VERTICAL,
 		MIR_HORIZONTAL,
 		MIR_SINGLE_HIGH,
@@ -32,7 +32,7 @@ public:
 	uint32_t rom_hash() const;
 	uint8_t *prg() const;
 	uint8_t *chr() const;
-	MIRRORING mirroring() const;
+	Mirroring mirroring() const;
 	const std::shared_ptr<Mapper> &mapper() const { return mapper_; }
 	std::vector<uint8_t> raw_image() const;
 
@@ -43,7 +43,7 @@ private:
     uint32_t                   prg_hash_  = 0;
     uint32_t                   chr_hash_  = 0;
     uint32_t                   rom_hash_  = 0;
-    MIRRORING                  mirroring_ = MIR_HORIZONTAL;
+    Mirroring                  mirroring_ = MIR_HORIZONTAL;
 	std::shared_ptr<Mapper>    mapper_;
     std::string                filename_;
 };

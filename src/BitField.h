@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace {
+namespace detail {
 
 template <size_t LastBit>
 struct MinimumTypeHelper {
@@ -28,7 +28,7 @@ private:
 		Mask = (1u << Bits) - 1u
 	};
 
-    using T = typename MinimumTypeHelper<Index + Bits>::type;
+	using T = typename detail::MinimumTypeHelper<Index + Bits>::type;
 	
 public:
 	template <class T2>
@@ -56,7 +56,7 @@ private:
 		Mask = 0x01
 	};
 
-    using T = typename MinimumTypeHelper<Index + Bits>::type;
+	using T = typename detail::MinimumTypeHelper<Index + Bits>::type;
 
 public:
 	BitField &operator=(bool value) {

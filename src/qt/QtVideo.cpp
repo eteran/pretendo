@@ -8,19 +8,11 @@
 #include "glext.h"
 #endif
 
-namespace {
-
-constexpr int Width  = 256;
-constexpr int Height = 240;
-
-}
-
 //------------------------------------------------------------------------------
 // Name: QtVideo
 //------------------------------------------------------------------------------
 QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f) : QGLWidget(parent, shareWidget, f) {
 
-	buffer_ = std::make_unique<uint32_t[]>(Width * Height);
 	for(int i = 0; i < Height; ++i) {
 		scanlines_[i] = &buffer_[i * Width];
 	}
@@ -39,8 +31,8 @@ QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags 
 // Name: resizeGL
 //------------------------------------------------------------------------------
 void QtVideo::resizeGL(int width, int height) {
-	Q_UNUSED(width);
-	Q_UNUSED(height);
+	Q_UNUSED(width)
+	Q_UNUSED(height)
 }
 
 //------------------------------------------------------------------------------
