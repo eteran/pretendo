@@ -19,7 +19,7 @@ public:
 		return *this;
 	}
 
-	VRAMBank(std::nullptr_t) : ptr_(nullptr), writeable_(false) {
+	explicit VRAMBank(std::nullptr_t) : ptr_(nullptr), writeable_(false) {
 	}
 
 	VRAMBank(uint8_t *p, bool writeable) : ptr_(p), writeable_(writeable) {

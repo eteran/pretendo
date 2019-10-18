@@ -130,13 +130,14 @@ uint8_t       dmc_dma_byte_           = 0;
 uint8_t       dmc_dma_delay_          = 0;
 
 // stats
-uint64_t executed_cycles_ = 1; // NOTE(eteran): make's 4.irq_and_dma.nes pass...
+uint64_t executed_cycles_ = 1; // NOTE(eteran): 1 instead of 0 makes 4.irq_and_dma.nes pass...
 
 /**
  * @brief jam_handler
  */
 void jam_handler() {
 	// TODO(eteran): do something useful here...
+	assert(0);
 }
 
 /**
