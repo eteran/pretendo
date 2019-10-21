@@ -94,6 +94,7 @@ constexpr uint16_t tile_address(uint16_t vram_address) {
 struct SpritePatternData {
 	uint8_t patterns[2];
 	uint8_t x;
+	uint8_t y;
 	uint8_t index;
 	uint8_t attr;
 };
@@ -528,18 +529,30 @@ void exit_vblank() {
 	write_block_ = false;
 }
 
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
 uint8_t sprite_y(uint8_t index) {
 	return sprite_data_[index * 4 + 0];
 }
 
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
 uint8_t sprite_index(uint8_t index) {
 	return sprite_data_[index * 4 + 1];
 }
 
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
 uint8_t sprite_attr(uint8_t index) {
 	return sprite_data_[index * 4 + 2];
 }
 
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
 uint8_t sprite_x(uint8_t index) {
 	return sprite_data_[index * 4 + 3];
 }
@@ -553,9 +566,9 @@ void open_sprite_pattern() {
 	current_sprite_index_ = ((hpos_ - 1) >> 3) & 0x07;
 	SpritePatternData &sprite = sprite_patterns_[current_sprite_index_];
 
-	if(sprite_y(current_sprite_index_) != 0xff) {
-		sprite.index = sprite_index(current_sprite_index_);
-		uint8_t sprite_line = sprite_y(current_sprite_index_);
+	sprite.y = sprite_y(current_sprite_index_);
+
+	if(sprite.y != 0xff) {
 
 		sprite.x     = sprite_x(current_sprite_index_);
 		sprite.attr  = sprite_attr(current_sprite_index_);
@@ -564,14 +577,14 @@ void open_sprite_pattern() {
 		// vertical flip
 		if(sprite.attr & OamVFlip) {
 			if(Size == 16) {
-				sprite_line ^= 0x0F;
+				sprite.y ^= 0x0F;
 			} else {
-				sprite_line ^= 0x07;
+				sprite.y ^= 0x07;
 			}
 		}
 
 		// fetch the actual sprite data
-		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(sprite.index, sprite_line);
+		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(sprite.index, sprite.y);
 	} else {
 		// fetch the actual sprite data (dummy)
 		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(0xff, 0xff);
@@ -914,6 +927,7 @@ void reset(Reset reset_type) {
 			sprite_patterns_[i].patterns[0] = 0;
 			sprite_patterns_[i].patterns[1] = 0;
 			sprite_patterns_[i].x           = 0;
+			sprite_patterns_[i].y           = 0;
 			sprite_patterns_[i].index       = 0;
 			sprite_patterns_[i].attr        = 0;
 		}
