@@ -485,12 +485,10 @@ void evaluate_sprites() {
 		case STATE_3:
 			{
 				// 3. Starting at m = 0, evaluate OAM[n][m] as a Y-coordinate.
-				const uint16_t sprite_line = (vpos_ - 1) - (sprite_ram_[index]);
-
 				// 3a. If the value is in range, set the sprite overflow flag in $2002 and read
 				//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
 				//     'n' when 'm' overflows); if m = 3, increment n
-				if(sprite_line < Size::value) {
+				if(sprite_in_range<Size>(sprite_ram_[index])) {
 					status_.overflow = true;
 					++index;
 				} else {
@@ -627,11 +625,9 @@ void read_sprite_pattern() {
 
 	SpritePatternData &sprite = sprite_patterns_[current_sprite_index_];
 
-	if(sprite_y(current_sprite_index_) != 0xff) {
-		// horizontal flip
-		if(sprite.attr & OamHFlip) {
-			pattern = reverse_bits[pattern];
-		}
+	// horizontal flip
+	if(sprite.attr & OamHFlip) {
+		pattern = reverse_bits[pattern];
 	}
 
 	sprite_patterns_[current_sprite_index_].patterns[Pattern::index] = pattern;
