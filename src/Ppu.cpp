@@ -202,6 +202,7 @@ void reset(Reset reset_type) {
 #endif
 	if(reset_type == Reset::Hard) {
 		std::fill_n(sprite_ram_, 0x0100, 0);
+		std::fill_n(sprite_data_, 32, 0xff);
 
 		for(int i = 0; i < 8; ++i) {
 			sprite_patterns_[i].patterns[0] = 0;
@@ -209,11 +210,6 @@ void reset(Reset reset_type) {
 			sprite_patterns_[i].x           = 0;
 			sprite_patterns_[i].index       = 0;
 			sprite_patterns_[i].attr        = 0;
-		}
-
-		for(int i = 0; i < 32; ++i) {
-			sprite_data_[i] = 0xff;
-
 		}
 
 		memcpy(palette_, powerup_palette, sizeof(palette_));
@@ -565,13 +561,18 @@ template <int Size, class Pattern>
 void open_sprite_pattern() {
 
 	current_sprite_index_ = ((hpos_ - 1) >> 3) & 0x07;
+	SpritePatternData &sprite = sprite_patterns_[current_sprite_index_];
 
 	if(sprite_y(current_sprite_index_) != 0xff) {
-		const uint8_t index = sprite_index(current_sprite_index_);
+		sprite.index = sprite_index(current_sprite_index_);
 		uint8_t sprite_line = sprite_y(current_sprite_index_);
 
+		sprite.x     = sprite_x(current_sprite_index_);
+		sprite.attr  = sprite_attr(current_sprite_index_);
+		sprite.index = sprite_index(current_sprite_index_);
+
 		// vertical flip
-		if(sprite_attr(current_sprite_index_) & OamVFlip) {
+		if(sprite.attr & OamVFlip) {
 			if(Size == 16) {
 				sprite_line ^= 0x0F;
 			} else {
@@ -580,7 +581,7 @@ void open_sprite_pattern() {
 		}
 
 		// fetch the actual sprite data
-		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(index, sprite_line);
+		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(sprite.index, sprite_line);
 	} else {
 		// fetch the actual sprite data (dummy)
 		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(0xff, 0xff);
@@ -597,9 +598,11 @@ void read_sprite_pattern() {
 
 	uint8_t pattern = cart.mapper()->read_vram(next_ppu_fetch_address_);
 
+	SpritePatternData &sprite = sprite_patterns_[current_sprite_index_];
+
 	if(sprite_y(current_sprite_index_) != 0xff) {
 		// horizontal flip
-		if(sprite_attr(current_sprite_index_) & OamHFlip) {
+		if(sprite.attr & OamHFlip) {
 			pattern = reverse_bits[pattern];
 		}
 	}
@@ -795,13 +798,16 @@ uint8_t select_pixel(uint8_t index) {
 
 			// this will loop at most 8 times
 			for(uint8_t spr = 0; spr != sprite_data_index_; ++spr) {
-				const uint16_t x_offset = index - sprite_x(spr);
+
+				const SpritePatternData &sprite = sprite_patterns_[spr];
+
+				const uint16_t x_offset = index - sprite.x;
 
 				// is this sprite visible on this pixel?
 				if(x_offset < 8) {
 
-					const uint8_t p0 = sprite_patterns_[spr].patterns[0];
-					const uint8_t p1 = sprite_patterns_[spr].patterns[1];
+					const uint8_t p0 = sprite.patterns[0];
+					const uint8_t p1 = sprite.patterns[1];
 					const uint16_t shift = 7 - x_offset;
 
 					const uint8_t sprite_pixel =
@@ -815,15 +821,15 @@ uint8_t select_pixel(uint8_t index) {
 						// NOTE: according to blargg's tests, a collision doesn't seem
 						//       possible to occur on the rightmost pixel
 					#ifndef SPRITE_ZERO_HACK
-						if((sprite_attr(spr) & OamZero) && (index < 255) && (pixel & 0x03)) {
+						if((sprite.attr & OamZero) && (index < 255) && (pixel & 0x03)) {
 					#else
-						if((sprite_attr(spr) & OamZero) && (index < 255)) {
+						if((sprite.attr & OamZero) && (index < 255)) {
 					#endif
 							status_.sprite0 = true;
 						}
 
-						if((((sprite_attr(spr) & OamPriority) == 0) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
-							pixel = 0x10 | sprite_pixel | ((sprite_attr(spr) & OamColor) << 2);
+						if((((sprite.attr & OamPriority) == 0) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
+							pixel = (0x10 | sprite_pixel | ((sprite.attr & OamColor) << 2)) & 0xff;
 						}
 
 						return pixel;
