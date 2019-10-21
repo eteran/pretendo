@@ -46,6 +46,14 @@ struct pattern_1 {
 	static constexpr uint8_t offset = 8;
 };
 
+struct size_8px {
+	static constexpr int value = 8;
+};
+
+struct size_16px {
+	static constexpr int value = 16;
+};
+
 const uint8_t reverse_bits[256] = {
 	0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0,
 	0x08, 0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8, 0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8,
@@ -151,19 +159,25 @@ uint16_t background_pattern_table() {
 	return ppu_control_.background_pattern_table ? 0x1000 : 0x0000;
 }
 
+template <class Pattern>
+constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line, const size_8px &) {
+	// 8x8
+	return (sprite_pattern_table() | (index << 4) | Pattern::offset | sprite_line) & 0xffff;
+}
+
+template <class Pattern>
+constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line, const size_16px &) {
+	// 8x16. even sprites use $0000, odd $1000
+	return (((index & 1) << 12) | ((index & 0xfe) << 4) | Pattern::offset | (sprite_line & 7) | ((sprite_line & 0x08) << 1)) & 0xffff;
+}
+
 //------------------------------------------------------------------------------
 // Name:
 // Desc:
 //------------------------------------------------------------------------------
-template <int Size, class Pattern>
+template <class Size, class Pattern>
 constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
-	if(Size == 16) {
-		// 8x16. even sprites use $0000, odd $1000
-		return ((index & 1) << 12) | ((index & 0xfe) << 4) | Pattern::offset | (sprite_line & 7) | ((sprite_line & 0x08) << 1);
-	} else {
-		// 8x8
-		return sprite_pattern_table() | (index << 4) | Pattern::offset | sprite_line;
-	}
+	return sprite_pattern_address<Pattern>(index, sprite_line, Size());
 }
 
 //------------------------------------------------------------------------------
@@ -379,7 +393,7 @@ void read_tile_index() {
 //------------------------------------------------------------------------------
 // Name: evaluate_sprites
 //------------------------------------------------------------------------------
-template <int Size>
+template <class Size>
 void evaluate_sprites() {
 	sprite_data_index_ = 0;
 
@@ -405,7 +419,7 @@ void evaluate_sprites() {
 
 				// 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
-				if(sprite_line < Size) {
+				if(sprite_line < Size::value) {
 
 					const uint8_t new_x = sprite_ram_[index + 3];
 
@@ -459,7 +473,7 @@ void evaluate_sprites() {
 				// 3a. If the value is in range, set the sprite overflow flag in $2002 and read
 				//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
 				//     'n' when 'm' overflows); if m = 3, increment n
-				if(sprite_line < Size) {
+				if(sprite_line < Size::value) {
 					status_.overflow = true;
 					++index;
 				} else {
@@ -489,9 +503,9 @@ void evaluate_sprites_even() {
 	} else if(UNLIKELY(hpos_ == 256)) {
 		// TODO: do this part incrementally during cycles 0-255 like the real thing
 		if(ppu_control_.large_sprites) {
-			evaluate_sprites<16>();
+			evaluate_sprites<size_16px>();
 		} else {
-			evaluate_sprites<8>();
+			evaluate_sprites<size_8px>();
 		}
 	}
 }
@@ -560,7 +574,7 @@ uint8_t sprite_x(uint8_t index) {
 //------------------------------------------------------------------------------
 // Name: open_sprite_pattern
 //------------------------------------------------------------------------------
-template <int Size, class Pattern>
+template <class Size, class Pattern>
 void open_sprite_pattern() {
 
 	current_sprite_index_ = ((hpos_ - 1) >> 3) & 0x07;
@@ -576,7 +590,7 @@ void open_sprite_pattern() {
 
 		// vertical flip
 		if(sprite.attr & OamVFlip) {
-			if(Size == 16) {
+			if(Size::value == 16) {
 				sprite.y ^= 0x0F;
 			} else {
 				sprite.y ^= 0x07;
@@ -596,7 +610,7 @@ void open_sprite_pattern() {
 //------------------------------------------------------------------------------
 // Name: read_sprite_pattern
 //------------------------------------------------------------------------------
-template <int Size, class Pattern>
+template <class Size, class Pattern>
 void read_sprite_pattern() {
 
 	uint8_t pattern = cart.mapper()->read_vram(next_ppu_fetch_address_);
@@ -747,10 +761,10 @@ void clock_ppu(const scanline_prerender &) {
 			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
 			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
 			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 8: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_0>(); } else { open_sprite_pattern<size_8px, pattern_0>(); } break;
+			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_0>(); } else { read_sprite_pattern<size_8px, pattern_0>(); } break;
+			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_1>(); } else { open_sprite_pattern<size_8px, pattern_1>(); } break;
+			case 8: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_1>(); } else { read_sprite_pattern<size_8px, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 305) {
 
@@ -762,10 +776,10 @@ void clock_ppu(const scanline_prerender &) {
 			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
 			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
 			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_0>(); } else { open_sprite_pattern<size_8px, pattern_0>(); } break;
+			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_0>(); } else { read_sprite_pattern<size_8px, pattern_0>(); } break;
+			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_1>(); } else { open_sprite_pattern<size_8px, pattern_1>(); } break;
+			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_1>(); } else { read_sprite_pattern<size_8px, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 321) {
 
@@ -776,10 +790,10 @@ void clock_ppu(const scanline_prerender &) {
 			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
 			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
 			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_0>(); } else { open_sprite_pattern<size_8px, pattern_0>(); } break;
+			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_0>(); } else { read_sprite_pattern<size_8px, pattern_0>(); } break;
+			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_1>(); } else { open_sprite_pattern<size_8px, pattern_1>(); } break;
+			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_1>(); } else { read_sprite_pattern<size_8px, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 337) {
 			// fetch first 2 tiles of NEXT scanline
@@ -866,10 +880,10 @@ void clock_ppu(const scanline_render &target) {
 			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
 			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
 			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_0>(); } else { open_sprite_pattern<8, pattern_0>(); } break;
-			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_0>(); } else { read_sprite_pattern<8, pattern_0>(); } break;
-			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<16, pattern_1>(); } else { open_sprite_pattern<8, pattern_1>(); } break;
-			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<16, pattern_1>(); } else { read_sprite_pattern<8, pattern_1>(); } break;
+			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_0>(); } else { open_sprite_pattern<size_8px, pattern_0>(); } break;
+			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_0>(); } else { read_sprite_pattern<size_8px, pattern_0>(); } break;
+			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_1>(); } else { open_sprite_pattern<size_8px, pattern_1>(); } break;
+			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_1>(); } else { read_sprite_pattern<size_8px, pattern_1>(); } break;
 			}
 		} else if(hpos_ < 337) {
 			// NOTE(eteran): on my machine, this code "costs" about 50 FPS
