@@ -4,7 +4,6 @@
 
 #include "Reset.h"
 #include "BitField.h"
-#include "VRAMBank.h"
 #include <cstdint>
 
 class Mapper;
@@ -91,8 +90,5 @@ extern bool system_paused;
 
 }
 }
-
-extern VRAMBank     vram_banks_[0x10];
-
 
 #endif
