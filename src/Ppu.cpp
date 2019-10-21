@@ -48,10 +48,12 @@ struct pattern_1 {
 
 struct size_8px {
 	static constexpr int value = 8;
+	static constexpr int flip_mask = 0x07;
 };
 
 struct size_16px {
 	static constexpr int value = 16;
+	static constexpr int flip_mask = 0x0f;
 };
 
 const uint8_t reverse_bits[256] = {
@@ -115,7 +117,6 @@ uint8_t      sprite_ram_[0x100]      = {};
 uint8_t      left_most_sprite_x_     = 0xff;
 uint8_t      sprite_address_         = 0;
 uint8_t      sprite_data_index_      = 0;
-uint8_t      sprite_buffer_          = 0xff;
 
 uint8_t      palette_[0x20];
 uint64_t     ppu_cycle_              = 0;
@@ -159,12 +160,20 @@ uint16_t background_pattern_table() {
 	return ppu_control_.background_pattern_table ? 0x1000 : 0x0000;
 }
 
+//------------------------------------------------------------------------------
+// Name:
+// Desc:
+//------------------------------------------------------------------------------
 template <class Pattern>
 constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line, const size_8px &) {
 	// 8x8
 	return (sprite_pattern_table() | (index << 4) | Pattern::offset | sprite_line) & 0xffff;
 }
 
+//------------------------------------------------------------------------------
+// Name:
+// Desc:
+//------------------------------------------------------------------------------
 template <class Pattern>
 constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line, const size_16px &) {
 	// 8x16. even sprites use $0000, odd $1000
@@ -421,19 +430,17 @@ void evaluate_sprites() {
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
 				if(sprite_line < Size::value) {
 
-					const uint8_t new_x = sprite_ram_[index + 3];
-
 					sprite_data_[sprite_data_index_ * 4 + 0] = static_cast<uint8_t>(sprite_line); // y
 					sprite_data_[sprite_data_index_ * 4 + 1] = sprite_ram_[index + 1];            // index
 					sprite_data_[sprite_data_index_ * 4 + 2] = sprite_ram_[index + 2] & 0xe3;     // attributes
-					sprite_data_[sprite_data_index_ * 4 + 3] = new_x;                             // x
+					sprite_data_[sprite_data_index_ * 4 + 3] = sprite_ram_[index + 3];            // x
 
 					// note that we found sprite 0
 					if(index == start_address) {
 						sprite_data_[sprite_data_index_ * 4 + 2] |= OamZero;
 					}
 
-					left_most_sprite_x_ = std::min(left_most_sprite_x_, new_x);
+					left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_ram_[index + 3]);
 
 					++sprite_data_index_;
 				}
@@ -499,6 +506,9 @@ void evaluate_sprites() {
 void evaluate_sprites_even() {
 	// write cycle
 	if(hpos_ < 64) {
+		if(UNLIKELY(hpos_ == 0)) {
+			std::fill_n(sprite_data_, sizeof(sprite_data_), 0xff);
+		}
 
 	} else if(UNLIKELY(hpos_ == 256)) {
 		// TODO: do this part incrementally during cycles 0-255 like the real thing
@@ -514,12 +524,6 @@ void evaluate_sprites_even() {
 // Name: evaluate_sprites_odd
 //------------------------------------------------------------------------------
 void evaluate_sprites_odd() {
-
-	// read cycle
-	if(hpos_ < 64) {
-		sprite_buffer_ = 0xff;
-	} else {
-	}
 }
 
 //------------------------------------------------------------------------------
@@ -590,11 +594,7 @@ void open_sprite_pattern() {
 
 		// vertical flip
 		if(sprite.attr & OamVFlip) {
-			if(Size::value == 16) {
-				sprite.y ^= 0x0F;
-			} else {
-				sprite.y ^= 0x07;
-			}
+			sprite.y ^= Size::flip_mask;
 		}
 
 		// fetch the actual sprite data
@@ -986,7 +986,6 @@ void reset(Reset reset_type) {
 	register_2007_buffer_   = 0;
 	rendering_              = false;
 	sprite_address_         = 0;
-	sprite_buffer_          = 0xff;
 	sprite_data_index_      = 0;
 	left_most_sprite_x_     = 0xff;
 	status_.raw             = 0;
