@@ -400,6 +400,15 @@ void read_tile_index() {
 }
 
 //------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+template <class Size>
+bool sprite_in_range(uint8_t y) {
+	const uint16_t sprite_line = (vpos_ - 1) - y;
+	return sprite_line < Size::value;
+}
+
+//------------------------------------------------------------------------------
 // Name: evaluate_sprites
 //------------------------------------------------------------------------------
 template <class Size>
@@ -424,12 +433,13 @@ void evaluate_sprites() {
 			//    the next open slot in secondary OAM (unless 8 sprites have been found, in
 			//    which case the write is ignored).
 			if(sprite_data_index_ < 8) {
-				const uint16_t sprite_line = (vpos_ - 1) - sprite_ram_[index];
+
 
 				// 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
-				if(sprite_line < Size::value) {
+				if(sprite_in_range<Size>(sprite_ram_[index])) {
 
+					const uint16_t sprite_line = (vpos_ - 1) - sprite_ram_[index + 0];
 					sprite_data_[sprite_data_index_ * 4 + 0] = static_cast<uint8_t>(sprite_line); // y
 					sprite_data_[sprite_data_index_ * 4 + 1] = sprite_ram_[index + 1];            // index
 					sprite_data_[sprite_data_index_ * 4 + 2] = sprite_ram_[index + 2] & 0xe3;     // attributes
