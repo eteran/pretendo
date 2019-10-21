@@ -105,10 +105,7 @@ struct SpritePatternData {
 // internal variables
 SpritePatternData sprite_patterns_[8];
 uint8_t      current_sprite_index_   = 0;
-uint8_t      sprite_data_y[8]        = {};
-uint8_t      sprite_data_x[8]        = {};
-uint8_t      sprite_data_index[8]    = {};
-uint8_t      sprite_data_attr[8]     = {};
+uint8_t      sprite_data_[32]        = {};
 uint8_t      sprite_ram_[0x100]      = {};
 uint8_t      left_most_sprite_x_     = 0xff;
 uint8_t      sprite_address_         = 0;
@@ -119,20 +116,20 @@ uint8_t      palette_[0x20];
 uint64_t     ppu_cycle_              = 0;
 uint64_t     ppu_read_2002_cycle_    = 0;
 uint16_t     next_ppu_fetch_address_ = 0;
-uint16_t     attribute_queue_[2];
-uint16_t     pattern_queue_[2];
+uint16_t     attribute_queue_[2]     = {};
+uint16_t     pattern_queue_[2]       = {};
 uint16_t     nametable_              = 0; // loopy's "t"
 uint16_t     vram_address_           = 0; // loopy's "v"
 uint16_t     hpos_                   = 0; // pixel counter
 uint16_t     vpos_                   = 0; // scanline counter
-uint8_t      next_pattern_[2];
+uint8_t      next_pattern_[2]        = {};
 uint16_t     latch_                  = 0;
 uint8_t      next_attribute_         = 0;
 uint8_t      next_tile_index_        = 0;
-Control   ppu_control_            = {0};
-Mask      ppu_mask_               = {0};
+Control      ppu_control_            = {0};
+Mask         ppu_mask_               = {0};
 uint8_t      register_2007_buffer_   = 0;
-Status    status_                 = {0};
+Status       status_                 = {0};
 uint8_t      tile_offset_            = 0; // loopy's "x"
 
 bool         odd_frame_              = false;
@@ -214,11 +211,9 @@ void reset(Reset reset_type) {
 			sprite_patterns_[i].attr        = 0;
 		}
 
-		for(int i = 0; i < 8; ++i) {
-			sprite_data_x[i]     = 0xff;
-			sprite_data_y[i]     = 0xff;
-			sprite_data_index[i] = 0xff;
-			sprite_data_attr[i]  = 0xff;
+		for(int i = 0; i < 32; ++i) {
+			sprite_data_[i] = 0xff;
+
 		}
 
 		memcpy(palette_, powerup_palette, sizeof(palette_));
@@ -547,6 +542,21 @@ void end_frame() {
 	cart.mapper()->ppu_end_frame();
 }
 
+uint8_t sprite_y(uint8_t index) {
+	return sprite_data_[index * 4 + 0];
+}
+
+uint8_t sprite_index(uint8_t index) {
+	return sprite_data_[index * 4 + 1];
+}
+
+uint8_t sprite_attr(uint8_t index) {
+	return sprite_data_[index * 4 + 2];
+}
+
+uint8_t sprite_x(uint8_t index) {
+	return sprite_data_[index * 4 + 3];
+}
 
 //------------------------------------------------------------------------------
 // Name: open_sprite_pattern
@@ -556,12 +566,12 @@ void open_sprite_pattern() {
 
 	current_sprite_index_ = ((hpos_ - 1) >> 3) & 0x07;
 
-	if(sprite_data_y[current_sprite_index_] != 0xff) {
-		const uint8_t index = sprite_data_index[current_sprite_index_];
-		uint8_t sprite_line = sprite_data_y[current_sprite_index_];
+	if(sprite_y(current_sprite_index_) != 0xff) {
+		const uint8_t index = sprite_index(current_sprite_index_);
+		uint8_t sprite_line = sprite_y(current_sprite_index_);
 
 		// vertical flip
-		if(sprite_data_attr[current_sprite_index_] & OamVFlip) {
+		if(sprite_attr(current_sprite_index_) & OamVFlip) {
 			if(Size == 16) {
 				sprite_line ^= 0x0F;
 			} else {
@@ -587,9 +597,9 @@ void read_sprite_pattern() {
 
 	uint8_t pattern = cart.mapper()->read_vram(next_ppu_fetch_address_);
 
-	if(sprite_data_y[current_sprite_index_] != 0xff) {
+	if(sprite_y(current_sprite_index_) != 0xff) {
 		// horizontal flip
-		if(sprite_data_attr[current_sprite_index_] & OamHFlip) {
+		if(sprite_attr(current_sprite_index_) & OamHFlip) {
 			pattern = reverse_bits[pattern];
 		}
 	}
@@ -659,14 +669,14 @@ void evaluate_sprites() {
 
 					const uint8_t new_x = sprite_ram_[index + 3];
 
-					sprite_data_y[sprite_data_index_]     = static_cast<uint8_t>(sprite_line); // y
-					sprite_data_index[sprite_data_index_] = sprite_ram_[index + 1];            // index
-					sprite_data_attr[sprite_data_index_]  = sprite_ram_[index + 2] & 0xe3;     // attributes
-					sprite_data_x[sprite_data_index_]     = new_x;                             // x
+					sprite_data_[sprite_data_index_ * 4 + 0] = static_cast<uint8_t>(sprite_line); // y
+					sprite_data_[sprite_data_index_ * 4 + 1] = sprite_ram_[index + 1];            // index
+					sprite_data_[sprite_data_index_ * 4 + 2] = sprite_ram_[index + 2] & 0xe3;     // attributes
+					sprite_data_[sprite_data_index_ * 4 + 3] = new_x;                             // x
 
 					// note that we found sprite 0
 					if(index == start_address) {
-						sprite_data_attr[sprite_data_index_] |= OamZero;
+						sprite_data_[sprite_data_index_ * 4 + 2] |= OamZero;
 					}
 
 					left_most_sprite_x_ = std::min(left_most_sprite_x_, new_x);
@@ -785,7 +795,7 @@ uint8_t select_pixel(uint8_t index) {
 
 			// this will loop at most 8 times
 			for(uint8_t spr = 0; spr != sprite_data_index_; ++spr) {
-				const uint16_t x_offset = index - sprite_data_x[spr];
+				const uint16_t x_offset = index - sprite_x(spr);
 
 				// is this sprite visible on this pixel?
 				if(x_offset < 8) {
@@ -805,15 +815,15 @@ uint8_t select_pixel(uint8_t index) {
 						// NOTE: according to blargg's tests, a collision doesn't seem
 						//       possible to occur on the rightmost pixel
 					#ifndef SPRITE_ZERO_HACK
-						if((sprite_data_attr[spr] & OamZero) && (index < 255) && (pixel & 0x03)) {
+						if((sprite_attr(spr) & OamZero) && (index < 255) && (pixel & 0x03)) {
 					#else
-						if((sprite_data_attr[spr] & OamZero) && (index < 255)) {
+						if((sprite_attr(spr) & OamZero) && (index < 255)) {
 					#endif
 							status_.sprite0 = true;
 						}
 
-						if((((sprite_data_attr[spr] & OamPriority) == 0) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
-							pixel = 0x10 | sprite_pixel | ((sprite_data_attr[spr] & OamColor) << 2);
+						if((((sprite_attr(spr) & OamPriority) == 0) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
+							pixel = 0x10 | sprite_pixel | ((sprite_attr(spr) & OamColor) << 2);
 						}
 
 						return pixel;
