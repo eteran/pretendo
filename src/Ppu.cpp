@@ -468,10 +468,10 @@ void evaluate_sprites() {
 				if(sprite_in_range<Size>(sprite_ram_[index])) {
 
 					const uint16_t sprite_line = (vpos_ - 1) - sprite_ram_[index + 0];
-					sprite_y(sprite_data_index_) = static_cast<uint8_t>(sprite_line); // y
-					sprite_index(sprite_data_index_) = sprite_ram_[index + 1];        // index
-					sprite_attr(sprite_data_index_) = sprite_ram_[index + 2] & 0xe3;  // attributes
-					sprite_x(sprite_data_index_) = sprite_ram_[index + 3];            // x
+					sprite_y(sprite_data_index_)     = static_cast<uint8_t>(sprite_line); // y
+					sprite_index(sprite_data_index_) = sprite_ram_[index + 1];            // index
+					sprite_attr(sprite_data_index_)  = sprite_ram_[index + 2] & 0xe3;     // attributes
+					sprite_x(sprite_data_index_)     = sprite_ram_[index + 3];            // x
 
 					// note that we found sprite 0
 					if(index == start_address) {
