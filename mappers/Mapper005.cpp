@@ -669,7 +669,7 @@ void Mapper5::vram_change_hook(uint16_t vram_address) {
 	++fetch_count_;
 
 	// 3 consecutive reads!
-	if (vram_address == prev_vram_address_[0] && vram_address == prev_vram_address_[1]) {
+	if (vram_address == prev_vram_address_[0] && vram_address == prev_vram_address_[1] && (vram_address & 0x2000)) {
 		clock_irq();
 		fetch_count_ = 0;
 	}
