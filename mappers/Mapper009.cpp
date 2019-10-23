@@ -41,11 +41,7 @@ void Mapper9::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper9::write_b(uint16_t address, uint8_t value) {
 	(void)address;
-	latch1_lo_ = value;
-
-	if(!latch1_) {
-		set_chr_0000_0fff(value & 0x1f);
-	}
+	latch0_lo_ = value;
 }
 
 //------------------------------------------------------------------------------
@@ -53,11 +49,7 @@ void Mapper9::write_b(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper9::write_c(uint16_t address, uint8_t value) {
 	(void)address;
-	latch1_hi_ = value;
-
-	if(latch1_) {
-		set_chr_0000_0fff(value & 0x1f);
-	}
+	latch0_hi_ = value;
 }
 
 //------------------------------------------------------------------------------
@@ -65,11 +57,7 @@ void Mapper9::write_c(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper9::write_d(uint16_t address, uint8_t value) {
 	(void)address;
-	latch2_lo_ = value;
-
-	if(!latch2_) {
-		set_chr_1000_1fff(value & 0x1f);
-	}
+	latch1_lo_ = value;
 }
 
 //------------------------------------------------------------------------------
@@ -77,11 +65,7 @@ void Mapper9::write_d(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper9::write_e(uint16_t address, uint8_t value) {
 	(void)address;
-	latch2_hi_ = value;
-
-	if(latch2_) {
-		set_chr_1000_1fff(value & 0x1f);
-	}
+	latch1_hi_ = value;
 }
 
 //------------------------------------------------------------------------------
@@ -103,22 +87,36 @@ uint8_t Mapper9::read_vram(uint16_t address) {
 
 	const uint8_t ret = Mapper::read_vram(address);
 
-	switch(address & 0xfff0) {
-	case 0x0fd0:
-		set_chr_0000_0fff(latch1_lo_);
+	switch(address) {
+	case 0x0fd8:
+		set_chr_0000_0fff(latch0_lo_);
+		latch0_ = false;
+		break;
+	case 0x0fe8:
+		set_chr_0000_0fff(latch0_hi_);
+		latch0_ = true;
+		break;
+	case 0x1fd8:
+	case 0x1fd9:
+	case 0x1fda:
+	case 0x1fdb:
+	case 0x1fdc:
+	case 0x1fdd:
+	case 0x1fde:
+	case 0x1fdf:
+		set_chr_1000_1fff(latch1_lo_);
 		latch1_ = false;
 		break;
-	case 0x1fd0:
-		set_chr_1000_1fff(latch2_lo_);
-		latch2_ = false;
-		break;
-	case 0x0fe0:
-		set_chr_0000_0fff(latch1_hi_);
+	case 0x1fe8:
+	case 0x1fe9:
+	case 0x1fea:
+	case 0x1feb:
+	case 0x1fec:
+	case 0x1fed:
+	case 0x1fee:
+	case 0x1fef:
+		set_chr_1000_1fff(latch1_hi_);
 		latch1_ = true;
-		break;
-	case 0x1fe0:
-		set_chr_1000_1fff(latch2_hi_);
-		latch2_ = true;
 		break;
 	}
 

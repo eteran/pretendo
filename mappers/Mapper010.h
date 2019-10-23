@@ -23,12 +23,12 @@ public:
 	uint8_t read_vram(uint16_t address) override;
 
 private:
+	bool    latch0_    = true;
 	bool    latch1_    = true;
-	bool    latch2_    = true;
+	uint8_t latch0_lo_ = 0;
+	uint8_t latch0_hi_ = 0;
 	uint8_t latch1_lo_ = 0;
 	uint8_t latch1_hi_ = 0;
-	uint8_t latch2_lo_ = 0;
-	uint8_t latch2_hi_ = 0;
 };
 
 #endif
