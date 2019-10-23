@@ -42,6 +42,10 @@ void Mapper9::write_a(uint16_t address, uint8_t value) {
 void Mapper9::write_b(uint16_t address, uint8_t value) {
 	(void)address;
 	latch0_lo_ = value;
+
+	if(!latch0_) {
+		set_chr_0000_0fff(value & 0x1f);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -50,6 +54,10 @@ void Mapper9::write_b(uint16_t address, uint8_t value) {
 void Mapper9::write_c(uint16_t address, uint8_t value) {
 	(void)address;
 	latch0_hi_ = value;
+
+	if(latch0_) {
+		set_chr_0000_0fff(value & 0x1f);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -58,6 +66,10 @@ void Mapper9::write_c(uint16_t address, uint8_t value) {
 void Mapper9::write_d(uint16_t address, uint8_t value) {
 	(void)address;
 	latch1_lo_ = value;
+
+	if(!latch1_) {
+		set_chr_1000_1fff(value & 0x1f);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -66,6 +78,10 @@ void Mapper9::write_d(uint16_t address, uint8_t value) {
 void Mapper9::write_e(uint16_t address, uint8_t value) {
 	(void)address;
 	latch1_hi_ = value;
+
+	if(latch1_) {
+		set_chr_1000_1fff(value & 0x1f);
+	}
 }
 
 //------------------------------------------------------------------------------
