@@ -45,11 +45,11 @@ constexpr double CPUFrequency  = 1789772.67; // 1.78977267Mhz
 // CPUFrequency / 44100Hz  = 40.5844142857 clocks per sample
 // CPUFrequency / 48000Hz  = 37.286930625  clocks per sample
 // CPUFrequency / 192000Hz = 9.32173265625 clocks per sample
-constexpr int ClocksPerSample = CPUFrequency / frequency;
+constexpr auto ClocksPerSample = static_cast<int>(CPUFrequency / frequency);
 
 
-uint64_t        apu_cycles_         = -1;
-uint64_t        next_clock_         = -1;
+auto            apu_cycles_         = static_cast<uint64_t>(-1);
+auto            next_clock_         = static_cast<uint64_t>(-1);
 uint8_t         clock_step_         = 0;
 APUFrameCounter frame_counter_      = {0};
 uint8_t         last_frame_counter_ = 0;
