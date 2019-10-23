@@ -153,7 +153,6 @@ protected:
 
 protected:
 	void set_mirroring(uint8_t mir);
-	void set_vram_bank(uint8_t bank, uint8_t *p, bool writeable);
 
 protected:
 	void swap_01(uint8_t *ptr) { page_[0x00] = ptr + 0x0000; page_[0x01] = ptr + 0x0800; page_[0x02] = ptr + 0x1000; page_[0x03] = ptr + 0x1800; }

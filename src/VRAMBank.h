@@ -9,20 +9,24 @@ using std::uint8_t;
 
 class VRAMBank {
 public:
+	enum Type {
+		Ram, Rom
+	};
+public:
     VRAMBank()                               = default;
     VRAMBank(const VRAMBank &other)          = default;
     VRAMBank &operator=(const VRAMBank &rhs) = default;
 
 	VRAMBank &operator=(std::nullptr_t) {
 		ptr_ = nullptr;
-		writeable_ = false;
+		type_ = Rom;
 		return *this;
 	}
 
-	explicit VRAMBank(std::nullptr_t) : ptr_(nullptr), writeable_(false) {
+	explicit VRAMBank(std::nullptr_t) : ptr_(nullptr), type_(Rom) {
 	}
 
-	VRAMBank(uint8_t *p, bool writeable) : ptr_(p), writeable_(writeable) {
+	VRAMBank(uint8_t *p, Type type) : ptr_(p), type_(type) {
 	}
 
 public:
@@ -31,11 +35,11 @@ public:
 	explicit operator bool() const     { return ptr_; }
 
 public:
-	bool writeable() const   { return writeable_; }
+	bool writeable() const   { return type_ == Ram; }
 
 private:
-    uint8_t* ptr_       = nullptr;
-    bool     writeable_ = false;
+	uint8_t* ptr_  = nullptr;
+	Type     type_ = Ram;
 };
 
 #endif

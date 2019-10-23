@@ -45,7 +45,6 @@ Mapper::Mapper() {
 	case Cart::MIR_SINGLE_HIGH: set_mirroring(mirror_single_high); break;
 	case Cart::MIR_4SCREEN:     set_mirroring(mirror_4screen);     break;
 	case Cart::MIR_MAPPER:
-	default:
 		// Nothing, handled by Mapper
 		break;
 	}
@@ -421,7 +420,7 @@ void Mapper::set_chr_0000_03ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & mask), false);
+		vram_banks_[0x00] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -432,7 +431,7 @@ void Mapper::set_chr_0400_07ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0000) & mask), false);
+		vram_banks_[0x01] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -443,7 +442,7 @@ void Mapper::set_chr_0800_0bff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0000) & mask), false);
+		vram_banks_[0x02] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -454,7 +453,7 @@ void Mapper::set_chr_0c00_0fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0000) & mask), false);
+		vram_banks_[0x03] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -465,7 +464,7 @@ void Mapper::set_chr_1000_13ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & mask), false);
+		vram_banks_[0x04] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -476,7 +475,7 @@ void Mapper::set_chr_1400_17ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0000) & mask), false);
+		vram_banks_[0x05] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -487,7 +486,7 @@ void Mapper::set_chr_1800_1bff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0000) & mask), false);
+		vram_banks_[0x06] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -498,7 +497,7 @@ void Mapper::set_chr_1c00_1fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (1 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0000) & mask), false);
+		vram_banks_[0x07] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -509,8 +508,8 @@ void Mapper::set_chr_0000_07ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (2 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & mask), false);
-		set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & mask), false);
+		vram_banks_[0x00] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
+		vram_banks_[0x01] = { nes::cart.chr() + ((num + 0x0400) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -521,8 +520,8 @@ void Mapper::set_chr_0800_0fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (2 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0000) & mask), false);
-		set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0400) & mask), false);
+		vram_banks_[0x02] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
+		vram_banks_[0x03] = { nes::cart.chr() + ((num + 0x0400) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -533,8 +532,8 @@ void Mapper::set_chr_1000_17ff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (2 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & mask), false);
-		set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0400) & mask), false);
+		vram_banks_[0x04] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
+		vram_banks_[0x05] = { nes::cart.chr() + ((num + 0x0400) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -545,8 +544,8 @@ void Mapper::set_chr_1800_1fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (2 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0000) & mask), false);
-		set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0400) & mask), false);
+		vram_banks_[0x06] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
+		vram_banks_[0x07] = { nes::cart.chr() + ((num + 0x0400) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -557,10 +556,10 @@ void Mapper::set_chr_0000_0fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (4 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & mask), false);
-		set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & mask), false);
-		set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0800) & mask), false);
-		set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0c00) & mask), false);
+		vram_banks_[0x00] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
+		vram_banks_[0x01] = { nes::cart.chr() + ((num + 0x0400) & mask), VRAMBank::Rom };
+		vram_banks_[0x02] = { nes::cart.chr() + ((num + 0x0800) & mask), VRAMBank::Rom };
+		vram_banks_[0x03] = { nes::cart.chr() + ((num + 0x0c00) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -571,10 +570,10 @@ void Mapper::set_chr_1000_1fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (4 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x04, nes::cart.chr() + ((num + 0x0000) & mask), false);
-		set_vram_bank(0x05, nes::cart.chr() + ((num + 0x0400) & mask), false);
-		set_vram_bank(0x06, nes::cart.chr() + ((num + 0x0800) & mask), false);
-		set_vram_bank(0x07, nes::cart.chr() + ((num + 0x0c00) & mask), false);
+		vram_banks_[0x04] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
+		vram_banks_[0x05] = { nes::cart.chr() + ((num + 0x0400) & mask), VRAMBank::Rom };
+		vram_banks_[0x06] = { nes::cart.chr() + ((num + 0x0800) & mask), VRAMBank::Rom };
+		vram_banks_[0x07] = { nes::cart.chr() + ((num + 0x0c00) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -585,14 +584,14 @@ void Mapper::set_chr_0000_1fff(int num) {
 	if(LIKELY(nes::cart.has_chr_rom())) {
 		num *= (8 * 1024);
 		const uint32_t mask = nes::cart.chr_mask();
-		set_vram_bank(0x00, nes::cart.chr() + ((num + 0x0000) & mask), false);
-		set_vram_bank(0x01, nes::cart.chr() + ((num + 0x0400) & mask), false);
-		set_vram_bank(0x02, nes::cart.chr() + ((num + 0x0800) & mask), false);
-		set_vram_bank(0x03, nes::cart.chr() + ((num + 0x0c00) & mask), false);
-		set_vram_bank(0x04, nes::cart.chr() + ((num + 0x1000) & mask), false);
-		set_vram_bank(0x05, nes::cart.chr() + ((num + 0x1400) & mask), false);
-		set_vram_bank(0x06, nes::cart.chr() + ((num + 0x1800) & mask), false);
-		set_vram_bank(0x07, nes::cart.chr() + ((num + 0x1c00) & mask), false);
+		vram_banks_[0x00] = { nes::cart.chr() + ((num + 0x0000) & mask), VRAMBank::Rom };
+		vram_banks_[0x01] = { nes::cart.chr() + ((num + 0x0400) & mask), VRAMBank::Rom };
+		vram_banks_[0x02] = { nes::cart.chr() + ((num + 0x0800) & mask), VRAMBank::Rom };
+		vram_banks_[0x03] = { nes::cart.chr() + ((num + 0x0c00) & mask), VRAMBank::Rom };
+		vram_banks_[0x04] = { nes::cart.chr() + ((num + 0x1000) & mask), VRAMBank::Rom };
+		vram_banks_[0x05] = { nes::cart.chr() + ((num + 0x1400) & mask), VRAMBank::Rom };
+		vram_banks_[0x06] = { nes::cart.chr() + ((num + 0x1800) & mask), VRAMBank::Rom };
+		vram_banks_[0x07] = { nes::cart.chr() + ((num + 0x1c00) & mask), VRAMBank::Rom };
 	}
 }
 
@@ -601,7 +600,7 @@ void Mapper::set_chr_0000_1fff(int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_03ff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	set_vram_bank(0x00, p + num + 0x0000, true);
+	vram_banks_[0x00] = { p + num + 0x0000, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -609,7 +608,7 @@ void Mapper::set_chr_0000_03ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0400_07ff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	set_vram_bank(0x01, p + num + 0x0000, true);
+	vram_banks_[0x01] = { p + num + 0x0000, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -617,7 +616,7 @@ void Mapper::set_chr_0400_07ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0800_0bff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	set_vram_bank(0x02, p + num + 0x0000, true);
+	vram_banks_[0x02] = { p + num + 0x0000, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -625,7 +624,7 @@ void Mapper::set_chr_0800_0bff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0c00_0fff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	set_vram_bank(0x03, p + num + 0x0000, true);
+	vram_banks_[0x03] = { p + num + 0x0000, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -633,7 +632,7 @@ void Mapper::set_chr_0c00_0fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1000_13ff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	set_vram_bank(0x04, p + num + 0x0000, true);
+	vram_banks_[0x04] = { p + num + 0x0000, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -641,7 +640,7 @@ void Mapper::set_chr_1000_13ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1400_17ff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	set_vram_bank(0x05, p + num + 0x0000, true);
+	vram_banks_[0x05] = { p + num + 0x0000, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -649,7 +648,7 @@ void Mapper::set_chr_1400_17ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1800_1bff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	set_vram_bank(0x06, p + num + 0x0000, true);
+	vram_banks_[0x06] = { p + num + 0x0000, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -657,7 +656,7 @@ void Mapper::set_chr_1800_1bff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1c00_1fff_ram(uint8_t *p, int num) {
 	num *= (1 * 1024);
-	set_vram_bank(0x07, p + num + 0x0000, true);
+	vram_banks_[0x07] = { p + num + 0x0000, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -665,8 +664,8 @@ void Mapper::set_chr_1c00_1fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_07ff_ram(uint8_t *p, int num) {
 	num *= (2 * 1024);
-	set_vram_bank(0x00, p + num + 0x0000, true);
-	set_vram_bank(0x01, p + num + 0x0400, true);
+	vram_banks_[0x00] = { p + num + 0x0000, VRAMBank::Ram };
+	vram_banks_[0x01] = { p + num + 0x0400, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -674,8 +673,8 @@ void Mapper::set_chr_0000_07ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0800_0fff_ram(uint8_t *p, int num) {
 	num *= (2 * 1024);
-	set_vram_bank(0x02, p + num + 0x0000, true);
-	set_vram_bank(0x03, p + num + 0x0400, true);
+	vram_banks_[0x02] = { p + num + 0x0000, VRAMBank::Ram };
+	vram_banks_[0x03] = { p + num + 0x0400, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -683,8 +682,8 @@ void Mapper::set_chr_0800_0fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1000_17ff_ram(uint8_t *p, int num) {
 	num *= (2 * 1024);
-	set_vram_bank(0x04, p + num + 0x0000, true);
-	set_vram_bank(0x05, p + num + 0x0400, true);
+	vram_banks_[0x04] = { p + num + 0x0000, VRAMBank::Ram };
+	vram_banks_[0x05] = { p + num + 0x0400, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -692,8 +691,8 @@ void Mapper::set_chr_1000_17ff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1800_1fff_ram(uint8_t *p, int num) {
 	num *= (2 * 1024);
-	set_vram_bank(0x06, p + num + 0x0000, true);
-	set_vram_bank(0x07, p + num + 0x0400, true);
+	vram_banks_[0x06] = { p + num + 0x0000, VRAMBank::Ram };
+	vram_banks_[0x07] = { p + num + 0x0400, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -701,10 +700,10 @@ void Mapper::set_chr_1800_1fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_0fff_ram(uint8_t *p, int num) {
 	num *= (4 * 1024);
-	set_vram_bank(0x00, p + num + 0x0000, true);
-	set_vram_bank(0x01, p + num + 0x0400, true);
-	set_vram_bank(0x02, p + num + 0x0800, true);
-	set_vram_bank(0x03, p + num + 0x0c00, true);
+	vram_banks_[0x00] = { p + num + 0x0000, VRAMBank::Ram };
+	vram_banks_[0x01] = { p + num + 0x0400, VRAMBank::Ram };
+	vram_banks_[0x02] = { p + num + 0x0800, VRAMBank::Ram };
+	vram_banks_[0x03] = { p + num + 0x0c00, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -712,10 +711,10 @@ void Mapper::set_chr_0000_0fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_1000_1fff_ram(uint8_t *p, int num) {
 	num *= (4 * 1024);
-	set_vram_bank(0x04, p + num + 0x0000, true);
-	set_vram_bank(0x05, p + num + 0x0400, true);
-	set_vram_bank(0x06, p + num + 0x0800, true);
-	set_vram_bank(0x07, p + num + 0x0c00, true);
+	vram_banks_[0x04] = { p + num + 0x0000, VRAMBank::Ram };
+	vram_banks_[0x05] = { p + num + 0x0400, VRAMBank::Ram };
+	vram_banks_[0x06] = { p + num + 0x0800, VRAMBank::Ram };
+	vram_banks_[0x07] = { p + num + 0x0c00, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -723,14 +722,14 @@ void Mapper::set_chr_1000_1fff_ram(uint8_t *p, int num) {
 //------------------------------------------------------------------------------
 void Mapper::set_chr_0000_1fff_ram(uint8_t *p, int num) {
 	num *= (8 * 1024);
-	set_vram_bank(0x00, p + num + 0x0000, true);
-	set_vram_bank(0x01, p + num + 0x0400, true);
-	set_vram_bank(0x02, p + num + 0x0800, true);
-	set_vram_bank(0x03, p + num + 0x0c00, true);
-	set_vram_bank(0x04, p + num + 0x1000, true);
-	set_vram_bank(0x05, p + num + 0x1400, true);
-	set_vram_bank(0x06, p + num + 0x1800, true);
-	set_vram_bank(0x07, p + num + 0x1c00, true);
+	vram_banks_[0x00] = { p + num + 0x0000, VRAMBank::Ram };
+	vram_banks_[0x01] = { p + num + 0x0400, VRAMBank::Ram };
+	vram_banks_[0x02] = { p + num + 0x0800, VRAMBank::Ram };
+	vram_banks_[0x03] = { p + num + 0x0c00, VRAMBank::Ram };
+	vram_banks_[0x04] = { p + num + 0x1000, VRAMBank::Ram };
+	vram_banks_[0x05] = { p + num + 0x1400, VRAMBank::Ram };
+	vram_banks_[0x06] = { p + num + 0x1800, VRAMBank::Ram };
+	vram_banks_[0x07] = { p + num + 0x1c00, VRAMBank::Ram };
 }
 
 //------------------------------------------------------------------------------
@@ -751,24 +750,16 @@ void Mapper::set_mirroring(uint8_t mir) {
 	// single lo:  00000000b, or $00
 	// single hi:  01010101b, or $55
 
-	vram_banks_[0x08] = { &nametables_[(mir << 0xa) & 0x0c00], true };
-	vram_banks_[0x09] = { &nametables_[(mir << 0x8) & 0x0c00], true };
-	vram_banks_[0x0a] = { &nametables_[(mir << 0x6) & 0x0c00], true };
-	vram_banks_[0x0b] = { &nametables_[(mir << 0x4) & 0x0c00], true };
+	vram_banks_[0x08] = { &nametables_[(mir << 0xa) & 0x0c00], VRAMBank::Ram };
+	vram_banks_[0x09] = { &nametables_[(mir << 0x8) & 0x0c00], VRAMBank::Ram };
+	vram_banks_[0x0a] = { &nametables_[(mir << 0x6) & 0x0c00], VRAMBank::Ram };
+	vram_banks_[0x0b] = { &nametables_[(mir << 0x4) & 0x0c00], VRAMBank::Ram };
 
 	// [$3000, $4000) mirrors [$2000, $3000)
-	vram_banks_[0x0c] = { &nametables_[(mir << 0xa) & 0x0c00], true };
-	vram_banks_[0x0d] = { &nametables_[(mir << 0x8) & 0x0c00], true };
-	vram_banks_[0x0e] = { &nametables_[(mir << 0x6) & 0x0c00], true };
-	vram_banks_[0x0f] = { &nametables_[(mir << 0x4) & 0x0c00], true };
-}
-
-//------------------------------------------------------------------------------
-// Name: set_vram_bank
-//------------------------------------------------------------------------------
-void Mapper::set_vram_bank(uint8_t bank, uint8_t *p, bool writeable) {
-	assert(p);
-	vram_banks_[bank] = { p, writeable };
+	vram_banks_[0x0c] = vram_banks_[0x08];
+	vram_banks_[0x0d] = vram_banks_[0x09];
+	vram_banks_[0x0e] = vram_banks_[0x0a];
+	vram_banks_[0x0f] = vram_banks_[0x0b];
 }
 
 //------------------------------------------------------------------------------

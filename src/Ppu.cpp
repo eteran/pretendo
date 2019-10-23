@@ -633,8 +633,6 @@ void read_sprite_pattern() {
 	sprite_patterns_[current_sprite_index_].patterns[Pattern::index] = pattern;
 }
 
-
-
 //------------------------------------------------------------------------------
 // Name: render_pixel
 //------------------------------------------------------------------------------
@@ -739,7 +737,7 @@ void clock_ppu(const scanline_prerender &) {
 	if(LIKELY(ppu_mask_.screen_enabled)) {
 		if(UNLIKELY(hpos_ < 1)) {
 			// idle
-		} else if(hpos_ < 257) {
+		} else if(LIKELY(hpos_ < 257)) {
 			switch(hpos_ & 0x07) {
 			case 1: evaluate_sprites_odd();  open_tile_index(); break;
 			case 2: evaluate_sprites_even(); read_tile_index(); break;
@@ -836,9 +834,9 @@ void clock_ppu(const scanline_render &target) {
 
 	if(UNLIKELY(!ppu_mask_.screen_enabled)) {
 
-		if(hpos_ < 1) {
+		if(UNLIKELY(hpos_ < 1)) {
 			// idle
-		} else if(hpos_ < 257) {
+		} else if(LIKELY(hpos_ < 257)) {
 			const uint8_t pixel = select_blank_pixel();
 			if(UNLIKELY(ppu_mask_.monochrome)) {
 				target.buffer[hpos_ - 1] = palette_[pixel] & 0x30;
@@ -850,14 +848,14 @@ void clock_ppu(const scanline_render &target) {
 		}
 	} else {
 
-		if(hpos_ < 1) {
+		if(UNLIKELY(hpos_ < 1)) {
 			// the first clock is acts like the last clock of the pre-render if we skipped a cycle
-			if(odd_frame_ && vpos_ == 1 && hpos_ == 0) {
+			if(UNLIKELY(odd_frame_ && vpos_ == 1 && hpos_ == 0)) {
 				read_tile_index();
 			} else {
 				// idle
 			}
-		} else if(hpos_ < 257) {
+		} else if(LIKELY(hpos_ < 257)) {
 
 			// NOTE(eteran): on my machine, this code "costs" about 200 FPS
 			render_pixel(target.buffer);
@@ -870,7 +868,11 @@ void clock_ppu(const scanline_render &target) {
 			case 5: evaluate_sprites_odd();  open_background_pattern<pattern_0>(); break;
 			case 6: evaluate_sprites_even(); read_background_pattern<pattern_0>(); break;
 			case 7: evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
-			case 0: evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x(); if(UNLIKELY(hpos_ == 256)) { clock_y(); } break;
+			case 0: evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x();  break;
+			}
+
+			if(UNLIKELY(hpos_ == 256)) {
+				clock_y();
 			}
 		} else if(hpos_ < 321) {
 
@@ -955,12 +957,10 @@ void clock_ppu(const scanline_vblank &target) {
 //------------------------------------------------------------------------------
 void reset(Reset reset_type) {
 
-#if 0
-	std::generate(sprite_ram_, sprite_ram_ + 0x100,  rand);
-#endif
 	if(reset_type == Reset::Hard) {
 		std::fill_n(sprite_ram_, 0x0100, 0);
 		std::fill_n(sprite_data_, 32, 0xff);
+		std::copy(std::begin(powerup_palette), std::end(powerup_palette), palette_);
 
 		for(int i = 0; i < 8; ++i) {
 			sprite_patterns_[i].patterns[0] = 0;
@@ -970,8 +970,6 @@ void reset(Reset reset_type) {
 			sprite_patterns_[i].index       = 0;
 			sprite_patterns_[i].attr        = 0;
 		}
-
-		memcpy(palette_, powerup_palette, sizeof(palette_));
 	}
 
 	attribute_queue_[0]     = 0;
@@ -1023,18 +1021,11 @@ void write2000(uint8_t value) {
 	nametable_ &= 0xf3ff;
 	nametable_ |= (value & 0x03) << 10;
 
-#if 0
-	// we can re-trigger an NMI ...
-	if(!prev_control.nmi_on_vblank && ppu_control_.nmi_on_vblank && status_.vblank) {
-		cpu::nmi();
-	}
-#else
 	if(prev_control.nmi_on_vblank && !ppu_control_.nmi_on_vblank) {
 		cpu::clear_nmi();
 	} else if(!prev_control.nmi_on_vblank && ppu_control_.nmi_on_vblank && status_.vblank && hpos_ != 0) {
 		cpu::nmi();
 	}
-#endif
 }
 
 //------------------------------------------------------------------------------
