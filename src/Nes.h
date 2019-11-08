@@ -13,7 +13,13 @@ namespace nes {
 extern Cart   cart;
 extern Config config;
 
+namespace {
+uint8_t buffer[256];
+}
+
 namespace detail {
+
+
 
 //------------------------------------------------------------------------------
 // Name: execute_scanline_0_19
@@ -53,7 +59,7 @@ inline void execute_scanline_20() {
 	 * second rendered frame, this scanline is only 1360 cycles. Otherwise it's
 	 * 1364.
 	 */
-
+	ppu::start_frame();
 	ppu::execute_scanline(scanline_prerender());
 }
 
@@ -67,9 +73,7 @@ void execute_scanline_21_260(Video *video) {
 	 * 21..260: after rendering 1 dummy scanline, the PPU starts to render the
 	 * actual data to be displayed on the screen. This is done for 240 scanlines,
 	 * of course.
-	 */
-
-	static uint8_t buffer[256];
+	 */	
 
 	// process the visible range
 	for(int i = 0; i < 240; ++i) {
@@ -83,6 +87,7 @@ void execute_scanline_21_260(Video *video) {
 //------------------------------------------------------------------------------
 inline void execute_scanline_261() {
 
+
 	/*
 	 * 261:  after the very last rendered scanline finishes, the PPU does nothing
 	 * for 1 scanline (i.e. the programmer gets screwed out of perfectly good VINT
@@ -90,6 +95,7 @@ inline void execute_scanline_261() {
 	 * drawing lines starts all over again.
 	 */
 
+	ppu::end_frame();
 	ppu::execute_scanline(scanline_postrender());
 }
 }
@@ -98,11 +104,9 @@ inline void execute_scanline_261() {
 // Name: run_frame
 //------------------------------------------------------------------------------
 template <class Video>
-void run_frame(Video *video) {
-	ppu::start_frame();
+void run_frame(Video *video) {	
 	detail::execute_scanline_20();
 	detail::execute_scanline_21_260(video);
-	ppu::end_frame();
 	detail::execute_scanline_261();
 	detail::execute_scanline_0_19();
 }

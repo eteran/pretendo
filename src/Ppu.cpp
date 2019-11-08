@@ -139,7 +139,6 @@ Status       status_                 = {0};
 uint8_t      tile_offset_            = 0; // loopy's "x"
 
 bool         odd_frame_              = false;
-bool         rendering_              = false;
 bool         write_latch_            = false;
 bool         write_block_            = false;
 
@@ -705,10 +704,17 @@ void update_vram_address() {
 }
 
 //------------------------------------------------------------------------------
+// Name: write4014
+//------------------------------------------------------------------------------
+bool rendering() {
+	return vpos_ <= 240;
+}
+
+//------------------------------------------------------------------------------
 // Name: increment_vram_address
 //------------------------------------------------------------------------------
 void increment_vram_address() {
-	if(rendering_ && ppu_mask_.screen_enabled) {
+	if(rendering() && ppu_mask_.screen_enabled) {
 		if(ppu_control_.address_increment) {
 			clock_y();
 		} else {
@@ -988,7 +994,6 @@ void reset(Reset reset_type) {
 	ppu_control_.raw        = 0;
 	ppu_mask_.raw           = 0;
 	register_2007_buffer_   = 0;
-	rendering_              = false;
 	sprite_address_         = 0;
 	sprite_data_index_      = 0;
 	left_most_sprite_x_     = 0xff;
@@ -1186,7 +1191,7 @@ uint8_t read2002() {
 //------------------------------------------------------------------------------
 uint8_t read2004() {
 
-	if(!rendering_ || !ppu_mask_.screen_enabled) {
+	if(!rendering() || !ppu_mask_.screen_enabled) {
 		switch(sprite_address_ & 0x03) {
 		case 0x00: latch_ = sprite_ram_[sprite_address_] & 0xff; break;
 		case 0x01: latch_ = sprite_ram_[sprite_address_] & 0xff; break;
@@ -1248,15 +1253,14 @@ void write4014(uint8_t value) {
 //------------------------------------------------------------------------------
 void start_frame() {
 	vpos_ = 0;
-	rendering_ = true;
 }
 
 //------------------------------------------------------------------------------
 // Name: end_frame
 //------------------------------------------------------------------------------
 void end_frame() {
+
 	odd_frame_ = !odd_frame_;
-	rendering_ = false;
 
 	// we use the upper bits to count frames, so the upper byte should be about 0x3c
 	// within one second

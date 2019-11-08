@@ -110,7 +110,7 @@ void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source
 		const uint8_t pix6 = source[i + 6];
 		const uint8_t pix7 = source[i + 7];
 
-		// collect them into 128-bits of data (unfonately with some indirection)
+		// collect them into 256-bits of data (unfortunately, with some indirection)
 		uint64_t value0 = 
 			(static_cast<uint64_t>(palette[pix0]) << 0) |
 			(static_cast<uint64_t>(palette[pix1]) << 32);
