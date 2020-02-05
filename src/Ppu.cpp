@@ -26,15 +26,15 @@ namespace {
 constexpr auto CyclesPerScanline = 341u;
 constexpr auto CpuAlignment      = 0u;
 
-constexpr uint8_t StatusOverflow = 0x20;
-constexpr uint8_t StatusSprite0  = 0x40;
-constexpr uint8_t StatusVBlank   = 0x80;
+constexpr uint8_t StatusOverflow = 0b00100000;
+constexpr uint8_t StatusSprite0  = 0b01000000;
+constexpr uint8_t StatusVBlank   = 0b10000000;
 
-constexpr uint8_t OamColor    = 0x03;
-constexpr uint8_t OamZero     = 0x10; // internal flag
-constexpr uint8_t OamPriority = 0x20;
-constexpr uint8_t OamHFlip    = 0x40;
-constexpr uint8_t OamVFlip    = 0x80;
+constexpr uint8_t OamColor    = 0b00000011;
+constexpr uint8_t OamZero     = 0b00010000; // internal flag
+constexpr uint8_t OamPriority = 0b00100000;
+constexpr uint8_t OamHFlip    = 0b01000000;
+constexpr uint8_t OamVFlip    = 0b10000000;
 
 struct pattern_0 {
 	static constexpr int     index  = 0;
@@ -48,12 +48,12 @@ struct pattern_1 {
 
 struct size_8px {
 	static constexpr int value = 8;
-	static constexpr int flip_mask = 0x07;
+	static constexpr int flip_mask = 0b00000111;
 };
 
 struct size_16px {
 	static constexpr int value = 16;
-	static constexpr int flip_mask = 0x0f;
+	static constexpr int flip_mask = 0b00001111;
 };
 
 const uint8_t reverse_bits[256] = {
@@ -682,7 +682,7 @@ void update_shift_registers_idle() {
 //------------------------------------------------------------------------------
 void update_x_scroll() {
 	// v:0000010000011111=t:0000010000011111
-	vram_address_ = (vram_address_ & ~0x041f) | (nametable_ & 0x041f);
+	vram_address_ = (vram_address_ & ~0b0000010000011111) | (nametable_ & 0b0000010000011111);
 }
 
 //------------------------------------------------------------------------------
@@ -700,7 +700,7 @@ void update_sprite_registers() {
 //------------------------------------------------------------------------------
 void update_vram_address() {
 	// v=t
-	vram_address_ = (vram_address_ & ~0x7be0) | (nametable_ & 0x7be0);
+	vram_address_ = (vram_address_ & ~0b0111101111100000) | (nametable_ & 0b0111101111100000);
 }
 
 //------------------------------------------------------------------------------
@@ -1023,8 +1023,7 @@ void write2000(uint8_t value) {
 
 	// name table address
 	// t:0000110000000000=d:00000011
-	nametable_ &= 0xf3ff;
-	nametable_ |= (value & 0x03) << 10;
+	nametable_ = (nametable_ & 0b1111001111111111) | ((value & 0b00000011) << 10);
 
 	if(prev_control.nmi_on_vblank && !ppu_control_.nmi_on_vblank) {
 		cpu::clear_nmi();
@@ -1087,16 +1086,16 @@ void write2005(uint8_t value) {
 		// 2005 first write:
 		// t:0000000000011111=d:11111000
 		// x=d:00000111
-		nametable_   &= 0x7fe0;
-		nametable_   |= (value & 0xf8) >> 3;
+		nametable_   &= 0b111111111100000;
+		nametable_   |= (value & 0b11111000) >> 3;
 		tile_offset_ = value & 0x07;
 	} else {
 		// 2005 second write:
 		// t:0000001111100000=d:11111000
 		// t:0111000000000000=d:00000111
-		nametable_ &= ~0x73e0;
-		nametable_ |= (value & 0xf8) << 2;
-		nametable_ |= (value & 0x07) << 12;
+		nametable_ &= ~0b0111001111100000;
+		nametable_ |= (value & 0b11111000) << 2;
+		nametable_ |= (value & 0b00000111) << 12;
 	}
 }
 
@@ -1116,13 +1115,13 @@ void write2006(uint8_t value) {
 		// 2006 first write:
 		// t:0011111100000000=d:00111111
 		// t:1100000000000000=0
-		nametable_ &= 0x00ff;
-		nametable_ |= (value & 0x3f) << 8;
+		nametable_ &= 0b0000000011111111;
+		nametable_ |= (value & 0b00111111) << 8;
 	} else {
 		// 2006 second write:
 		// t:0000000011111111=d:11111111
 		// v=t
-		nametable_    = (nametable_ & 0x7f00) | (value & 0xff);
+		nametable_    = (nametable_ & 0b0111111100000000) | (value & 0b11111111);
 		vram_address_ = nametable_;
 
 		cart.mapper()->vram_change_hook(vram_address_);
@@ -1135,14 +1134,14 @@ void write2006(uint8_t value) {
 void write2007(uint8_t value) {
 	latch_ = value;
 
-	const uint16_t temp_address = vram_address_ & 0x3fff;
+	const uint16_t temp_address = vram_address_ & 0b0011111111111111;
 
 	increment_vram_address();
 
 	cart.mapper()->vram_change_hook(vram_address_);
 
 	// palette write
-	if((temp_address & 0x3f00) == 0x3f00) {
+	if((temp_address & 0b0011111100000000) == 0b0011111100000000) {
 
 		const uint16_t palette_address = temp_address & 0x1f;
 		palette_[palette_address] = value & 0x3f;
@@ -1214,7 +1213,7 @@ uint8_t read2007() {
 		return 0x00;
 	}
 
-	const uint16_t temp_address = vram_address_ & 0x3fff;
+	const uint16_t temp_address = vram_address_ & 0b0011111111111111;
 
 	increment_vram_address();
 
@@ -1225,7 +1224,7 @@ uint8_t read2007() {
 	latch_ = register_2007_buffer_;
 	register_2007_buffer_ = cart.mapper()->read_vram(temp_address);
 
-	if((temp_address & 0x3f00) == 0x3f00) {
+	if((temp_address & 0b0011111100000000) == 0b0011111100000000) {
 
 		latch_ = palette_[temp_address & 0x1f] | (decay_value & 0xc0);
 		if(UNLIKELY(ppu_mask_.monochrome)) {
