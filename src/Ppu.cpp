@@ -640,11 +640,9 @@ void render_pixel(uint8_t *dest_buffer) {
 	const uint8_t index = hpos_ - 1;
 	const uint8_t pixel = select_pixel(index);
 
-	if(UNLIKELY(ppu_mask_.monochrome)) {
-		dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00] & 0x30;
-	} else {
-		dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00];
-	}
+	constexpr uint8_t mask_table[2] = { 0xff, 0x30 };
+
+	dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00] & mask_table[ppu_mask_.monochrome];
 
 	pattern_queue_[0]   <<= 1;
 	pattern_queue_[1]   <<= 1;
