@@ -789,8 +789,6 @@ void Mapper::vram_change_hook(uint16_t vram_address) {
 //------------------------------------------------------------------------------
 void Mapper::register_mapper(int num, create_func create_ptr) {
     assert(create_ptr);
-
-	std::cout << "[Mapper::register_mapper] Registering Mapper: " << num << '\n';
 	registered_mappers_ines().insert(std::make_pair(num, create_ptr));
 }
 

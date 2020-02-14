@@ -192,7 +192,9 @@ add_executable(pretendo
 	qt/QtVideo.h
 	qt/SortFilterProxyModel.cpp
 	qt/SortFilterProxyModel.h
-
+	qt/FilesystemModel.cpp
+	qt/FilesystemModel.h
+	
 	qt/Pretendo.ui
 	qt/Preferences.ui
 	qt/About.ui
@@ -214,6 +216,7 @@ target_link_libraries(pretendo LINK_PUBLIC
 	${Boost_LIBRARIES}
 	${LIBRARIES}
 	iNES2
+	-lpthread
 	$<TARGET_OBJECTS:mappers>
 )
 

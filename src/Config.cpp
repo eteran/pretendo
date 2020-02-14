@@ -107,8 +107,7 @@ Config::~Config() {
 }
 
 
-bool
-Config::Load() {
+bool Config::Load() {
 
 	std::cout << "Loading config from file..." << std::endl;
     std::ifstream file(filename_);
@@ -121,7 +120,7 @@ Config::Load() {
 		NewKey("App Settings", std::make_pair("ShowOpenOnLoad", "false"));
 		NewKey("App Settings", std::make_pair("AutoRun", "false"));
 		NewKey("App Settings", std::make_pair("SleepOnLoseFocus", "false"));
-		NewKey("App Settings", std::make_pair("ROMDirectory", "./roms"));
+		NewKey("App Settings", std::make_pair("ROMDirectory", "/home/eteran/projects/pretendo/"));
 
 		Save();
 		return false;
@@ -287,7 +286,7 @@ std::string Config::homeDirectory() {
 #if defined(__unix__)
 	const char *homedir;
 
-	if ((homedir = getenv("HOME")) == NULL) {
+	if ((homedir = getenv("HOME")) == nullptr) {
     	homedir = getpwuid(getuid())->pw_dir;
 	}
 	

@@ -4,20 +4,24 @@
 #include "AudioViewer.h"
 #include "Cart.h"
 #include "Controller.h"
+#include "Config.h"
 #include "Input.h"
 #include "Mapper.h"
 #include "Nes.h"
 #include "Ppu.h"
 #include "Preferences.h"
 #include "SortFilterProxyModel.h"
+#include "FilesystemModel.h"
 
+
+#include <QThread>
 #include <QDebug>
 #include <QFileDialog>
-#include <QFileSystemModel>
 #include <QKeyEvent>
 #include <QTimer>
 #include <QLabel>
 #include <QMessageBox>
+#include <QDirIterator>
 
 #if defined(PULSE_AUDIO_SOUND)
 #include "PulseAudio.h"
@@ -52,19 +56,28 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 	QStringList filters;
 	filters << "*.nes" << "*.nes.gz";
 
-	filesystem_model_ = new QFileSystemModel(this);
-	filesystem_model_->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDot);
-	filesystem_model_->setNameFilters(filters);
-	filesystem_model_->setNameFilterDisables(false);
-	filesystem_model_->setResolveSymlinks(true);
-	const QModelIndex root_model_index = filesystem_model_->setRootPath(QDir::currentPath());
+	filesystem_model_ = new FilesystemModel(this);
+	std::string roms;
+	nes::config.ReadKey("App Settings", "ROMDirectory", roms);
+
+	auto thread = QThread::create([roms, this]() {
+		QDirIterator it(QString::fromStdString(roms), QStringList() << "*.nes", QDir::Files | QDir::Readable, QDirIterator::Subdirectories);
+		while (it.hasNext()) {
+			QString f = it.next();
+			QFileInfo fi(f);
+			filesystem_model_->addFile(FilesystemModel::Item{fi.fileName(), f});
+		}
+	});
+
+	thread->start();
+
 
 	filter_model_ = new SortFilterProxyModel(this);
 	filter_model_->setFilterCaseSensitivity(Qt::CaseInsensitive);
 	filter_model_->setSourceModel(filesystem_model_);
+	filter_model_->sort(0, Qt::AscendingOrder);
 
 	ui_.listView->setModel(filter_model_);
-	ui_.listView->setRootIndex(filter_model_->mapFromSource(root_model_index));
 
 	connect(ui_.listView, &QListView::activated, this, &Pretendo::picked);
 	connect(ui_.lineEdit, &QLineEdit::textChanged, filter_model_, &QSortFilterProxyModel::setFilterFixedString);
@@ -103,9 +116,6 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 
 		// make the ROM viewer default to the location of the run ROM
 		const QFileInfo info(rom);
-		const QModelIndex root_model_index = filesystem_model_->setRootPath(info.absolutePath());
-		ui_.listView->setRootIndex(filter_model_->mapFromSource(root_model_index));
-
 		if(info.isFile()) {
 			nes::cart.load(rom.toStdString());
 			on_action_Run_triggered();
@@ -193,22 +203,17 @@ void Pretendo::picked(const QModelIndex &index) {
 	if(index.isValid()) {
 		if(const QAbstractItemModel *const m = index.model()) {
 			if(const QSortFilterProxyModel *const filter_model = qobject_cast<const QSortFilterProxyModel *>(m)) {
-				if(QFileSystemModel *const fs_model = qobject_cast<QFileSystemModel *>(filter_model->sourceModel())) {
+				if(FilesystemModel *const fs_model = qobject_cast<FilesystemModel *>(filter_model->sourceModel())) {
 
-					const QModelIndex source_index     = filter_model->mapToSource(index);
-					const QString filename             = fs_model->filePath(source_index);
-					const QModelIndex root_model_index = fs_model->setRootPath(filename);
+					const QModelIndex source_index = filter_model->mapToSource(index);
+					const auto filename            = fs_model->data(source_index, Qt::UserRole).toString();
 
-					if(fs_model->isDir(source_index)) {
-						ui_.listView->setRootIndex(filter_model_->mapFromSource(root_model_index));
-					} else {
-						// they picked a ROM, load it, then run it
-						if(!filename.isEmpty()) {
-							on_action_Stop_triggered();
-							on_action_Free_ROM_triggered();
-                            nes::cart.load(filename.toStdString());
-							on_action_Run_triggered();
-						}
+					// they picked a ROM, load it, then run it
+					if(!filename.isEmpty()) {
+						on_action_Stop_triggered();
+						on_action_Free_ROM_triggered();
+						nes::cart.load(filename.toStdString());
+						on_action_Run_triggered();
 					}
 				}
 			}

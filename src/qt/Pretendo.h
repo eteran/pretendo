@@ -9,7 +9,7 @@
 #include "ui_Pretendo.h"
 
 class QAudioOutput;
-class QFileSystemModel;
+class FilesystemModel;
 class QLabel;
 class QSortFilterProxyModel;
 class QTimer;
@@ -63,7 +63,7 @@ private:
 private:
 	Ui::Pretendo           ui_;
 	Preferences           *preferences_      = nullptr;
-	QFileSystemModel      *filesystem_model_ = nullptr;
+	FilesystemModel       *filesystem_model_ = nullptr;
 	QSortFilterProxyModel *filter_model_     = nullptr;
 	QTimer                *timer_            = nullptr;
 	QLabel                *fps_label_        = nullptr;
