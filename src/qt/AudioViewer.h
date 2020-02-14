@@ -3,9 +3,9 @@
 #define AUDIO_VIEWER_H_
 
 #include "Apu.h"
+#include "ui_AudioViewer.h"
 #include <QDialog>
 #include <cstdint>
-#include "ui_AudioViewer.h"
 
 class AudioViewer final : public QDialog {
 	Q_OBJECT

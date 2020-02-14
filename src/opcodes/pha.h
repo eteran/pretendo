@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_pha {
 
-    using memory_access = operation_stack_write;
+	using memory_access = operation_stack_write;
 
 	static uint8_t execute() {
 		return A;
@@ -15,4 +15,3 @@ struct opcode_pha {
 };
 
 #endif
-

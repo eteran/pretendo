@@ -14,7 +14,4 @@ struct opcode_sed {
 	}
 };
 
-
-
 #endif
-

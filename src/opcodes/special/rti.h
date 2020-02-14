@@ -9,7 +9,7 @@
 class opcode_rti {
 public:
 	static void execute() {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
 			read_byte(PC.raw);
@@ -38,4 +38,3 @@ public:
 };
 
 #endif
-

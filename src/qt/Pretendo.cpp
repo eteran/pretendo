@@ -4,7 +4,7 @@
 #include "AudioViewer.h"
 #include "Cart.h"
 #include "Controller.h"
-#include "Config.h"
+#include "Settings.h"
 #include "Input.h"
 #include "Mapper.h"
 #include "Nes.h"
@@ -34,6 +34,10 @@
 //------------------------------------------------------------------------------
 Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
 	ui_.setupUi(this);
+
+	Settings::load();
+
+	nes::ppu::show_sprites = Settings::showSprites;
 	
 	// make only one of these selectable at a time
 	QActionGroup *const zoom_group = new QActionGroup(this);
@@ -44,7 +48,7 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 	ui_.action2x->setChecked(true);
 
 	// set the default zoom
-	zoom(2);
+	zoom(Settings::zoomFactor);
 
 	preferences_ = new Preferences(this);
 
@@ -57,15 +61,31 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 	filters << "*.nes" << "*.nes.gz";
 
 	filesystem_model_ = new FilesystemModel(this);
-	std::string roms;
-	nes::config.ReadKey("App Settings", "ROMDirectory", roms);
 
-	auto thread = QThread::create([roms, this]() {
-		QDirIterator it(QString::fromStdString(roms), QStringList() << "*.nes", QDir::Files | QDir::Readable, QDirIterator::Subdirectories);
+	auto thread = QThread::create([this]() {
+
+		auto romdir = QString::fromStdString(Settings::romDirectory);
+		QFileInfo romdir_fi(romdir);
+		romdir_fi.makeAbsolute();
+
+		QString rom_basedir = romdir_fi.path();
+		if(!rom_basedir.endsWith('/')) {
+			rom_basedir.append('/');
+		}
+
+		QDirIterator it(romdir, QStringList() << "*.nes", QDir::Files | QDir::Readable, QDirIterator::Subdirectories);
 		while (it.hasNext()) {
 			QString f = it.next();
 			QFileInfo fi(f);
-			filesystem_model_->addFile(FilesystemModel::Item{fi.fileName(), f});
+			fi.makeAbsolute();
+
+
+			QString path = fi.filePath();
+			if(path.startsWith(rom_basedir)) {
+				path = path.mid(rom_basedir.size());
+			}
+
+			filesystem_model_->addFile(FilesystemModel::Item{path, f});
 		}
 	});
 
@@ -130,6 +150,8 @@ Pretendo::~Pretendo() {
 	on_action_Stop_triggered();
 	on_action_Free_ROM_triggered();
 	delete audio_;
+
+	Settings::save();
 }
 
 //------------------------------------------------------------------------------
@@ -348,6 +370,7 @@ void Pretendo::keyReleaseEvent(QKeyEvent *event) {
 //------------------------------------------------------------------------------
 void Pretendo::on_actionShow_Sprites_toggled(bool value) {
 	nes::ppu::show_sprites = value;
+	Settings::showSprites = value;
 }
 
 //------------------------------------------------------------------------------
@@ -395,6 +418,7 @@ void Pretendo::zoom(int scale) {
 //------------------------------------------------------------------------------
 void Pretendo::on_action1x_triggered() {
 	zoom(1);
+	Settings::zoomFactor = 1;
 }
 
 //------------------------------------------------------------------------------
@@ -402,6 +426,7 @@ void Pretendo::on_action1x_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action2x_triggered() {
 	zoom(2);
+	Settings::zoomFactor = 2;
 }
 
 //------------------------------------------------------------------------------
@@ -409,6 +434,7 @@ void Pretendo::on_action2x_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action3x_triggered() {
 	zoom(3);
+	Settings::zoomFactor = 3;
 }
 
 //------------------------------------------------------------------------------
@@ -416,6 +442,7 @@ void Pretendo::on_action3x_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action4x_triggered() {
 	zoom(4);
+	Settings::zoomFactor = 4;
 }
 
 //------------------------------------------------------------------------------

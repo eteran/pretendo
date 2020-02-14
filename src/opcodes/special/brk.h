@@ -9,7 +9,7 @@
 class opcode_brk {
 public:
 	static void execute() {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away),
 			// increment PC
@@ -26,9 +26,9 @@ public:
 		case 4:
 			// push P on stack, decrement S
 			write_byte(S-- + StackAddress, P | B_MASK);
-			if(nmi_asserted_) {
+			if (nmi_asserted_) {
 				effective_address16_.raw = NmiVectorAddress;
-				nmi_asserted_ = false;
+				nmi_asserted_            = false;
 			} else {
 				effective_address16_.raw = IrqVectorAddress;
 			}
@@ -53,4 +53,3 @@ public:
 };
 
 #endif
-

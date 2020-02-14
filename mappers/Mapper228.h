@@ -42,7 +42,6 @@ private:
 	const uint8_t *prg_chips_[4] = {};
 	uint8_t ram_[0x04]           = {};
 	const uint8_t *rom_[0x08]    = {};
-
 };
 
 #endif

@@ -23,8 +23,8 @@ public:
 	uint8_t read_vram(uint16_t address) override;
 
 private:
-	uint8_t chr_rom_reg_[2] = { 0x80, 0x80 };
-	uint8_t reg_e000_ = 0;
+	uint8_t chr_rom_reg_[2] = {0x80, 0x80};
+	uint8_t reg_e000_       = 0;
 };
 
 #endif

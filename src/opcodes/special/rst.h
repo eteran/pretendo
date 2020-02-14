@@ -9,7 +9,7 @@
 class opcode_rst {
 public:
 	static void execute() {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// read from current PC
 			read_byte(PC.raw);
@@ -24,7 +24,7 @@ public:
 			break;
 		case 4:
 			// push P on stack, decrement S (fake)
-			read_byte(S-- + StackAddress);		
+			read_byte(S-- + StackAddress);
 			break;
 		case 5:
 			set_flag<I_MASK>();

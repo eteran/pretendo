@@ -17,9 +17,9 @@ public:
 	void set_control(uint8_t value);
 
 private:
-    uint8_t value_   = 0;
-    uint8_t control_ = 0;
-    bool    reload_  = false;
+	uint8_t value_   = 0;
+	uint8_t control_ = 0;
+	bool reload_     = false;
 };
 
 }

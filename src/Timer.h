@@ -17,7 +17,7 @@ public:
 public:
 	template <class Callback>
 	void tick(Callback c) {
-		if(--timer_ == 0) {
+		if (--timer_ == 0) {
 			timer_ = frequency;
 			c();
 		}
@@ -34,4 +34,3 @@ private:
 }
 
 #endif
-

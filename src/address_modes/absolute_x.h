@@ -9,11 +9,11 @@ public:
 	static void execute() {
 		execute(typename Op::memory_access());
 	}
-	
+
 private:
 	static void execute(const operation_read &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch low byte of address, increment PC
 			data16_.raw = read_byte(PC.raw++);
@@ -30,9 +30,9 @@ private:
 			// read from effective address,
 			// fix the high byte of effective address
 			effective_address16_.lo = data16_.lo;
-			data8_ = read_byte(effective_address16_.raw);
+			data8_                  = read_byte(effective_address16_.raw);
 
-			if(data16_.raw > 0xff) {
+			if (data16_.raw > 0xff) {
 				++effective_address16_.hi;
 				break;
 			} else {
@@ -49,10 +49,10 @@ private:
 			abort();
 		}
 	}
-	
+
 	static void execute(const operation_modify &) {
-	
-		switch(cycle_) {
+
+		switch (cycle_) {
 		case 1:
 			// fetch low byte of address, increment PC
 			data16_.raw = read_byte(PC.raw++);
@@ -68,9 +68,9 @@ private:
 			// read from effective address,
 			// fix the high byte of effective address
 			effective_address16_.lo = data16_.lo;
-			data8_ = read_byte(effective_address16_.raw);
+			data8_                  = read_byte(effective_address16_.raw);
 
-			if(data16_.raw > 0xff) {
+			if (data16_.raw > 0xff) {
 				++effective_address16_.hi;
 			}
 			break;
@@ -93,10 +93,10 @@ private:
 			abort();
 		}
 	}
-		
+
 	static void execute(const operation_write &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch low byte of address, increment PC
 			data16_.raw = read_byte(PC.raw++);
@@ -112,9 +112,9 @@ private:
 			// read from effective address,
 			// fix the high byte of effective address
 			effective_address16_.lo = data16_.lo;
-			data8_ = read_byte(effective_address16_.raw);
+			data8_                  = read_byte(effective_address16_.raw);
 
-			if(data16_.raw > 0xff) {
+			if (data16_.raw > 0xff) {
 				++effective_address16_.hi;
 			}
 			break;
@@ -122,8 +122,8 @@ private:
 			LAST_CYCLE;
 			// write to effective address
 			{
-                uint16_t address = effective_address16_.raw;
-                const uint8_t value = Op::execute(address);
+				uint16_t address    = effective_address16_.raw;
+				const uint8_t value = Op::execute(address);
 				write_byte(address, value);
 			}
 			OPCODE_COMPLETE;

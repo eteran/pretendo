@@ -5,15 +5,15 @@
 template <class Op>
 class implied {
 public:
-	// dispatch to the appropriate version of the address mode	
+	// dispatch to the appropriate version of the address mode
 	static void execute() {
 		execute(typename Op::memory_access());
 	}
-	
+
 private:
 	template <class T>
 	static void execute(T) {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			LAST_CYCLE;
 			// read next instruction byte (and throw it away)
@@ -24,7 +24,7 @@ private:
 			abort();
 		}
 	}
-	
+
 	// really this is only for NOP support...
 	// synonym for other version
 	static void execute(const operation_read &) {

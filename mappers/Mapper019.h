@@ -2,21 +2,21 @@
 #ifndef MAPPER019_20080314_H_
 #define MAPPER019_20080314_H_
 
-#include "Mapper.h"
 #include "BitField.h"
+#include "Mapper.h"
 
 class Mapper19 final : public Mapper {
 private:
 	union IRQControl {
 		uint16_t raw;
-		BitField<0,15> counter;
-		BitField<15>   enabled;	
-		
+		BitField<0, 15> counter;
+		BitField<15> enabled;
+
 		// meta-fields
-		BitField<0,8> lo;
-		BitField<8,8> hi;			
+		BitField<0, 8> lo;
+		BitField<8, 8> hi;
 	};
-	
+
 public:
 	Mapper19();
 
@@ -46,10 +46,10 @@ public:
 	void cpu_sync() override;
 
 private:
-	uint8_t    chr_ram_[0x2000] = {};
-	IRQControl irq_control_ = { 0 };
-	uint8_t    mirroring_   = 0;
-	MemoryMappedFile  prg_ptr_;
+	uint8_t chr_ram_[0x2000] = {};
+	IRQControl irq_control_  = {0};
+	uint8_t mirroring_       = 0;
+	MemoryMappedFile prg_ptr_;
 };
 
 #endif

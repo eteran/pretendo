@@ -8,8 +8,8 @@
 //------------------------------------------------------------------------------
 struct opcode_asl {
 
-    using memory_access = operation_modify;
-	
+	using memory_access = operation_modify;
+
 	static void execute(uint8_t &data) {
 		set_flag_condition<C_MASK>(data & 0x80);
 		data <<= 1;
@@ -18,4 +18,3 @@ struct opcode_asl {
 };
 
 #endif
-

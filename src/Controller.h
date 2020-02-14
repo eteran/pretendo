@@ -26,13 +26,12 @@ public:
 	};
 
 public:
-	std::bitset<8>  keystate_;
+	std::bitset<8> keystate_;
 
 private:
-    ShiftRegister<uint8_t> data_{ 0 };
-    uint8_t                read_index_ = 0;
-    bool                   connected_ = true;
+	ShiftRegister<uint8_t> data_{0};
+	uint8_t read_index_ = 0;
+	bool connected_     = true;
 };
-
 
 #endif

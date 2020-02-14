@@ -8,7 +8,7 @@
 struct opcode_rla {
 
 	using memory_access = operation_modify;
-	
+
 	static void execute(uint8_t &data) {
 		// only correct because C_MASK is 0x01, we basically want to shift in a 1
 		// if C_MASK is set, and a 0 if it is not
@@ -21,4 +21,3 @@ struct opcode_rla {
 };
 
 #endif
-

@@ -9,7 +9,7 @@
 class opcode_nmi {
 public:
 	static void execute() {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away),
 			// increment PC

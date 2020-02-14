@@ -20,7 +20,6 @@ public:
 	void write_d(uint16_t address, uint8_t value) override;
 	void write_e(uint16_t address, uint8_t value) override;
 	void write_f(uint16_t address, uint8_t value) override;
-
 };
 
 #endif

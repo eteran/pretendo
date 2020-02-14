@@ -30,31 +30,31 @@ enum : uint8_t {
 };
 
 union register16 {
-	uint16_t       raw;
+	uint16_t raw;
 	BitField<0, 8> lo;
 	BitField<8, 8> hi;
 };
 
 // API
 uint64_t cycle_count();
-void     clear_irq(IrqSource source);
-void     clear_nmi();
-void     irq(IrqSource source);
-void     schedule_spr_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
-void     schedule_dmc_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
-void     reset(Reset reset_type);
-void     reset();
-void     stop();
-void     nmi();
-void     tick();
+void clear_irq(IrqSource source);
+void clear_nmi();
+void irq(IrqSource source);
+void schedule_spr_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
+void schedule_dmc_dma(dma_handler_t dma_handler, uint16_t source_address, uint16_t count);
+void reset(Reset reset_type);
+void reset();
+void stop();
+void nmi();
+void tick();
 
 // public registers
 extern register16 PC;
-extern uint8_t    A;
-extern uint8_t    X;
-extern uint8_t    Y;
-extern uint8_t    S;
-extern uint8_t    P;
+extern uint8_t A;
+extern uint8_t X;
+extern uint8_t Y;
+extern uint8_t S;
+extern uint8_t P;
 
 template <int Cycles>
 void exec() {

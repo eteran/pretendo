@@ -5,10 +5,10 @@
 // Name: opcode_dcp
 // Desc: Decrement Memory (no borrow)
 //------------------------------------------------------------------------------
-struct opcode_dcp  : compare {
+struct opcode_dcp : compare {
 
 	using memory_access = operation_modify;
-	
+
 	static void execute(uint8_t &data) {
 		--data;
 		update_nz_flags(data);
@@ -17,4 +17,3 @@ struct opcode_dcp  : compare {
 };
 
 #endif
-

@@ -9,7 +9,7 @@
 class opcode_rts {
 public:
 	static void execute() {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
 			read_byte(PC.raw);
@@ -28,7 +28,7 @@ public:
 			break;
 		case 5:
 			LAST_CYCLE;
-			 // increment PC
+			// increment PC
 			++PC.raw;
 			OPCODE_COMPLETE;
 		default:
@@ -38,4 +38,3 @@ public:
 };
 
 #endif
-

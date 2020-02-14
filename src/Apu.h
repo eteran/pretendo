@@ -2,11 +2,11 @@
 #ifndef APU_20130206_H_
 #define APU_20130206_H_
 
-#include "Reset.h"
 #include "BitField.h"
+#include "Reset.h"
 #include "circular_buffer.h"
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 namespace nes {
 namespace apu {
@@ -28,7 +28,7 @@ union APUStatus {
 	BitField<7> dmc_irq;
 
 	// meta field
-	BitField<6,2> irq_firing;
+	BitField<6, 2> irq_firing;
 };
 
 constexpr int frequency   = 44100;
@@ -63,16 +63,16 @@ void tick();
 
 template <int Cycles>
 void exec() {
-	for(int i = 0; i < Cycles; ++i) {
+	for (int i = 0; i < Cycles; ++i) {
 		tick();
 	}
 }
 
 extern Square<0> square_0;
 extern Square<1> square_1;
-extern Triangle  triangle;
-extern Noise     noise;
-extern DMC       dmc;
+extern Triangle triangle;
+extern Noise noise;
+extern DMC dmc;
 
 extern circular_buffer<uint8_t, buffer_size> sample_buffer_;
 

@@ -5,15 +5,15 @@
 template <class Op>
 class stack {
 public:
-	// dispatch to the appropriate version of the address mode	
+	// dispatch to the appropriate version of the address mode
 	static void execute() {
 		execute(typename Op::memory_access());
 	}
-	
+
 private:
 	static void execute(const operation_stack_read &) {
-	
-		switch(cycle_) {
+
+		switch (cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
 			read_byte(PC.raw);
@@ -29,12 +29,12 @@ private:
 			OPCODE_COMPLETE;
 		default:
 			abort();
-		}	
+		}
 	}
-	
+
 	static void execute(const operation_stack_write &) {
-	
-		switch(cycle_) {
+
+		switch (cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away)
 			read_byte(PC.raw);

@@ -9,7 +9,7 @@
 class opcode_jam {
 public:
 	static void execute() {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// make sure we spin forever
 			--PC.raw;
@@ -23,4 +23,3 @@ public:
 };
 
 #endif
-

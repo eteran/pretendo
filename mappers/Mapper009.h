@@ -24,12 +24,12 @@ public:
 
 private:
 	uint8_t chr_ram_[0x2000] = {};
-	bool    latch0_    = true;
-	bool    latch1_    = true;
-	uint8_t latch0_lo_ = 0;
-	uint8_t latch0_hi_ = 0;
-	uint8_t latch1_lo_ = 0;
-	uint8_t latch1_hi_ = 0;
+	bool latch0_             = true;
+	bool latch1_             = true;
+	uint8_t latch0_lo_       = 0;
+	uint8_t latch0_hi_       = 0;
+	uint8_t latch1_lo_       = 0;
+	uint8_t latch1_hi_       = 0;
 };
 
 #endif

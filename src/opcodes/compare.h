@@ -16,4 +16,3 @@ protected:
 };
 
 #endif
-

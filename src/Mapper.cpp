@@ -4,7 +4,7 @@
 #include "Cpu.h"
 #include "Cart.h"
 #include "Input.h"
-#include "Config.h"
+#include "Settings.h"
 #include "Nes.h"
 #include "Ppu.h"
 #include "Compiler.h"
@@ -797,7 +797,7 @@ void Mapper::register_mapper(int num, create_func create_ptr) {
 //------------------------------------------------------------------------------
 MemoryMappedFile Mapper::open_sram(size_t size) {
 
-    const boost::filesystem::path cache_path = Config::cacheDirectory();
+	const boost::filesystem::path cache_path = Settings::cacheDirectory();
     boost::filesystem::create_directories(cache_path);
 
     char hex_buf[32];

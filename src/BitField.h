@@ -2,21 +2,21 @@
 #ifndef BITFIELD_H_
 #define BITFIELD_H_
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <type_traits>
 
 namespace detail {
 
 template <size_t LastBit>
 struct MinimumTypeHelper {
-    using type =
-		typename std::conditional<LastBit == 0 , void,
-		typename std::conditional<LastBit <= 8 , uint8_t,
-		typename std::conditional<LastBit <= 16, uint16_t,
-		typename std::conditional<LastBit <= 32, uint32_t,
-		typename std::conditional<LastBit <= 64, uint64_t,
-        void>::type>::type>::type>::type>::type;
+	using type =
+		typename std::conditional<LastBit == 0, void,
+								  typename std::conditional<LastBit <= 8, uint8_t,
+															typename std::conditional<LastBit <= 16, uint16_t,
+																					  typename std::conditional<LastBit <= 32, uint32_t,
+																												typename std::conditional<LastBit <= 64, uint64_t,
+																																		  void>::type>::type>::type>::type>::type;
 };
 
 }
@@ -29,7 +29,7 @@ private:
 	};
 
 	using T = typename detail::MinimumTypeHelper<Index + Bits>::type;
-	
+
 public:
 	template <class T2>
 	BitField &operator=(T2 value) {
@@ -37,12 +37,20 @@ public:
 		return *this;
 	}
 
-	operator T() const             { return (value_ >> Index) & Mask; }
+	operator T() const { return (value_ >> Index) & Mask; }
 	explicit operator bool() const { return (value_ & (Mask << Index)) != 0; }
-	BitField &operator++()         { return *this = *this + 1; }
-	T operator++(int)              { T r = *this; ++*this; return r; }
-	BitField &operator--()         { return *this = *this - 1; }
-	T operator--(int)              { T r = *this; ++*this; return r; }
+	BitField &operator++() { return *this = *this + 1; }
+	T operator++(int) {
+		T r = *this;
+		++*this;
+		return r;
+	}
+	BitField &operator--() { return *this = *this - 1; }
+	T operator--(int) {
+		T r = *this;
+		++*this;
+		return r;
+	}
 
 private:
 	T value_;
@@ -64,7 +72,7 @@ public:
 		return *this;
 	}
 
-	operator bool() const  { return (value_ & (Mask << Index)) != 0; }
+	operator bool() const { return (value_ & (Mask << Index)) != 0; }
 	bool operator!() const { return (value_ & (Mask << Index)) == 0; }
 
 private:

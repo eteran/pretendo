@@ -7,8 +7,8 @@
 namespace nes {
 namespace apu {
 
-using std::uint8_t;
 using std::uint16_t;
+using std::uint8_t;
 
 template <int Channel>
 class Square;
@@ -17,9 +17,9 @@ template <int Channel>
 class Sweep {
 public:
 	explicit Sweep(Square<Channel> *square);
-	~Sweep() = default;
+	~Sweep()             = default;
 	Sweep(const Sweep &) = delete;
-	Sweep& operator=(const Sweep &) = delete;
+	Sweep &operator=(const Sweep &) = delete;
 
 public:
 	void clock();
@@ -36,11 +36,11 @@ private:
 
 private:
 	Square<Channel> *const square_;
-    uint16_t      pulse_period_ = 0;
-    uint8_t       counter_      = 0;
-    uint8_t       control_      = 0;
-    bool          reload_       = false;
-    bool          silenced_     = false;
+	uint16_t pulse_period_ = 0;
+	uint8_t counter_       = 0;
+	uint8_t control_       = 0;
+	bool reload_           = false;
+	bool silenced_         = false;
 };
 
 }
@@ -49,4 +49,3 @@ private:
 #include "Sweep.tcc"
 
 #endif
-

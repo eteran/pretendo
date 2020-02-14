@@ -2,8 +2,8 @@
 #ifndef MAPPER005_20080314_H_
 #define MAPPER005_20080314_H_
 
-#include "Mapper.h"
 #include "BitField.h"
+#include "Mapper.h"
 
 class Mapper5 final : public Mapper {
 private:
@@ -12,6 +12,7 @@ private:
 		BitField<6> in_frame;
 		BitField<7> pending;
 	};
+
 public:
 	Mapper5();
 
@@ -56,34 +57,33 @@ private:
 	uint8_t read_handler(uint16_t address);
 
 private:
+	uint8_t prg_ram_[2][0x8000]    = {};
+	uint8_t exram_[0x400]          = {};
+	uint8_t bg_chr_banks_[8]       = {};
+	uint8_t sp_chr_banks_[8]       = {};
+	uint16_t prev_vram_address_[2] = {0xffff, 0xffff};
+	uint8_t *prg_ram_banks_[0x10]  = {};
 
-	uint8_t   prg_ram_[2][0x8000]   = {};
-	uint8_t   exram_[0x400]         = {};
-	uint8_t   bg_chr_banks_[8]      = {};
-	uint8_t   sp_chr_banks_[8]      = {};
-	uint16_t  prev_vram_address_[2] = { 0xffff, 0xffff };
-	uint8_t * prg_ram_banks_[0x10]  = {};
-
-	bool      irq_enabled_           = false;
-	bool      large_sprites_         = false;
-	uint16_t  bg_char_upper_         = 0x00;
-	uint16_t  fetch_count_           = 0;
-	uint8_t   chr_mode_              = 0;
-	uint8_t   exram_mode_            = 0;
-	uint8_t   fill_mode_attr_        = 0;
-	uint8_t   fill_mode_tile_        = 0;
-	uint8_t   irq_counter_           = 0;
-	IRQStatus irq_status_            = {0};
-	uint8_t   irq_target_            = 0;
-	uint8_t   mirroring_mode_        = 0;
-	uint8_t   multiplier_1_          = 0;
-	uint8_t   multiplier_2_          = 0;
-	uint8_t   prg_mode_              = 0x03;
-	uint8_t   prg_ram_protect1_      = 0;
-	uint8_t   prg_ram_protect2_      = 0;
-	uint8_t   vertical_split_mode_   = 0;
-	uint8_t   vertical_split_scroll_ = 0;
-	uint8_t   vertical_split_bank_   = 0;
+	bool irq_enabled_              = false;
+	bool large_sprites_            = false;
+	uint16_t bg_char_upper_        = 0x00;
+	uint16_t fetch_count_          = 0;
+	uint8_t chr_mode_              = 0;
+	uint8_t exram_mode_            = 0;
+	uint8_t fill_mode_attr_        = 0;
+	uint8_t fill_mode_tile_        = 0;
+	uint8_t irq_counter_           = 0;
+	IRQStatus irq_status_          = {0};
+	uint8_t irq_target_            = 0;
+	uint8_t mirroring_mode_        = 0;
+	uint8_t multiplier_1_          = 0;
+	uint8_t multiplier_2_          = 0;
+	uint8_t prg_mode_              = 0x03;
+	uint8_t prg_ram_protect1_      = 0;
+	uint8_t prg_ram_protect2_      = 0;
+	uint8_t vertical_split_mode_   = 0;
+	uint8_t vertical_split_scroll_ = 0;
+	uint8_t vertical_split_bank_   = 0;
 
 	enum {
 		CHR_BANK_A,

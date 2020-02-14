@@ -15,6 +15,4 @@ struct opcode_sty {
 	}
 };
 
-
 #endif
-

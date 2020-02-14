@@ -7,8 +7,8 @@
 namespace nes {
 namespace apu {
 
-using std::uint8_t;
 using std::uint16_t;
+using std::uint8_t;
 
 class LFSR {
 public:
@@ -47,7 +47,7 @@ private:
 	// Name: feedback
 	//-------------------------------------------------------------------
 	uint16_t feedback() const {
-		if(mode_) {
+		if (mode_) {
 			return (value_ & 0x01) ^ ((value_ >> 6) & 0x01);
 		} else {
 			return (value_ & 0x01) ^ ((value_ >> 1) & 0x01);
@@ -55,8 +55,8 @@ private:
 	}
 
 private:
-    uint16_t value_ = 1;
-    uint8_t  mode_  = 0;
+	uint16_t value_ = 1;
+	uint8_t mode_   = 0;
 };
 
 }

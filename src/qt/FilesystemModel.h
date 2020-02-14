@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef FILESYSTEM_MODEL_H_20191119_
 #define FILESYSTEM_MODEL_H_20191119_
 
-#include <QDirIterator>
 #include <QAbstractItemModel>
+#include <QDirIterator>
 #include <QString>
 #include <QVector>
 

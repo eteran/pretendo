@@ -2,14 +2,14 @@
 #ifndef OPCODES_20121204_H_
 #define OPCODES_20121204_H_
 
-struct operation_none        {};
-struct operation_read        {};
-struct operation_modify      {};
-struct operation_write       {};
-struct operation_stack_read  {};
+struct operation_none {};
+struct operation_read {};
+struct operation_modify {};
+struct operation_write {};
+struct operation_stack_read {};
 struct operation_stack_write {};
-struct operation_jump        {};
-struct operation_branch      {};
+struct operation_jump {};
+struct operation_branch {};
 
 #include "opcodes/adc.h"
 #include "opcodes/and.h"
@@ -68,19 +68,20 @@ struct operation_branch      {};
 #include "opcodes/tya.h"
 
 // special
-#include "opcodes/special/irq.h"
-#include "opcodes/special/nmi.h"
 #include "opcodes/special/brk.h"
-#include "opcodes/special/jsr.h"
-#include "opcodes/special/rti.h"
-#include "opcodes/special/rst.h"
-#include "opcodes/special/rts.h"
+#include "opcodes/special/irq.h"
 #include "opcodes/special/jam.h"
+#include "opcodes/special/jsr.h"
+#include "opcodes/special/nmi.h"
+#include "opcodes/special/rst.h"
+#include "opcodes/special/rti.h"
+#include "opcodes/special/rts.h"
 
 // unofficial
-#include "opcodes/unofficial/asr.h"
 #include "opcodes/unofficial/aac.h"
+#include "opcodes/unofficial/aax.h"
 #include "opcodes/unofficial/arr.h"
+#include "opcodes/unofficial/asr.h"
 #include "opcodes/unofficial/axa.h"
 #include "opcodes/unofficial/axs.h"
 #include "opcodes/unofficial/dcp.h"
@@ -89,7 +90,6 @@ struct operation_branch      {};
 #include "opcodes/unofficial/lax.h"
 #include "opcodes/unofficial/rla.h"
 #include "opcodes/unofficial/rra.h"
-#include "opcodes/unofficial/aax.h"
 #include "opcodes/unofficial/slo.h"
 #include "opcodes/unofficial/sre.h"
 #include "opcodes/unofficial/sxa.h"

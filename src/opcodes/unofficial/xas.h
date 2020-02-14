@@ -10,7 +10,7 @@
 struct opcode_xas {
 
 	using memory_access = operation_write;
-	
+
 	static uint8_t execute(uint16_t address) {
 		S = X & A;
 		return S & (((address >> 8) + 1) & 0xff);
@@ -18,4 +18,3 @@ struct opcode_xas {
 };
 
 #endif
-

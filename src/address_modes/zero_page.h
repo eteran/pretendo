@@ -9,11 +9,11 @@ public:
 	static void execute() {
 		execute(typename Op::memory_access());
 	}
-	
+
 private:
 	static void execute(const operation_read &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch address, increment PC
 			effective_address16_.raw = read_byte(PC.raw++);
@@ -30,7 +30,7 @@ private:
 
 	static void execute(const operation_modify &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch address, increment PC
 			effective_address16_.raw = read_byte(PC.raw++);
@@ -57,7 +57,7 @@ private:
 
 	static void execute(const operation_write &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch address, increment PC
 			effective_address16_.raw = read_byte(PC.raw++);
@@ -68,7 +68,7 @@ private:
 			{
 				const uint8_t address = effective_address16_.lo;
 				const uint8_t value   = Op::execute(address);
-            	write_byte_zp(address, value);
+				write_byte_zp(address, value);
 			}
 			OPCODE_COMPLETE;
 		default:

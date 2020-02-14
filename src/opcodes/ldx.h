@@ -16,4 +16,3 @@ struct opcode_ldx {
 };
 
 #endif
-

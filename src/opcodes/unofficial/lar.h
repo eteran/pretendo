@@ -8,7 +8,7 @@
 struct opcode_lar {
 
 	using memory_access = operation_read;
-	
+
 	static void execute(uint8_t data) {
 
 		data &= S;
@@ -20,4 +20,3 @@ struct opcode_lar {
 };
 
 #endif
-

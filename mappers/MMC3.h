@@ -47,13 +47,13 @@ protected:
 
 	uint64_t prev_ppu_cycle_    = 0;
 	uint16_t prev_vram_address_ = 0xffff;
-	uint8_t  command_           = 0;
-	uint8_t  irq_latch_         = 0;
-	uint8_t  irq_counter_       = 0;
-	bool     irq_enabled_       = false;
-	bool     irq_reload_        = false;
-	bool     save_ram_enabled_  = false;
-	bool     save_ram_writable_ = false;
+	uint8_t command_            = 0;
+	uint8_t irq_latch_          = 0;
+	uint8_t irq_counter_        = 0;
+	bool irq_enabled_           = false;
+	bool irq_reload_            = false;
+	bool save_ram_enabled_      = false;
+	bool save_ram_writable_     = false;
 
 private:
 	MemoryMappedFile prg_ptr_;

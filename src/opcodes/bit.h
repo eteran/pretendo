@@ -18,4 +18,3 @@ struct opcode_bit {
 };
 
 #endif
-

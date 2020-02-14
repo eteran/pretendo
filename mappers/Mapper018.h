@@ -2,8 +2,8 @@
 #ifndef MAPPER018_20080314_H_
 #define MAPPER018_20080314_H_
 
-#include "Mapper.h"
 #include "BitField.h"
+#include "Mapper.h"
 
 class Mapper18 final : public Mapper {
 private:
@@ -14,22 +14,23 @@ private:
 		BitField<2> mode_8bit;
 		BitField<3> mode_4bit;
 	};
-	
+
 	union IRQCounter {
 		uint16_t raw;
-		BitField<0,4>  counter_4bit;
-		BitField<0,8>  counter_8bit;
-		BitField<0,12> counter_12bit;
-		BitField<0,16> counter_16bit;
+		BitField<0, 4> counter_4bit;
+		BitField<0, 8> counter_8bit;
+		BitField<0, 12> counter_12bit;
+		BitField<0, 16> counter_16bit;
 	};
-	
+
 	union IRQLatch {
 		uint16_t raw;
-		BitField<0,4>   byte1;
-		BitField<4,8>   byte2;
-		BitField<8,12>  byte3;
-		BitField<12,16> byte4;
+		BitField<0, 4> byte1;
+		BitField<4, 8> byte2;
+		BitField<8, 12> byte3;
+		BitField<12, 16> byte4;
 	};
+
 public:
 	Mapper18();
 
@@ -50,12 +51,12 @@ public:
 	void cpu_sync() override;
 
 private:
-	uint8_t    chr_ram_[0x2000] = {};
-	uint8_t    chr_[16]         = {};
-	uint8_t    prg_[8]          = {}; // upper 2 are unneccessary, but simpler this way
-	IRQCounter irq_counter_     = { 0 };
-	IRQLatch   irq_latch_       = { 0 };
-	IRQControl irq_control_     = { 0 };
+	uint8_t chr_ram_[0x2000] = {};
+	uint8_t chr_[16]         = {};
+	uint8_t prg_[8]          = {}; // upper 2 are unneccessary, but simpler this way
+	IRQCounter irq_counter_  = {0};
+	IRQLatch irq_latch_      = {0};
+	IRQControl irq_control_  = {0};
 };
 
 #endif

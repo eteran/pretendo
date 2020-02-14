@@ -14,11 +14,10 @@ struct opcode_nop {
 	// operation
 	static void execute() {
 	}
-	
+
 	template <class T>
 	static void execute(T) {
 	}
 };
 
 #endif
-

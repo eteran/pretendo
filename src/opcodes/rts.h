@@ -2,4 +2,3 @@
 #define RTS_20121206_H_
 
 #endif
-

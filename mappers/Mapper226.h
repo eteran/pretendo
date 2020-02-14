@@ -26,7 +26,7 @@ private:
 
 private:
 	uint8_t chr_ram_[0x2000] = {};
-	uint8_t regs_[2] = {};
+	uint8_t regs_[2]         = {};
 };
 
 #endif

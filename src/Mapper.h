@@ -2,15 +2,15 @@
 #ifndef MAPPER_20080314_H_
 #define MAPPER_20080314_H_
 
-#include "Cpu.h"
 #include "Cart.h"
+#include "Cpu.h"
 #include "MemoryMappedFile.h"
 #include "VRAMBank.h"
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
-#include <functional>
 
 class Mapper;
 
@@ -22,17 +22,17 @@ public:
 	static void register_mapper(int num, create_func create_ptr);
 
 public:
-    MemoryMappedFile open_sram(size_t size);
+	MemoryMappedFile open_sram(size_t size);
 
 public:
 	// the standard mapper interface
-	virtual void save()		{}
-	virtual void restore()	{}
+	virtual void save() {}
+	virtual void restore() {}
 	virtual std::string name() const = 0;
 
 protected:
 	Mapper();
-    Mapper(const Mapper &)            = delete;
+	Mapper(const Mapper &) = delete;
 	Mapper &operator=(const Mapper &) = delete;
 
 public:
@@ -155,23 +155,103 @@ protected:
 	void set_mirroring(uint8_t mir);
 
 protected:
-	void swap_01(uint8_t *ptr) { page_[0x00] = ptr + 0x0000; page_[0x01] = ptr + 0x0800; page_[0x02] = ptr + 0x1000; page_[0x03] = ptr + 0x1800; }
-	void swap_23(uint8_t *ptr) { page_[0x04] = ptr + 0x0000; page_[0x05] = ptr + 0x0800; page_[0x06] = ptr + 0x1000; page_[0x07] = ptr + 0x1800; }
-	void swap_45(uint8_t *ptr) { page_[0x08] = ptr + 0x0000; page_[0x09] = ptr + 0x0800; page_[0x0a] = ptr + 0x1000; page_[0x0b] = ptr + 0x1800; }
-	void swap_67(uint8_t *ptr) { page_[0x0c] = ptr + 0x0000; page_[0x0d] = ptr + 0x0800; page_[0x0e] = ptr + 0x1000; page_[0x0f] = ptr + 0x1800; }
-	void swap_89(uint8_t *ptr) { page_[0x10] = ptr + 0x0000; page_[0x11] = ptr + 0x0800; page_[0x12] = ptr + 0x1000; page_[0x13] = ptr + 0x1800; }
-	void swap_ab(uint8_t *ptr) { page_[0x14] = ptr + 0x0000; page_[0x15] = ptr + 0x0800; page_[0x16] = ptr + 0x1000; page_[0x17] = ptr + 0x1800; }
-	void swap_cd(uint8_t *ptr) { page_[0x18] = ptr + 0x0000; page_[0x19] = ptr + 0x0800; page_[0x1a] = ptr + 0x1000; page_[0x1b] = ptr + 0x1800; }
-	void swap_ef(uint8_t *ptr) { page_[0x1c] = ptr + 0x0000; page_[0x1d] = ptr + 0x0800; page_[0x1e] = ptr + 0x1000; page_[0x1f] = ptr + 0x1800; }
+	void swap_01(uint8_t *ptr) {
+		page_[0x00] = ptr + 0x0000;
+		page_[0x01] = ptr + 0x0800;
+		page_[0x02] = ptr + 0x1000;
+		page_[0x03] = ptr + 0x1800;
+	}
+	void swap_23(uint8_t *ptr) {
+		page_[0x04] = ptr + 0x0000;
+		page_[0x05] = ptr + 0x0800;
+		page_[0x06] = ptr + 0x1000;
+		page_[0x07] = ptr + 0x1800;
+	}
+	void swap_45(uint8_t *ptr) {
+		page_[0x08] = ptr + 0x0000;
+		page_[0x09] = ptr + 0x0800;
+		page_[0x0a] = ptr + 0x1000;
+		page_[0x0b] = ptr + 0x1800;
+	}
+	void swap_67(uint8_t *ptr) {
+		page_[0x0c] = ptr + 0x0000;
+		page_[0x0d] = ptr + 0x0800;
+		page_[0x0e] = ptr + 0x1000;
+		page_[0x0f] = ptr + 0x1800;
+	}
+	void swap_89(uint8_t *ptr) {
+		page_[0x10] = ptr + 0x0000;
+		page_[0x11] = ptr + 0x0800;
+		page_[0x12] = ptr + 0x1000;
+		page_[0x13] = ptr + 0x1800;
+	}
+	void swap_ab(uint8_t *ptr) {
+		page_[0x14] = ptr + 0x0000;
+		page_[0x15] = ptr + 0x0800;
+		page_[0x16] = ptr + 0x1000;
+		page_[0x17] = ptr + 0x1800;
+	}
+	void swap_cd(uint8_t *ptr) {
+		page_[0x18] = ptr + 0x0000;
+		page_[0x19] = ptr + 0x0800;
+		page_[0x1a] = ptr + 0x1000;
+		page_[0x1b] = ptr + 0x1800;
+	}
+	void swap_ef(uint8_t *ptr) {
+		page_[0x1c] = ptr + 0x0000;
+		page_[0x1d] = ptr + 0x0800;
+		page_[0x1e] = ptr + 0x1000;
+		page_[0x1f] = ptr + 0x1800;
+	}
 
-	void unmap_01() { page_[0x00] = nullptr; page_[0x01] = nullptr; page_[0x02] = nullptr; page_[0x03] = nullptr; }
-	void unmap_23() { page_[0x04] = nullptr; page_[0x05] = nullptr; page_[0x06] = nullptr; page_[0x07] = nullptr; }
-	void unmap_45() { page_[0x08] = nullptr; page_[0x09] = nullptr; page_[0x0a] = nullptr; page_[0x0b] = nullptr; }
-	void unmap_67() { page_[0x0c] = nullptr; page_[0x0d] = nullptr; page_[0x0e] = nullptr; page_[0x0f] = nullptr; }
-	void unmap_89() { page_[0x10] = nullptr; page_[0x11] = nullptr; page_[0x12] = nullptr; page_[0x13] = nullptr; }
-	void unmap_ab() { page_[0x14] = nullptr; page_[0x15] = nullptr; page_[0x16] = nullptr; page_[0x17] = nullptr; }
-	void unmap_cd() { page_[0x18] = nullptr; page_[0x19] = nullptr; page_[0x1a] = nullptr; page_[0x1b] = nullptr; }
-	void unmap_ef() { page_[0x1c] = nullptr; page_[0x1d] = nullptr; page_[0x1e] = nullptr; page_[0x1f] = nullptr; }
+	void unmap_01() {
+		page_[0x00] = nullptr;
+		page_[0x01] = nullptr;
+		page_[0x02] = nullptr;
+		page_[0x03] = nullptr;
+	}
+	void unmap_23() {
+		page_[0x04] = nullptr;
+		page_[0x05] = nullptr;
+		page_[0x06] = nullptr;
+		page_[0x07] = nullptr;
+	}
+	void unmap_45() {
+		page_[0x08] = nullptr;
+		page_[0x09] = nullptr;
+		page_[0x0a] = nullptr;
+		page_[0x0b] = nullptr;
+	}
+	void unmap_67() {
+		page_[0x0c] = nullptr;
+		page_[0x0d] = nullptr;
+		page_[0x0e] = nullptr;
+		page_[0x0f] = nullptr;
+	}
+	void unmap_89() {
+		page_[0x10] = nullptr;
+		page_[0x11] = nullptr;
+		page_[0x12] = nullptr;
+		page_[0x13] = nullptr;
+	}
+	void unmap_ab() {
+		page_[0x14] = nullptr;
+		page_[0x15] = nullptr;
+		page_[0x16] = nullptr;
+		page_[0x17] = nullptr;
+	}
+	void unmap_cd() {
+		page_[0x18] = nullptr;
+		page_[0x19] = nullptr;
+		page_[0x1a] = nullptr;
+		page_[0x1b] = nullptr;
+	}
+	void unmap_ef() {
+		page_[0x1c] = nullptr;
+		page_[0x1d] = nullptr;
+		page_[0x1e] = nullptr;
+		page_[0x1f] = nullptr;
+	}
 
 protected:
 	constexpr static uint8_t mirror_single_low  = 0x00;
@@ -208,10 +288,9 @@ private:
 	}
 };
 
-
 // template which is a class whose constructor adds a function to our mapper
 // creation table in order to create an object of each type of mapper
-template<class T>
+template <class T>
 struct MapperRegisterObject {
 	explicit MapperRegisterObject(int n) {
 		Mapper::register_mapper(n, []() {
@@ -220,11 +299,12 @@ struct MapperRegisterObject {
 	}
 };
 
-
 // macro to hide details of setting up a static instance of the previously
 // mentioned class. The first line of each Mapper[NNN].cpp file should be
 // a call to this macro passing the appropriate mapper number
-#define SETUP_STATIC_INES_MAPPER_REGISTRAR(N) namespace { static MapperRegisterObject<Mapper##N> MapperRegister(N); }
+#define SETUP_STATIC_INES_MAPPER_REGISTRAR(N)                 \
+	namespace {                                               \
+	static MapperRegisterObject<Mapper##N> MapperRegister(N); \
+	}
 
 #endif
-

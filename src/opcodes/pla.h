@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_pla {
 
-    using memory_access = operation_stack_read;
+	using memory_access = operation_stack_read;
 
 	static void execute(uint8_t data) {
 		A = data;
@@ -16,4 +16,3 @@ struct opcode_pla {
 };
 
 #endif
-

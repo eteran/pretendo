@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_sta {
 
-    using memory_access = operation_write;
+	using memory_access = operation_write;
 
 	static uint8_t execute(uint16_t address) {
 		(void)address;
@@ -15,6 +15,4 @@ struct opcode_sta {
 	}
 };
 
-
 #endif
-

@@ -9,11 +9,11 @@ public:
 	static void execute() {
 		execute(typename Op::memory_access());
 	}
-	
-private:	
+
+private:
 	static void execute(const operation_read &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch pointer address, increment PC
 			effective_address16_.raw = PC.raw++;
@@ -37,13 +37,12 @@ private:
 			OPCODE_COMPLETE;
 		default:
 			abort();
-			
 		}
 	}
-	
+
 	static void execute(const operation_modify &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch pointer address, increment PC
 			effective_address16_.raw = PC.raw++;
@@ -79,10 +78,10 @@ private:
 			abort();
 		}
 	}
-		
+
 	static void execute(const operation_write &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch pointer address, increment PC
 			effective_address16_.raw = PC.raw++;
@@ -104,7 +103,7 @@ private:
 			// write to effective address
 			{
 				const uint16_t address = effective_address16_.raw;
-				const uint8_t  value   = Op::execute(address);
+				const uint8_t value    = Op::execute(address);
 				write_byte(address, value);
 			}
 			OPCODE_COMPLETE;

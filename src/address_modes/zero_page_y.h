@@ -5,15 +5,15 @@
 template <class Op>
 class zero_page_y {
 public:
-	// dispatch to the appropriate version of the address mode	
+	// dispatch to the appropriate version of the address mode
 	static void execute() {
 		execute(typename Op::memory_access());
 	}
-	
+
 private:
 	static void execute(const operation_read &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch address, increment PC
 			effective_address16_.raw = PC.raw++;
@@ -25,7 +25,7 @@ private:
 		case 3:
 			LAST_CYCLE;
 			// read from effective address
-            Op::execute(read_byte_zp(effective_address16_.lo));
+			Op::execute(read_byte_zp(effective_address16_.lo));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -34,7 +34,7 @@ private:
 
 	static void execute(const operation_write &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch address, increment PC
 			effective_address16_.raw = PC.raw++;
@@ -48,8 +48,8 @@ private:
 			// write to effective address
 			{
 				const uint16_t address = effective_address16_.lo;
-				const uint8_t  value   = Op::execute(address);
-            	write_byte_zp(address, value);
+				const uint8_t value    = Op::execute(address);
+				write_byte_zp(address, value);
 			}
 			OPCODE_COMPLETE;
 		default:

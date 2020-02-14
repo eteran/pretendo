@@ -26,17 +26,17 @@ public:
 	bool enabled() const;
 
 public:
-	void    tick();
+	void tick();
 	uint8_t output() const;
 
 public:
 	LengthCounter length_counter;
-	Envelope      envelope;
+	Envelope envelope;
 
 private:
-	bool  enabled_ = false;
+	bool enabled_ = false;
 	Timer timer_;
-	LFSR  lfsr_;
+	LFSR lfsr_;
 };
 
 }

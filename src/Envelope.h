@@ -18,10 +18,10 @@ private:
 	void clock_divider();
 
 private:
-    bool    start_   = false;
-    uint8_t counter_ = 0;
-    uint8_t divider_ = 0xff;
-    uint8_t control_ = 0;
+	bool start_      = false;
+	uint8_t counter_ = 0;
+	uint8_t divider_ = 0xff;
+	uint8_t control_ = 0;
 };
 
 }

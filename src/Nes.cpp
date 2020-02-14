@@ -5,11 +5,9 @@
 #include "Apu.h"
 #include "Input.h"
 #include "Cart.h"
-#include "Config.h"
 #include <iostream>
 
-Cart   nes::cart;
-Config nes::config;
+Cart nes::cart;
 
 /*
  * Just some thoughts on timing:

@@ -15,4 +15,3 @@ struct opcode_beq : branch {
 };
 
 #endif
-

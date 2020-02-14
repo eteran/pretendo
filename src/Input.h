@@ -2,8 +2,8 @@
 #ifndef INPUT_20080314_H_
 #define INPUT_20080314_H_
 
-#include <cstdint>
 #include "Nes.h"
+#include <cstdint>
 
 class Controller;
 
@@ -27,4 +27,3 @@ extern Controller controller4;
 }
 
 #endif
-

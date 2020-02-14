@@ -15,4 +15,3 @@ struct opcode_bpl : branch {
 };
 
 #endif
-

@@ -2,15 +2,15 @@
 #ifndef PREFERENCES_H_
 #define PREFERENCES_H_
 
-#include <QDialog>
 #include "ui_Preferences.h"
+#include <QDialog>
 
 class Preferences final : public QDialog {
 	Q_OBJECT
 public:
 	Preferences(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 	~Preferences() override = default;
-	
+
 protected:
 	bool eventFilter(QObject *watched, QEvent *event) override;
 
@@ -22,7 +22,7 @@ protected Q_SLOTS:
 	void on_gamma_valueChanged(int value);
 	void on_buttonBox_clicked(QAbstractButton *button);
 	void on_buttonBox_accepted();
-	
+
 private:
 	Ui::Preferences ui_;
 	float current_saturation_;

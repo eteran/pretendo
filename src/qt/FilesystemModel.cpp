@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "FilesystemModel.h"
 
 #include <QtAlgorithms>
+#include <QIcon>
 
 FilesystemModel::FilesystemModel(QObject *parent)
 	: QAbstractItemModel(parent) {
@@ -57,6 +58,8 @@ QVariant FilesystemModel::data(const QModelIndex &index, int role) const {
 			}
 		} else if (role == Qt::UserRole) {
 			return QVariant::fromValue(item.path);
+		} else if ( role == Qt::DecorationRole ) {
+			return QIcon::fromTheme("application-x-nes-rom");
 		}
 	}
 

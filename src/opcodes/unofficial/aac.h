@@ -17,4 +17,3 @@ struct opcode_aac {
 };
 
 #endif
-

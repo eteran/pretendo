@@ -8,7 +8,7 @@
 struct opcode_inc {
 
 	using memory_access = operation_modify;
-	
+
 	static void execute(uint8_t &data) {
 		++data;
 		update_nz_flags(data);
@@ -16,4 +16,3 @@ struct opcode_inc {
 };
 
 #endif
-

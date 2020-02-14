@@ -11,6 +11,7 @@ class QtVideo final : public QGLWidget {
 private:
 	static constexpr int Width  = 256;
 	static constexpr int Height = 240;
+
 public:
 	QtVideo(QWidget *parent = nullptr, const QGLWidget *shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 	~QtVideo() override = default;
@@ -30,10 +31,10 @@ Q_SIGNALS:
 	void render_frame();
 
 private:
-	uint32_t*                            scanlines_[240];
-	uint32_t                             palette_[8][64];
+	uint32_t *scanlines_[240];
+	uint32_t palette_[8][64];
 	std::array<uint32_t, Width * Height> buffer_;
-	GLuint                               texture_ = 0;
+	GLuint texture_ = 0;
 };
 
 #endif

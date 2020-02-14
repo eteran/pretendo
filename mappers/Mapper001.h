@@ -29,14 +29,14 @@ private:
 	void write_handler(uint16_t address, uint8_t value);
 
 private:
-	uint8_t  chr_ram_[0x2000] = {};
-	uint8_t  regs_[4]         = {};
-	uint64_t cpu_cycles_      = 0;
-	uint8_t  latch_           = 0;
-	uint8_t  write_counter_   = 0;
+	uint8_t chr_ram_[0x2000] = {};
+	uint8_t regs_[4]         = {};
+	uint64_t cpu_cycles_     = 0;
+	uint8_t latch_           = 0;
+	uint8_t write_counter_   = 0;
 
 private:
-    MemoryMappedFile prg_ptr_;
+	MemoryMappedFile prg_ptr_;
 };
 
 #endif

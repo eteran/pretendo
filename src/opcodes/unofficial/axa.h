@@ -19,4 +19,3 @@ struct opcode_axa {
 };
 
 #endif
-

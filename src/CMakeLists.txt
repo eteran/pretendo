@@ -136,8 +136,6 @@ add_executable(pretendo
 	Cart.cpp
 	Cart.h
 	circular_buffer.h
-	Config.cpp
-	Config.h
 	Controller.cpp
 	Controller.h
 	Cpu.cpp
@@ -175,6 +173,8 @@ add_executable(pretendo
 	Triangle.h
 	VRAMBank.h
 
+	qt/Settings.cpp
+	qt/Settings.h
 	qt/About.cpp
 	qt/About.h
 	qt/AudioViewer.cpp

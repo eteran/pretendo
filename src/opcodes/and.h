@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_and {
 
-    using memory_access = operation_read;
+	using memory_access = operation_read;
 
 	static void execute(uint8_t data) {
 		A &= data;
@@ -16,4 +16,3 @@ struct opcode_and {
 };
 
 #endif
-

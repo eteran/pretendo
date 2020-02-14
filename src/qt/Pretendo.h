@@ -16,9 +16,9 @@ class QTimer;
 class Preferences;
 
 #if defined(PULSE_AUDIO_SOUND)
-	class PulseAudio;
+class PulseAudio;
 #else
-	class NullAudio;
+class NullAudio;
 #endif
 
 class Pretendo final : public QMainWindow {
@@ -29,7 +29,7 @@ class Pretendo final : public QMainWindow {
 public:
 	Pretendo(const QString &filename = QString(), QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 	~Pretendo() override;
-	
+
 public:
 	void setFrameRate(int framerate);
 
@@ -56,22 +56,22 @@ private Q_SLOTS:
 protected:
 	void keyPressEvent(QKeyEvent *event) override;
 	void keyReleaseEvent(QKeyEvent *event) override;
-	
+
 private:
 	void zoom(int scale);
 
 private:
-	Ui::Pretendo           ui_;
-	Preferences           *preferences_      = nullptr;
-	FilesystemModel       *filesystem_model_ = nullptr;
-	QSortFilterProxyModel *filter_model_     = nullptr;
-	QTimer                *timer_            = nullptr;
-	QLabel                *fps_label_        = nullptr;
-	Qt::Key                player_1_[8];
-	QTime                  time_;
-	quint64                framecount_       = 0;
-	bool                   paused_           = false;
-	int                    framerate_        = 60;
+	Ui::Pretendo ui_;
+	Preferences *preferences_            = nullptr;
+	FilesystemModel *filesystem_model_   = nullptr;
+	QSortFilterProxyModel *filter_model_ = nullptr;
+	QTimer *timer_                       = nullptr;
+	QLabel *fps_label_                   = nullptr;
+	Qt::Key player_1_[8];
+	QTime time_;
+	quint64 framecount_ = 0;
+	bool paused_        = false;
+	int framerate_      = 60;
 
 #if defined(PULSE_AUDIO_SOUND)
 	PulseAudio *audio_;
@@ -81,4 +81,3 @@ private:
 };
 
 #endif
-

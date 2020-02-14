@@ -5,21 +5,21 @@
 template <class Op>
 class indirect {
 public:
-	// dispatch to the appropriate version of the address mode	
+	// dispatch to the appropriate version of the address mode
 	static void execute() {
 		execute(typename Op::memory_access());
 	}
-	
+
 private:
 	static void execute(const operation_jump &) {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch pointer address low, increment PC
 			data16_.lo = read_byte(PC.raw++);
 			break;
 		case 2:
 			// fetch pointer address high, increment PC
-			data16_.hi =  read_byte(PC.raw++);
+			data16_.hi = read_byte(PC.raw++);
 			break;
 		case 3:
 			// fetch low address byte, increment PC

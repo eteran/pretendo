@@ -15,4 +15,3 @@ struct opcode_cpx : compare {
 };
 
 #endif
-

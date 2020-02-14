@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 struct opcode_txa {
 	using memory_access = operation_none;
-	
+
 	static void execute() {
 		A = X;
 		update_nz_flags(A);
@@ -15,4 +15,3 @@ struct opcode_txa {
 };
 
 #endif
-

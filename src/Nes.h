@@ -2,24 +2,21 @@
 #ifndef NES_H_
 #define NES_H_
 
-#include "Reset.h"
 #include "Ppu.h"
+#include "Reset.h"
 
 class Cart;
 class Config;
 
 namespace nes {
 
-extern Cart   cart;
-extern Config config;
+extern Cart cart;
 
 namespace {
 uint8_t buffer[256];
 }
 
 namespace detail {
-
-
 
 //------------------------------------------------------------------------------
 // Name: execute_scanline_0_19
@@ -33,7 +30,7 @@ inline void execute_scanline_0_19() {
 	 * external memory (i.e. name / pattern tables, etc.).
 	 */
 
-	for(int i = 0; i < 20; ++i) {
+	for (int i = 0; i < 20; ++i) {
 		ppu::execute_scanline(scanline_vblank());
 	}
 }
@@ -73,10 +70,10 @@ void execute_scanline_21_260(Video *video) {
 	 * 21..260: after rendering 1 dummy scanline, the PPU starts to render the
 	 * actual data to be displayed on the screen. This is done for 240 scanlines,
 	 * of course.
-	 */	
+	 */
 
 	// process the visible range
-	for(int i = 0; i < 240; ++i) {
+	for (int i = 0; i < 240; ++i) {
 		ppu::execute_scanline(scanline_render(buffer));
 		video->submit_scanline(i, ppu::mask().intensity, buffer);
 	}
@@ -86,7 +83,6 @@ void execute_scanline_21_260(Video *video) {
 // Name: execute_scanline_261
 //------------------------------------------------------------------------------
 inline void execute_scanline_261() {
-
 
 	/*
 	 * 261:  after the very last rendered scanline finishes, the PPU does nothing
@@ -104,13 +100,12 @@ inline void execute_scanline_261() {
 // Name: run_frame
 //------------------------------------------------------------------------------
 template <class Video>
-void run_frame(Video *video) {	
+void run_frame(Video *video) {
 	detail::execute_scanline_20();
 	detail::execute_scanline_21_260(video);
 	detail::execute_scanline_261();
 	detail::execute_scanline_0_19();
 }
-
 
 void reset(Reset reset_type);
 

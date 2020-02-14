@@ -34,10 +34,10 @@ public:
 	uint8_t output() const;
 
 private:
-    bool          enabled_        = false;
-    uint16_t      timer_load_     = 0;
-    size_t        sequence_index_ = 0;
-	Timer         timer_;
+	bool enabled_          = false;
+	uint16_t timer_load_   = 0;
+	size_t sequence_index_ = 0;
+	Timer timer_;
 };
 
 }

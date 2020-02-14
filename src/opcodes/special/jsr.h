@@ -9,7 +9,7 @@
 class opcode_jsr {
 public:
 	static void execute() {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch low address byte, increment PC
 			effective_address16_.lo = read_byte(PC.raw++);
@@ -29,7 +29,7 @@ public:
 			LAST_CYCLE;
 			// fetch high address byte to PCH
 			effective_address16_.hi = read_byte(PC.raw);
-			PC.raw = effective_address16_.raw;
+			PC.raw                  = effective_address16_.raw;
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -38,4 +38,3 @@ public:
 };
 
 #endif
-

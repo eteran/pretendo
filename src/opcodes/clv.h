@@ -14,6 +14,4 @@ struct opcode_clv {
 	}
 };
 
-
 #endif
-

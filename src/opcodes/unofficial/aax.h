@@ -15,6 +15,4 @@ struct opcode_aax {
 	}
 };
 
-
 #endif
-

@@ -2,27 +2,27 @@
 #ifndef MAPPER090_20080314_H_
 #define MAPPER090_20080314_H_
 
-#include "Mapper.h"
 #include "BitField.h"
+#include "Mapper.h"
 
 class Mapper90 final : public Mapper {
 private:
 	union BankControl {
 		uint8_t raw;
-		BitField<0,3> prg;
-		BitField<3,2> chr;
-		BitField<5>   n;
-		BitField<6>   r;
-		BitField<6>   map_67;
-		
+		BitField<0, 3> prg;
+		BitField<3, 2> chr;
+		BitField<5> n;
+		BitField<6> r;
+		BitField<6> map_67;
 	};
-	
+
 	union ChrControl {
 		uint8_t raw;
-		BitField<0,5> block;	
-		BitField<5>   disabled;
-		BitField<7>   mirror;
+		BitField<0, 5> block;
+		BitField<5> disabled;
+		BitField<7> mirror;
 	};
+
 public:
 	Mapper90();
 
@@ -53,8 +53,8 @@ private:
 	uint8_t chr_lo_[8] = {};
 	uint8_t prg_[4]    = {};
 
-	BankControl bank_control_ = { 0 };
-	ChrControl  chr_control_  = { 0 };
+	BankControl bank_control_ = {0};
+	ChrControl chr_control_   = {0};
 
 	uint8_t multiply_1_ = 0;
 	uint8_t multiply_2_ = 0;

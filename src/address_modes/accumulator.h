@@ -5,14 +5,14 @@
 template <class Op>
 class accumulator {
 public:
-	// dispatch to the appropriate version of the address mode	
+	// dispatch to the appropriate version of the address mode
 	static void execute() {
 		execute(typename Op::memory_access());
 	}
-	
+
 private:
 	static void execute(const operation_modify &) {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			LAST_CYCLE;
 			// read next instruction byte (and throw it away)
@@ -24,6 +24,5 @@ private:
 		}
 	}
 };
-
 
 #endif

@@ -2,8 +2,8 @@
 #ifndef VRC4_20120121_H_
 #define VRC4_20120121_H_
 
-#include "Mapper.h"
 #include "BitField.h"
+#include "Mapper.h"
 
 class VRC4 : public Mapper {
 private:
@@ -13,6 +13,7 @@ private:
 		BitField<1> enabled;
 		BitField<2> mode;
 	};
+
 public:
 	VRC4();
 
@@ -36,14 +37,14 @@ private:
 	void clock_irq();
 
 private:
-	uint8_t    chr_[8] = {};
-	uint8_t    prg_[2] = {};
+	uint8_t chr_[8] = {};
+	uint8_t prg_[2] = {};
 
-	uint8_t    irq_latch_     = 0;
-	IRQControl irq_control_   = { 0 };
-	uint8_t    irq_counter_   = 0;
-	uint8_t    prg_mode_      = 0;
-	int        irq_prescaler_ = 341;
+	uint8_t irq_latch_      = 0;
+	IRQControl irq_control_ = {0};
+	uint8_t irq_counter_    = 0;
+	uint8_t prg_mode_       = 0;
+	int irq_prescaler_      = 341;
 };
 
 #endif

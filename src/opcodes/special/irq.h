@@ -2,18 +2,18 @@
 #ifndef IRQ_20140417_H_
 #define IRQ_20140417_H_
 
-#define LAST_CYCLE_0                                  \
-do {                                                  \
-	rst_executing_ = false;                           \
-	irq_executing_ = false;                           \
-					                                  \
-	if(rst_asserted_) {                               \
-		rst_executing_ = true;                        \
-	} else if(irq_asserted_ && ((P & I_MASK) == 0)) { \
-		irq_executing_ = true;                        \
-	}                                                 \
-	rst_asserted_ = false;                            \
-} while(0)
+#define LAST_CYCLE_0                                       \
+	do {                                                   \
+		rst_executing_ = false;                            \
+		irq_executing_ = false;                            \
+                                                           \
+		if (rst_asserted_) {                               \
+			rst_executing_ = true;                         \
+		} else if (irq_asserted_ && ((P & I_MASK) == 0)) { \
+			irq_executing_ = true;                         \
+		}                                                  \
+		rst_asserted_ = false;                             \
+	} while (0)
 
 //------------------------------------------------------------------------------
 // Name: opcode_irq
@@ -22,7 +22,7 @@ do {                                                  \
 class opcode_irq {
 public:
 	static void execute() {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// read next instruction byte (and throw it away),
 			// increment PC
@@ -39,9 +39,9 @@ public:
 		case 4:
 			// push P on stack, decrement S
 			write_byte(S-- + StackAddress, P);
-			if(nmi_asserted_) {
+			if (nmi_asserted_) {
 				effective_address16_.raw = NmiVectorAddress;
-				nmi_asserted_ = false;
+				nmi_asserted_            = false;
 			} else {
 				effective_address16_.raw = IrqVectorAddress;
 			}
@@ -65,4 +65,3 @@ public:
 #undef LAST_CYCLE_0
 
 #endif
-

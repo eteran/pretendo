@@ -14,6 +14,4 @@ struct opcode_iny {
 	}
 };
 
-
 #endif
-

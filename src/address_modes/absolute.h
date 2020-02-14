@@ -5,14 +5,14 @@
 template <class Op>
 class absolute {
 public:
-	// dispatch to the appropriate version of the address mode	
+	// dispatch to the appropriate version of the address mode
 	static void execute() {
 		execute(typename Op::memory_access());
 	}
-	
+
 private:
 	static void execute(const operation_jump &) {
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch low address byte, increment PC
 			effective_address16_.lo = read_byte(PC.raw++);
@@ -25,13 +25,13 @@ private:
 			Op::execute(effective_address16_.raw);
 			OPCODE_COMPLETE;
 		default:
-			abort();	
+			abort();
 		}
 	}
-                      
+
 	static void execute(const operation_read &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch low byte of address, increment PC
 			effective_address16_.lo = read_byte(PC.raw++);
@@ -49,10 +49,10 @@ private:
 			abort();
 		}
 	}
-	
+
 	static void execute(const operation_modify &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch low byte of address, increment PC
 			effective_address16_.lo = read_byte(PC.raw++);
@@ -80,10 +80,10 @@ private:
 			abort();
 		}
 	}
-	
+
 	static void execute(const operation_write &) {
 
-		switch(cycle_) {
+		switch (cycle_) {
 		case 1:
 			// fetch low byte of address, increment PC
 			effective_address16_.lo = read_byte(PC.raw++);
@@ -97,7 +97,7 @@ private:
 			// write to effective address
 			{
 				const uint16_t address = effective_address16_.raw;
-				const uint8_t  value   = Op::execute(address);
+				const uint8_t value    = Op::execute(address);
 				write_byte(address, value);
 			}
 			OPCODE_COMPLETE;

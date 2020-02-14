@@ -23,7 +23,7 @@ public:
 
 private:
 	uint16_t irq_counter_ = 0;
-	bool     irq_enabled_ = false;
+	bool irq_enabled_     = false;
 };
 
 #endif

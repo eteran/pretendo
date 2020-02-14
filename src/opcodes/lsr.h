@@ -8,7 +8,7 @@
 struct opcode_lsr {
 
 	using memory_access = operation_modify;
-	
+
 	static void execute(uint8_t &data) {
 		set_flag_condition<C_MASK>(data & 0x01);
 		data >>= 1;
@@ -17,4 +17,3 @@ struct opcode_lsr {
 };
 
 #endif
-
