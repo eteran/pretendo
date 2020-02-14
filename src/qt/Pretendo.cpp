@@ -37,7 +37,8 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 
 	Settings::load();
 
-	nes::ppu::show_sprites = Settings::showSprites;
+	ui_.actionShow_Sprites->setChecked(Settings::showSprites);
+
 	
 	// make only one of these selectable at a time
 	QActionGroup *const zoom_group = new QActionGroup(this);
@@ -45,7 +46,23 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 	zoom_group->addAction(ui_.action2x);
 	zoom_group->addAction(ui_.action3x);
 	zoom_group->addAction(ui_.action4x);
-	ui_.action2x->setChecked(true);
+
+	switch(Settings::zoomFactor) {
+	case 1:
+		ui_.action1x->setChecked(true);
+		break;
+	case 2:
+		ui_.action2x->setChecked(true);
+		break;
+	case 3:
+		ui_.action3x->setChecked(true);
+		break;
+	case 4:
+		ui_.action4x->setChecked(true);
+		break;
+	}
+
+
 
 	// set the default zoom
 	zoom(Settings::zoomFactor);
