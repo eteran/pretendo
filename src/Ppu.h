@@ -13,10 +13,10 @@ struct scanline_prerender {};
 struct scanline_postrender {};
 
 struct scanline_render {
-	explicit scanline_render(uint8_t *p)
+	explicit scanline_render(uint16_t *p)
 		: buffer(p) {
 	}
-	uint8_t *const buffer;
+	uint16_t *const buffer;
 };
 
 namespace nes {

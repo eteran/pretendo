@@ -12,10 +12,6 @@ namespace nes {
 
 extern Cart cart;
 
-namespace {
-uint8_t buffer[256];
-}
-
 namespace detail {
 
 //------------------------------------------------------------------------------
@@ -74,6 +70,7 @@ void execute_scanline_21_260(Video *video) {
 
 	// process the visible range
 	for (int i = 0; i < 240; ++i) {
+		uint16_t buffer[256];
 		ppu::execute_scanline(scanline_render(buffer));
 		video->submit_scanline(i, ppu::mask().intensity, buffer);
 	}

@@ -207,7 +207,7 @@ uint8_t select_blank_pixel() {
 // Name: select_bg_pixel
 // Note: the screen is *always* enabled when this is called
 //------------------------------------------------------------------------------
-uint8_t select_bg_pixel(uint8_t index) {
+uint8_t select_bg_pixel(uint16_t index) {
 
 	assert(ppu_mask_.screen_enabled);
 
@@ -229,7 +229,7 @@ uint8_t select_bg_pixel(uint8_t index) {
 // Name: select_pixel
 // Note: the screen is *always* enabled when this is called
 //------------------------------------------------------------------------------
-uint8_t select_pixel(uint8_t index) {
+uint8_t select_pixel(uint16_t index) {
 
 	assert(ppu_mask_.screen_enabled);
 
@@ -635,9 +635,9 @@ void read_sprite_pattern() {
 //------------------------------------------------------------------------------
 // Name: render_pixel
 //------------------------------------------------------------------------------
-void render_pixel(uint8_t *dest_buffer) {
+void render_pixel(uint16_t *dest_buffer) {
 
-	const uint8_t index = hpos_ - 1;
+	const uint16_t index = hpos_ - 1;
 	const uint8_t pixel = select_pixel(index);
 
 	constexpr uint8_t mask_table[2] = { 0xff, 0x30 };
@@ -842,11 +842,8 @@ void clock_ppu(const scanline_render &target) {
 			// idle
 		} else if(LIKELY(hpos_ < 257)) {
 			const uint8_t pixel = select_blank_pixel();
-			if(UNLIKELY(ppu_mask_.monochrome)) {
-				target.buffer[hpos_ - 1] = palette_[pixel] & 0x30;
-			} else {
-				target.buffer[hpos_ - 1] = palette_[pixel];
-			}
+			constexpr uint8_t mask_table[2] = { 0xff, 0x30 };
+			target.buffer[hpos_ - 1] = palette_[pixel] & mask_table[ppu_mask_.monochrome];
 		} else {
 			// idle
 		}

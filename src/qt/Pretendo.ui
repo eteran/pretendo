@@ -222,6 +222,7 @@
     <addaction name="separator"/>
     <addaction name="menuZoom"/>
     <addaction name="action_Audio_Viewer"/>
+    <addaction name="action_Take_Screenshot"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_CPU"/>
@@ -409,6 +410,11 @@
   <action name="action_Audio_Viewer">
    <property name="text">
     <string>&amp;Audio Viewer</string>
+   </property>
+  </action>
+  <action name="action_Take_Screenshot">
+   <property name="text">
+    <string>Take &amp;Screenshot</string>
    </property>
   </action>
  </widget>

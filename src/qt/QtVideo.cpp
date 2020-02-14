@@ -27,6 +27,18 @@ QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags 
 	std::cout << "[QtVideo::QtVideo]" << std::endl;
 }
 
+QImage QtVideo::screenshot() {
+	QImage screen(Width, Height, QImage::Format_ARGB32);
+	for(int i = 0; i < Height; ++i) {
+
+		auto scanline = reinterpret_cast<QRgb *>(screen.scanLine(i));
+		std::transform(scanlines_[i], scanlines_[i] + Width, scanline, [](uint32_t value) {
+			return QRgb(value);
+		});
+	}
+	return screen;
+}
+
 //------------------------------------------------------------------------------
 // Name: resizeGL
 //------------------------------------------------------------------------------
@@ -92,7 +104,7 @@ void QtVideo::initializeGL() {
 //------------------------------------------------------------------------------
 // Name: submit_scanline
 //------------------------------------------------------------------------------
-void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source) {
+void QtVideo::submit_scanline(int scanline, int intensity, const uint16_t *source) {
 	
 	const uint32_t *const palette = palette_[intensity];
 	
@@ -101,14 +113,14 @@ void QtVideo::submit_scanline(int scanline, int intensity, const uint8_t *source
 	for(int i = 0; i < Width; ) {
 	
 		// this approach will try to read 64-bits from the source at a time...
-		const uint8_t pix0 = source[i + 0];
-		const uint8_t pix1 = source[i + 1];
-		const uint8_t pix2 = source[i + 2];
-		const uint8_t pix3 = source[i + 3];
-		const uint8_t pix4 = source[i + 4];
-		const uint8_t pix5 = source[i + 5];
-		const uint8_t pix6 = source[i + 6];
-		const uint8_t pix7 = source[i + 7];
+		const uint8_t pix0 = source[i + 0] & 0xff;
+		const uint8_t pix1 = source[i + 1] & 0xff;
+		const uint8_t pix2 = source[i + 2] & 0xff;
+		const uint8_t pix3 = source[i + 3] & 0xff;
+		const uint8_t pix4 = source[i + 4] & 0xff;
+		const uint8_t pix5 = source[i + 5] & 0xff;
+		const uint8_t pix6 = source[i + 6] & 0xff;
+		const uint8_t pix7 = source[i + 7] & 0xff;
 
 		// collect them into 256-bits of data (unfortunately, with some indirection)
 		uint64_t value0 = 

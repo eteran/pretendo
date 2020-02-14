@@ -514,3 +514,12 @@ void Pretendo::on_action_Audio_Viewer_triggered() {
 	}
 	dialog->show();
 }
+
+
+void Pretendo::on_action_Take_Screenshot_triggered() {
+	QImage screenshot = ui_.video->screenshot();
+	auto pix = QPixmap::fromImage(screenshot);
+
+	// TODO(eteran): generate a better screenshot name
+	pix.save("PretendoScreenshot.png");
+}

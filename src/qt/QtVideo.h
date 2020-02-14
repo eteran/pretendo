@@ -4,6 +4,7 @@
 
 #include "Palette.h"
 #include <QGLWidget>
+#include <QImage>
 #include <array>
 
 class QtVideo final : public QGLWidget {
@@ -18,9 +19,12 @@ public:
 
 public:
 	// required functions
-	void submit_scanline(int scanline, int intensity, const uint8_t *source);
+	void submit_scanline(int scanline, int intensity, const uint16_t *source);
 	void set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal);
 	void end_frame();
+
+public:
+	QImage screenshot();
 
 protected:
 	void initializeGL() override;
