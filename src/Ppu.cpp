@@ -1265,6 +1265,13 @@ void end_frame() {
 template <class T>
 void execute_scanline(const T &target) {
 
+	if(UNLIKELY(vpos_ == 262)) {
+		start_frame();
+	} else if(UNLIKELY(vpos_ == 241)) {
+		end_frame();
+	}
+
+
 	if(LIKELY(!system_paused)) {
 		for(hpos_ = 0; hpos_ < CyclesPerScanline; ++hpos_, ++ppu_cycle_) {
 			clock_ppu(target);

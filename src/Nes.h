@@ -52,7 +52,6 @@ inline void execute_scanline_20() {
 	 * second rendered frame, this scanline is only 1360 cycles. Otherwise it's
 	 * 1364.
 	 */
-	ppu::start_frame();
 	ppu::execute_scanline(scanline_prerender());
 }
 
@@ -88,7 +87,6 @@ inline void execute_scanline_261() {
 	 * drawing lines starts all over again.
 	 */
 
-	ppu::end_frame();
 	ppu::execute_scanline(scanline_postrender());
 }
 }
