@@ -22,6 +22,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QDirIterator>
+#include <QDateTime>
 
 #if defined(PULSE_AUDIO_SOUND)
 #include "PulseAudio.h"
@@ -520,6 +521,7 @@ void Pretendo::on_action_Take_Screenshot_triggered() {
 	QImage screenshot = ui_.video->screenshot();
 	auto pix = QPixmap::fromImage(screenshot);
 
-	// TODO(eteran): generate a better screenshot name
-	pix.save("PretendoScreenshot.png");
+	QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+	pix.save(QString("pretendo-screenshot-%1.png").arg(timestamp));
 }

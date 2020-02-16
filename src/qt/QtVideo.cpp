@@ -104,40 +104,37 @@ void QtVideo::initializeGL() {
 //------------------------------------------------------------------------------
 // Name: submit_scanline
 //------------------------------------------------------------------------------
-void QtVideo::submit_scanline(int scanline, int intensity, const uint16_t *source) {
-	
-	const uint32_t *const palette = palette_[intensity];
-	
+void QtVideo::submit_scanline(int scanline, const uint16_t *source) {
+
 #if 1
 	uint64_t *s = reinterpret_cast<uint64_t *>(scanlines_[scanline]);
-	for(int i = 0; i < Width; ) {
-	
-		// this approach will try to read 64-bits from the source at a time...
-		const uint8_t pix0 = source[i + 0] & 0xff;
-		const uint8_t pix1 = source[i + 1] & 0xff;
-		const uint8_t pix2 = source[i + 2] & 0xff;
-		const uint8_t pix3 = source[i + 3] & 0xff;
-		const uint8_t pix4 = source[i + 4] & 0xff;
-		const uint8_t pix5 = source[i + 5] & 0xff;
-		const uint8_t pix6 = source[i + 6] & 0xff;
-		const uint8_t pix7 = source[i + 7] & 0xff;
+	for(int i = 0; i < Width; i += 8) {
+
+		const uint16_t pix0 = source[0];
+		const uint16_t pix1 = source[1];
+		const uint16_t pix2 = source[2];
+		const uint16_t pix3 = source[3];
+		const uint16_t pix4 = source[4];
+		const uint16_t pix5 = source[5];
+		const uint16_t pix6 = source[6];
+		const uint16_t pix7 = source[7];
 
 		// collect them into 256-bits of data (unfortunately, with some indirection)
 		uint64_t value0 = 
-			(static_cast<uint64_t>(palette[pix0]) << 0) |
-			(static_cast<uint64_t>(palette[pix1]) << 32);
+			(static_cast<uint64_t>(palette_[pix0]) << 0) |
+			(static_cast<uint64_t>(palette_[pix1]) << 32);
 
 		uint64_t value1 = 
-			(static_cast<uint64_t>(palette[pix2]) << 0) |
-			(static_cast<uint64_t>(palette[pix3]) << 32);
+			(static_cast<uint64_t>(palette_[pix2]) << 0) |
+			(static_cast<uint64_t>(palette_[pix3]) << 32);
 			
 		uint64_t value2 = 
-			(static_cast<uint64_t>(palette[pix4]) << 0) |
-			(static_cast<uint64_t>(palette[pix5]) << 32);
+			(static_cast<uint64_t>(palette_[pix4]) << 0) |
+			(static_cast<uint64_t>(palette_[pix5]) << 32);
 			
 		uint64_t value3 = 
-			(static_cast<uint64_t>(palette[pix6]) << 0) |
-			(static_cast<uint64_t>(palette[pix7]) << 32);
+			(static_cast<uint64_t>(palette_[pix6]) << 0) |
+			(static_cast<uint64_t>(palette_[pix7]) << 32);
 	
 	
 		// then write them, this will help the rendering be much more
@@ -146,13 +143,13 @@ void QtVideo::submit_scanline(int scanline, int intensity, const uint16_t *sourc
 		*s++ = value1;
 		*s++ = value2;
 		*s++ = value3;
-		
-		i += 8;
+
+		source += 8;
 	}
 #else
 	uint32_t *const s = scanlines_[scanline];
-	std::transform(source, source + Width, s, [palette](uint8_t index) {
-		return palette[index];
+	std::transform(source, source + Width, s, [this](uint16_t index) {
+		return palette_[index];
 	});
 #endif
 }
@@ -168,7 +165,7 @@ void QtVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t *
 
 	for(int j = 0; j < 8; j++) {
 		for(int i = 0; i < 64; i++) {
-			palette_[j][i] =
+			palette_[j * 64 + i] =
 				QColor(
 					qBound(0x00, static_cast<int>(pal[i].r * intensity[j].r), 0xff),
 					qBound(0x00, static_cast<int>(pal[i].g * intensity[j].g), 0xff),

@@ -72,7 +72,7 @@ void execute_scanline_21_260(Video *video) {
 	for (int i = 0; i < 240; ++i) {
 		uint16_t buffer[256];
 		ppu::execute_scanline(scanline_render(buffer));
-		video->submit_scanline(i, ppu::mask().intensity, buffer);
+		video->submit_scanline(i, buffer);
 	}
 }
 

@@ -11,7 +11,6 @@
 #include <iostream>
 #include <cstring>
 #include <algorithm>
-#include <cassert>
 
 //#define SPRITE_ZERO_HACK
 
@@ -194,8 +193,6 @@ constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
 //------------------------------------------------------------------------------
 uint8_t select_blank_pixel() {
 
-	assert(!ppu_mask_.screen_enabled);
-
 	if((vram_address_ & 0x3f00) == 0x3f00) {
 		return vram_address_ & 0x1f;
 	} else {
@@ -209,16 +206,14 @@ uint8_t select_blank_pixel() {
 //------------------------------------------------------------------------------
 uint8_t select_bg_pixel(uint16_t index) {
 
-	assert(ppu_mask_.screen_enabled);
-
 	// first identify what the BG pixel would be
 	if((ppu_mask_.background_clipping || index >= 8) && ppu_mask_.background_visible) {
 		const uint16_t mask  = (0x8000 >> tile_offset_);
 
-		return((pattern_queue_[0]   & mask) >> (15 - tile_offset_)) |
-			  ((pattern_queue_[1]   & mask) >> (14 - tile_offset_)) |
-			  ((attribute_queue_[0] & mask) >> (13 - tile_offset_)) |
-			  ((attribute_queue_[1] & mask) >> (12 - tile_offset_));
+		return (((pattern_queue_[0]   & mask) >> (15 - tile_offset_)) |
+				((pattern_queue_[1]   & mask) >> (14 - tile_offset_)) |
+				((attribute_queue_[0] & mask) >> (13 - tile_offset_)) |
+				((attribute_queue_[1] & mask) >> (12 - tile_offset_))) & 0xff;
 
 	} else {
 		return 0x00;
@@ -230,8 +225,6 @@ uint8_t select_bg_pixel(uint16_t index) {
 // Note: the screen is *always* enabled when this is called
 //------------------------------------------------------------------------------
 uint8_t select_pixel(uint16_t index) {
-
-	assert(ppu_mask_.screen_enabled);
 
 	// default to displaying the BG pixel
 	uint8_t pixel = select_bg_pixel(index);
@@ -655,10 +648,10 @@ void render_pixel(uint16_t *dest_buffer) {
 //------------------------------------------------------------------------------
 void update_shift_registers_render() {
 
-	pattern_queue_[0]   |= (next_pattern_[0] & 0x00ff);
-	pattern_queue_[1]   |= (next_pattern_[1] & 0x00ff);
-	attribute_queue_[0] |= (((next_attribute_ >> 0) & 0x01) * 0xff); // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
-	attribute_queue_[1] |= (((next_attribute_ >> 1) & 0x01) * 0xff); // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+	pattern_queue_[0]   |= next_pattern_[0];
+	pattern_queue_[1]   |= next_pattern_[1];
+	attribute_queue_[0] |= ((next_attribute_ >> 0) & 0x01) * 0xff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+	attribute_queue_[1] |= ((next_attribute_ >> 1) & 0x01) * 0xff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
 }
 
 //------------------------------------------------------------------------------
@@ -731,8 +724,6 @@ void increment_vram_address() {
 // Name: clock_ppu
 //------------------------------------------------------------------------------
 void clock_ppu(const scanline_prerender &) {
-
-	assert(vpos_ == 0);
 
 	if(UNLIKELY(hpos_ == 1)) {
 		exit_vblank();
@@ -844,6 +835,7 @@ void clock_ppu(const scanline_render &target) {
 			const uint8_t pixel = select_blank_pixel();
 			constexpr uint8_t mask_table[2] = { 0xff, 0x30 };
 			target.buffer[hpos_ - 1] = palette_[pixel] & mask_table[ppu_mask_.monochrome];
+			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
 		} else {
 			// idle
 		}
@@ -860,6 +852,7 @@ void clock_ppu(const scanline_render &target) {
 
 			// NOTE(eteran): on my machine, this code "costs" about 200 FPS
 			render_pixel(target.buffer);
+			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
 
 			switch(hpos_ & 0x07) {
 			case 1: evaluate_sprites_odd();  open_tile_index(); break;
@@ -1303,20 +1296,6 @@ uint16_t hpos() {
 //------------------------------------------------------------------------------
 uint16_t vpos() {
 	return vpos_;
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-const Mask &mask() {
-	return ppu_mask_;
-}
-
-//------------------------------------------------------------------------------
-// Name:
-//------------------------------------------------------------------------------
-const Control &control() {
-	return ppu_control_;
 }
 
 // explicitly instantiate the types we use for this function,

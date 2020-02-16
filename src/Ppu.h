@@ -76,9 +76,6 @@ uint8_t read200x();
 void start_frame();
 void end_frame();
 
-const Mask &mask();
-const Control &control();
-
 template <class T>
 void execute_scanline(const T &target);
 
