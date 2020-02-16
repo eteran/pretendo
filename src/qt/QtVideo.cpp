@@ -11,9 +11,10 @@
 //------------------------------------------------------------------------------
 // Name: QtVideo
 //------------------------------------------------------------------------------
-QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f) : QGLWidget(parent, shareWidget, f) {
+QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f)
+	: QGLWidget(parent, shareWidget, f) {
 
-	for(int i = 0; i < Height; ++i) {
+	for (int i = 0; i < Height; ++i) {
 		scanlines_[i] = &buffer_[i * Width];
 	}
 
@@ -29,7 +30,7 @@ QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags 
 
 QImage QtVideo::screenshot() {
 	QImage screen(Width, Height, QImage::Format_ARGB32);
-	for(int i = 0; i < Height; ++i) {
+	for (int i = 0; i < Height; ++i) {
 
 		auto scanline = reinterpret_cast<QRgb *>(screen.scanLine(i));
 		std::transform(scanlines_[i], scanlines_[i] + Width, scanline, [](uint32_t value) {
@@ -64,16 +65,14 @@ void QtVideo::initializeGL() {
 	glGenTextures(1, &texture_);
 	glBindTexture(GL_TEXTURE_2D, texture_);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, Width);
-	
+
 	// clamp out of bounds texture coordinates
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	
+
 	// link the texture with the buffer
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
-	
 
-	
 #if 0
 	QGLShaderProgram program(context());
 	
@@ -97,8 +96,6 @@ void QtVideo::initializeGL() {
 	program.link();
 	program.bind();
 #endif
-	
-
 }
 
 //------------------------------------------------------------------------------
@@ -108,7 +105,7 @@ void QtVideo::submit_scanline(int scanline, const uint16_t *source) {
 
 #if 1
 	uint64_t *s = reinterpret_cast<uint64_t *>(scanlines_[scanline]);
-	for(int i = 0; i < Width; i += 8) {
+	for (int i = 0; i < Width; i += 8) {
 
 		const uint16_t pix0 = source[0];
 		const uint16_t pix1 = source[1];
@@ -120,23 +117,22 @@ void QtVideo::submit_scanline(int scanline, const uint16_t *source) {
 		const uint16_t pix7 = source[7];
 
 		// collect them into 256-bits of data (unfortunately, with some indirection)
-		uint64_t value0 = 
+		uint64_t value0 =
 			(static_cast<uint64_t>(palette_[pix0]) << 0) |
 			(static_cast<uint64_t>(palette_[pix1]) << 32);
 
-		uint64_t value1 = 
+		uint64_t value1 =
 			(static_cast<uint64_t>(palette_[pix2]) << 0) |
 			(static_cast<uint64_t>(palette_[pix3]) << 32);
-			
-		uint64_t value2 = 
+
+		uint64_t value2 =
 			(static_cast<uint64_t>(palette_[pix4]) << 0) |
 			(static_cast<uint64_t>(palette_[pix5]) << 32);
-			
-		uint64_t value3 = 
+
+		uint64_t value3 =
 			(static_cast<uint64_t>(palette_[pix6]) << 0) |
 			(static_cast<uint64_t>(palette_[pix7]) << 32);
-	
-	
+
 		// then write them, this will help the rendering be much more
 		// cache friendly
 		*s++ = value0;
@@ -160,17 +156,17 @@ void QtVideo::submit_scanline(int scanline, const uint16_t *source) {
 void QtVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal) {
 	assert(pal);
 	assert(intensity);
-	
+
 	std::cout << "Setting Palette" << std::endl;
 
-	for(int j = 0; j < 8; j++) {
-		for(int i = 0; i < 64; i++) {
+	for (int j = 0; j < 8; j++) {
+		for (int i = 0; i < 64; i++) {
 			palette_[j * 64 + i] =
 				QColor(
 					qBound(0x00, static_cast<int>(pal[i].r * intensity[j].r), 0xff),
 					qBound(0x00, static_cast<int>(pal[i].g * intensity[j].g), 0xff),
-					qBound(0x00, static_cast<int>(pal[i].b * intensity[j].b), 0xff)).rgb();
-
+					qBound(0x00, static_cast<int>(pal[i].b * intensity[j].b), 0xff))
+					.rgb();
 		}
 	}
 }
@@ -208,9 +204,13 @@ void QtVideo::paintGL() {
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
 
 	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0, 0.0); glVertex3i(0, output_height, 0);
-	glTexCoord2f(1.0, 0.0); glVertex3i(output_width, output_height, 0);
-	glTexCoord2f(0.0, 1.0); glVertex3i(0, 0, 0);
-	glTexCoord2f(1.0, 1.0); glVertex3i(output_width, 0, 0);
+	glTexCoord2f(0.0, 0.0);
+	glVertex3i(0, output_height, 0);
+	glTexCoord2f(1.0, 0.0);
+	glVertex3i(output_width, output_height, 0);
+	glTexCoord2f(0.0, 1.0);
+	glVertex3i(0, 0, 0);
+	glTexCoord2f(1.0, 1.0);
+	glVertex3i(output_width, 0, 0);
 	glEnd();
 }

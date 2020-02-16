@@ -36,7 +36,7 @@ void Mapper10::write_b(uint16_t address, uint8_t value) {
 	(void)address;
 	latch0_lo_ = value;
 
-	if(!latch0_) {
+	if (!latch0_) {
 		set_chr_0000_0fff(value & 0x1f);
 	}
 }
@@ -48,7 +48,7 @@ void Mapper10::write_c(uint16_t address, uint8_t value) {
 	(void)address;
 	latch0_hi_ = value;
 
-	if(latch0_) {
+	if (latch0_) {
 		set_chr_0000_0fff(value & 0x1f);
 	}
 }
@@ -60,7 +60,7 @@ void Mapper10::write_d(uint16_t address, uint8_t value) {
 	(void)address;
 	latch1_lo_ = value;
 
-	if(!latch1_) {
+	if (!latch1_) {
 		set_chr_1000_1fff(value & 0x1f);
 	}
 }
@@ -72,7 +72,7 @@ void Mapper10::write_e(uint16_t address, uint8_t value) {
 	(void)address;
 	latch1_hi_ = value;
 
-	if(latch1_) {
+	if (latch1_) {
 		set_chr_1000_1fff(value & 0x1f);
 	}
 }
@@ -81,7 +81,7 @@ void Mapper10::write_e(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper10::write_f(uint16_t address, uint8_t value) {
 	(void)address;
-	if(value & 0x01) {
+	if (value & 0x01) {
 		set_mirroring(mirror_horizontal);
 	} else {
 		set_mirroring(mirror_vertical);
@@ -95,7 +95,7 @@ uint8_t Mapper10::read_vram(uint16_t address) {
 
 	const uint8_t ret = Mapper::read_vram(address);
 
-	switch(address & 0xfff8) {
+	switch (address & 0xfff8) {
 	case 0x0fd8:
 		set_chr_0000_0fff(latch0_lo_);
 		latch0_ = false;

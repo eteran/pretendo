@@ -1,12 +1,12 @@
 
 #include "Bus.h"
-#include "Nes.h"
-#include "Ppu.h"
-#include "Cpu.h"
-#include "Cart.h"
 #include "Apu.h"
+#include "Cart.h"
+#include "Cpu.h"
 #include "Input.h"
 #include "Mapper.h"
+#include "Nes.h"
+#include "Ppu.h"
 #include <algorithm>
 #include <cstdlib>
 
@@ -38,7 +38,7 @@ void write_1(uint16_t address, uint8_t value) {
 void write_2(uint16_t address, uint8_t value) {
 
 	nes::cart.mapper()->write_2(address, value);
-	switch(address & 0x07) {
+	switch (address & 0x07) {
 	case 0x00:
 		nes::ppu::write2000(value);
 		break;
@@ -74,7 +74,7 @@ void write_2(uint16_t address, uint8_t value) {
 void write_3(uint16_t address, uint8_t value) {
 
 	nes::cart.mapper()->write_3(address, value);
-	switch(address & 0x07) {
+	switch (address & 0x07) {
 	case 0x00:
 		nes::ppu::write2000(value);
 		break;
@@ -110,7 +110,7 @@ void write_3(uint16_t address, uint8_t value) {
 void write_4(uint16_t address, uint8_t value) {
 
 	nes::cart.mapper()->write_4(address, value);
-	switch(address) {
+	switch (address) {
 	case 0x4000:
 		nes::apu::write4000(value);
 		break;
@@ -276,10 +276,13 @@ uint8_t read_1(uint16_t address) {
 //------------------------------------------------------------------------------
 uint8_t read_2(uint16_t address) {
 
-	switch(address & 0x07) {
-	case 0x02: return nes::ppu::read2002();
-	case 0x04: return nes::ppu::read2004();
-	case 0x07: return nes::ppu::read2007();
+	switch (address & 0x07) {
+	case 0x02:
+		return nes::ppu::read2002();
+	case 0x04:
+		return nes::ppu::read2004();
+	case 0x07:
+		return nes::ppu::read2007();
 	default:
 		return nes::ppu::read200x();
 	}
@@ -289,10 +292,13 @@ uint8_t read_2(uint16_t address) {
 // Name: read_3
 //------------------------------------------------------------------------------
 uint8_t read_3(uint16_t address) {
-	switch(address & 0x07) {
-	case 0x02: return nes::ppu::read2002();
-	case 0x04: return nes::ppu::read2004();
-	case 0x07: return nes::ppu::read2007();
+	switch (address & 0x07) {
+	case 0x02:
+		return nes::ppu::read2002();
+	case 0x04:
+		return nes::ppu::read2004();
+	case 0x07:
+		return nes::ppu::read2007();
 	default:
 		return nes::ppu::read200x();
 	}
@@ -303,10 +309,13 @@ uint8_t read_3(uint16_t address) {
 //------------------------------------------------------------------------------
 uint8_t read_4(uint16_t address) {
 
-	switch(address) {
-	case 0x4015: return nes::apu::read4015();
-	case 0x4016: return nes::input::read4016();
-	case 0x4017: return nes::input::read4017();
+	switch (address) {
+	case 0x4015:
+		return nes::apu::read4015();
+	case 0x4016:
+		return nes::input::read4016();
+	case 0x4017:
+		return nes::input::read4017();
 	default:
 		return nes::cart.mapper()->read_4(address);
 	}
@@ -395,23 +404,55 @@ uint8_t read_f(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 void write_memory(uint16_t address, uint8_t value) {
-	switch((address >> 12) & 0xf) {
-	case 0x0000: write_0(address, value); break;
-	case 0x0001: write_1(address, value); break;
-	case 0x0002: write_2(address, value); break;
-	case 0x0003: write_3(address, value); break;
-	case 0x0004: write_4(address, value); break;
-	case 0x0005: write_5(address, value); break;
-	case 0x0006: write_6(address, value); break;
-	case 0x0007: write_7(address, value); break;
-	case 0x0008: write_8(address, value); break;
-	case 0x0009: write_9(address, value); break;
-	case 0x000a: write_a(address, value); break;
-	case 0x000b: write_b(address, value); break;
-	case 0x000c: write_c(address, value); break;
-	case 0x000d: write_d(address, value); break;
-	case 0x000e: write_e(address, value); break;
-	case 0x000f: write_f(address, value); break;
+	switch ((address >> 12) & 0xf) {
+	case 0x0000:
+		write_0(address, value);
+		break;
+	case 0x0001:
+		write_1(address, value);
+		break;
+	case 0x0002:
+		write_2(address, value);
+		break;
+	case 0x0003:
+		write_3(address, value);
+		break;
+	case 0x0004:
+		write_4(address, value);
+		break;
+	case 0x0005:
+		write_5(address, value);
+		break;
+	case 0x0006:
+		write_6(address, value);
+		break;
+	case 0x0007:
+		write_7(address, value);
+		break;
+	case 0x0008:
+		write_8(address, value);
+		break;
+	case 0x0009:
+		write_9(address, value);
+		break;
+	case 0x000a:
+		write_a(address, value);
+		break;
+	case 0x000b:
+		write_b(address, value);
+		break;
+	case 0x000c:
+		write_c(address, value);
+		break;
+	case 0x000d:
+		write_d(address, value);
+		break;
+	case 0x000e:
+		write_e(address, value);
+		break;
+	case 0x000f:
+		write_f(address, value);
+		break;
 	default:
 		abort();
 	}
@@ -421,23 +462,39 @@ void write_memory(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t read_memory(uint16_t address) {
-	switch((address >> 12) & 0xf) {
-	case 0x0000: return read_0(address);
-	case 0x0001: return read_1(address);
-	case 0x0002: return read_2(address);
-	case 0x0003: return read_3(address);
-	case 0x0004: return read_4(address);
-	case 0x0005: return read_5(address);
-	case 0x0006: return read_6(address);
-	case 0x0007: return read_7(address);
-	case 0x0008: return read_8(address);
-	case 0x0009: return read_9(address);
-	case 0x000a: return read_a(address);
-	case 0x000b: return read_b(address);
-	case 0x000c: return read_c(address);
-	case 0x000d: return read_d(address);
-	case 0x000e: return read_e(address);
-	case 0x000f: return read_f(address);
+	switch ((address >> 12) & 0xf) {
+	case 0x0000:
+		return read_0(address);
+	case 0x0001:
+		return read_1(address);
+	case 0x0002:
+		return read_2(address);
+	case 0x0003:
+		return read_3(address);
+	case 0x0004:
+		return read_4(address);
+	case 0x0005:
+		return read_5(address);
+	case 0x0006:
+		return read_6(address);
+	case 0x0007:
+		return read_7(address);
+	case 0x0008:
+		return read_8(address);
+	case 0x0009:
+		return read_9(address);
+	case 0x000a:
+		return read_a(address);
+	case 0x000b:
+		return read_b(address);
+	case 0x000c:
+		return read_c(address);
+	case 0x000d:
+		return read_d(address);
+	case 0x000e:
+		return read_e(address);
+	case 0x000f:
+		return read_f(address);
 	default:
 		abort();
 	}
@@ -447,11 +504,9 @@ uint8_t read_memory(uint16_t address) {
 // Name: trash_ram
 //-------------------------------------------------------------------
 void trash_ram() {
-#if 0
-	std::generate_n(ram_, sizeof(ram_), std::rand);
-#else
+	// NOTE(eteran): this could be "random" bytes, but all zeros
+	// is just an good as any other patterns
 	std::fill_n(ram_, sizeof(ram_), 0);
-#endif
 }
 
 }

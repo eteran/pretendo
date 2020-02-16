@@ -1,7 +1,7 @@
 
 #include "Mapper058.h"
-#include "Nes.h"
 #include "Cart.h"
+#include "Nes.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(58)
 
@@ -13,7 +13,7 @@ Mapper58::Mapper58() {
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 
-	if(nes::cart.has_chr_rom()) {
+	if (nes::cart.has_chr_rom()) {
 		set_chr_0000_1fff(0);
 	} else {
 		set_chr_0000_1fff_ram(chr_ram_, 0);
@@ -90,19 +90,18 @@ void Mapper58::write_hander(uint16_t address, uint8_t value) {
 
 	(void)value;
 
-	if(address & 0x80) {
+	if (address & 0x80) {
 		set_mirroring(mirror_horizontal);
 	} else {
 		set_mirroring(mirror_vertical);
 	}
 
-	if(address & 0x40) {
+	if (address & 0x40) {
 		set_prg_89ab(address & 0x07);
 		set_prg_cdef(address & 0x07);
 	} else {
 		set_prg_89abcdef(address & 0x07);
 	}
-
 
 	set_chr_0000_1fff((address >> 3) & 0x07);
 }

@@ -1,7 +1,7 @@
 
 #include "Mapper068.h"
-#include "Nes.h"
 #include "Cart.h"
+#include "Nes.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(68)
 
@@ -77,7 +77,7 @@ void Mapper68::write_e(uint16_t address, uint8_t value) {
 
 	reg_e000_ = value;
 
-	switch(value & 0x01) {
+	switch (value & 0x01) {
 	case 0x00:
 		set_mirroring(mirror_horizontal);
 		break;
@@ -100,11 +100,11 @@ void Mapper68::write_f(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 uint8_t Mapper68::read_vram(uint16_t address) {
 
-	if(reg_e000_ & 0x10) {
+	if (reg_e000_ & 0x10) {
 		const uint8_t *const nt_chr_c000_ = nes::cart.chr() + ((chr_rom_reg_[0] * 0x400) & nes::cart.chr_mask());
 		const uint8_t *const nt_chr_d000_ = nes::cart.chr() + ((chr_rom_reg_[1] * 0x400) & nes::cart.chr_mask());
 
-		switch((address >> 10) & 0x0f) {
+		switch ((address >> 10) & 0x0f) {
 		case 0x08:
 		case 0x0c:
 			// $2000
@@ -112,7 +112,7 @@ uint8_t Mapper68::read_vram(uint16_t address) {
 		case 0x09:
 		case 0x0d:
 			// $2400
-			if(reg_e000_ & 0x01) {
+			if (reg_e000_ & 0x01) {
 				return nt_chr_c000_[address & 0x3ff];
 			} else {
 				return nt_chr_d000_[address & 0x3ff];
@@ -120,7 +120,7 @@ uint8_t Mapper68::read_vram(uint16_t address) {
 		case 0x0a:
 		case 0x0e:
 			// $2800
-			if(reg_e000_ & 0x01) {
+			if (reg_e000_ & 0x01) {
 				return nt_chr_d000_[address & 0x3ff];
 			} else {
 				return nt_chr_c000_[address & 0x3ff];

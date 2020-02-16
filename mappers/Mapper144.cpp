@@ -86,4 +86,3 @@ void Mapper144::write_handler(uint16_t address, uint8_t value) {
 	set_prg_89abcdef(effective_value & 0x3);
 	set_chr_0000_1fff((effective_value >> 4) & 0x0f);
 }
-

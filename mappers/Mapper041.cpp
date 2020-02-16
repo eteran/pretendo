@@ -25,17 +25,16 @@ std::string Mapper41::name() const {
 void Mapper41::write_6(uint16_t address, uint8_t value) {
 	(void)value;
 
-	if(!(address & 0x800)) {
+	if (!(address & 0x800)) {
 		register1_ = static_cast<uint8_t>(address & 0x3f);
 		set_prg_89abcdef(register1_ & 0x7);
 
-		if(value & 0x10) {
+		if (value & 0x10) {
 			set_mirroring(mirror_horizontal);
 		} else {
 			set_mirroring(mirror_vertical);
 		}
 	}
-
 }
 
 //------------------------------------------------------------------------------
@@ -100,7 +99,7 @@ void Mapper41::write_f(uint16_t address, uint8_t value) {
 void Mapper41::write_handler(uint16_t address, uint8_t value) {
 	(void)address;
 	register2_ = value;
-	if(register1_ & 0x04) {
+	if (register1_ & 0x04) {
 		set_chr_0000_1fff(((register2_ & 0x03) | (register1_ >> 1)) & 0xc);
 	}
 }

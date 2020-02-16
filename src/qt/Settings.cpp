@@ -1,7 +1,7 @@
 
 #include "Settings.h"
-#include <QStandardPaths>
 #include <QSettings>
+#include <QStandardPaths>
 
 namespace Settings {
 
@@ -31,8 +31,8 @@ void load() {
 	QSettings settings(filename, QSettings::IniFormat);
 
 	romDirectory = settings.value("romDirectory", QString::fromStdString(homeDirectory())).toString().toStdString();
-	zoomFactor  = settings.value("zoomFactor", 2).toInt();
-	showSprites = settings.value("showSprites", true).toBool();
+	zoomFactor   = settings.value("zoomFactor", 2).toInt();
+	showSprites  = settings.value("showSprites", true).toBool();
 }
 
 void save() {
@@ -44,7 +44,6 @@ void save() {
 	settings.setValue("showSprites", showSprites);
 
 	settings.sync();
-
 }
 
 }

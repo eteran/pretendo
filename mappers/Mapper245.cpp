@@ -15,5 +15,3 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(245)
 std::string Mapper245::name() const {
 	return "iNES 245 (MMC3 Clone)";
 }
-
-

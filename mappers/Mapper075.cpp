@@ -32,7 +32,7 @@ void Mapper75::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper75::write_9(uint16_t address, uint8_t value) {
 	(void)address;
-	if(value & 0x01) {
+	if (value & 0x01) {
 		set_mirroring(mirror_horizontal);
 	} else {
 		set_mirroring(mirror_vertical);
@@ -40,7 +40,6 @@ void Mapper75::write_9(uint16_t address, uint8_t value) {
 
 	chr_reg_[0] = (chr_reg_[0] & 0x0f) | ((value << 3) & 0x10);
 	chr_reg_[1] = (chr_reg_[1] & 0x0f) | ((value << 2) & 0x10);
-
 
 	set_chr_0000_0fff(chr_reg_[0]);
 	set_chr_1000_1fff(chr_reg_[1]);
@@ -80,5 +79,4 @@ void Mapper75::write_f(uint16_t address, uint8_t value) {
 	chr_reg_[1] = (chr_reg_[1] & 0xf0) | (value & 0x0f);
 	set_chr_0000_0fff(chr_reg_[0]);
 	set_chr_1000_1fff(chr_reg_[1]);
-
 }

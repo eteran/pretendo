@@ -1,10 +1,10 @@
 
 #include "Cart.h"
-#include "iNES/Error.h"
 #include "Mapper.h"
+#include "iNES/Error.h"
 #include <cstring>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 namespace {
 
@@ -15,7 +15,7 @@ uint32_t create_mask(uint32_t size) {
 
 	// returns 1 less than closest fitting power of 2
 	// is this number not a power of two or 0?
-	if((size & (size - 1)) != 0) {
+	if ((size & (size - 1)) != 0) {
 		// yea, fix it!
 		--size;
 		size |= size >> 1;
@@ -24,7 +24,7 @@ uint32_t create_mask(uint32_t size) {
 		size |= size >> 8;
 		size |= size >> 16;
 		++size;
-	} else if(size == 0) {
+	} else if (size == 0) {
 		++size;
 	}
 
@@ -46,21 +46,27 @@ constexpr bool is_power_of_2(size_t size) {
 bool Cart::load(const std::string &s) {
 
 	std::cout << "[Cart::load] loading '" << s << "'...";
-	
-    try {
-        filename_ = s;
-		rom_ = std::make_unique<iNES::Rom>(s.c_str());
-		
+
+	try {
+		filename_ = s;
+		rom_      = std::make_unique<iNES::Rom>(s.c_str());
+
 		std::cout << " OK!" << std::endl;
 
 		// get mask values
 		prg_mask_ = create_mask(rom_->prg_size());
 		chr_mask_ = create_mask(rom_->chr_size());
 
-		switch(rom_->header()->mirroring()) {
-		case iNES::Mirroring::HORIZONTAL:  mirroring_ = MIR_HORIZONTAL; break;
-		case iNES::Mirroring::VERTICAL:    mirroring_ = MIR_VERTICAL;   break;
-		case iNES::Mirroring::FOUR_SCREEN: mirroring_ = MIR_4SCREEN;    break;
+		switch (rom_->header()->mirroring()) {
+		case iNES::Mirroring::HORIZONTAL:
+			mirroring_ = MIR_HORIZONTAL;
+			break;
+		case iNES::Mirroring::VERTICAL:
+			mirroring_ = MIR_VERTICAL;
+			break;
+		case iNES::Mirroring::FOUR_SCREEN:
+			mirroring_ = MIR_4SCREEN;
+			break;
 		default:
 			mirroring_ = MIR_MAPPER;
 			break;
@@ -74,11 +80,11 @@ bool Cart::load(const std::string &s) {
 		std::cout << "CHR HASH: " << std::hex << std::setw(8) << std::setfill('0') << chr_hash_ << std::dec << std::endl;
 		std::cout << "ROM HASH: " << std::hex << std::setw(8) << std::setfill('0') << rom_hash_ << std::dec << std::endl;
 
-		if(!is_power_of_2(rom_->prg_size())) {
+		if (!is_power_of_2(rom_->prg_size())) {
 			std::cout << "WARNING: PRG size is not a power of 2, this is unusual" << std::endl;
 		}
 
-		if(!is_power_of_2(rom_->chr_size())) {
+		if (!is_power_of_2(rom_->chr_size())) {
 			std::cout << "WARNING: CHR size is not a power of 2, this is unusual" << std::endl;
 		}
 
@@ -87,12 +93,12 @@ bool Cart::load(const std::string &s) {
 		return true;
 	} catch (const iNES::ines_error &e) {
 		std::cout << " ERROR Loading ROM File! " << e.what() << std::endl;
-		rom_     = nullptr;
+		rom_      = nullptr;
 		mapper_   = nullptr;
 		prg_hash_ = 0;
 		chr_hash_ = 0;
 		rom_hash_ = 0;
-        filename_.clear();
+		filename_.clear();
 	}
 
 	return false;
@@ -102,9 +108,9 @@ bool Cart::load(const std::string &s) {
 // Name: unload
 //------------------------------------------------------------------------------
 void Cart::unload() {
-	rom_ = nullptr;
+	rom_    = nullptr;
 	mapper_ = nullptr;
-    filename_.clear();
+	filename_.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -182,7 +188,7 @@ std::vector<uint8_t> Cart::raw_image() const {
 	std::vector<uint8_t> image(prg_rom, prg_rom + rom_->prg_size());
 
 	// if there is CHR, insert it at the end of the vector
-	if(chr_rom) {
+	if (chr_rom) {
 		image.insert(image.end(), chr_rom, chr_rom + rom_->chr_size());
 	}
 
@@ -193,5 +199,5 @@ std::vector<uint8_t> Cart::raw_image() const {
 // Name: filename
 //------------------------------------------------------------------------------
 const std::string &Cart::filename() const {
-    return filename_;
+	return filename_;
 }

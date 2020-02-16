@@ -1,11 +1,11 @@
 
 #include "AudioViewer.h"
-#include "Pretendo.h"
 #include "Apu.h"
-#include "Square.h"
-#include "Triangle.h"
 #include "Dmc.h"
 #include "Noise.h"
+#include "Pretendo.h"
+#include "Square.h"
+#include "Triangle.h"
 #include <QPainter>
 #include <cstring>
 
@@ -23,7 +23,6 @@ void drawBar(QPainter *painter, int index, int value) {
 	gradient.setColorAt(1, Qt::green);
 	gradient.setColorAt(0, Qt::red);
 	painter->fillRect(rect, gradient);
-
 }
 
 }
@@ -31,11 +30,12 @@ void drawBar(QPainter *painter, int index, int value) {
 //------------------------------------------------------------------------------
 // Name: AudioViewer
 //------------------------------------------------------------------------------
-AudioViewer::AudioViewer(QWidget *parent, Qt::WindowFlags f) : QDialog(parent, f) {
-		
+AudioViewer::AudioViewer(QWidget *parent, Qt::WindowFlags f)
+	: QDialog(parent, f) {
+
 	ui_.setupUi(this);
 	ui_.widget->installEventFilter(this);
-	ui_.widget->resize(nes::apu::buffer_size, ui_.widget->height());	
+	ui_.widget->resize(nes::apu::buffer_size, ui_.widget->height());
 }
 
 //------------------------------------------------------------------------------
@@ -50,8 +50,8 @@ void AudioViewer::update() {
 //------------------------------------------------------------------------------
 bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 
-	if(watched == ui_.widget && event->type() == QEvent::Paint) {
-	
+	if (watched == ui_.widget && event->type() == QEvent::Paint) {
+
 		const int pulse1_out   = nes::apu::square_0.output();
 		const int pulse2_out   = nes::apu::square_1.output();
 		const int triangle_out = nes::apu::triangle.output();
@@ -60,8 +60,8 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 
 		QPixmap back_buffer(110, 256);
 		QPainter painter;
-		if(painter.begin(&back_buffer)) {	
-			
+		if (painter.begin(&back_buffer)) {
+
 			// draw stuff...
 			painter.fillRect(back_buffer.rect(), Qt::black);
 
@@ -73,7 +73,7 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 
 			painter.end();
 		}
-		
+
 		painter.begin(ui_.widget);
 		painter.drawPixmap(ui_.widget->rect(), back_buffer);
 		return true;

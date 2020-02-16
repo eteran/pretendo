@@ -11,7 +11,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(43)
 Mapper43::Mapper43() {
 
 	set_prg_89abcdef(0);
-	if(nes::cart.has_chr_rom()) {
+	if (nes::cart.has_chr_rom()) {
 		set_chr_0000_1fff(0);
 	} else {
 		set_chr_0000_1fff_ram(chr_ram_, 0);
@@ -88,5 +88,4 @@ void Mapper43::write_handler(uint16_t address, uint8_t value) {
 	(void)value;
 	set_prg_89abcdef(address & 0xff);
 	// incomplete
-
 }

@@ -23,7 +23,7 @@ std::string Mapper33::name() const {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper33::write_8(uint16_t address, uint8_t value) {
-	 write_handler(address, value);
+	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -52,9 +52,9 @@ void Mapper33::write_b(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper33::write_handler(uint16_t address, uint8_t value) {
 
-	switch(address & 0xa003) {
+	switch (address & 0xa003) {
 	case 0x8000:
-		if(!(value & 0x40)) {
+		if (!(value & 0x40)) {
 			set_mirroring(mirror_vertical);
 		} else {
 			set_mirroring(mirror_horizontal);

@@ -1,7 +1,7 @@
 
 #include "Palette.h"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 
 #ifndef M_PI
@@ -15,8 +15,8 @@ namespace {
 //------------------------------------------------------------------------------
 template <class T>
 constexpr T bound(T lower, T value, T upper) {
-	using std::min;
 	using std::max;
+	using std::min;
 
 	return max(lower, min(value, upper));
 }
@@ -51,9 +51,9 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 	const uint8_t level = color < 0xE ? (pixel >> 4) & 3 : 1;
 
 	// Voltage levels, relative to synch voltage
-    static constexpr float black       = 0.518f;
-    static constexpr float white       = 1.962f;
-    static constexpr float attenuation = 0.746f;
+	static constexpr float black       = 0.518f;
+	static constexpr float white       = 1.962f;
+	static constexpr float attenuation = 0.746f;
 
 	static const float levels[8] = {
 		0.350f, 0.518f, 0.962f, 1.550f, // Signal low
@@ -62,8 +62,7 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 
 	const float lo_and_hi[2] = {
 		levels[level + 4 * (color == 0x0)],
-		levels[level + 4 * (color <  0xD)]
-	};
+		levels[level + 4 * (color < 0xD)]};
 
 	// Calculate the luma and chroma by emulating the relevant circuits:
 	float y = 0.f;
@@ -71,13 +70,13 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 	float q = 0.f;
 
 	// 12 clock cycles per pixel.
-	for(int p = 0; p < 12; ++p) {
+	for (int p = 0; p < 12; ++p) {
 
 		// NES NTSC modulator (square wave between two voltage levels):
 		float spot = lo_and_hi[wave(p, color)];
 
 		// De-emphasis bits attenuate a part of the signal:
-		if(((pixel & 0x40) && wave(p, 12)) || ((pixel & 0x80) && wave(p, 4)) || ((pixel & 0x100) && wave(p, 8))) {
+		if (((pixel & 0x40) && wave(p, 12)) || ((pixel & 0x80) && wave(p, 4)) || ((pixel & 0x100) && wave(p, 8))) {
 			spot *= attenuation;
 		}
 
@@ -99,9 +98,9 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 
 	// Convert YIQ into RGB according to FCC-sanctioned conversion matrix.
 	rgb_color_t rgb;
-	rgb.r = bound(0x00, static_cast<int>(255 * gamma_fix(y +  0.946882f * i +  0.623557f * q, gamma)), 0xff);
+	rgb.r = bound(0x00, static_cast<int>(255 * gamma_fix(y + 0.946882f * i + 0.623557f * q, gamma)), 0xff);
 	rgb.g = bound(0x00, static_cast<int>(255 * gamma_fix(y + -0.274788f * i + -0.635691f * q, gamma)), 0xff);
-	rgb.b = bound(0x00, static_cast<int>(255 * gamma_fix(y + -1.108545f * i +  1.709007f * q, gamma)), 0xff);
+	rgb.b = bound(0x00, static_cast<int>(255 * gamma_fix(y + -1.108545f * i + 1.709007f * q, gamma)), 0xff);
 	return rgb;
 }
 
@@ -115,11 +114,9 @@ const rgb_color_t *Palette::NTSC(float saturation, float hue, float contrast, fl
 	std::cout << "Creating Palette: <" << saturation << "," << hue << "," << contrast << "," << brightness << "," << gamma << ">" << std::endl;
 	static rgb_color_t color_list[64];
 
-	for(int i = 0; i < 64; ++i) {
+	for (int i = 0; i < 64; ++i) {
 		color_list[i] = make_rgb_color(i, saturation, hue, contrast, brightness, gamma);
 	}
 
 	return color_list;
 }
-
-

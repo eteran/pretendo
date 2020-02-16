@@ -9,13 +9,13 @@ namespace apu {
 //------------------------------------------------------------------------------
 void LinearCounter::clock() {
 
-	if(reload_) {
+	if (reload_) {
 		value_ = (control_ & 0x7f);
-	} else if(value_) {
+	} else if (value_) {
 		--value_;
 	}
 
-	if(!(control_ & 0x80)) {
+	if (!(control_ & 0x80)) {
 		reload_ = false;
 	}
 }

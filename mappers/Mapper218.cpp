@@ -27,7 +27,7 @@ uint8_t Mapper218::read_vram(uint16_t address) {
 	// TODO: deal with mirroring somehow
 	// it's in the iNES header
 
-	switch((address >> 10) & 0x0f) {
+	switch ((address >> 10) & 0x0f) {
 	case 0x00:
 	case 0x01:
 	case 0x02:
@@ -54,7 +54,7 @@ uint8_t Mapper218::read_vram(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper218::write_vram(uint16_t address, uint8_t value) {
-	switch((address >> 10) & 0x0f) {
+	switch ((address >> 10) & 0x0f) {
 	case 0x00:
 	case 0x01:
 	case 0x02:

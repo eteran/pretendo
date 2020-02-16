@@ -1,10 +1,10 @@
 
 #include "Nes.h"
-#include "Cpu.h"
-#include "Ppu.h"
 #include "Apu.h"
-#include "Input.h"
 #include "Cart.h"
+#include "Cpu.h"
+#include "Input.h"
+#include "Ppu.h"
 #include <iostream>
 
 Cart nes::cart;
@@ -25,7 +25,6 @@ Cart nes::cart;
  * timestamp system which would possibly be very beneficial
  */
 
-
 namespace nes {
 
 //------------------------------------------------------------------------------
@@ -44,4 +43,3 @@ void reset(Reset reset_type) {
 }
 
 }
-

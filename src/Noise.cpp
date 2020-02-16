@@ -8,8 +8,7 @@ namespace {
 
 // NTSC period table
 const uint16_t frequency_table[16] = {
-	4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068
-};
+	4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068};
 
 }
 
@@ -17,7 +16,7 @@ const uint16_t frequency_table[16] = {
 // Name: set_enabled
 //------------------------------------------------------------------------------
 void Noise::set_enabled(bool value) {
-	if(value) {
+	if (value) {
 		enable();
 	} else {
 		disable();
@@ -44,7 +43,7 @@ void Noise::disable() {
 //------------------------------------------------------------------------------
 void Noise::write_reg0(uint8_t value) {
 
-	if(value & 0x20) {
+	if (value & 0x20) {
 		length_counter.halt();
 	} else {
 		length_counter.resume();
@@ -67,7 +66,7 @@ void Noise::write_reg2(uint8_t value) {
 //------------------------------------------------------------------------------
 void Noise::write_reg3(uint8_t value) {
 
-	if(enabled_) {
+	if (enabled_) {
 		length_counter.load((value >> 3) & 0x1f);
 	}
 
@@ -95,7 +94,7 @@ void Noise::tick() {
 // Name: output
 //------------------------------------------------------------------------------
 uint8_t Noise::output() const {
-	if(length_counter.value() == 0 || ((lfsr_.value() & 1) == 0)) {
+	if (length_counter.value() == 0 || ((lfsr_.value() & 1) == 0)) {
 		return 0;
 	} else {
 		return envelope.volume();

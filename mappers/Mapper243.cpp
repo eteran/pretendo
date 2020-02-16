@@ -32,9 +32,9 @@ std::string Mapper243::name() const {
 // Name: write_4
 //------------------------------------------------------------------------------
 void Mapper243::write_4(uint16_t address, uint8_t value) {
-	if(address >= 0x4020) {
+	if (address >= 0x4020) {
 
-		switch(address & 0x4101) {
+		switch (address & 0x4101) {
 		case 0x4100:
 			address_ = value & 0x07;
 			break;
@@ -48,12 +48,19 @@ void Mapper243::write_4(uint16_t address, uint8_t value) {
 			set_prg_89abcdef(prg);
 			set_chr_0000_1fff(chr);
 
-
-			switch(mir) {
-			case 0x00: set_mirroring(mirror_horizontal);  break;
-			case 0x01: set_mirroring(mirror_vertical);    break;
-			case 0x02: set_mirroring(0x15);                    break;
-			case 0x03: set_mirroring(mirror_single_high); break;
+			switch (mir) {
+			case 0x00:
+				set_mirroring(mirror_horizontal);
+				break;
+			case 0x01:
+				set_mirroring(mirror_vertical);
+				break;
+			case 0x02:
+				set_mirroring(0x15);
+				break;
+			case 0x03:
+				set_mirroring(mirror_single_high);
+				break;
 			}
 			break;
 		}

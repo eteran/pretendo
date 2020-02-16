@@ -84,4 +84,3 @@ void Mapper13::write_handler(uint16_t address, uint8_t value) {
 	(void)address;
 	set_chr_1000_1fff_ram(chr_ram_, value & 3);
 }
-

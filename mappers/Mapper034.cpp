@@ -1,18 +1,18 @@
 
 #include "Mapper034.h"
-#include "Nes.h"
 #include "Cart.h"
+#include "Nes.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(34)
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-Mapper34::Mapper34()  {
+Mapper34::Mapper34() {
 
 	// for now, this is how we tell the difference, iNES2.0 sub mappers
 	// or UNIF would be preferable
-	if(nes::cart.has_chr_rom()) {
+	if (nes::cart.has_chr_rom()) {
 		mode_ = NINA_001;
 		set_prg_89ab(0);
 		set_prg_cdef(-1);
@@ -29,7 +29,7 @@ Mapper34::Mapper34()  {
 // Name:
 //------------------------------------------------------------------------------
 std::string Mapper34::name() const {
-	switch(mode_) {
+	switch (mode_) {
 	case NINA_001:
 		return "NINA-001";
 	case BNROM:
@@ -43,8 +43,8 @@ std::string Mapper34::name() const {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper34::write_7(uint16_t address, uint8_t value) {
-	if(mode_ == NINA_001) {
-		switch(address) {
+	if (mode_ == NINA_001) {
+		switch (address) {
 		case 0x7ffd:
 			set_prg_89abcdef(value);
 			break;
@@ -121,7 +121,7 @@ void Mapper34::write_f(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper34::write_handler(uint16_t address, uint8_t value) {
 	(void)address;
-	if(mode_ == BNROM) {
+	if (mode_ == BNROM) {
 		set_prg_89abcdef(value);
 	}
 }

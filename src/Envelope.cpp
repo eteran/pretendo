@@ -8,7 +8,7 @@ namespace apu {
 // Name: volume
 //------------------------------------------------------------------------------
 uint8_t Envelope::volume() const {
-	if(control_ & 0x10) {
+	if (control_ & 0x10) {
 		return control_ & 0x0f;
 	} else {
 		return counter_;
@@ -33,7 +33,7 @@ void Envelope::start() {
 // Name: clock
 //------------------------------------------------------------------------------
 void Envelope::clock() {
-	if(!start_) {
+	if (!start_) {
 		clock_divider();
 	} else {
 		start_   = false;
@@ -47,11 +47,11 @@ void Envelope::clock() {
 //------------------------------------------------------------------------------
 void Envelope::clock_divider() {
 
-	if(--divider_ == 0) {
+	if (--divider_ == 0) {
 		divider_ = (control_ & 0x0f) + 1;
-		if(counter_) {
+		if (counter_) {
 			--counter_;
-		} else if(control_ & 0x20) {
+		} else if (control_ & 0x20) {
 			counter_ = 15;
 		}
 	}

@@ -24,7 +24,7 @@ std::string Mapper32::name() const {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper32::sync_prg() {
-	if(prg_mode_) {
+	if (prg_mode_) {
 		set_prg_89(0);
 		set_prg_ab(prg_a000_);
 		set_prg_cd(prg_8000_);
@@ -58,7 +58,7 @@ void Mapper32::write_9(uint16_t address, uint8_t value) {
 
 #if 1
 	// NOTE(eteran): this code should be off for major league
-	if(value & 0x01) {
+	if (value & 0x01) {
 		set_mirroring(mirror_horizontal);
 	} else {
 		set_mirroring(mirror_vertical);
@@ -79,7 +79,7 @@ void Mapper32::write_a(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper32::write_b(uint16_t address, uint8_t value) {
-	switch(address & 0xf007) {
+	switch (address & 0xf007) {
 	case 0xb000:
 		set_chr_0000_03ff(value);
 		break;
@@ -106,4 +106,3 @@ void Mapper32::write_b(uint16_t address, uint8_t value) {
 		break;
 	}
 }
-

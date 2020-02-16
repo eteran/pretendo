@@ -11,7 +11,7 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(4)
 //------------------------------------------------------------------------------
 Mapper4::Mapper4() {
 
-	switch(nes::cart.rom_hash()) {
+	switch (nes::cart.rom_hash()) {
 	case 0xf312d1de:
 	case 0xa512bdf6:
 	case 0x633afe6f:
@@ -23,4 +23,3 @@ Mapper4::Mapper4() {
 		break;
 	}
 }
-

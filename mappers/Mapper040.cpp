@@ -84,9 +84,9 @@ void Mapper40::write_f(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper40::cpu_sync() {
-	if(irq_enabled_) {
+	if (irq_enabled_) {
 		irq_counter_ = (irq_counter_ + 1) % 0x1000;
-		if(irq_counter_ == 0) {
+		if (irq_counter_ == 0) {
 			nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 		}
 	}

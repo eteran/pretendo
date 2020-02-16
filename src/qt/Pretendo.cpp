@@ -4,25 +4,24 @@
 #include "AudioViewer.h"
 #include "Cart.h"
 #include "Controller.h"
-#include "Settings.h"
+#include "FilesystemModel.h"
 #include "Input.h"
 #include "Mapper.h"
 #include "Nes.h"
 #include "Ppu.h"
 #include "Preferences.h"
+#include "Settings.h"
 #include "SortFilterProxyModel.h"
-#include "FilesystemModel.h"
 
-
-#include <QThread>
+#include <QDateTime>
 #include <QDebug>
+#include <QDirIterator>
 #include <QFileDialog>
 #include <QKeyEvent>
-#include <QTimer>
 #include <QLabel>
 #include <QMessageBox>
-#include <QDirIterator>
-#include <QDateTime>
+#include <QThread>
+#include <QTimer>
 
 #if defined(PULSE_AUDIO_SOUND)
 #include "PulseAudio.h"
@@ -33,14 +32,14 @@
 //------------------------------------------------------------------------------
 // Name: Pretendo
 //------------------------------------------------------------------------------
-Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
+Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags flags)
+	: QMainWindow(parent, flags) {
 	ui_.setupUi(this);
 
 	Settings::load();
 
 	ui_.actionShow_Sprites->setChecked(Settings::showSprites);
 
-	
 	// make only one of these selectable at a time
 	QActionGroup *const zoom_group = new QActionGroup(this);
 	zoom_group->addAction(ui_.action1x);
@@ -48,7 +47,7 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 	zoom_group->addAction(ui_.action3x);
 	zoom_group->addAction(ui_.action4x);
 
-	switch(Settings::zoomFactor) {
+	switch (Settings::zoomFactor) {
 	case 1:
 		ui_.action1x->setChecked(true);
 		break;
@@ -63,8 +62,6 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 		break;
 	}
 
-
-
 	// set the default zoom
 	zoom(Settings::zoomFactor);
 
@@ -76,18 +73,18 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 	ui_.toolBar->addWidget(fps_label_);
 
 	QStringList filters;
-	filters << "*.nes" << "*.nes.gz";
+	filters << "*.nes"
+			<< "*.nes.gz";
 
 	filesystem_model_ = new FilesystemModel(this);
 
 	auto thread = QThread::create([this]() {
-
 		auto romdir = QString::fromStdString(Settings::romDirectory);
 		QFileInfo romdir_fi(romdir);
 		romdir_fi.makeAbsolute();
 
 		QString rom_basedir = romdir_fi.path();
-		if(!rom_basedir.endsWith('/')) {
+		if (!rom_basedir.endsWith('/')) {
 			rom_basedir.append('/');
 		}
 
@@ -97,9 +94,8 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 			QFileInfo fi(f);
 			fi.makeAbsolute();
 
-
 			QString path = fi.filePath();
-			if(path.startsWith(rom_basedir)) {
+			if (path.startsWith(rom_basedir)) {
 				path = path.mid(rom_basedir.size());
 			}
 
@@ -108,7 +104,6 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 	});
 
 	thread->start();
-
 
 	filter_model_ = new SortFilterProxyModel(this);
 	filter_model_->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -131,11 +126,11 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 
 	// setup default palette
 	ui_.video->set_palette(Palette::intensity, Palette::NTSC(
-		Palette::default_saturation,
-		Palette::default_hue,
-		Palette::default_contrast,
-		Palette::default_brightness,
-		Palette::default_gamma));
+												   Palette::default_saturation,
+												   Palette::default_hue,
+												   Palette::default_contrast,
+												   Palette::default_brightness,
+												   Palette::default_gamma));
 
 	time_.start();
 
@@ -148,13 +143,13 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 	player_1_[Controller::INDEX_DOWN]   = Qt::Key_Down;
 	player_1_[Controller::INDEX_LEFT]   = Qt::Key_Left;
 	player_1_[Controller::INDEX_RIGHT]  = Qt::Key_Right;
-	
-	if(!filename.isNull()) {
+
+	if (!filename.isNull()) {
 		const QString rom = filename;
 
 		// make the ROM viewer default to the location of the run ROM
 		const QFileInfo info(rom);
-		if(info.isFile()) {
+		if (info.isFile()) {
 			nes::cart.load(rom.toStdString());
 			on_action_Run_triggered();
 		}
@@ -177,7 +172,7 @@ Pretendo::~Pretendo() {
 //------------------------------------------------------------------------------
 void Pretendo::setFrameRate(int framerate) {
 	framerate_ = framerate;
-	if(timer_->isActive()) {
+	if (timer_->isActive()) {
 		timer_->start(1000.0f / framerate_);
 	}
 }
@@ -195,8 +190,8 @@ void Pretendo::update() {
 	const size_t audio_tail     = nes::apu::sample_buffer_.tail();
 	const size_t audio_capacity = nes::apu::sample_buffer_.capacity();
 	const auto audio_buffer     = nes::apu::sample_buffer_.buffer();
-		
-	if(audio_head >= audio_tail) {
+
+	if (audio_head >= audio_tail) {
 		audio_->write(&audio_buffer[audio_head], audio_capacity - audio_head);
 		audio_->write(&audio_buffer[0], audio_tail);
 	} else {
@@ -204,15 +199,13 @@ void Pretendo::update() {
 	}
 	nes::apu::sample_buffer_.clear();
 
-
 	// FPS calculation
-	if(time_.elapsed() > 1000) {
+	if (time_.elapsed() > 1000) {
 		fps_label_->setText(tr("FPS: %1").arg(framecount_));
 		time_.restart();
 		framecount_ = 0;
 	}
 	++framecount_;
-
 }
 
 //------------------------------------------------------------------------------
@@ -221,10 +214,10 @@ void Pretendo::update() {
 void Pretendo::on_action_Load_ROM_triggered() {
 
 	const QString rom = QFileDialog::getOpenFileName(this, tr("Open ROM File"), QString(), tr("iNES ROM Images (*.nes *.nes.gz)"));
-	if(!rom.isNull()) {
+	if (!rom.isNull()) {
 		on_action_Stop_triggered();
 		on_action_Free_ROM_triggered();
-        nes::cart.load(rom.toStdString());
+		nes::cart.load(rom.toStdString());
 	}
 }
 
@@ -240,16 +233,16 @@ void Pretendo::on_action_Free_ROM_triggered() {
 // Name: picked
 //------------------------------------------------------------------------------
 void Pretendo::picked(const QModelIndex &index) {
-	if(index.isValid()) {
-		if(const QAbstractItemModel *const m = index.model()) {
-			if(const QSortFilterProxyModel *const filter_model = qobject_cast<const QSortFilterProxyModel *>(m)) {
-				if(FilesystemModel *const fs_model = qobject_cast<FilesystemModel *>(filter_model->sourceModel())) {
+	if (index.isValid()) {
+		if (const QAbstractItemModel *const m = index.model()) {
+			if (const QSortFilterProxyModel *const filter_model = qobject_cast<const QSortFilterProxyModel *>(m)) {
+				if (FilesystemModel *const fs_model = qobject_cast<FilesystemModel *>(filter_model->sourceModel())) {
 
 					const QModelIndex source_index = filter_model->mapToSource(index);
 					const auto filename            = fs_model->data(source_index, Qt::UserRole).toString();
 
 					// they picked a ROM, load it, then run it
-					if(!filename.isEmpty()) {
+					if (!filename.isEmpty()) {
 						on_action_Stop_triggered();
 						on_action_Free_ROM_triggered();
 						nes::cart.load(filename.toStdString());
@@ -266,14 +259,14 @@ void Pretendo::picked(const QModelIndex &index) {
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Run_triggered() {
 
-	if(paused_) {
+	if (paused_) {
 		on_action_Pause_triggered();
 	} else {
 
-		if(!timer_->isActive()) {
+		if (!timer_->isActive()) {
 
 			// we test mapper, it's a good metric for "did we load the cart correctly"
-			if(nes::cart.mapper()) {
+			if (nes::cart.mapper()) {
 
 				ui_.stackedWidget->setCurrentIndex(1);
 
@@ -306,11 +299,11 @@ void Pretendo::on_action_Stop_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Pause_triggered() {
 
-	if(timer_->isActive()) {
+	if (timer_->isActive()) {
 		timer_->stop();
 		audio_->stop();
-	} else if(paused_) {
-		if(const std::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
+	} else if (paused_) {
+		if (const std::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
 			timer_->start();
 			audio_->start();
 		}
@@ -324,27 +317,27 @@ void Pretendo::on_action_Pause_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::keyPressEvent(QKeyEvent *event) {
 
-	if(event->isAutoRepeat()) {
+	if (event->isAutoRepeat()) {
 		return;
 	}
 
 	const int key = event->key();
 
-	if(key == player_1_[Controller::INDEX_A]) {
+	if (key == player_1_[Controller::INDEX_A]) {
 		nes::input::controller1.keystate_[Controller::INDEX_A] = true;
-	} else if(key == player_1_[Controller::INDEX_B]) {
+	} else if (key == player_1_[Controller::INDEX_B]) {
 		nes::input::controller1.keystate_[Controller::INDEX_B] = true;
-	} else if(key == player_1_[Controller::INDEX_SELECT]) {
+	} else if (key == player_1_[Controller::INDEX_SELECT]) {
 		nes::input::controller1.keystate_[Controller::INDEX_SELECT] = true;
-	} else if(key == player_1_[Controller::INDEX_START]) {
+	} else if (key == player_1_[Controller::INDEX_START]) {
 		nes::input::controller1.keystate_[Controller::INDEX_START] = true;
-	} else if(key == player_1_[Controller::INDEX_UP]) {
+	} else if (key == player_1_[Controller::INDEX_UP]) {
 		nes::input::controller1.keystate_[Controller::INDEX_UP] = true;
-	} else if(key == player_1_[Controller::INDEX_DOWN]) {
+	} else if (key == player_1_[Controller::INDEX_DOWN]) {
 		nes::input::controller1.keystate_[Controller::INDEX_DOWN] = true;
-	} else if(key == player_1_[Controller::INDEX_LEFT]) {
+	} else if (key == player_1_[Controller::INDEX_LEFT]) {
 		nes::input::controller1.keystate_[Controller::INDEX_LEFT] = true;
-	} else if(key == player_1_[Controller::INDEX_RIGHT]) {
+	} else if (key == player_1_[Controller::INDEX_RIGHT]) {
 		nes::input::controller1.keystate_[Controller::INDEX_RIGHT] = true;
 	} else {
 		event->ignore();
@@ -358,25 +351,25 @@ void Pretendo::keyReleaseEvent(QKeyEvent *event) {
 
 	const int key = event->key();
 
-	if(event->isAutoRepeat()) {
+	if (event->isAutoRepeat()) {
 		return;
 	}
 
-	if(key == player_1_[Controller::INDEX_A]) {
+	if (key == player_1_[Controller::INDEX_A]) {
 		nes::input::controller1.keystate_[Controller::INDEX_A] = false;
-	} else if(key == player_1_[Controller::INDEX_B]) {
+	} else if (key == player_1_[Controller::INDEX_B]) {
 		nes::input::controller1.keystate_[Controller::INDEX_B] = false;
-	} else if(key == player_1_[Controller::INDEX_SELECT]) {
+	} else if (key == player_1_[Controller::INDEX_SELECT]) {
 		nes::input::controller1.keystate_[Controller::INDEX_SELECT] = false;
-	} else if(key == player_1_[Controller::INDEX_START]) {
+	} else if (key == player_1_[Controller::INDEX_START]) {
 		nes::input::controller1.keystate_[Controller::INDEX_START] = false;
-	} else if(key == player_1_[Controller::INDEX_UP]) {
+	} else if (key == player_1_[Controller::INDEX_UP]) {
 		nes::input::controller1.keystate_[Controller::INDEX_UP] = false;
-	} else if(key == player_1_[Controller::INDEX_DOWN]) {
+	} else if (key == player_1_[Controller::INDEX_DOWN]) {
 		nes::input::controller1.keystate_[Controller::INDEX_DOWN] = false;
-	} else if(key == player_1_[Controller::INDEX_LEFT]) {
+	} else if (key == player_1_[Controller::INDEX_LEFT]) {
 		nes::input::controller1.keystate_[Controller::INDEX_LEFT] = false;
-	} else if(key == player_1_[Controller::INDEX_RIGHT]) {
+	} else if (key == player_1_[Controller::INDEX_RIGHT]) {
 		nes::input::controller1.keystate_[Controller::INDEX_RIGHT] = false;
 	} else {
 		event->ignore();
@@ -388,7 +381,7 @@ void Pretendo::keyReleaseEvent(QKeyEvent *event) {
 //------------------------------------------------------------------------------
 void Pretendo::on_actionShow_Sprites_toggled(bool value) {
 	nes::ppu::show_sprites = value;
-	Settings::showSprites = value;
+	Settings::showSprites  = value;
 }
 
 //------------------------------------------------------------------------------
@@ -396,11 +389,11 @@ void Pretendo::on_actionShow_Sprites_toggled(bool value) {
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Hard_Reset_triggered() {
 
-	if(paused_) {
+	if (paused_) {
 		on_action_Pause_triggered();
 	}
 
-	if(timer_->isActive()) {
+	if (timer_->isActive()) {
 		nes::reset(nes::Reset::Hard);
 	}
 }
@@ -409,11 +402,11 @@ void Pretendo::on_action_Hard_Reset_triggered() {
 // Name: on_actionReset_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_actionReset_triggered() {
-	if(paused_) {
+	if (paused_) {
 		on_action_Pause_triggered();
 	}
 
-	if(timer_->isActive()) {
+	if (timer_->isActive()) {
 		nes::reset(nes::Reset::Soft);
 	}
 }
@@ -468,7 +461,7 @@ void Pretendo::on_action4x_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Preferences_triggered() {
 
-	if(timer_->isActive()) {
+	if (timer_->isActive()) {
 		timer_->stop();
 		audio_->stop();
 	}
@@ -476,7 +469,7 @@ void Pretendo::on_action_Preferences_triggered() {
 
 	preferences_->exec();
 
-	if(paused_) {
+	if (paused_) {
 		on_action_Pause_triggered();
 	}
 }
@@ -495,7 +488,7 @@ void Pretendo::on_actionAbout_Qt_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action_About_triggered() {
 	static About *dialog = nullptr;
-	if(!dialog) {
+	if (!dialog) {
 		dialog = new About(this);
 		dialog->ui_.build_date->setText(tr("%1").arg(__TIMESTAMP__));
 		dialog->ui_.version->setText(tr("%1").arg("2.0.0"));
@@ -509,17 +502,16 @@ void Pretendo::on_action_About_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Audio_Viewer_triggered() {
 	static AudioViewer *dialog = nullptr;
-	if(!dialog) {
+	if (!dialog) {
 		dialog = new AudioViewer(this);
 		connect(timer_, &QTimer::timeout, dialog, &AudioViewer::update);
 	}
 	dialog->show();
 }
 
-
 void Pretendo::on_action_Take_Screenshot_triggered() {
 	QImage screenshot = ui_.video->screenshot();
-	auto pix = QPixmap::fromImage(screenshot);
+	auto pix          = QPixmap::fromImage(screenshot);
 
 	QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
 

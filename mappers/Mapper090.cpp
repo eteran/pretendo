@@ -1,10 +1,9 @@
 
 #include "Mapper090.h"
-#include "Nes.h"
 #include "Cart.h"
+#include "Nes.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(90)
-
 
 // TODO: this mapper is very confusing... I have no idea if I am on the right track
 //       with its implementation
@@ -27,8 +26,7 @@ const uint8_t reverse_bits[256] = {
 	0x03, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3, 0x13, 0x93, 0x53, 0xd3, 0x33, 0xb3, 0x73, 0xf3,
 	0x0b, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb, 0x1b, 0x9b, 0x5b, 0xdb, 0x3b, 0xbb, 0x7b, 0xfb,
 	0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7, 0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
-	0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff
-};
+	0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff};
 
 }
 
@@ -53,7 +51,7 @@ std::string Mapper90::name() const {
 //------------------------------------------------------------------------------
 uint8_t Mapper90::read_5(uint16_t address) {
 
-	switch(address) {
+	switch (address) {
 	case 0x5000:
 		// dip switches
 		return 0x80;
@@ -72,7 +70,7 @@ uint8_t Mapper90::read_5(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper90::write_5(uint16_t address, uint8_t value) {
-	switch(address) {
+	switch (address) {
 	case 0x5800:
 		multiply_1_ = value;
 		break;
@@ -93,7 +91,7 @@ void Mapper90::write_5(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper90::write_8(uint16_t address, uint8_t value) {
 
-	switch(address & 0x07) {
+	switch (address & 0x07) {
 	case 0x00:
 	case 0x01:
 	case 0x02:
@@ -114,7 +112,7 @@ void Mapper90::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper90::write_9(uint16_t address, uint8_t value) {
 
-	switch(address & 0x07) {
+	switch (address & 0x07) {
 	case 0x00:
 	case 0x01:
 	case 0x02:
@@ -135,7 +133,7 @@ void Mapper90::write_9(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper90::write_a(uint16_t address, uint8_t value) {
 
-	switch(address & 0x07) {
+	switch (address & 0x07) {
 	case 0x00:
 	case 0x01:
 	case 0x02:
@@ -159,7 +157,6 @@ void Mapper90::write_b(uint16_t address, uint8_t value) {
 	(void)value;
 }
 
-
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
@@ -174,16 +171,24 @@ void Mapper90::write_c(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper90::write_d(uint16_t address, uint8_t value) {
 
-	switch(address & 0x03) {
+	switch (address & 0x03) {
 	case 0x00:
 		bank_control_.raw = (value & ~0x20);
 		break;
 	case 0x01:
-		switch(value & 0x03) {
-		case 0x00: set_mirroring(mirror_vertical);    break;
-		case 0x01: set_mirroring(mirror_horizontal);  break;
-		case 0x02: set_mirroring(mirror_single_low);  break;
-		case 0x03: set_mirroring(mirror_single_high); break;
+		switch (value & 0x03) {
+		case 0x00:
+			set_mirroring(mirror_vertical);
+			break;
+		case 0x01:
+			set_mirroring(mirror_horizontal);
+			break;
+		case 0x02:
+			set_mirroring(mirror_single_low);
+			break;
+		case 0x03:
+			set_mirroring(mirror_single_high);
+			break;
 		}
 		break;
 	case 0x02:
@@ -202,7 +207,7 @@ void Mapper90::write_d(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper90::sync_prg() {
 
-	switch(bank_control_.prg) {
+	switch (bank_control_.prg) {
 	case 0x00:
 		set_prg_67((prg_[3] * 4) + 3);
 		set_prg_89abcdef(-1);
@@ -251,7 +256,7 @@ void Mapper90::sync_prg() {
 		break;
 	}
 
-	if(!bank_control_.map_67) {
+	if (!bank_control_.map_67) {
 		unmap_67();
 	}
 }
@@ -261,8 +266,8 @@ void Mapper90::sync_prg() {
 //------------------------------------------------------------------------------
 void Mapper90::sync_chr() {
 
-	if(chr_control_.mirror) {
-		switch(bank_control_.chr) {
+	if (chr_control_.mirror) {
+		switch (bank_control_.chr) {
 		case 0x00:
 			set_chr_0000_1fff((chr_lo_[0] | (chr_hi_[0] << 8)));
 			break;
@@ -288,7 +293,7 @@ void Mapper90::sync_chr() {
 			break;
 		}
 	} else {
-		switch(bank_control_.chr) {
+		switch (bank_control_.chr) {
 		case 0x00:
 			set_chr_0000_1fff((chr_lo_[0] | (chr_hi_[0] << 8)));
 			break;
@@ -321,24 +326,32 @@ void Mapper90::sync_chr() {
 //------------------------------------------------------------------------------
 uint8_t Mapper90::read_vram(uint16_t address) {
 
-	if(chr_control_.disabled) {
-		
+	if (chr_control_.disabled) {
+
 		// 256k blocks = 0x40000
-		const uint16_t block_offset = (chr_control_.block * 0x40000);
+		const uint16_t block_offset  = (chr_control_.block * 0x40000);
 		const uint8_t *const chr_rom = nes::cart.chr();
 		const uint32_t chr_mask      = nes::cart.chr_mask();
 
-		switch((address >> 10) & 0x0f) {
-		case 0x00: return chr_rom[((block_offset + (0x0 * 0x400)) & chr_mask)];
-		case 0x01: return chr_rom[((block_offset + (0x1 * 0x400)) & chr_mask)];
-		case 0x02: return chr_rom[((block_offset + (0x2 * 0x400)) & chr_mask)];
-		case 0x03: return chr_rom[((block_offset + (0x3 * 0x400)) & chr_mask)];
-		case 0x04: return chr_rom[((block_offset + (0x4 * 0x400)) & chr_mask)];
-		case 0x05: return chr_rom[((block_offset + (0x5 * 0x400)) & chr_mask)];
-		case 0x06: return chr_rom[((block_offset + (0x6 * 0x400)) & chr_mask)];
-		case 0x07: return chr_rom[((block_offset + (0x7 * 0x400)) & chr_mask)];
-		
-		/*
+		switch ((address >> 10) & 0x0f) {
+		case 0x00:
+			return chr_rom[((block_offset + (0x0 * 0x400)) & chr_mask)];
+		case 0x01:
+			return chr_rom[((block_offset + (0x1 * 0x400)) & chr_mask)];
+		case 0x02:
+			return chr_rom[((block_offset + (0x2 * 0x400)) & chr_mask)];
+		case 0x03:
+			return chr_rom[((block_offset + (0x3 * 0x400)) & chr_mask)];
+		case 0x04:
+			return chr_rom[((block_offset + (0x4 * 0x400)) & chr_mask)];
+		case 0x05:
+			return chr_rom[((block_offset + (0x5 * 0x400)) & chr_mask)];
+		case 0x06:
+			return chr_rom[((block_offset + (0x6 * 0x400)) & chr_mask)];
+		case 0x07:
+			return chr_rom[((block_offset + (0x7 * 0x400)) & chr_mask)];
+
+			/*
 		case 0x08: return chr_rom[((block_offset + (0x8 * 0x400)) & chr_mask)];
 		case 0x09: return chr_rom[((block_offset + (0x9 * 0x400)) & chr_mask)];
 		case 0x0a: return chr_rom[((block_offset + (0xa * 0x400)) & chr_mask)];

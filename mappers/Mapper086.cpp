@@ -39,4 +39,3 @@ void Mapper86::write_7(uint16_t address, uint8_t value) {
 	(void)value;
 	// TODO
 }
-

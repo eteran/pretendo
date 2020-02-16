@@ -83,7 +83,7 @@ void Mapper226::writer_handler(uint16_t address, uint8_t value) {
 
 	regs_[address & 0x0001] = value;
 
-	if(regs_[0] & 0x40) {
+	if (regs_[0] & 0x40) {
 		set_mirroring(mirror_horizontal);
 	} else {
 		set_mirroring(mirror_vertical);
@@ -91,10 +91,10 @@ void Mapper226::writer_handler(uint16_t address, uint8_t value) {
 
 	uint32_t prg_page = ((regs_[0] >> 1) & 0x0f) | ((regs_[0] >> 3) & 0x10) | ((regs_[1] & 0x01) << 5);
 
-	if(regs_[0] & 0x20) {
+	if (regs_[0] & 0x20) {
 		// 16k mode
 		prg_page *= 2;
-		if(regs_[0] & 0x01) {
+		if (regs_[0] & 0x01) {
 			prg_page += 1;
 		}
 		set_prg_89ab(prg_page);

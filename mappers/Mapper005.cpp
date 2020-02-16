@@ -310,7 +310,7 @@ uint8_t Mapper5::read_5(uint16_t address) {
 
 	uint8_t ret = (address >> 8);
 
-	switch(address) {
+	switch (address) {
 	case 0x5204:
 		ret = irq_status_.raw;
 		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
@@ -320,20 +320,20 @@ uint8_t Mapper5::read_5(uint16_t address) {
 	case 0x5205:
 		do {
 			const uint16_t x = multiplier_1_ * multiplier_2_;
-			ret = x & 0xff;
-		} while(0);
+			ret              = x & 0xff;
+		} while (0);
 		break;
 
 	case 0x5206:
 		do {
 			const uint16_t x = multiplier_1_ * multiplier_2_;
-			ret = (x >> 8) & 0xff;
-		} while(0);
+			ret              = (x >> 8) & 0xff;
+		} while (0);
 		break;
 
 	default:
-		if(address >= 0x5c00) {
-			switch(exram_mode_) {
+		if (address >= 0x5c00) {
+			switch (exram_mode_) {
 			case 0x00:
 			case 0x01:
 				break;
@@ -342,7 +342,6 @@ uint8_t Mapper5::read_5(uint16_t address) {
 				ret = exram_[address & 0x03ff];
 				break;
 			}
-
 		}
 	}
 	return ret;
@@ -423,57 +422,71 @@ uint8_t Mapper5::read_handler(uint16_t address) {
 //------------------------------------------------------------------------------
 uint8_t Mapper5::read_vram(uint16_t address) {
 
-
-	if(vertical_split_bank_ & VSPLIT_ENABLE) {
+	if (vertical_split_bank_ & VSPLIT_ENABLE) {
 		printf("VSPLIT\n");
 	}
 
+	// VSPLIT_RIGHT  = 0x40,
+	// VSPLIT_TILE   = 0x1f
 
-// VSPLIT_RIGHT  = 0x40,
-// VSPLIT_TILE   = 0x1f
-
-	switch((address >> 10) & 0x0f) {
+	switch ((address >> 10) & 0x0f) {
 	case 0x08:
 	case 0x0c:
 		// $2000
-		switch(mirroring_mode_ & 0x03) {
-		case 0x00: return Mapper::read_vram(address);
-		case 0x01: return Mapper::read_vram(address);
-		case 0x02: return (exram_mode_ & 0x02) ? 0x00 : exram_[address & 0x03ff];
-		case 0x03: return (address & 0x03ff) < 0x03c0 ? fill_mode_tile_ : fill_mode_attr_;
+		switch (mirroring_mode_ & 0x03) {
+		case 0x00:
+			return Mapper::read_vram(address);
+		case 0x01:
+			return Mapper::read_vram(address);
+		case 0x02:
+			return (exram_mode_ & 0x02) ? 0x00 : exram_[address & 0x03ff];
+		case 0x03:
+			return (address & 0x03ff) < 0x03c0 ? fill_mode_tile_ : fill_mode_attr_;
 		}
 		break;
 
 	case 0x09:
 	case 0x0d:
 		// $2400
-		switch((mirroring_mode_ >> 2) & 0x03) {
-		case 0x00: return Mapper::read_vram(address);
-		case 0x01: return Mapper::read_vram(address);
-		case 0x02: return (exram_mode_ & 0x02) ? 0x00 : exram_[address & 0x03ff];
-		case 0x03: return (address & 0x03ff) < 0x03c0 ? fill_mode_tile_ : fill_mode_attr_;
+		switch ((mirroring_mode_ >> 2) & 0x03) {
+		case 0x00:
+			return Mapper::read_vram(address);
+		case 0x01:
+			return Mapper::read_vram(address);
+		case 0x02:
+			return (exram_mode_ & 0x02) ? 0x00 : exram_[address & 0x03ff];
+		case 0x03:
+			return (address & 0x03ff) < 0x03c0 ? fill_mode_tile_ : fill_mode_attr_;
 		}
 		break;
 
 	case 0x0a:
 	case 0x0e:
 		// $2800
-		switch((mirroring_mode_ >> 4) & 0x03) {
-		case 0x00: return Mapper::read_vram(address);
-		case 0x01: return Mapper::read_vram(address);
-		case 0x02: return (exram_mode_ & 0x02) ? 0x00 : exram_[address & 0x03ff];
-		case 0x03: return (address & 0x03ff) < 0x03c0 ? fill_mode_tile_ : fill_mode_attr_;
+		switch ((mirroring_mode_ >> 4) & 0x03) {
+		case 0x00:
+			return Mapper::read_vram(address);
+		case 0x01:
+			return Mapper::read_vram(address);
+		case 0x02:
+			return (exram_mode_ & 0x02) ? 0x00 : exram_[address & 0x03ff];
+		case 0x03:
+			return (address & 0x03ff) < 0x03c0 ? fill_mode_tile_ : fill_mode_attr_;
 		}
 		break;
 
 	case 0x0b:
 	case 0x0f:
 		// $2c00
-		switch((mirroring_mode_ >> 6) & 0x03) {
-		case 0x00: return Mapper::read_vram(address);
-		case 0x01: return Mapper::read_vram(address);
-		case 0x02: return (exram_mode_ & 0x02) ? 0x00 : exram_[address & 0x03ff];
-		case 0x03: return (address & 0x03ff) < 0x03c0 ? fill_mode_tile_ : fill_mode_attr_;
+		switch ((mirroring_mode_ >> 6) & 0x03) {
+		case 0x00:
+			return Mapper::read_vram(address);
+		case 0x01:
+			return Mapper::read_vram(address);
+		case 0x02:
+			return (exram_mode_ & 0x02) ? 0x00 : exram_[address & 0x03ff];
+		case 0x03:
+			return (address & 0x03ff) < 0x03c0 ? fill_mode_tile_ : fill_mode_attr_;
 		}
 		break;
 
@@ -488,15 +501,15 @@ uint8_t Mapper5::read_vram(uint16_t address) {
 		// CHR-ROM ($0000 - $1fff)
 		const uint8_t *chr_selector;
 
-		if(large_sprites_) {
+		if (large_sprites_) {
 			// there seems to be 128 fetches of tiles before sprites..
-			if(fetch_count_ > 128 && fetch_count_ < 160) {
+			if (fetch_count_ > 128 && fetch_count_ < 160) {
 				chr_selector = sp_chr_banks_;
 			} else {
 				chr_selector = bg_chr_banks_;
 			}
 		} else {
-			if(last_chr_write_ == CHR_BANK_A) {
+			if (last_chr_write_ == CHR_BANK_A) {
 				chr_selector = sp_chr_banks_;
 			} else {
 				chr_selector = bg_chr_banks_;
@@ -507,8 +520,8 @@ uint8_t Mapper5::read_vram(uint16_t address) {
 		const uint8_t *const chr_rom = nes::cart.chr();
 		const uint32_t chr_mask      = nes::cart.chr_mask();
 
-		switch(chr_mode_ & 0x03) {
-		case 0x00: // 8K mode
+		switch (chr_mode_ & 0x03) {
+		case 0x00:                                                                                            // 8K mode
 			chr_rom_banks[0] = chr_rom + (((chr_selector[7] + bg_char_upper_) * 0x2000) & chr_mask) + 0x0000; // $0000
 			chr_rom_banks[1] = chr_rom + (((chr_selector[7] + bg_char_upper_) * 0x2000) & chr_mask) + 0x0400; // $0400
 			chr_rom_banks[2] = chr_rom + (((chr_selector[7] + bg_char_upper_) * 0x2000) & chr_mask) + 0x0800; // $0800
@@ -518,7 +531,7 @@ uint8_t Mapper5::read_vram(uint16_t address) {
 			chr_rom_banks[6] = chr_rom + (((chr_selector[7] + bg_char_upper_) * 0x2000) & chr_mask) + 0x1800; // $1800
 			chr_rom_banks[7] = chr_rom + (((chr_selector[7] + bg_char_upper_) * 0x2000) & chr_mask) + 0x1c00; // $1c00
 			break;
-		case 0x01: // 4K mode
+		case 0x01:                                                                                            // 4K mode
 			chr_rom_banks[0] = chr_rom + (((chr_selector[3] + bg_char_upper_) * 0x1000) & chr_mask) + 0x0000; // $0000
 			chr_rom_banks[1] = chr_rom + (((chr_selector[3] + bg_char_upper_) * 0x1000) & chr_mask) + 0x0400; // $0400
 			chr_rom_banks[2] = chr_rom + (((chr_selector[3] + bg_char_upper_) * 0x1000) & chr_mask) + 0x0800; // $0800
@@ -528,7 +541,7 @@ uint8_t Mapper5::read_vram(uint16_t address) {
 			chr_rom_banks[6] = chr_rom + (((chr_selector[7] + bg_char_upper_) * 0x1000) & chr_mask) + 0x0800; // $1800
 			chr_rom_banks[7] = chr_rom + (((chr_selector[7] + bg_char_upper_) * 0x1000) & chr_mask) + 0x0c00; // $1c00
 			break;
-		case 0x02: // 2K mode
+		case 0x02:                                                                                            // 2K mode
 			chr_rom_banks[0] = chr_rom + (((chr_selector[1] + bg_char_upper_) * 0x0800) & chr_mask) + 0x0000; // $0000
 			chr_rom_banks[1] = chr_rom + (((chr_selector[1] + bg_char_upper_) * 0x0800) & chr_mask) + 0x0400; // $0400
 			chr_rom_banks[2] = chr_rom + (((chr_selector[3] + bg_char_upper_) * 0x0800) & chr_mask) + 0x0000; // $0800
@@ -538,7 +551,7 @@ uint8_t Mapper5::read_vram(uint16_t address) {
 			chr_rom_banks[6] = chr_rom + (((chr_selector[7] + bg_char_upper_) * 0x0800) & chr_mask) + 0x0000; // $1800
 			chr_rom_banks[7] = chr_rom + (((chr_selector[7] + bg_char_upper_) * 0x0800) & chr_mask) + 0x0400; // $1c00
 			break;
-		case 0x03: // 1K mode
+		case 0x03:                                                                                            // 1K mode
 			chr_rom_banks[0] = chr_rom + (((chr_selector[0] + bg_char_upper_) * 0x0400) & chr_mask) + 0x0000; // $0000
 			chr_rom_banks[1] = chr_rom + (((chr_selector[1] + bg_char_upper_) * 0x0400) & chr_mask) + 0x0000; // $0400
 			chr_rom_banks[2] = chr_rom + (((chr_selector[2] + bg_char_upper_) * 0x0400) & chr_mask) + 0x0000; // $0800
@@ -560,14 +573,20 @@ uint8_t Mapper5::read_vram(uint16_t address) {
 // Name: write_vram
 //------------------------------------------------------------------------------
 void Mapper5::write_vram(uint16_t address, uint8_t value) {
-	switch((address >> 10) & 0x0f) {
+	switch ((address >> 10) & 0x0f) {
 	case 0x08:
 	case 0x0c:
 		// $2000
-		switch((mirroring_mode_) & 0x03) {
-		case 0x00: Mapper::write_vram(address, value); break;
-		case 0x01: Mapper::write_vram(address, value); break;
-		case 0x02: if(!(exram_mode_ & 0x02)) exram_[address & 0x03ff] = value; break;
+		switch ((mirroring_mode_)&0x03) {
+		case 0x00:
+			Mapper::write_vram(address, value);
+			break;
+		case 0x01:
+			Mapper::write_vram(address, value);
+			break;
+		case 0x02:
+			if (!(exram_mode_ & 0x02)) exram_[address & 0x03ff] = value;
+			break;
 		case 0x03:
 			break;
 		}
@@ -575,10 +594,16 @@ void Mapper5::write_vram(uint16_t address, uint8_t value) {
 	case 0x09:
 	case 0x0d:
 		// $2400
-		switch((mirroring_mode_ >> 2) & 0x03) {
-		case 0x00: Mapper::write_vram(address, value); break;
-		case 0x01: Mapper::write_vram(address, value); break;
-		case 0x02: if(!(exram_mode_ & 0x02)) exram_[address & 0x03ff] = value; break;
+		switch ((mirroring_mode_ >> 2) & 0x03) {
+		case 0x00:
+			Mapper::write_vram(address, value);
+			break;
+		case 0x01:
+			Mapper::write_vram(address, value);
+			break;
+		case 0x02:
+			if (!(exram_mode_ & 0x02)) exram_[address & 0x03ff] = value;
+			break;
 		case 0x03:
 			break;
 		}
@@ -586,10 +611,16 @@ void Mapper5::write_vram(uint16_t address, uint8_t value) {
 	case 0x0a:
 	case 0x0e:
 		// $2800
-		switch((mirroring_mode_ >> 4) & 0x03) {
-		case 0x00: Mapper::write_vram(address, value); break;
-		case 0x01: Mapper::write_vram(address, value); break;
-		case 0x02: if(!(exram_mode_ & 0x02)) exram_[address & 0x03ff] = value; break;
+		switch ((mirroring_mode_ >> 4) & 0x03) {
+		case 0x00:
+			Mapper::write_vram(address, value);
+			break;
+		case 0x01:
+			Mapper::write_vram(address, value);
+			break;
+		case 0x02:
+			if (!(exram_mode_ & 0x02)) exram_[address & 0x03ff] = value;
+			break;
 		case 0x03:
 			break;
 		}
@@ -597,10 +628,16 @@ void Mapper5::write_vram(uint16_t address, uint8_t value) {
 	case 0x0b:
 	case 0x0f:
 		// $2c00
-		switch((mirroring_mode_ >> 6) & 0x03) {
-		case 0x00: Mapper::write_vram(address, value); break;
-		case 0x01: Mapper::write_vram(address, value); break;
-		case 0x02: if((exram_mode_ & 0x02)) exram_[address & 0x03ff] = value; break;
+		switch ((mirroring_mode_ >> 6) & 0x03) {
+		case 0x00:
+			Mapper::write_vram(address, value);
+			break;
+		case 0x01:
+			Mapper::write_vram(address, value);
+			break;
+		case 0x02:
+			if ((exram_mode_ & 0x02)) exram_[address & 0x03ff] = value;
+			break;
 		case 0x03:
 			break;
 		}

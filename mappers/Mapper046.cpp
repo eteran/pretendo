@@ -81,7 +81,8 @@ void Mapper46::write_a(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper46::write_b(uint16_t address, uint8_t value) {
-	write89ABCDEF(address, value);;
+	write89ABCDEF(address, value);
+	;
 }
 
 //------------------------------------------------------------------------------

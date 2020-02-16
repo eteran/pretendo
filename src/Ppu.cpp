@@ -1,23 +1,23 @@
 
 #include "Ppu.h"
 #include "Apu.h"
-#include "Cpu.h"
-#include "Nes.h"
 #include "Cart.h"
-#include "Mapper.h"
-#include "VRAMBank.h"
 #include "Compiler.h"
+#include "Cpu.h"
+#include "Mapper.h"
+#include "Nes.h"
+#include "VRAMBank.h"
 
-#include <iostream>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
+#include <iostream>
 
 //#define SPRITE_ZERO_HACK
 
 namespace nes {
 namespace ppu {
 
-bool show_sprites = true;
+bool show_sprites  = true;
 bool system_paused = false;
 
 namespace {
@@ -36,22 +36,22 @@ constexpr uint8_t OamHFlip    = 0b01000000;
 constexpr uint8_t OamVFlip    = 0b10000000;
 
 struct pattern_0 {
-	static constexpr int     index  = 0;
+	static constexpr int index      = 0;
 	static constexpr uint8_t offset = 0;
 };
 
 struct pattern_1 {
-	static constexpr int     index  = 1;
+	static constexpr int index      = 1;
 	static constexpr uint8_t offset = 8;
 };
 
 struct size_8px {
-	static constexpr int value = 8;
+	static constexpr int value     = 8;
 	static constexpr int flip_mask = 0b00000111;
 };
 
 struct size_16px {
-	static constexpr int value = 16;
+	static constexpr int value     = 16;
 	static constexpr int flip_mask = 0b00001111;
 };
 
@@ -71,13 +71,11 @@ const uint8_t reverse_bits[256] = {
 	0x03, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3, 0x13, 0x93, 0x53, 0xd3, 0x33, 0xb3, 0x73, 0xf3,
 	0x0b, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb, 0x1b, 0x9b, 0x5b, 0xdb, 0x3b, 0xbb, 0x7b, 0xfb,
 	0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7, 0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
-	0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff
-};
+	0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff};
 
 const uint8_t powerup_palette[32] = {
 	0x09, 0x01, 0x00, 0x01, 0x00, 0x02, 0x02, 0x0D, 0x08, 0x10, 0x08, 0x24, 0x00, 0x00, 0x04, 0x2C,
-	0x09, 0x01, 0x34, 0x03, 0x00, 0x04, 0x00, 0x14, 0x08, 0x3A, 0x00, 0x02, 0x00, 0x20, 0x2C, 0x08
-};
+	0x09, 0x01, 0x34, 0x03, 0x00, 0x04, 0x00, 0x14, 0x08, 0x3A, 0x00, 0x02, 0x00, 0x20, 0x2C, 0x08};
 
 //------------------------------------------------------------------------------
 // Name: attribute_bits
@@ -110,37 +108,36 @@ struct SpritePatternData {
 
 // internal variables
 SpritePatternData sprite_patterns_[8];
-uint8_t      current_sprite_index_   = 0;
-uint8_t      sprite_data_[32]        = {};
-uint8_t      sprite_ram_[0x100]      = {};
-uint8_t      left_most_sprite_x_     = 0xff;
-uint8_t      sprite_address_         = 0;
-uint8_t      sprite_data_index_      = 0;
+uint8_t current_sprite_index_ = 0;
+uint8_t sprite_data_[32]      = {};
+uint8_t sprite_ram_[0x100]    = {};
+uint8_t left_most_sprite_x_   = 0xff;
+uint8_t sprite_address_       = 0;
+uint8_t sprite_data_index_    = 0;
 
-uint8_t      palette_[0x20];
-uint64_t     ppu_cycle_              = 0;
-uint64_t     ppu_read_2002_cycle_    = 0;
-uint16_t     next_ppu_fetch_address_ = 0;
-uint16_t     attribute_queue_[2]     = {};
-uint16_t     pattern_queue_[2]       = {};
-uint16_t     nametable_              = 0; // loopy's "t"
-uint16_t     vram_address_           = 0; // loopy's "v"
-uint16_t     hpos_                   = 0; // pixel counter
-uint16_t     vpos_                   = 0; // scanline counter
-uint8_t      next_pattern_[2]        = {};
-uint16_t     latch_                  = 0;
-uint8_t      next_attribute_         = 0;
-uint8_t      next_tile_index_        = 0;
-Control      ppu_control_            = {0};
-Mask         ppu_mask_               = {0};
-uint8_t      register_2007_buffer_   = 0;
-Status       status_                 = {0};
-uint8_t      tile_offset_            = 0; // loopy's "x"
+uint8_t palette_[0x20];
+uint64_t ppu_cycle_              = 0;
+uint64_t ppu_read_2002_cycle_    = 0;
+uint16_t next_ppu_fetch_address_ = 0;
+uint16_t attribute_queue_[2]     = {};
+uint16_t pattern_queue_[2]       = {};
+uint16_t nametable_              = 0; // loopy's "t"
+uint16_t vram_address_           = 0; // loopy's "v"
+uint16_t hpos_                   = 0; // pixel counter
+uint16_t vpos_                   = 0; // scanline counter
+uint8_t next_pattern_[2]         = {};
+uint16_t latch_                  = 0;
+uint8_t next_attribute_          = 0;
+uint8_t next_tile_index_         = 0;
+Control ppu_control_             = {0};
+Mask ppu_mask_                   = {0};
+uint8_t register_2007_buffer_    = 0;
+Status status_                   = {0};
+uint8_t tile_offset_             = 0; // loopy's "x"
 
-bool         odd_frame_              = false;
-bool         write_latch_            = false;
-bool         write_block_            = false;
-
+bool odd_frame_   = false;
+bool write_latch_ = false;
+bool write_block_ = false;
 
 //------------------------------------------------------------------------------
 // Name: sprite_pattern_table
@@ -193,7 +190,7 @@ constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
 //------------------------------------------------------------------------------
 uint8_t select_blank_pixel() {
 
-	if((vram_address_ & 0x3f00) == 0x3f00) {
+	if (UNLIKELY((vram_address_ & 0x3f00) == 0x3f00)) {
 		return vram_address_ & 0x1f;
 	} else {
 		return 0x00;
@@ -207,13 +204,14 @@ uint8_t select_blank_pixel() {
 uint8_t select_bg_pixel(uint16_t index) {
 
 	// first identify what the BG pixel would be
-	if((ppu_mask_.background_clipping || index >= 8) && ppu_mask_.background_visible) {
-		const uint16_t mask  = (0x8000 >> tile_offset_);
+	if ((ppu_mask_.background_clipping || index >= 8) && ppu_mask_.background_visible) {
+		const uint16_t mask = (0x8000 >> tile_offset_);
 
-		return (((pattern_queue_[0]   & mask) >> (15 - tile_offset_)) |
-				((pattern_queue_[1]   & mask) >> (14 - tile_offset_)) |
+		return (((pattern_queue_[0] & mask) >> (15 - tile_offset_)) |
+				((pattern_queue_[1] & mask) >> (14 - tile_offset_)) |
 				((attribute_queue_[0] & mask) >> (13 - tile_offset_)) |
-				((attribute_queue_[1] & mask) >> (12 - tile_offset_))) & 0xff;
+				((attribute_queue_[1] & mask) >> (12 - tile_offset_))) &
+			   0xff;
 
 	} else {
 		return 0x00;
@@ -230,44 +228,42 @@ uint8_t select_pixel(uint16_t index) {
 	uint8_t pixel = select_bg_pixel(index);
 
 	// are ANY sprites possibly in range?
-	if(left_most_sprite_x_ <= index) {
+	if (left_most_sprite_x_ <= index) {
 
 		// then see if any of the sprites belong..
-		if((ppu_mask_.sprite_clipping || index >= 8) && ppu_mask_.sprites_visible) {
+		if ((ppu_mask_.sprite_clipping || index >= 8) && ppu_mask_.sprites_visible) {
 
 			// this will loop at most 8 times
-			for(uint8_t spr = 0; spr != sprite_data_index_; ++spr) {
+			for (uint8_t spr = 0; spr != sprite_data_index_; ++spr) {
 
 				const SpritePatternData &sprite = sprite_patterns_[spr];
 
 				const uint16_t x_offset = index - sprite.x;
 
 				// is this sprite visible on this pixel?
-				if(x_offset < 8) {
+				if (x_offset < 8) {
 
-					const uint8_t p0 = sprite.patterns[0];
-					const uint8_t p1 = sprite.patterns[1];
+					const uint8_t p0     = sprite.patterns[0];
+					const uint8_t p1     = sprite.patterns[1];
 					const uint16_t shift = 7 - x_offset;
 
 					const uint8_t sprite_pixel =
-							(((p0 >> shift) & 0x01) << 0x00) |
-							(((p1 >> shift) & 0x01) << 0x01);
-
+						((p0 >> shift) & 0x01) | (((p1 >> shift) << 0x01) & 0x02);
 
 					// this pixel is visible..
-					if(sprite_pixel & 0x03) {
+					if (sprite_pixel & 0x03) {
 						// we rendered a sprite0 pixel which collided with a BG pixel
 						// NOTE: according to blargg's tests, a collision doesn't seem
 						//       possible to occur on the rightmost pixel
-					#ifndef SPRITE_ZERO_HACK
-						if((sprite.attr & OamZero) && (index < 255) && (pixel & 0x03)) {
-					#else
-						if((sprite.attr & OamZero) && (index < 255)) {
-					#endif
+#ifndef SPRITE_ZERO_HACK
+						if ((sprite.attr & OamZero) && (index < 255) && (pixel & 0x03)) {
+#else
+						if ((sprite.attr & OamZero) && (index < 255)) {
+#endif
 							status_.sprite0 = true;
 						}
 
-						if((((sprite.attr & OamPriority) == 0) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
+						if ((((sprite.attr & OamPriority) == 0) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
 							pixel = (0x10 | sprite_pixel | ((sprite.attr & OamColor) << 2)) & 0xff;
 						}
 
@@ -286,7 +282,7 @@ uint8_t select_pixel(uint16_t index) {
 //------------------------------------------------------------------------------
 void clock_x() {
 	// wrap X at 31 and flip bit 10, or just increment
-	if(UNLIKELY((vram_address_ & 0x1f) == 0x1f)) {
+	if (UNLIKELY((vram_address_ & 0x1f) == 0x1f)) {
 		vram_address_ ^= 0x41f;
 	} else {
 		++vram_address_;
@@ -306,13 +302,13 @@ void clock_y() {
 	//    switched when it's incremented from _29_.
 	//
 	//    Y scroll still wraps from 31, but without flipping bit 11
-	if(UNLIKELY((vram_address_ & 0x7000) == 0x7000)) {
+	if (UNLIKELY((vram_address_ & 0x7000) == 0x7000)) {
 
 		// tile Y wraps from 7 -> 0
 		vram_address_ &= 0x0fff;
 
 		// Now Check the Y Scroll
-		switch(vram_address_ & 0x03e0) {
+		switch (vram_address_ & 0x03e0) {
 		case 0x03a0:
 			// Y scroll is 29
 			vram_address_ &= ~0x03e0;
@@ -343,7 +339,7 @@ template <class Pattern>
 void open_background_pattern() {
 
 	const uint8_t tile_line = (vram_address_ & 0x7000) >> 12;
-	next_ppu_fetch_address_ = background_pattern_table() | (next_tile_index_ << 4) | Pattern::offset | tile_line;
+	next_ppu_fetch_address_ = (background_pattern_table() | (next_tile_index_ << 4) | Pattern::offset | tile_line) & 0xffff;
 	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
 }
 
@@ -446,27 +442,26 @@ void evaluate_sprites() {
 		STATE_4
 	} state = STATE_1;
 
-	while(state != STATE_4) {
-		switch(state) {
+	while (state != STATE_4) {
+		switch (state) {
 		case STATE_1:
 			// 1. Starting at n = 0, read a sprite's Y-coordinate (OAM[n][0], copying it to
 			//    the next open slot in secondary OAM (unless 8 sprites have been found, in
 			//    which case the write is ignored).
-			if(sprite_data_index_ < 8) {
-
+			if (sprite_data_index_ < 8) {
 
 				// 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
-				if(sprite_in_range<Size>(sprite_ram_[index])) {
+				if (sprite_in_range<Size>(sprite_ram_[index])) {
 
-					const uint16_t sprite_line = (vpos_ - 1) - sprite_ram_[index + 0];
+					const uint16_t sprite_line       = (vpos_ - 1) - sprite_ram_[index + 0];
 					sprite_y(sprite_data_index_)     = static_cast<uint8_t>(sprite_line); // y
 					sprite_index(sprite_data_index_) = sprite_ram_[index + 1];            // index
 					sprite_attr(sprite_data_index_)  = sprite_ram_[index + 2] & 0xe3;     // attributes
 					sprite_x(sprite_data_index_)     = sprite_ram_[index + 3];            // x
 
 					// note that we found sprite 0
-					if(index == start_address) {
+					if (index == start_address) {
 						sprite_attr(sprite_data_index_) |= OamZero;
 					}
 
@@ -482,46 +477,44 @@ void evaluate_sprites() {
 			index += 4;
 
 			// 2a. If n has overflowed back to zero (all 64 sprites evaluated), go to 4
-			if((index & 0xfc) == 0x00) {
+			if ((index & 0xfc) == 0x00) {
 				state = STATE_4;
 				break;
 			}
 
 			// 2b. If less than 8 sprites have been found, go to 1
-			if(sprite_data_index_ < 8) {
+			if (sprite_data_index_ < 8) {
 				state = STATE_1;
 				break;
 			}
 
 			// 2c. If exactly 8 sprites have been found, disable writes to secondary OAM.
 			//     This causes sprites in back to drop out.
-			if(sprite_data_index_ == 8) {
+			if (sprite_data_index_ == 8) {
 				state = STATE_3;
 				break;
 			}
 
 			state = STATE_3;
 			break;
-		case STATE_3:
-			{
-				// 3. Starting at m = 0, evaluate OAM[n][m] as a Y-coordinate.
-				// 3a. If the value is in range, set the sprite overflow flag in $2002 and read
-				//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
-				//     'n' when 'm' overflows); if m = 3, increment n
-				if(sprite_in_range<Size>(sprite_ram_[index])) {
-					status_.overflow = true;
-					++index;
-				} else {
-					// 3b. If the value is not in range, increment n AND m (without carry). If n overflows
-					//     to 0, go to 4; otherwise go to 3
-					index = (index & 0x03) | (((index & 0xfc) + 4) & 0xfc);
-					index = (index & 0xfc) | (((index & 0x03) + 1) & 0x03);
-				}
-				if((index & 0xfc) == 0x00) {
-					state = STATE_4;
-				}
+		case STATE_3: {
+			// 3. Starting at m = 0, evaluate OAM[n][m] as a Y-coordinate.
+			// 3a. If the value is in range, set the sprite overflow flag in $2002 and read
+			//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
+			//     'n' when 'm' overflows); if m = 3, increment n
+			if (sprite_in_range<Size>(sprite_ram_[index])) {
+				status_.overflow = true;
+				++index;
+			} else {
+				// 3b. If the value is not in range, increment n AND m (without carry). If n overflows
+				//     to 0, go to 4; otherwise go to 3
+				index = (index & 0x03) | (((index & 0xfc) + 4) & 0xfc);
+				index = (index & 0xfc) | (((index & 0x03) + 1) & 0x03);
 			}
-			break;
+			if ((index & 0xfc) == 0x00) {
+				state = STATE_4;
+			}
+		} break;
 		default:
 			abort();
 		}
@@ -533,14 +526,14 @@ void evaluate_sprites() {
 //------------------------------------------------------------------------------
 void evaluate_sprites_even() {
 	// write cycle
-	if(hpos_ < 64) {
-		if(UNLIKELY(hpos_ == 0)) {
+	if (hpos_ < 64) {
+		if (UNLIKELY(hpos_ == 0)) {
 			std::fill_n(sprite_data_, sizeof(sprite_data_), 0xff);
 		}
 
-	} else if(UNLIKELY(hpos_ == 256)) {
+	} else if (UNLIKELY(hpos_ == 256)) {
 		// TODO: do this part incrementally during cycles 0-255 like the real thing
-		if(ppu_control_.large_sprites) {
+		if (ppu_control_.large_sprites) {
 			evaluate_sprites<size_16px>();
 		} else {
 			evaluate_sprites<size_8px>();
@@ -561,7 +554,7 @@ void enter_vblank() {
 
 	// Reading one PPU clock before reads it as clear and never sets the flag
 	// or generates NMI for that frame.
-	if(UNLIKELY(ppu_cycle_ != (ppu_read_2002_cycle_ + 1))) {
+	if (UNLIKELY(ppu_cycle_ != (ppu_read_2002_cycle_ + 1))) {
 		status_.vblank = true;
 	}
 }
@@ -572,7 +565,7 @@ void enter_vblank() {
 void exit_vblank() {
 	// clear all the relevant status bits
 	status_.flags = 0;
-	write_block_ = false;
+	write_block_  = false;
 }
 
 //------------------------------------------------------------------------------
@@ -581,19 +574,19 @@ void exit_vblank() {
 template <class Size, class Pattern>
 void open_sprite_pattern() {
 
-	current_sprite_index_ = ((hpos_ - 1) >> 3) & 0x07;
+	current_sprite_index_     = ((hpos_ - 1) >> 3) & 0x07;
 	SpritePatternData &sprite = sprite_patterns_[current_sprite_index_];
 
 	sprite.y = sprite_y(current_sprite_index_);
 
-	if(sprite.y != 0xff) {
+	if (sprite.y != 0xff) {
 
 		sprite.x     = sprite_x(current_sprite_index_);
 		sprite.attr  = sprite_attr(current_sprite_index_);
 		sprite.index = sprite_index(current_sprite_index_);
 
 		// vertical flip
-		if(sprite.attr & OamVFlip) {
+		if (sprite.attr & OamVFlip) {
 			sprite.y ^= Size::flip_mask;
 		}
 
@@ -618,7 +611,7 @@ void read_sprite_pattern() {
 	SpritePatternData &sprite = sprite_patterns_[current_sprite_index_];
 
 	// horizontal flip
-	if(sprite.attr & OamHFlip) {
+	if (sprite.attr & OamHFlip) {
 		pattern = reverse_bits[pattern];
 	}
 
@@ -631,14 +624,14 @@ void read_sprite_pattern() {
 void render_pixel(uint16_t *dest_buffer) {
 
 	const uint16_t index = hpos_ - 1;
-	const uint8_t pixel = select_pixel(index);
+	const uint8_t pixel  = select_pixel(index);
 
-	constexpr uint8_t mask_table[2] = { 0xff, 0x30 };
+	constexpr uint8_t mask_table[2] = {0xff, 0x30};
 
 	dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00] & mask_table[ppu_mask_.monochrome];
 
-	pattern_queue_[0]   <<= 1;
-	pattern_queue_[1]   <<= 1;
+	pattern_queue_[0] <<= 1;
+	pattern_queue_[1] <<= 1;
 	attribute_queue_[0] <<= 1;
 	attribute_queue_[1] <<= 1;
 }
@@ -648,8 +641,8 @@ void render_pixel(uint16_t *dest_buffer) {
 //------------------------------------------------------------------------------
 void update_shift_registers_render() {
 
-	pattern_queue_[0]   |= next_pattern_[0];
-	pattern_queue_[1]   |= next_pattern_[1];
+	pattern_queue_[0] |= next_pattern_[0];
+	pattern_queue_[1] |= next_pattern_[1];
 	attribute_queue_[0] |= ((next_attribute_ >> 0) & 0x01) * 0xff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
 	attribute_queue_[1] |= ((next_attribute_ >> 1) & 0x01) * 0xff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
 }
@@ -659,8 +652,8 @@ void update_shift_registers_render() {
 //------------------------------------------------------------------------------
 void update_shift_registers_idle() {
 
-	pattern_queue_[0]   <<= 8;
-	pattern_queue_[1]   <<= 8;
+	pattern_queue_[0] <<= 8;
+	pattern_queue_[1] <<= 8;
 	attribute_queue_[0] <<= 8;
 	attribute_queue_[1] <<= 8;
 
@@ -705,14 +698,14 @@ bool rendering() {
 // Name: increment_vram_address
 //------------------------------------------------------------------------------
 void increment_vram_address() {
-	if(rendering() && ppu_mask_.screen_enabled) {
-		if(ppu_control_.address_increment) {
+	if (rendering() && ppu_mask_.screen_enabled) {
+		if (ppu_control_.address_increment) {
 			clock_y();
 		} else {
 			clock_x();
 		}
 	} else {
-		if(ppu_control_.address_increment) {
+		if (ppu_control_.address_increment) {
 			vram_address_ += 32;
 		} else {
 			vram_address_ += 1;
@@ -725,96 +718,245 @@ void increment_vram_address() {
 //------------------------------------------------------------------------------
 void clock_ppu(const scanline_prerender &) {
 
-	if(UNLIKELY(hpos_ == 1)) {
+	if (UNLIKELY(hpos_ == 1)) {
 		exit_vblank();
 	}
 
-	if(LIKELY(ppu_mask_.screen_enabled)) {
-		if(UNLIKELY(hpos_ < 1)) {
+	if (LIKELY(ppu_mask_.screen_enabled)) {
+		if (UNLIKELY(hpos_ < 1)) {
 			// idle
-		} else if(LIKELY(hpos_ < 257)) {
-			switch(hpos_ & 0x07) {
-			case 1: evaluate_sprites_odd();  open_tile_index(); break;
-			case 2: evaluate_sprites_even(); read_tile_index(); break;
-			case 3: evaluate_sprites_odd();  open_background_attribute(); break;
-			case 4: evaluate_sprites_even(); read_background_attribute(); break;
-			case 5: evaluate_sprites_odd();  open_background_pattern<pattern_0>(); break;
-			case 6: evaluate_sprites_even(); read_background_pattern<pattern_0>(); break;
-			case 7: evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
-			case 0: evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break;
+		} else if (LIKELY(hpos_ < 257)) {
+			switch (hpos_ & 0x07) {
+			case 1:
+				evaluate_sprites_odd();
+				open_tile_index();
+				break;
+			case 2:
+				evaluate_sprites_even();
+				read_tile_index();
+				break;
+			case 3:
+				evaluate_sprites_odd();
+				open_background_attribute();
+				break;
+			case 4:
+				evaluate_sprites_even();
+				read_background_attribute();
+				break;
+			case 5:
+				evaluate_sprites_odd();
+				open_background_pattern<pattern_0>();
+				break;
+			case 6:
+				evaluate_sprites_even();
+				read_background_pattern<pattern_0>();
+				break;
+			case 7:
+				evaluate_sprites_odd();
+				open_background_pattern<pattern_1>();
+				break;
+			case 0:
+				evaluate_sprites_even();
+				read_background_pattern<pattern_1>();
+				update_shift_registers_idle();
+				clock_x();
+				break;
 			}
 
-			if(UNLIKELY(hpos_ == 256)) {
+			if (UNLIKELY(hpos_ == 256)) {
 				clock_y();
 			}
-		} else if(hpos_ < 281) {
+		} else if (hpos_ < 281) {
 
-			if(UNLIKELY(hpos_ == 257)) {
+			if (UNLIKELY(hpos_ == 257)) {
 				update_x_scroll();
 			}
 
 			update_sprite_registers();
 
-			switch(hpos_ & 0x07) {
-			case 1: open_tile_index(); break;           // open the bus for nametable fetch (garbage)
-			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
-			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_0>(); } else { open_sprite_pattern<size_8px, pattern_0>(); } break;
-			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_0>(); } else { read_sprite_pattern<size_8px, pattern_0>(); } break;
-			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_1>(); } else { open_sprite_pattern<size_8px, pattern_1>(); } break;
-			case 8: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_1>(); } else { read_sprite_pattern<size_8px, pattern_1>(); } break;
+			switch (hpos_ & 0x07) {
+			case 1:
+				open_tile_index();
+				break; // open the bus for nametable fetch (garbage)
+			case 2:
+				read_tile_index();
+				break; // fetch the name table byte (garbage)
+			case 3:
+				open_background_attribute();
+				break; // open the bus for the attribute fetch (garbage)
+			case 4:
+				read_background_attribute();
+				break; // fetch the attributes (garbage)
+			case 5:
+				if (ppu_control_.large_sprites) {
+					open_sprite_pattern<size_16px, pattern_0>();
+				} else {
+					open_sprite_pattern<size_8px, pattern_0>();
+				}
+				break;
+			case 6:
+				if (ppu_control_.large_sprites) {
+					read_sprite_pattern<size_16px, pattern_0>();
+				} else {
+					read_sprite_pattern<size_8px, pattern_0>();
+				}
+				break;
+			case 7:
+				if (ppu_control_.large_sprites) {
+					open_sprite_pattern<size_16px, pattern_1>();
+				} else {
+					open_sprite_pattern<size_8px, pattern_1>();
+				}
+				break;
+			case 8:
+				if (ppu_control_.large_sprites) {
+					read_sprite_pattern<size_16px, pattern_1>();
+				} else {
+					read_sprite_pattern<size_8px, pattern_1>();
+				}
+				break;
 			}
-		} else if(hpos_ < 305) {
+		} else if (hpos_ < 305) {
 
 			update_vram_address();
 			update_sprite_registers();
 
-			switch(hpos_ & 0x07) {
-			case 1: open_tile_index(); break;           // open the bus for nametable fetch (garbage)
-			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
-			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_0>(); } else { open_sprite_pattern<size_8px, pattern_0>(); } break;
-			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_0>(); } else { read_sprite_pattern<size_8px, pattern_0>(); } break;
-			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_1>(); } else { open_sprite_pattern<size_8px, pattern_1>(); } break;
-			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_1>(); } else { read_sprite_pattern<size_8px, pattern_1>(); } break;
+			switch (hpos_ & 0x07) {
+			case 1:
+				open_tile_index();
+				break; // open the bus for nametable fetch (garbage)
+			case 2:
+				read_tile_index();
+				break; // fetch the name table byte (garbage)
+			case 3:
+				open_background_attribute();
+				break; // open the bus for the attribute fetch (garbage)
+			case 4:
+				read_background_attribute();
+				break; // fetch the attributes (garbage)
+			case 5:
+				if (ppu_control_.large_sprites) {
+					open_sprite_pattern<size_16px, pattern_0>();
+				} else {
+					open_sprite_pattern<size_8px, pattern_0>();
+				}
+				break;
+			case 6:
+				if (ppu_control_.large_sprites) {
+					read_sprite_pattern<size_16px, pattern_0>();
+				} else {
+					read_sprite_pattern<size_8px, pattern_0>();
+				}
+				break;
+			case 7:
+				if (ppu_control_.large_sprites) {
+					open_sprite_pattern<size_16px, pattern_1>();
+				} else {
+					open_sprite_pattern<size_8px, pattern_1>();
+				}
+				break;
+			case 0:
+				if (ppu_control_.large_sprites) {
+					read_sprite_pattern<size_16px, pattern_1>();
+				} else {
+					read_sprite_pattern<size_8px, pattern_1>();
+				}
+				break;
 			}
-		} else if(hpos_ < 321) {
+		} else if (hpos_ < 321) {
 
 			update_sprite_registers();
 
-			switch(hpos_ & 0x07) {
-			case 1: open_tile_index(); break;           // open the bus for nametable fetch (garbage)
-			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
-			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_0>(); } else { open_sprite_pattern<size_8px, pattern_0>(); } break;
-			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_0>(); } else { read_sprite_pattern<size_8px, pattern_0>(); } break;
-			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_1>(); } else { open_sprite_pattern<size_8px, pattern_1>(); } break;
-			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_1>(); } else { read_sprite_pattern<size_8px, pattern_1>(); } break;
+			switch (hpos_ & 0x07) {
+			case 1:
+				open_tile_index();
+				break; // open the bus for nametable fetch (garbage)
+			case 2:
+				read_tile_index();
+				break; // fetch the name table byte (garbage)
+			case 3:
+				open_background_attribute();
+				break; // open the bus for the attribute fetch (garbage)
+			case 4:
+				read_background_attribute();
+				break; // fetch the attributes (garbage)
+			case 5:
+				if (ppu_control_.large_sprites) {
+					open_sprite_pattern<size_16px, pattern_0>();
+				} else {
+					open_sprite_pattern<size_8px, pattern_0>();
+				}
+				break;
+			case 6:
+				if (ppu_control_.large_sprites) {
+					read_sprite_pattern<size_16px, pattern_0>();
+				} else {
+					read_sprite_pattern<size_8px, pattern_0>();
+				}
+				break;
+			case 7:
+				if (ppu_control_.large_sprites) {
+					open_sprite_pattern<size_16px, pattern_1>();
+				} else {
+					open_sprite_pattern<size_8px, pattern_1>();
+				}
+				break;
+			case 0:
+				if (ppu_control_.large_sprites) {
+					read_sprite_pattern<size_16px, pattern_1>();
+				} else {
+					read_sprite_pattern<size_8px, pattern_1>();
+				}
+				break;
 			}
-		} else if(hpos_ < 337) {
+		} else if (hpos_ < 337) {
 			// fetch first 2 tiles of NEXT scanline
-			switch(hpos_ & 0x07) {
-			case 1: open_tile_index(); break;           // open the bus for nametable fetch
-			case 2: read_tile_index(); break;           // fetch the name table byte
-			case 3: open_background_attribute(); break; // open the bus for the attribute fetch
-			case 4: read_background_attribute(); break; // fetch the attributes
-			case 5: open_background_pattern<pattern_0>(); break; // open the bus for pattern A fetch
-			case 6: read_background_pattern<pattern_0>(); break; // read 1st pattern byte from 000PTTTTTTTT0YYY
-			case 7: open_background_pattern<pattern_1>(); break; // open the bus for pattern B fetch
-			case 0: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
+			switch (hpos_ & 0x07) {
+			case 1:
+				open_tile_index();
+				break; // open the bus for nametable fetch
+			case 2:
+				read_tile_index();
+				break; // fetch the name table byte
+			case 3:
+				open_background_attribute();
+				break; // open the bus for the attribute fetch
+			case 4:
+				read_background_attribute();
+				break; // fetch the attributes
+			case 5:
+				open_background_pattern<pattern_0>();
+				break; // open the bus for pattern A fetch
+			case 6:
+				read_background_pattern<pattern_0>();
+				break; // read 1st pattern byte from 000PTTTTTTTT0YYY
+			case 7:
+				open_background_pattern<pattern_1>();
+				break; // open the bus for pattern B fetch
+			case 0:
+				read_background_pattern<pattern_1>();
+				update_shift_registers_idle();
+				clock_x();
+				break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
 			}
 		} else {
-			switch(hpos_) {
+			switch (hpos_) {
 			// dummy fetches
-			case 337: open_tile_index(); break;
-			case 338: read_tile_index(); break;
-			case 339: open_tile_index(); if(odd_frame_) {
+			case 337:
+				open_tile_index();
+				break;
+			case 338:
+				read_tile_index();
+				break;
+			case 339:
+				open_tile_index();
+				if (odd_frame_) {
 					++hpos_;
-				} break; // skip one clock if the first visible line on odd frames
-			case 340: read_tile_index(); break;
+				}
+				break; // skip one clock if the first visible line on odd frames
+			case 340:
+				read_tile_index();
+				break;
 			default:
 				abort();
 			}
@@ -827,86 +969,170 @@ void clock_ppu(const scanline_prerender &) {
 //------------------------------------------------------------------------------
 void clock_ppu(const scanline_render &target) {
 
-	if(UNLIKELY(!ppu_mask_.screen_enabled)) {
+	if (UNLIKELY(!ppu_mask_.screen_enabled)) {
 
-		if(UNLIKELY(hpos_ < 1)) {
+		if (UNLIKELY(hpos_ < 1)) {
 			// idle
-		} else if(LIKELY(hpos_ < 257)) {
-			const uint8_t pixel = select_blank_pixel();
-			constexpr uint8_t mask_table[2] = { 0xff, 0x30 };
-			target.buffer[hpos_ - 1] = palette_[pixel] & mask_table[ppu_mask_.monochrome];
+		} else if (LIKELY(hpos_ < 257)) {
+			const uint8_t pixel             = select_blank_pixel();
+			constexpr uint8_t mask_table[2] = {0xff, 0x30};
+			target.buffer[hpos_ - 1]        = palette_[pixel] & mask_table[ppu_mask_.monochrome];
 			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
 		} else {
 			// idle
 		}
 	} else {
 
-		if(UNLIKELY(hpos_ < 1)) {
+		if (UNLIKELY(hpos_ < 1)) {
 			// the first clock is acts like the last clock of the pre-render if we skipped a cycle
-			if(UNLIKELY(odd_frame_ && vpos_ == 1 && hpos_ == 0)) {
+			if (UNLIKELY(odd_frame_ && vpos_ == 1 && hpos_ == 0)) {
 				read_tile_index();
 			} else {
 				// idle
 			}
-		} else if(LIKELY(hpos_ < 257)) {
+		} else if (LIKELY(hpos_ < 257)) {
 
 			// NOTE(eteran): on my machine, this code "costs" about 200 FPS
 			render_pixel(target.buffer);
 			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
 
-			switch(hpos_ & 0x07) {
-			case 1: evaluate_sprites_odd();  open_tile_index(); break;
-			case 2: evaluate_sprites_even(); read_tile_index(); break;
-			case 3: evaluate_sprites_odd();  open_background_attribute(); break;
-			case 4: evaluate_sprites_even(); read_background_attribute(); break;
-			case 5: evaluate_sprites_odd();  open_background_pattern<pattern_0>(); break;
-			case 6: evaluate_sprites_even(); read_background_pattern<pattern_0>(); break;
-			case 7: evaluate_sprites_odd();  open_background_pattern<pattern_1>(); break;
-			case 0: evaluate_sprites_even(); read_background_pattern<pattern_1>(); update_shift_registers_render(); clock_x();  break;
+			switch (hpos_ & 0x07) {
+			case 1:
+				evaluate_sprites_odd();
+				open_tile_index();
+				break;
+			case 2:
+				evaluate_sprites_even();
+				read_tile_index();
+				break;
+			case 3:
+				evaluate_sprites_odd();
+				open_background_attribute();
+				break;
+			case 4:
+				evaluate_sprites_even();
+				read_background_attribute();
+				break;
+			case 5:
+				evaluate_sprites_odd();
+				open_background_pattern<pattern_0>();
+				break;
+			case 6:
+				evaluate_sprites_even();
+				read_background_pattern<pattern_0>();
+				break;
+			case 7:
+				evaluate_sprites_odd();
+				open_background_pattern<pattern_1>();
+				break;
+			case 0:
+				evaluate_sprites_even();
+				read_background_pattern<pattern_1>();
+				update_shift_registers_render();
+				clock_x();
+				break;
 			}
 
-			if(UNLIKELY(hpos_ == 256)) {
+			if (UNLIKELY(hpos_ == 256)) {
 				clock_y();
 			}
-		} else if(hpos_ < 321) {
+		} else if (hpos_ < 321) {
 
-			if(UNLIKELY(hpos_ == 257)) {
+			if (UNLIKELY(hpos_ == 257)) {
 				update_x_scroll();
 			}
 
 			update_sprite_registers();
 
 			// NOTE(eteran): on my machine, this code "costs" about 100 FPS
-			switch(hpos_ & 0x07) {
-			case 1: open_tile_index(); break;           // open the bus for nametable fetch (garbage)
-			case 2: read_tile_index(); break;           // fetch the name table byte (garbage)
-			case 3: open_background_attribute(); break; // open the bus for the attribute fetch (garbage)
-			case 4: read_background_attribute(); break; // fetch the attributes (garbage)
-			case 5: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_0>(); } else { open_sprite_pattern<size_8px, pattern_0>(); } break;
-			case 6: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_0>(); } else { read_sprite_pattern<size_8px, pattern_0>(); } break;
-			case 7: if(ppu_control_.large_sprites) { open_sprite_pattern<size_16px, pattern_1>(); } else { open_sprite_pattern<size_8px, pattern_1>(); } break;
-			case 0: if(ppu_control_.large_sprites) { read_sprite_pattern<size_16px, pattern_1>(); } else { read_sprite_pattern<size_8px, pattern_1>(); } break;
+			switch (hpos_ & 0x07) {
+			case 1:
+				open_tile_index();
+				break; // open the bus for nametable fetch (garbage)
+			case 2:
+				read_tile_index();
+				break; // fetch the name table byte (garbage)
+			case 3:
+				open_background_attribute();
+				break; // open the bus for the attribute fetch (garbage)
+			case 4:
+				read_background_attribute();
+				break; // fetch the attributes (garbage)
+			case 5:
+				if (ppu_control_.large_sprites) {
+					open_sprite_pattern<size_16px, pattern_0>();
+				} else {
+					open_sprite_pattern<size_8px, pattern_0>();
+				}
+				break;
+			case 6:
+				if (ppu_control_.large_sprites) {
+					read_sprite_pattern<size_16px, pattern_0>();
+				} else {
+					read_sprite_pattern<size_8px, pattern_0>();
+				}
+				break;
+			case 7:
+				if (ppu_control_.large_sprites) {
+					open_sprite_pattern<size_16px, pattern_1>();
+				} else {
+					open_sprite_pattern<size_8px, pattern_1>();
+				}
+				break;
+			case 0:
+				if (ppu_control_.large_sprites) {
+					read_sprite_pattern<size_16px, pattern_1>();
+				} else {
+					read_sprite_pattern<size_8px, pattern_1>();
+				}
+				break;
 			}
-		} else if(hpos_ < 337) {
+		} else if (hpos_ < 337) {
 			// NOTE(eteran): on my machine, this code "costs" about 50 FPS
 			// fetch first 2 tiles of NEXT scanline
-			switch(hpos_ & 0x07) {
-			case 1: open_tile_index(); break;           // open the bus for nametable fetch
-			case 2: read_tile_index(); break;           // fetch the name table byte
-			case 3: open_background_attribute(); break; // open the bus for the attribute fetch
-			case 4: read_background_attribute(); break; // fetch the attributes
-			case 5: open_background_pattern<pattern_0>(); break; // open the bus for pattern A fetch
-			case 6: read_background_pattern<pattern_0>(); break; // read 1st pattern byte from 000PTTTTTTTT0YYY
-			case 7: open_background_pattern<pattern_1>(); break; // open the bus for pattern B fetch
-			case 0: read_background_pattern<pattern_1>(); update_shift_registers_idle(); clock_x(); break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
+			switch (hpos_ & 0x07) {
+			case 1:
+				open_tile_index();
+				break; // open the bus for nametable fetch
+			case 2:
+				read_tile_index();
+				break; // fetch the name table byte
+			case 3:
+				open_background_attribute();
+				break; // open the bus for the attribute fetch
+			case 4:
+				read_background_attribute();
+				break; // fetch the attributes
+			case 5:
+				open_background_pattern<pattern_0>();
+				break; // open the bus for pattern A fetch
+			case 6:
+				read_background_pattern<pattern_0>();
+				break; // read 1st pattern byte from 000PTTTTTTTT0YYY
+			case 7:
+				open_background_pattern<pattern_1>();
+				break; // open the bus for pattern B fetch
+			case 0:
+				read_background_pattern<pattern_1>();
+				update_shift_registers_idle();
+				clock_x();
+				break; // read 2nd pattern byte from 000PTTTTTTTT1YYY
 			}
 		} else {
-			switch(hpos_) {
+			switch (hpos_) {
 			// dummy fetches
-			case 337: open_tile_index(); break;
-			case 338: read_tile_index(); break;
-			case 339: open_tile_index(); break;
-			case 340: read_tile_index(); break;
+			case 337:
+				open_tile_index();
+				break;
+			case 338:
+				read_tile_index();
+				break;
+			case 339:
+				open_tile_index();
+				break;
+			case 340:
+				read_tile_index();
+				break;
 			default:
 				abort();
 			}
@@ -930,18 +1156,42 @@ void clock_ppu(const scanline_vblank &target) {
 
 	// I know this should be 241 in theory, but we consider the pre-rendering
 	// scanline to be #0 for now
-	if(UNLIKELY(vpos_ == 242)) {
-		switch(hpos_) {
+	if (UNLIKELY(vpos_ == 242)) {
+		switch (hpos_) {
 		case 1:
 			enter_vblank();
 			break;
 		case 3:
-			if(ppu_control_.nmi_on_vblank && status_.vblank) {
+			if (ppu_control_.nmi_on_vblank && status_.vblank) {
 				cpu::nmi();
 			}
 			break;
 		}
 	}
+}
+
+//------------------------------------------------------------------------------
+// Name: start_frame
+//------------------------------------------------------------------------------
+void start_frame() {
+	vpos_ = 0;
+}
+
+//------------------------------------------------------------------------------
+// Name: end_frame
+//------------------------------------------------------------------------------
+void end_frame() {
+
+	odd_frame_ = !odd_frame_;
+
+	// we use the upper bits to count frames, so the upper byte should be about 0x3c
+	// within one second
+	latch_ += 0x100;
+	if (latch_ > 0x3c00) {
+		latch_ = 0;
+	}
+
+	cart.mapper()->ppu_end_frame();
 }
 
 }
@@ -951,12 +1201,12 @@ void clock_ppu(const scanline_vblank &target) {
 //------------------------------------------------------------------------------
 void reset(Reset reset_type) {
 
-	if(reset_type == Reset::Hard) {
+	if (reset_type == Reset::Hard) {
 		std::fill_n(sprite_ram_, 0x0100, 0);
 		std::fill_n(sprite_data_, 32, 0xff);
 		std::copy(std::begin(powerup_palette), std::end(powerup_palette), palette_);
 
-		for(int i = 0; i < 8; ++i) {
+		for (int i = 0; i < 8; ++i) {
 			sprite_patterns_[i].patterns[0] = 0;
 			sprite_patterns_[i].patterns[1] = 0;
 			sprite_patterns_[i].x           = 0;
@@ -966,31 +1216,31 @@ void reset(Reset reset_type) {
 		}
 	}
 
-	attribute_queue_[0]     = 0;
-	attribute_queue_[1]     = 0;
-	hpos_                   = 0;
-	latch_                  = 0;
-	nametable_              = 0x0000;
-	next_attribute_         = 0;
-	next_pattern_[0]        = 0;
-	next_pattern_[1]        = 0;
-	next_tile_index_        = 0;
-	odd_frame_              = false;
-	pattern_queue_[0]       = 0;
-	pattern_queue_[1]       = 0;
-	ppu_cycle_              = 0;
-	ppu_control_.raw        = 0;
-	ppu_mask_.raw           = 0;
-	register_2007_buffer_   = 0;
-	sprite_address_         = 0;
-	sprite_data_index_      = 0;
-	left_most_sprite_x_     = 0xff;
-	status_.raw             = 0;
-	tile_offset_            = 0;
-	vpos_                   = 0;
-	vram_address_           = 0x0000;
-	write_latch_            = false;
-	write_block_            = true;
+	attribute_queue_[0]   = 0;
+	attribute_queue_[1]   = 0;
+	hpos_                 = 0;
+	latch_                = 0;
+	nametable_            = 0x0000;
+	next_attribute_       = 0;
+	next_pattern_[0]      = 0;
+	next_pattern_[1]      = 0;
+	next_tile_index_      = 0;
+	odd_frame_            = false;
+	pattern_queue_[0]     = 0;
+	pattern_queue_[1]     = 0;
+	ppu_cycle_            = 0;
+	ppu_control_.raw      = 0;
+	ppu_mask_.raw         = 0;
+	register_2007_buffer_ = 0;
+	sprite_address_       = 0;
+	sprite_data_index_    = 0;
+	left_most_sprite_x_   = 0xff;
+	status_.raw           = 0;
+	tile_offset_          = 0;
+	vpos_                 = 0;
+	vram_address_         = 0x0000;
+	write_latch_          = false;
+	write_block_          = true;
 
 	std::cout << "PPU reset complete" << std::endl;
 }
@@ -1002,20 +1252,21 @@ void write2000(uint8_t value) {
 
 	latch_ = value;
 
-	if(write_block_) {
+	if (write_block_) {
 		return;
 	}
 
 	const Control prev_control = ppu_control_;
-	ppu_control_.raw = value;
+	ppu_control_.raw           = value;
 
 	// name table address
 	// t:0000110000000000=d:00000011
-	nametable_ = (nametable_ & 0b1111001111111111) | ((value & 0b00000011) << 10);
+	nametable_ &= 0b1111001111111111;
+	nametable_ |= ((value & 0b00000011) << 10);
 
-	if(prev_control.nmi_on_vblank && !ppu_control_.nmi_on_vblank) {
+	if (prev_control.nmi_on_vblank && !ppu_control_.nmi_on_vblank) {
 		cpu::clear_nmi();
-	} else if(!prev_control.nmi_on_vblank && ppu_control_.nmi_on_vblank && status_.vblank && hpos_ != 0) {
+	} else if (!prev_control.nmi_on_vblank && ppu_control_.nmi_on_vblank && status_.vblank && hpos_ != 0) {
 		cpu::nmi();
 	}
 }
@@ -1026,7 +1277,7 @@ void write2000(uint8_t value) {
 void write2001(uint8_t value) {
 	latch_ = value;
 
-	if(write_block_) {
+	if (write_block_) {
 		return;
 	}
 
@@ -1064,18 +1315,18 @@ void write2004(uint8_t value) {
 void write2005(uint8_t value) {
 	latch_ = value;
 
-	if(write_block_) {
+	if (write_block_) {
 		return;
 	}
 
 	write_latch_ = !write_latch_;
 
-	if(write_latch_) {
+	if (write_latch_) {
 		// 2005 first write:
 		// t:0000000000011111=d:11111000
 		// x=d:00000111
-		nametable_   &= 0b111111111100000;
-		nametable_   |= (value & 0b11111000) >> 3;
+		nametable_ &= 0b111111111100000;
+		nametable_ |= (value & 0b11111000) >> 3;
 		tile_offset_ = value & 0x07;
 	} else {
 		// 2005 second write:
@@ -1093,13 +1344,13 @@ void write2005(uint8_t value) {
 void write2006(uint8_t value) {
 	latch_ = value;
 
-	if(write_block_) {
+	if (write_block_) {
 		return;
 	}
 
 	write_latch_ = !write_latch_;
 
-	if(write_latch_) {
+	if (write_latch_) {
 		// 2006 first write:
 		// t:0011111100000000=d:00111111
 		// t:1100000000000000=0
@@ -1109,7 +1360,8 @@ void write2006(uint8_t value) {
 		// 2006 second write:
 		// t:0000000011111111=d:11111111
 		// v=t
-		nametable_    = (nametable_ & 0b0111111100000000) | (value & 0b11111111);
+		nametable_ &= 0b0111111100000000;
+		nametable_ |= (value & 0b11111111);
 		vram_address_ = nametable_;
 
 		cart.mapper()->vram_change_hook(vram_address_);
@@ -1129,12 +1381,12 @@ void write2007(uint8_t value) {
 	cart.mapper()->vram_change_hook(vram_address_);
 
 	// palette write
-	if((temp_address & 0b0011111100000000) == 0b0011111100000000) {
+	if ((temp_address & 0b0011111100000000) == 0b0011111100000000) {
 
 		const uint16_t palette_address = temp_address & 0x1f;
-		palette_[palette_address] = value & 0x3f;
+		palette_[palette_address]      = value & 0x3f;
 
-		if((palette_address & 0x03) == 0x00) {
+		if ((palette_address & 0x03) == 0x00) {
 			// $3F10/$3F14/$3F18/$3F1C are mirrors of $3F00/$3F04/$3F08/$3F0C.
 			palette_[palette_address ^ 0x10] = value & 0x3f;
 		}
@@ -1159,8 +1411,9 @@ uint8_t read2002() {
 	// upper 3 bits of status
 	// lower 5 bits of garbage (latch)
 	const uint8_t ret =
-		(status_.raw &  (StatusOverflow | StatusSprite0 | StatusVBlank)) |
-		(latch_      & ~(StatusOverflow | StatusSprite0 | StatusVBlank));
+		((status_.raw & (StatusOverflow | StatusSprite0 | StatusVBlank)) |
+		 (latch_ & ~(StatusOverflow | StatusSprite0 | StatusVBlank))) &
+		0xff;
 
 	// reset scroll/write latch
 	write_latch_ = false;
@@ -1178,12 +1431,20 @@ uint8_t read2002() {
 //------------------------------------------------------------------------------
 uint8_t read2004() {
 
-	if(!rendering() || !ppu_mask_.screen_enabled) {
-		switch(sprite_address_ & 0x03) {
-		case 0x00: latch_ = sprite_ram_[sprite_address_] & 0xff; break;
-		case 0x01: latch_ = sprite_ram_[sprite_address_] & 0xff; break;
-		case 0x02: latch_ = sprite_ram_[sprite_address_] & 0xe3; break;
-		case 0x03: latch_ = sprite_ram_[sprite_address_] & 0xff; break;
+	if (!rendering() || !ppu_mask_.screen_enabled) {
+		switch (sprite_address_ & 0x03) {
+		case 0x00:
+			latch_ = sprite_ram_[sprite_address_] & 0xff;
+			break;
+		case 0x01:
+			latch_ = sprite_ram_[sprite_address_] & 0xff;
+			break;
+		case 0x02:
+			latch_ = sprite_ram_[sprite_address_] & 0xe3;
+			break;
+		case 0x03:
+			latch_ = sprite_ram_[sprite_address_] & 0xff;
+			break;
 		}
 
 		return latch_ & 0xff;
@@ -1197,7 +1458,7 @@ uint8_t read2004() {
 //------------------------------------------------------------------------------
 uint8_t read2007() {
 
-	if(write_block_) {
+	if (write_block_) {
 		return 0x00;
 	}
 
@@ -1209,13 +1470,13 @@ uint8_t read2007() {
 
 	const auto decay_value = static_cast<uint8_t>(latch_);
 
-	latch_ = register_2007_buffer_;
+	latch_                = register_2007_buffer_;
 	register_2007_buffer_ = cart.mapper()->read_vram(temp_address);
 
-	if((temp_address & 0b0011111100000000) == 0b0011111100000000) {
+	if ((temp_address & 0b0011111100000000) == 0b0011111100000000) {
 
 		latch_ = palette_[temp_address & 0x1f] | (decay_value & 0xc0);
-		if(UNLIKELY(ppu_mask_.monochrome)) {
+		if (UNLIKELY(ppu_mask_.monochrome)) {
 			latch_ &= 0xf0;
 		}
 	}
@@ -1236,46 +1497,21 @@ void write4014(uint8_t value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: start_frame
-//------------------------------------------------------------------------------
-void start_frame() {
-	vpos_ = 0;
-}
-
-//------------------------------------------------------------------------------
-// Name: end_frame
-//------------------------------------------------------------------------------
-void end_frame() {
-
-	odd_frame_ = !odd_frame_;
-
-	// we use the upper bits to count frames, so the upper byte should be about 0x3c
-	// within one second
-	latch_ += 0x100;
-	if(latch_ > 0x3c00) {
-		latch_ = 0;
-	}
-
-	cart.mapper()->ppu_end_frame();
-}
-
-//------------------------------------------------------------------------------
 // Name: execute_scanline
 //------------------------------------------------------------------------------
 template <class T>
 void execute_scanline(const T &target) {
 
-	if(UNLIKELY(vpos_ == 262)) {
+	if (UNLIKELY(vpos_ == 262)) {
 		start_frame();
-	} else if(UNLIKELY(vpos_ == 241)) {
+	} else if (UNLIKELY(vpos_ == 241)) {
 		end_frame();
 	}
 
-
-	if(LIKELY(!system_paused)) {
-		for(hpos_ = 0; hpos_ < CyclesPerScanline; ++hpos_, ++ppu_cycle_) {
+	if (LIKELY(!system_paused)) {
+		for (hpos_ = 0; hpos_ < CyclesPerScanline; ++hpos_, ++ppu_cycle_) {
 			clock_ppu(target);
-			if((ppu_cycle_ % 3) == CpuAlignment) {
+			if ((ppu_cycle_ % 3) == CpuAlignment) {
 				cpu::exec<1>();
 				apu::exec<1>();
 			}

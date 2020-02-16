@@ -22,8 +22,7 @@ const uint8_t length_table[32] = {
 	0xc0, 0x18,
 	0x48, 0x1a,
 	0x10, 0x1c,
-	0x20, 0x1e
-};
+	0x20, 0x1e};
 }
 
 //------------------------------------------------------------------------------
@@ -31,8 +30,8 @@ const uint8_t length_table[32] = {
 //------------------------------------------------------------------------------
 void LengthCounter::load(uint8_t index) {
 
-	if(reload_) {
-		value_  = reload_value_;
+	if (reload_) {
+		value_ = reload_value_;
 	}
 
 	reload_value_ = length_table[index & 0x1f];
@@ -70,7 +69,7 @@ void LengthCounter::resume() {
 // Name: value
 //------------------------------------------------------------------------------
 uint8_t LengthCounter::value() const {
-	if(reload_) {
+	if (reload_) {
 		value_  = reload_value_;
 		reload_ = false;
 	}
@@ -86,28 +85,28 @@ void LengthCounter::clock() {
 	bool prevent_decrement     = false;
 	const uint64_t cycle_count = nes::apu::cycle_count();
 
-	if(reload_) {
-		if(reload_cycle_ == cycle_count && value_ == 0) {
-			value_ = reload_value_;
+	if (reload_) {
+		if (reload_cycle_ == cycle_count && value_ == 0) {
+			value_            = reload_value_;
 			prevent_decrement = true;
-		} else if(reload_cycle_ == cycle_count && value_ != 0) {
+		} else if (reload_cycle_ == cycle_count && value_ != 0) {
 			// no reload!
 		} else {
 			value_ = reload_value_;
 		}
 	}
 
-	if(!prevent_decrement) {
+	if (!prevent_decrement) {
 		bool halted;
 
 		// delay the halt 1 cycle
-		if(halt_cycle_ == cycle_count) {
+		if (halt_cycle_ == cycle_count) {
 			halted = prev_halt_;
 		} else {
 			halted = halt_;
 		}
 
-		if(!halted && value_ > 0) {
+		if (!halted && value_ > 0) {
 			--value_;
 		}
 	}

@@ -1,7 +1,7 @@
 
 #include "Mapper231.h"
-#include "Nes.h"
 #include "Cart.h"
+#include "Nes.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(231)
 
@@ -12,8 +12,8 @@ Mapper231::Mapper231() {
 
 	set_prg_89ab(0);
 	set_prg_cdef(0);
-	
-	if(nes::cart.has_chr_rom()) {
+
+	if (nes::cart.has_chr_rom()) {
 		set_chr_0000_1fff(0);
 	} else {
 		set_chr_0000_1fff_ram(chr_ram_, 0);
@@ -88,7 +88,7 @@ void Mapper231::write_f(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper231::write_handler(uint16_t address, uint8_t value) {
 	(void)value;
-	if(address & 0x80) {
+	if (address & 0x80) {
 		set_mirroring(mirror_horizontal);
 	} else {
 		set_mirroring(mirror_vertical);
@@ -97,5 +97,4 @@ void Mapper231::write_handler(uint16_t address, uint8_t value) {
 	prg_ = (prg_ & 0xfe) | ((address & 0x20) >> 5);
 	prg_ = (prg_ & 0x01) | ((address & 0x1e));
 	set_prg_89ab(prg_);
-
 }

@@ -84,7 +84,7 @@ void Mapper15::write_handler(uint16_t address, uint8_t value) {
 	uint8_t pageCD;
 	uint8_t pageEF;
 
-	switch(address & 0x03) {
+	switch (address & 0x03) {
 	case 0x00:
 		page89 = (((value & 0x3f) | 0) << 1);
 		pageAB = page89 + 1;
@@ -101,20 +101,20 @@ void Mapper15::write_handler(uint16_t address, uint8_t value) {
 		break;
 	case 0x02:
 		page89 =
-		pageAB =
-		pageCD =
-		pageEF =
-			(((value & 0x3f) + 0) << 1) + ((value & 0x80) >> 7);
+			pageAB =
+				pageCD =
+					pageEF =
+						(((value & 0x3f) + 0) << 1) + ((value & 0x80) >> 7);
 		break;
 	case 0x03:
 	default:
 		page89 =
-		pageCD =
-			((value & 0x3f) << 1);
+			pageCD =
+				((value & 0x3f) << 1);
 
 		pageAB =
-		pageEF =
-			pageCD + 1;
+			pageEF =
+				pageCD + 1;
 
 		break;
 	}
@@ -124,7 +124,7 @@ void Mapper15::write_handler(uint16_t address, uint8_t value) {
 	set_prg_cd(pageCD);
 	set_prg_ef(pageEF);
 
-	if(value & 0x40) {
+	if (value & 0x40) {
 		set_mirroring(mirror_horizontal);
 	} else {
 		set_mirroring(mirror_vertical);

@@ -82,6 +82,6 @@ void Mapper66::write_handler(uint16_t address, uint8_t value) {
 	const uint8_t prg = (value & 0x30) >> 4;
 	const uint8_t chr = (value & 0x03);
 
-	set_prg_89abcdef (prg);
+	set_prg_89abcdef(prg);
 	set_chr_0000_1fff(chr);
 }

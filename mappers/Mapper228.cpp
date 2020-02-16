@@ -1,7 +1,7 @@
 
 #include "Mapper228.h"
-#include "Nes.h"
 #include "Cart.h"
+#include "Nes.h"
 #include <cassert>
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(228)
@@ -34,7 +34,7 @@ std::string Mapper228::name() const {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper228::read_4(uint16_t address) {
-	if(address >= 0x4020) {
+	if (address >= 0x4020) {
 		return ram_[address & 0x03];
 	}
 	return Mapper::read_4(address);
@@ -52,7 +52,7 @@ uint8_t Mapper228::read_5(uint16_t address) {
 //------------------------------------------------------------------------------
 void Mapper228::write_4(uint16_t address, uint8_t value) {
 
-	if(address >= 0x4020) {
+	if (address >= 0x4020) {
 		ram_[address & 0x03] = value & 0x03;
 	} else {
 		Mapper::write_4(address, value);
@@ -127,29 +127,29 @@ void Mapper228::write_f(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper228::write_hander(uint16_t address, uint8_t value) {
 
-	if(address & 0x2000) {
+	if (address & 0x2000) {
 		set_mirroring(mirror_horizontal);
 	} else {
 		set_mirroring(mirror_vertical);
 	}
 
-	uint8_t prg_chip_select        = (address >> 11) & 0x03;
-	const uint8_t  prg_page_select = (address >> 6) & 0x1f;
-	const uint8_t  prg_mode        = ((address & 0x20) != 0);
-	const uint8_t  chr_select      = ((address & 0x0f) << 2) | (value & 0x03);
-	const uint32_t prg_mask        = nes::cart.prg_mask();
+	uint8_t prg_chip_select       = (address >> 11) & 0x03;
+	const uint8_t prg_page_select = (address >> 6) & 0x1f;
+	const uint8_t prg_mode        = ((address & 0x20) != 0);
+	const uint8_t chr_select      = ((address & 0x0f) << 2) | (value & 0x03);
+	const uint32_t prg_mask       = nes::cart.prg_mask();
 
 	set_chr_0000_1fff(chr_select);
 
 	assert(prg_chip_select != 2);
 
 	// Cheetahmen II seems to only have one chip
-	if(prg_mask < (ChipSize - 1)) {
+	if (prg_mask < (ChipSize - 1)) {
 		prg_chip_select = 0;
 	}
 
-	if(prg_chips_[prg_chip_select]) {
-		if(prg_mode == 0) {
+	if (prg_chips_[prg_chip_select]) {
+		if (prg_mode == 0) {
 
 			const uint8_t *const ptr = prg_chips_[prg_chip_select] + (((prg_page_select >> 1) * 0x8000) & (ChipSize - 1));
 
@@ -162,7 +162,7 @@ void Mapper228::write_hander(uint16_t address, uint8_t value) {
 			rom_[6] = ptr + 0x6000;
 			rom_[7] = ptr + 0x7000;
 
-		} else if(prg_mode == 1) {
+		} else if (prg_mode == 1) {
 
 			const uint8_t *const ptr = prg_chips_[prg_chip_select] + ((prg_page_select * 0x4000) & (ChipSize - 1));
 
@@ -193,7 +193,7 @@ void Mapper228::write_hander(uint16_t address, uint8_t value) {
 uint8_t Mapper228::read_8(uint16_t address) {
 	//return Mapper::read_8(address);
 
-	if(rom_[0]) {
+	if (rom_[0]) {
 		return rom_[0][address & 0x0fff];
 	}
 
@@ -204,7 +204,7 @@ uint8_t Mapper228::read_8(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper228::read_9(uint16_t address) {
-	if(rom_[1]) {
+	if (rom_[1]) {
 		return rom_[1][address & 0x0fff];
 	}
 
@@ -215,7 +215,7 @@ uint8_t Mapper228::read_9(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper228::read_a(uint16_t address) {
-	if(rom_[2]) {
+	if (rom_[2]) {
 		return rom_[2][address & 0x0fff];
 	}
 
@@ -226,7 +226,7 @@ uint8_t Mapper228::read_a(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper228::read_b(uint16_t address) {
-	if(rom_[3]) {
+	if (rom_[3]) {
 		return rom_[3][address & 0x0fff];
 	}
 
@@ -237,7 +237,7 @@ uint8_t Mapper228::read_b(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper228::read_c(uint16_t address) {
-	if(rom_[4]) {
+	if (rom_[4]) {
 		return rom_[4][address & 0x0fff];
 	}
 
@@ -248,7 +248,7 @@ uint8_t Mapper228::read_c(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper228::read_d(uint16_t address) {
-	if(rom_[5]) {
+	if (rom_[5]) {
 		return rom_[5][address & 0x0fff];
 	}
 
@@ -259,7 +259,7 @@ uint8_t Mapper228::read_d(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper228::read_e(uint16_t address) {
-	if(rom_[6]) {
+	if (rom_[6]) {
 		return rom_[6][address & 0x0fff];
 	}
 
@@ -270,10 +270,9 @@ uint8_t Mapper228::read_e(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper228::read_f(uint16_t address) {
-	if(rom_[7]) {
+	if (rom_[7]) {
 		return rom_[7][address & 0x0fff];
 	}
 
 	return Mapper::read_f(address);
 }
-

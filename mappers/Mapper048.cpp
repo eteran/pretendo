@@ -30,7 +30,7 @@ std::string Mapper48::name() const {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper48::write_8(uint16_t address, uint8_t value) {
-	 write_handler(address, value);
+	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ void Mapper48::write_f(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper48::write_handler(uint16_t address, uint8_t value) {
 
-	switch(address & 0xe003) {
+	switch (address & 0xe003) {
 	case 0x8000:
 		set_prg_89(value);
 		break;
@@ -117,7 +117,7 @@ void Mapper48::write_handler(uint16_t address, uint8_t value) {
 		break;
 	case 0xc001:
 		irq_counter_ = 0x00;
-		irq_reload_ = true;
+		irq_reload_  = true;
 		break;
 	case 0xc002:
 		irq_enabled_ = true;
@@ -127,7 +127,7 @@ void Mapper48::write_handler(uint16_t address, uint8_t value) {
 		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		break;
 	case 0xe000:
-		if(!(value & 0x40)) {
+		if (!(value & 0x40)) {
 			set_mirroring(mirror_vertical);
 		} else {
 			set_mirroring(mirror_horizontal);
@@ -141,7 +141,7 @@ void Mapper48::write_handler(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper48::vram_change_hook(uint16_t vram_address) {
 
-	if(vram_address & 0x1000 && !(prev_vram_address_ & 0x1000)) {
+	if (vram_address & 0x1000 && !(prev_vram_address_ & 0x1000)) {
 		if ((nes::ppu::cycle_count() - prev_ppu_cycle_) >= 16) {
 			clock_irq();
 		}
@@ -164,16 +164,16 @@ void Mapper48::clock_irq() {
 	 * $E001, the IRQ flag is set.
 	 */
 
-	if(irq_counter_ == 0x00) {
+	if (irq_counter_ == 0x00) {
 		irq_counter_ = irq_latch_;
 	} else {
 		--irq_counter_;
 		irq_reload_ = true;
 	}
 #ifdef MMC3A_STYLE
-	if(irq_enabled_ && irq_counter_ == 0 && irq_reload_) {
+	if (irq_enabled_ && irq_counter_ == 0 && irq_reload_) {
 #else
-	if(irq_enabled_ && irq_counter_ == 0) {
+	if (irq_enabled_ && irq_counter_ == 0) {
 #endif
 		nes::cpu::irq(nes::cpu::MAPPER_IRQ);
 	}

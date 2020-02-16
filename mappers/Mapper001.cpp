@@ -23,13 +23,13 @@ enum {
 // Name: Mapper1
 //------------------------------------------------------------------------------
 Mapper1::Mapper1() {
-	
-    prg_ptr_ = open_sram(0x2000);
+
+	prg_ptr_ = open_sram(0x2000);
 
 	set_prg_89ab(0);
 	set_prg_cdef(-1);
 
-	if(nes::cart.has_chr_rom()) {
+	if (nes::cart.has_chr_rom()) {
 		set_chr_0000_1fff(0);
 	} else {
 		set_chr_0000_1fff_ram(chr_ram_, 0);
@@ -50,7 +50,7 @@ std::string Mapper1::name() const {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper1::read_6(uint16_t address) {
-	if(!(regs_[REG_E000_FFFF] & 0x10)) {
+	if (!(regs_[REG_E000_FFFF] & 0x10)) {
 		return prg_ptr_[address & 0x1fff];
 	}
 	return Mapper::read_6(address);
@@ -60,7 +60,7 @@ uint8_t Mapper1::read_6(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper1::read_7(uint16_t address) {
-	if(!(regs_[REG_E000_FFFF] & 0x10)) {
+	if (!(regs_[REG_E000_FFFF] & 0x10)) {
 		return prg_ptr_[address & 0x1fff];
 	}
 	return Mapper::read_7(address);
@@ -70,7 +70,7 @@ uint8_t Mapper1::read_7(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper1::write_6(uint16_t address, uint8_t value) {
-	if(!(regs_[REG_E000_FFFF] & 0x10)) {
+	if (!(regs_[REG_E000_FFFF] & 0x10)) {
 		prg_ptr_[address & 0x1fff] = value;
 	} else {
 		Mapper::write_6(address, value);
@@ -81,7 +81,7 @@ void Mapper1::write_6(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper1::write_7(uint16_t address, uint8_t value) {
-	if(!(regs_[REG_E000_FFFF] & 0x10)) {
+	if (!(regs_[REG_E000_FFFF] & 0x10)) {
 		prg_ptr_[address & 0x1fff] = value;
 	} else {
 		Mapper::write_7(address, value);
@@ -150,26 +150,26 @@ void Mapper1::write_f(uint16_t address, uint8_t value) {
 void Mapper1::write_handler(uint16_t address, uint8_t value) {
 
 	// ignore writes which are only 1 or 2 cycles appart
-	if(nes::cpu::cycle_count() - cpu_cycles_ > 1) {
+	if (nes::cpu::cycle_count() - cpu_cycles_ > 1) {
 
 		uint8_t bank = (address >> 12) & 0xf;
 
-		if(value & 0x80) {
+		if (value & 0x80) {
 			// Reset latch_
-			latch_                = 0;
-			write_counter_        = 5;
+			latch_         = 0;
+			write_counter_ = 5;
 			regs_[REG_8000_9FFF] |= 0x0c;
-			bank                  = 0;
+			bank = 0;
 		} else {
 			// Normal write
-			value  &= 1;
+			value &= 1;
 			latch_ |= (value << write_counter_);
 			++write_counter_;
 		}
 
 		// every 5th write things are commited
-		if(write_counter_ == 5) {
-			if(bank > 0) {
+		if (write_counter_ == 5) {
+			if (bank > 0) {
 				regs_[(bank & 0xf7) >> 1] = (latch_ & 0x1f);
 			}
 
@@ -178,16 +178,24 @@ void Mapper1::write_handler(uint16_t address, uint8_t value) {
 			write_counter_ = 0;
 
 			// set mirroring
-			switch(regs_[REG_8000_9FFF] & 0x3) {
-			case 0: set_mirroring(mirror_single_low);  break;
-			case 1: set_mirroring(mirror_single_high); break;
-			case 2: set_mirroring(mirror_vertical);    break;
-			case 3: set_mirroring(mirror_horizontal);  break;
+			switch (regs_[REG_8000_9FFF] & 0x3) {
+			case 0:
+				set_mirroring(mirror_single_low);
+				break;
+			case 1:
+				set_mirroring(mirror_single_high);
+				break;
+			case 2:
+				set_mirroring(mirror_vertical);
+				break;
+			case 3:
+				set_mirroring(mirror_horizontal);
+				break;
 			}
 
 			// set CHR-ROM
-			if(nes::cart.has_chr_rom()) {
-				if(regs_[REG_8000_9FFF] & 0x10) {
+			if (nes::cart.has_chr_rom()) {
+				if (regs_[REG_8000_9FFF] & 0x10) {
 					set_chr_0000_0fff(regs_[REG_A000_BFFF]);
 					set_chr_1000_1fff(regs_[REG_C000_DFFF]);
 				} else {
@@ -196,7 +204,7 @@ void Mapper1::write_handler(uint16_t address, uint8_t value) {
 			}
 
 			// set PRG-ROM
-			switch((regs_[REG_8000_9FFF] >> 2) & 0x03) {
+			switch ((regs_[REG_8000_9FFF] >> 2) & 0x03) {
 			case 0x00:
 			case 0x01:
 				set_prg_89abcdef((regs_[REG_E000_FFFF] & 0x0f) >> 1);

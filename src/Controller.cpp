@@ -5,7 +5,7 @@
 // Name: read
 //------------------------------------------------------------------------------
 uint8_t Controller::read() {
-	if(read_index_++ < 8) {
+	if (read_index_++ < 8) {
 		return data_.read();
 	} else {
 		return 0x01;
@@ -17,8 +17,8 @@ uint8_t Controller::read() {
 //------------------------------------------------------------------------------
 void Controller::poll() {
 
-	if(connected_) {
-        data_.load(static_cast<uint8_t>(keystate_.to_ulong()));
+	if (connected_) {
+		data_.load(static_cast<uint8_t>(keystate_.to_ulong()));
 		read_index_ = 0;
 	}
 }

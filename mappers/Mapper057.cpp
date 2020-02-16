@@ -82,7 +82,7 @@ void Mapper57::write_f(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper57::write_hander(uint16_t address, uint8_t value) {
 
-	switch(address & 0x8800) {
+	switch (address & 0x8800) {
 	case 0x8000:
 		reg0_ = value;
 		break;
@@ -92,19 +92,18 @@ void Mapper57::write_hander(uint16_t address, uint8_t value) {
 	}
 
 	// set mirroring
-	if(reg1_ & 0x08) {
+	if (reg1_ & 0x08) {
 		set_mirroring(mirror_horizontal);
 	} else {
 		set_mirroring(mirror_vertical);
 	}
 
-	if(reg1_ & 0x10) {
+	if (reg1_ & 0x10) {
 		set_prg_89abcdef((reg1_ >> 5) & 0x07);
 	} else {
 		set_prg_89ab((reg1_ >> 5) & 0x07);
 		set_prg_cdef((reg1_ >> 5) & 0x07);
 	}
-
 
 	set_chr_0000_1fff((reg0_ & 0x07) | (reg1_ & 0x07) | ((reg0_ >> 3) & 0x08));
 }

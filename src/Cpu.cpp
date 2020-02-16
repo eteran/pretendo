@@ -44,11 +44,11 @@ namespace cpu {
 
 // public registers
 register16 PC = {};
-uint8_t    A  = 0;
-uint8_t    X  = 0;
-uint8_t    Y  = 0;
-uint8_t    S  = 0;
-uint8_t    P  = I_MASK | R_MASK;
+uint8_t A     = 0;
+uint8_t X     = 0;
+uint8_t Y     = 0;
+uint8_t S     = 0;
+uint8_t P     = I_MASK | R_MASK;
 
 namespace {
 
@@ -94,21 +94,20 @@ constexpr uint8_t flag_table_[256] = {
 	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-};
+	0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
 
 uint8_t irq_sources_ = 0x00;
 
 // internal registers
 uint16_t instruction_ = 0;
-int      cycle_       = 0;
+int cycle_            = 0;
 
 // internal registers (which get trashed by instructions)
 register16 effective_address16_ = {};
 register16 data16_              = {};
 register16 old_pc_              = {};
 register16 new_pc_              = {};
-uint8_t    data8_               = {};
+uint8_t data8_                  = {};
 
 bool irq_asserted_  = false;
 bool nmi_asserted_  = false;
@@ -117,17 +116,17 @@ bool irq_executing_ = false;
 bool nmi_executing_ = false;
 bool rst_executing_ = true;
 
-dma_handler_t spr_dma_handler_        = nullptr;
-uint16_t      spr_dma_source_address_ = 0;
-uint16_t      spr_dma_count_          = 0;
-uint8_t       spr_dma_byte_           = 0;
-uint8_t       spr_dma_delay_          = 0;
+dma_handler_t spr_dma_handler_   = nullptr;
+uint16_t spr_dma_source_address_ = 0;
+uint16_t spr_dma_count_          = 0;
+uint8_t spr_dma_byte_            = 0;
+uint8_t spr_dma_delay_           = 0;
 
-dma_handler_t dmc_dma_handler_        = nullptr;
-uint16_t      dmc_dma_source_address_ = 0;
-uint16_t      dmc_dma_count_          = 0;
-uint8_t       dmc_dma_byte_           = 0;
-uint8_t       dmc_dma_delay_          = 0;
+dma_handler_t dmc_dma_handler_   = nullptr;
+uint16_t dmc_dma_source_address_ = 0;
+uint16_t dmc_dma_count_          = 0;
+uint8_t dmc_dma_byte_            = 0;
+uint8_t dmc_dma_delay_           = 0;
 
 // stats
 uint64_t executed_cycles_ = 1; // NOTE(eteran): 1 instead of 0 makes 4.irq_and_dma.nes pass...
@@ -135,6 +134,7 @@ uint64_t executed_cycles_ = 1; // NOTE(eteran): 1 instead of 0 makes 4.irq_and_d
 /**
  * @brief jam_handler
  */
+[[noreturn]]
 void jam_handler() {
 	// TODO(eteran): do something useful here...
 	assert(0);
@@ -195,7 +195,6 @@ void update_nz_flags(uint8_t value) {
 #include "opcodes.h"
 
 #include "address_modes.h"
-
 
 /**
  * @brief execute_opcode

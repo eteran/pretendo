@@ -73,9 +73,6 @@ uint8_t read2004();
 uint8_t read2007();
 uint8_t read200x();
 
-void end_frame();
-void start_frame();
-
 template <class T>
 void execute_scanline(const T &target);
 
