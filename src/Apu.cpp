@@ -24,8 +24,8 @@ enum {
 
 union APUFrameCounter {
 	uint8_t raw;
-	BitField<6> inihibit_frame_irq;
-	BitField<7> mode;
+	BitField<uint8_t, 6> inihibit_frame_irq;
+	BitField<uint8_t, 7> mode;
 };
 
 //------------------------------------------------------------------------------

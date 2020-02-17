@@ -9,9 +9,9 @@ class VRC4 : public Mapper {
 private:
 	union IRQControl {
 		uint8_t raw;
-		BitField<0> a;
-		BitField<1> enabled;
-		BitField<2> mode;
+		BitField<uint8_t, 0> a;
+		BitField<uint8_t, 1> enabled;
+		BitField<uint8_t, 2> mode;
 	};
 
 public:

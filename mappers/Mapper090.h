@@ -9,18 +9,18 @@ class Mapper90 final : public Mapper {
 private:
 	union BankControl {
 		uint8_t raw;
-		BitField<0, 3> prg;
-		BitField<3, 2> chr;
-		BitField<5> n;
-		BitField<6> r;
-		BitField<6> map_67;
+		BitField<uint8_t, 0, 3> prg;
+		BitField<uint8_t, 3, 2> chr;
+		BitField<uint8_t, 5> n;
+		BitField<uint8_t, 6> r;
+		BitField<uint8_t, 6> map_67;
 	};
 
 	union ChrControl {
 		uint8_t raw;
-		BitField<0, 5> block;
-		BitField<5> disabled;
-		BitField<7> mirror;
+		BitField<uint8_t, 0, 5> block;
+		BitField<uint8_t, 5> disabled;
+		BitField<uint8_t, 7> mirror;
 	};
 
 public:

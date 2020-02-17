@@ -9,8 +9,8 @@ class Bandai : public Mapper {
 private:
 	union IRQCounter {
 		uint16_t raw;
-		BitField<0, 8> lo;
-		BitField<8, 8> hi;
+		BitField<uint16_t, 0, 8> lo;
+		BitField<uint16_t, 8, 8> hi;
 	};
 
 public:

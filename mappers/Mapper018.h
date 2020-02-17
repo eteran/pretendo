@@ -9,26 +9,26 @@ class Mapper18 final : public Mapper {
 private:
 	union IRQControl {
 		uint8_t raw;
-		BitField<0> enabled;
-		BitField<1> mode_12bit;
-		BitField<2> mode_8bit;
-		BitField<3> mode_4bit;
+		BitField<uint8_t, 0> enabled;
+		BitField<uint8_t, 1> mode_12bit;
+		BitField<uint8_t, 2> mode_8bit;
+		BitField<uint8_t, 3> mode_4bit;
 	};
 
 	union IRQCounter {
 		uint16_t raw;
-		BitField<0, 4> counter_4bit;
-		BitField<0, 8> counter_8bit;
-		BitField<0, 12> counter_12bit;
-		BitField<0, 16> counter_16bit;
+		BitField<uint16_t, 0, 4> counter_4bit;
+		BitField<uint16_t, 0, 8> counter_8bit;
+		BitField<uint16_t, 0, 12> counter_12bit;
+		BitField<uint16_t, 0, 16> counter_16bit;
 	};
 
 	union IRQLatch {
 		uint16_t raw;
-		BitField<0, 4> byte1;
-		BitField<4, 8> byte2;
-		BitField<8, 12> byte3;
-		BitField<12, 16> byte4;
+		BitField<uint16_t, 0, 4> byte1;
+		BitField<uint16_t, 4, 8> byte2;
+		BitField<uint16_t, 8, 12> byte3;
+		BitField<uint16_t, 12, 16> byte4;
 	};
 
 public:

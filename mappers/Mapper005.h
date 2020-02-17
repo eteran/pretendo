@@ -9,8 +9,8 @@ class Mapper5 final : public Mapper {
 private:
 	union IRQStatus {
 		uint8_t raw;
-		BitField<6> in_frame;
-		BitField<7> pending;
+		BitField<uint8_t, 6> in_frame;
+		BitField<uint8_t, 7> pending;
 	};
 
 public:

@@ -19,16 +19,16 @@ class DMC;
 
 union APUStatus {
 	uint8_t raw;
-	BitField<0> square1_enabled;
-	BitField<1> square2_enabled;
-	BitField<2> triangle_enabled;
-	BitField<3> noise_enabled;
-	BitField<4> dmc_enabled;
-	BitField<6> frame_irq;
-	BitField<7> dmc_irq;
+	BitField<uint8_t, 0> square1_enabled;
+	BitField<uint8_t, 1> square2_enabled;
+	BitField<uint8_t, 2> triangle_enabled;
+	BitField<uint8_t, 3> noise_enabled;
+	BitField<uint8_t, 4> dmc_enabled;
+	BitField<uint8_t, 6> frame_irq;
+	BitField<uint8_t, 7> dmc_irq;
 
 	// meta field
-	BitField<6, 2> irq_firing;
+	BitField<uint8_t, 6, 2> irq_firing;
 };
 
 constexpr int frequency   = 44100;

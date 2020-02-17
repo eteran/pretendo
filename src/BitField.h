@@ -4,48 +4,48 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <type_traits>
 
-namespace detail {
-
-template <size_t LastBit>
-struct MinimumTypeHelper {
-	using type =
-		typename std::conditional<LastBit == 0, void,
-								  typename std::conditional<LastBit <= 8, uint8_t,
-															typename std::conditional<LastBit <= 16, uint16_t,
-																					  typename std::conditional<LastBit <= 32, uint32_t,
-																												typename std::conditional<LastBit <= 64, uint64_t,
-																																		  void>::type>::type>::type>::type>::type;
-};
-
-}
-
-template <size_t Index, size_t Bits = 1>
+template <class T, size_t Index, size_t Bits = 1>
 class BitField {
 private:
 	enum {
 		Mask = (1u << Bits) - 1u
 	};
 
-	using T = typename detail::MinimumTypeHelper<Index + Bits>::type;
-
 public:
+	BitField &operator=(BitField &rhs) {
+		value_ = (value_ & ~Mask) | (rhs.value_ & Mask);
+		return *this;
+	}
+
 	template <class T2>
 	BitField &operator=(T2 value) {
 		value_ = (value_ & ~(Mask << Index)) | ((value & Mask) << Index);
 		return *this;
 	}
 
-	operator T() const { return (value_ >> Index) & Mask; }
-	explicit operator bool() const { return (value_ & (Mask << Index)) != 0; }
-	BitField &operator++() { return *this = *this + 1; }
+	operator T() const {
+		return (value_ >> Index) & Mask;
+	}
+
+	explicit operator bool() const {
+		return (value_ & (Mask << Index)) != 0;
+	}
+
+	BitField &operator++() {
+		return *this = *this + 1;
+	}
+
 	T operator++(int) {
 		T r = *this;
 		++*this;
 		return r;
 	}
-	BitField &operator--() { return *this = *this - 1; }
+
+	BitField &operator--() {
+		return *this = *this - 1;
+	}
+
 	T operator--(int) {
 		T r = *this;
 		++*this;
@@ -56,15 +56,13 @@ private:
 	T value_;
 };
 
-template <size_t Index>
-class BitField<Index, 1> {
+template <class T, size_t Index>
+class BitField<T, Index, 1> {
 private:
 	enum {
 		Bits = 1,
 		Mask = 0x01
 	};
-
-	using T = typename detail::MinimumTypeHelper<Index + Bits>::type;
 
 public:
 	BitField &operator=(bool value) {
@@ -72,8 +70,13 @@ public:
 		return *this;
 	}
 
-	operator bool() const { return (value_ & (Mask << Index)) != 0; }
-	bool operator!() const { return (value_ & (Mask << Index)) == 0; }
+	operator bool() const {
+		return (value_ & (Mask << Index)) != 0;
+	}
+
+	bool operator!() const {
+		return (value_ & (Mask << Index)) == 0;
+	}
 
 private:
 	T value_;

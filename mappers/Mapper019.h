@@ -9,12 +9,12 @@ class Mapper19 final : public Mapper {
 private:
 	union IRQControl {
 		uint16_t raw;
-		BitField<0, 15> counter;
-		BitField<15> enabled;
+		BitField<uint16_t, 0, 15> counter;
+		BitField<uint16_t, 15> enabled;
 
 		// meta-fields
-		BitField<0, 8> lo;
-		BitField<8, 8> hi;
+		BitField<uint16_t, 0, 8> lo;
+		BitField<uint16_t, 8, 8> hi;
 	};
 
 public:

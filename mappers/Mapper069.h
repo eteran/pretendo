@@ -9,14 +9,14 @@ class Mapper69 final : public Mapper {
 public:
 	union IRQControl {
 		uint8_t raw;
-		BitField<0> enabled;
-		BitField<7> counter_enabled;
+		BitField<uint8_t, 0> enabled;
+		BitField<uint8_t, 7> counter_enabled;
 	};
 
 	union IRQCounter {
 		uint16_t raw;
-		BitField<0, 8> lo;
-		BitField<8, 8> hi;
+		BitField<uint16_t, 0, 8> lo;
+		BitField<uint16_t, 8, 8> hi;
 	};
 
 public:

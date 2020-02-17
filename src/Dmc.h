@@ -12,9 +12,9 @@ namespace apu {
 
 union DMCControl {
 	uint8_t value;
-	BitField<0, 4> frequency;
-	BitField<6> loop;
-	BitField<7> irq;
+	BitField<uint8_t, 0, 4> frequency;
+	BitField<uint8_t, 6> loop;
+	BitField<uint8_t, 7> irq;
 };
 
 class DMC {
