@@ -40,21 +40,21 @@ public:
 			// push P on stack, decrement S
 			write_byte(S-- + StackAddress, P);
 			if (nmi_asserted_) {
-				effective_address16_.raw = NmiVectorAddress;
-				nmi_asserted_            = false;
+				effective_address_.raw = NmiVectorAddress;
+				nmi_asserted_          = false;
 			} else {
-				effective_address16_.raw = IrqVectorAddress;
+				effective_address_.raw = IrqVectorAddress;
 			}
 			break;
 		case 5:
 			set_flag<I_MASK>();
 			// fetch PCL
-			PC.lo = read_byte(effective_address16_.raw + 0);
+			PC.lo = read_byte(effective_address_.raw + 0);
 			break;
 		case 6:
 			LAST_CYCLE_0;
 			// fetch PCH
-			PC.hi = read_byte(effective_address16_.raw + 1);
+			PC.hi = read_byte(effective_address_.raw + 1);
 			OPCODE_COMPLETE;
 		default:
 			abort();

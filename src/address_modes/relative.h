@@ -39,7 +39,7 @@ private:
 			// Fetch opcode of next instruction,
 			// If branch is taken, add operand to PCL.
 			// Otherwise increment PC.
-			const uint8_t new_op = read_byte(PC.raw);
+			const uint8_t next_op = read_byte(PC.raw);
 
 			// ------
 			// A taken non-page-crossing branch ignores IRQ during
@@ -61,7 +61,7 @@ private:
 				} else if (irq_executing_) {
 					instruction_ = 0x102;
 				} else {
-					instruction_ = new_op;
+					instruction_ = next_op;
 					++PC.raw;
 				}
 				cycle_ = 0;
@@ -71,7 +71,7 @@ private:
 		case 3: {
 			// Fetch opcode of next instruction.
 			// Fix PCH. If it did not change, increment PC.
-			const uint8_t new_op = read_byte(PC.raw);
+			const uint8_t next_op = read_byte(PC.raw);
 
 			if (new_pc_.hi != old_pc_.hi) {
 				LAST_CYCLE_0;
@@ -84,7 +84,7 @@ private:
 				} else if (irq_executing_) {
 					instruction_ = 0x102;
 				} else {
-					instruction_ = new_op;
+					instruction_ = next_op;
 					++PC.raw;
 				}
 				cycle_ = 0;
@@ -92,7 +92,7 @@ private:
 			break;
 		}
 		case 4: {
-			const uint8_t new_op = read_byte(PC.raw);
+			const uint8_t next_op = read_byte(PC.raw);
 
 			if (rst_executing_) {
 				instruction_ = 0x100;
@@ -101,7 +101,7 @@ private:
 			} else if (irq_executing_) {
 				instruction_ = 0x102;
 			} else {
-				instruction_ = new_op;
+				instruction_ = next_op;
 				++PC.raw;
 			}
 			cycle_ = 0;
@@ -112,5 +112,7 @@ private:
 		}
 	}
 };
+
+#undef LAST_CYCLE_0
 
 #endif

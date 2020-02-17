@@ -103,11 +103,11 @@ uint16_t instruction_ = 0;
 int cycle_            = 0;
 
 // internal registers (which get trashed by instructions)
-register16 effective_address16_ = {};
-register16 data16_              = {};
-register16 old_pc_              = {};
-register16 new_pc_              = {};
-uint8_t data8_                  = {};
+register16 effective_address_ = {};
+register16 data16_            = {};
+register16 old_pc_            = {};
+register16 new_pc_            = {};
+uint8_t data8_                = {};
 
 bool irq_asserted_  = false;
 bool nmi_asserted_  = false;

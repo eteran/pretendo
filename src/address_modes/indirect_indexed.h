@@ -25,17 +25,17 @@ private:
 		case 3:
 			// fetch effective address high,
 			// add Y to low byte of effective address
-			effective_address16_.hi = read_byte_zp(data8_ + 1);
+			effective_address_.hi = read_byte_zp(data8_ + 1);
 			data16_.raw += Y;
 			break;
 		case 4:
 
 			// read from effective address,
 			// fix high byte of effective address
-			effective_address16_.lo = data16_.lo;
-			data8_                  = read_byte(effective_address16_.raw);
+			effective_address_.lo = data16_.lo;
+			data8_                = read_byte(effective_address_.raw);
 			if (data16_.raw > 0xff) {
-				++effective_address16_.hi;
+				++effective_address_.hi;
 				break;
 			} else {
 				LAST_CYCLE;
@@ -45,7 +45,7 @@ private:
 		case 5:
 			LAST_CYCLE;
 			// read from effective address
-			Op::execute(read_byte(effective_address16_.raw));
+			Op::execute(read_byte(effective_address_.raw));
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -66,33 +66,33 @@ private:
 		case 3:
 			// fetch effective address high,
 			// add Y to low byte of effective address
-			effective_address16_.hi = read_byte_zp(data8_ + 1);
+			effective_address_.hi = read_byte_zp(data8_ + 1);
 			data16_.raw += Y;
 			break;
 		case 4:
 
 			// read from effective address,
 			// fix high byte of effective address
-			effective_address16_.lo = data16_.lo;
-			data8_                  = read_byte(effective_address16_.raw);
+			effective_address_.lo = data16_.lo;
+			data8_                = read_byte(effective_address_.raw);
 			if (data16_.raw > 0xff) {
-				++effective_address16_.hi;
+				++effective_address_.hi;
 			}
 			break;
 		case 5:
 			// read from effective address
-			data8_ = read_byte(effective_address16_.raw);
+			data8_ = read_byte(effective_address_.raw);
 			break;
 		case 6:
 			// write the value back to effective address,
 			// and do the operation on it
-			write_byte(effective_address16_.raw, data8_);
+			write_byte(effective_address_.raw, data8_);
 			Op::execute(data8_);
 			break;
 		case 7:
 			LAST_CYCLE;
 			// write the new value to effective address
-			write_byte(effective_address16_.raw, data8_);
+			write_byte(effective_address_.raw, data8_);
 			OPCODE_COMPLETE;
 		default:
 			abort();
@@ -113,24 +113,24 @@ private:
 		case 3:
 			// fetch effective address high,
 			// add Y to low byte of effective address
-			effective_address16_.hi = read_byte_zp(data8_ + 1);
+			effective_address_.hi = read_byte_zp(data8_ + 1);
 			data16_.raw += Y;
 			break;
 		case 4:
 
 			// read from effective address,
 			// fix high byte of effective address
-			effective_address16_.lo = data16_.lo;
-			data8_                  = read_byte(effective_address16_.raw);
+			effective_address_.lo = data16_.lo;
+			data8_                = read_byte(effective_address_.raw);
 			if (data16_.raw > 0xff) {
-				++effective_address16_.hi;
+				++effective_address_.hi;
 			}
 			break;
 		case 5:
 			LAST_CYCLE;
 			// write to effective address
 			{
-				uint16_t address = effective_address16_.raw;
+				uint16_t address = effective_address_.raw;
 				uint8_t value    = Op::execute(address);
 				write_byte(address, value);
 			}

@@ -26,8 +26,6 @@ struct SaveState {
 	// API
 
 	// Mapper
-
-
 };
 
 #endif
