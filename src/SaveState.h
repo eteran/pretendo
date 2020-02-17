@@ -4,6 +4,8 @@
 
 #include <cstdint>
 
+// TODO(eteran): implement internal state
+
 struct SaveState {
 
 	// System
@@ -17,40 +19,15 @@ struct SaveState {
 	uint8_t cpu_s;
 	uint8_t cpu_p;
 
-	uint8_t irq_sources;
+	// PPU
+	uint8_t ppu_sprite_ram[0x100];
+	uint8_t ppu_palette[0x20];
 
-	// internal registers
-	uint16_t instruction;
-	int cycle;
+	// API
 
-	// internal registers (which get trashed by instructions)
-	uint16_t effective_address16;
-	uint16_t data16;
-	uint16_t old_pc;
-	uint16_t new_pc;
-	uint8_t data8;
+	// Mapper
 
-	bool irq_asserted;
-	bool nmi_asserted;
-	bool rst_asserted;
-	bool irq_executing;
-	bool nmi_executing;
-	bool rst_executing;
 
-	void *spr_dma_handler;
-	uint16_t spr_dma_source_address;
-	uint16_t spr_dma_count;
-	uint8_t spr_dma_byte;
-	uint8_t spr_dma_delay;
-
-	void *dmc_dma_handler;
-	uint16_t dmc_dma_source_address;
-	uint16_t dmc_dma_count;
-	uint8_t dmc_dma_byte;
-	uint8_t dmc_dma_delay;
-
-	// stats
-	uint64_t executed_cycles = 1; // NOTE(eteran): 1 instead of 0 makes 4.irq_and_dma.nes pass...
 };
 
 #endif
