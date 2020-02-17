@@ -134,8 +134,7 @@ uint64_t executed_cycles_ = 1; // NOTE(eteran): 1 instead of 0 makes 4.irq_and_d
 /**
  * @brief jam_handler
  */
-[[noreturn]]
-void jam_handler() {
+[[noreturn]] void jam_handler() {
 	// TODO(eteran): do something useful here...
 	abort();
 }

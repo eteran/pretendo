@@ -12,6 +12,7 @@ namespace {
 	std::cout << "\n";
 	std::cout << "OPTIONS:\n";
 	std::cout << "\t--fps <NUM>\n";
+	std::cout << "\t--test-frames <NUM>\n";
 	std::cout << "\t--help" << std::endl;
 	exit(0);
 }
@@ -21,7 +22,8 @@ namespace {
 int main(int argc, char *argv[]) {
 	QApplication app(argc, argv);
 
-	int fps = 60;
+	int fps              = 60;
+	uint64_t test_cycles = 0;
 	QString rom;
 
 	int i = 1;
@@ -34,6 +36,16 @@ int main(int argc, char *argv[]) {
 			fps = atoi(argv[i]);
 			if (fps == 0) {
 				std::cerr << "ERROR: Invalid FPS" << std::endl;
+				usage(argv[0]);
+			}
+		} else if (strcmp(argv[i], "--test-frames") == 0) {
+			if (i + 1 == argc) {
+				usage(argv[0]);
+			}
+			++i;
+			test_cycles = strtoul(argv[i], nullptr, 10);
+			if (test_cycles == 0) {
+				std::cerr << "ERROR: Invalid test cycles" << std::endl;
 				usage(argv[0]);
 			}
 		} else if (strcmp(argv[i], "--help") == 0) {
@@ -50,6 +62,7 @@ int main(int argc, char *argv[]) {
 
 	Pretendo w(rom);
 	w.setFrameRate(fps);
+	w.setFrameLimit(test_cycles);
 	w.show();
 
 	return app.exec();

@@ -32,6 +32,7 @@ public:
 
 public:
 	void setFrameRate(int framerate);
+	void setFrameLimit(uint64_t limit);
 
 private Q_SLOTS:
 	void picked(const QModelIndex &index);
@@ -70,15 +71,17 @@ private:
 	QLabel *fps_label_                   = nullptr;
 	Qt::Key player_1_[8];
 	QTime time_;
-	quint64 framecount_ = 0;
-	bool paused_        = false;
-	int framerate_      = 60;
+	uint64_t framecount_     = 0;
+	uint64_t raw_framecount_ = 0;
+	bool paused_             = false;
+	int framerate_           = 60;
 
 #if defined(PULSE_AUDIO_SOUND)
 	PulseAudio *audio_;
 #else
 	NullAudio *audio_;
 #endif
+	uint64_t frame_limit_ = 0;
 };
 
 #endif

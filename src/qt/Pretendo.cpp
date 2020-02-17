@@ -178,6 +178,13 @@ void Pretendo::setFrameRate(int framerate) {
 }
 
 //------------------------------------------------------------------------------
+// Name: setFrameLimit
+//------------------------------------------------------------------------------
+void Pretendo::setFrameLimit(uint64_t limit) {
+	frame_limit_ = limit;
+}
+
+//------------------------------------------------------------------------------
 // Name: update
 //------------------------------------------------------------------------------
 void Pretendo::update() {
@@ -205,7 +212,16 @@ void Pretendo::update() {
 		time_.restart();
 		framecount_ = 0;
 	}
+
 	++framecount_;
+
+	++raw_framecount_;
+	if (raw_framecount_ == frame_limit_) {
+		on_action_Take_Screenshot_triggered();
+		on_action_Stop_triggered();
+		on_action_Free_ROM_triggered();
+		qApp->quit();
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -271,6 +287,8 @@ void Pretendo::on_action_Run_triggered() {
 				ui_.stackedWidget->setCurrentIndex(1);
 
 				nes::reset(nes::Reset::Hard);
+
+				raw_framecount_ = 0;
 
 				timer_->start(1000.0f / framerate_);
 				audio_->start();
@@ -509,11 +527,23 @@ void Pretendo::on_action_Audio_Viewer_triggered() {
 	dialog->show();
 }
 
+//------------------------------------------------------------------------------
+// Name:
+// Desc:
+//------------------------------------------------------------------------------
 void Pretendo::on_action_Take_Screenshot_triggered() {
+
+	if (!nes::cart.mapper()) {
+		QMessageBox::critical(this, tr("Error Taking Snapshot"), tr("Cannot take a screenshot with no ROM loaded"));
+		return;
+	}
+
 	QImage screenshot = ui_.video->screenshot();
 	auto pix          = QPixmap::fromImage(screenshot);
 
-	QString timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
+	QString filename = QString::fromStdString(nes::cart.filename());
 
-	pix.save(QString("pretendo-screenshot-%1.png").arg(timestamp));
+	QFileInfo fi(filename);
+
+	pix.save(QString("pretendo-%1.png").arg(fi.baseName()));
 }
