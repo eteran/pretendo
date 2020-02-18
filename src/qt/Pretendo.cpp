@@ -14,7 +14,6 @@
 #include "SortFilterProxyModel.h"
 
 #include <QDateTime>
-#include <QDebug>
 #include <QDirIterator>
 #include <QFileDialog>
 #include <QKeyEvent>
@@ -22,6 +21,8 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QTimer>
+
+#include <iostream>
 
 #if defined(PULSE_AUDIO_SOUND)
 #include "PulseAudio.h"
@@ -150,7 +151,11 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 		// make the ROM viewer default to the location of the run ROM
 		const QFileInfo info(rom);
 		if (info.isFile()) {
-			nes::cart.load(rom.toStdString());
+			if(!nes::cart.load(rom.toStdString())) {
+				QTimer::singleShot(0, this, SLOT(close()));
+				std::cout << "[Pretendo] Failed to load ROM, exiting..." << std::endl;
+				return;
+			}
 			on_action_Run_triggered();
 		}
 	}
