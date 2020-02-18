@@ -545,5 +545,5 @@ void Pretendo::on_action_Take_Screenshot_triggered() {
 
 	QFileInfo fi(filename);
 
-	pix.save(QString("pretendo-%1.png").arg(fi.baseName()));
+	pix.save(QString("pretendo-%1-%2.png").arg(nes::cart.rom_hash(), 8, 16, QLatin1Char('0')).arg(fi.baseName()));
 }

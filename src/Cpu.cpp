@@ -193,6 +193,23 @@ void update_nz_flags(uint8_t value) {
 #include "memory.h"
 #include "opcodes.h"
 
+void cycle_0() {
+	// first cycle is always instruction fetch
+	// or do we force an interrupt?
+	const uint8_t next_op = read_byte(PC.raw);
+
+	if (rst_executing_) {
+		instruction_ = 0x100;
+	} else if (nmi_executing_) {
+		instruction_ = 0x101;
+	} else if (irq_executing_) {
+		instruction_ = 0x102;
+	} else {
+		instruction_ = next_op;
+		++PC.raw;
+	}
+}
+
 #include "address_modes.h"
 
 /**
@@ -531,22 +548,7 @@ void clock() {
 		assert(cycle_ < 10);
 
 		if (cycle_ == 0) {
-
-			// first cycle is always instruction fetch
-			// or do we force an interrupt?
-			if (rst_executing_) {
-				read_byte(PC.raw);
-				instruction_ = 0x100;
-			} else if (nmi_executing_) {
-				read_byte(PC.raw);
-				instruction_ = 0x101;
-			} else if (irq_executing_) {
-				read_byte(PC.raw);
-				instruction_ = 0x102;
-			} else {
-				instruction_ = read_byte(PC.raw++);
-			}
-
+			cycle_0();
 		} else {
 			// execute the current part of the instruction
 			execute_opcode();
