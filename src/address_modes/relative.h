@@ -48,12 +48,14 @@ private:
 			// ------
 			// Therefore, we DON'T check for IRQ/NMI/RESET here
 
+			const uint8_t next_op = read_byte(PC.raw);
+
 			if (Op::execute()) {
 				old_pc_.raw = PC.raw;
 				new_pc_.raw = (PC.raw + static_cast<int8_t>(data8_));
 				PC.lo       = new_pc_.lo;
 			} else {
-				cycle_0();
+				cycle_0(next_op);
 				cycle_ = 0;
 			}
 			break;
@@ -62,12 +64,14 @@ private:
 			// Fetch opcode of next instruction.
 			// Fix PCH. If it did not change, increment PC.
 
+			const uint8_t next_op = read_byte(PC.raw);
+
 			if (new_pc_.hi != old_pc_.hi) {
 				LAST_CYCLE_0;
 				PC.raw = new_pc_.raw;
 				OPCODE_COMPLETE;
 			} else {
-				cycle_0();
+				cycle_0(next_op);
 				cycle_ = 0;
 			}
 			break;

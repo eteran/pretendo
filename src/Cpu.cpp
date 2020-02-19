@@ -193,10 +193,10 @@ void update_nz_flags(uint8_t value) {
 #include "memory.h"
 #include "opcodes.h"
 
-void cycle_0() {
+void cycle_0(uint8_t next_op) {
 	// first cycle is always instruction fetch
 	// or do we force an interrupt?
-	const uint8_t next_op = read_byte(PC.raw);
+
 
 	if (rst_executing_) {
 		instruction_ = 0x100;
@@ -548,7 +548,8 @@ void clock() {
 		assert(cycle_ < 10);
 
 		if (cycle_ == 0) {
-			cycle_0();
+			const uint8_t next_op = read_byte(PC.raw);
+			cycle_0(next_op);
 		} else {
 			// execute the current part of the instruction
 			execute_opcode();
