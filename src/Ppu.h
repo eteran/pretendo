@@ -28,8 +28,6 @@ union Status {
 	BitField<uint8_t, 5> overflow;
 	BitField<uint8_t, 6> sprite0;
 	BitField<uint8_t, 7> vblank;
-
-	BitField<uint8_t, 5, 3> flags;
 };
 
 union Control {

@@ -243,15 +243,15 @@ uint8_t select_pixel(uint16_t index) {
 				// is this sprite visible on this pixel?
 				if (x_offset < 8) {
 
-					const uint8_t p0     = sprite.patterns[0];
-					const uint8_t p1     = sprite.patterns[1];
+					const uint8_t &p0     = sprite.patterns[0];
+					const uint8_t &p1     = sprite.patterns[1];
 					const uint16_t shift = 7 - x_offset;
 
 					const uint8_t sprite_pixel =
 						((p0 >> shift) & 0x01) | (((p1 >> shift) << 0x01) & 0x02);
 
 					// this pixel is visible..
-					if (sprite_pixel & 0x03) {
+					if (LIKELY(sprite_pixel & 0x03)) {
 						// we rendered a sprite0 pixel which collided with a BG pixel
 						// NOTE: according to blargg's tests, a collision doesn't seem
 						//       possible to occur on the rightmost pixel
@@ -560,15 +560,6 @@ void enter_vblank() {
 }
 
 //------------------------------------------------------------------------------
-// Name: exit_vblank
-//------------------------------------------------------------------------------
-void exit_vblank() {
-	// clear all the relevant status bits
-	status_.flags = 0;
-	write_block_  = false;
-}
-
-//------------------------------------------------------------------------------
 // Name: open_sprite_pattern
 //------------------------------------------------------------------------------
 template <class Size, class Pattern>
@@ -718,8 +709,13 @@ void increment_vram_address() {
 //------------------------------------------------------------------------------
 void clock_ppu(const scanline_prerender &) {
 
-	if (UNLIKELY(hpos_ == 1)) {
-		exit_vblank();
+	if (UNLIKELY(hpos_ == 0)) {
+		status_.sprite0 = 0;
+		status_.overflow = 0;
+	} else if (UNLIKELY(hpos_ == 1)) {
+		// clear all the relevant status bits
+		status_.vblank = 0;
+		write_block_  = false;
 	}
 
 	if (LIKELY(ppu_mask_.screen_enabled)) {
@@ -985,7 +981,7 @@ void clock_ppu(const scanline_render &target) {
 
 		if (UNLIKELY(hpos_ < 1)) {
 			// the first clock is acts like the last clock of the pre-render if we skipped a cycle
-			if (UNLIKELY(odd_frame_ && vpos_ == 1 && hpos_ == 0)) {
+			if (UNLIKELY(vpos_ == 1 && odd_frame_)) {
 				read_tile_index();
 			} else {
 				// idle
