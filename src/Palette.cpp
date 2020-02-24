@@ -89,8 +89,8 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 		v *= brightness / 12.f;
 
 		y += v;
-		i += v * std::cos((M_PI / 6.f) * (p + hue));
-		q += v * std::sin((M_PI / 6.f) * (p + hue));
+		i += v * std::cos((M_PI / 6.) * (p + hue));
+		q += v * std::sin((M_PI / 6.) * (p + hue));
 	}
 
 	i *= saturation;

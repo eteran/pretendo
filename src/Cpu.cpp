@@ -197,7 +197,6 @@ void cycle_0(uint8_t next_op) {
 	// first cycle is always instruction fetch
 	// or do we force an interrupt?
 
-
 	if (rst_executing_) {
 		instruction_ = 0x100;
 	} else if (nmi_executing_) {

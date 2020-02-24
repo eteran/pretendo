@@ -34,6 +34,8 @@ private:
 	uint64_t cpu_cycles_     = 0;
 	uint8_t latch_           = 0;
 	uint8_t write_counter_   = 0;
+	uint8_t prg_ram_enable0_ = 0x10;
+	uint8_t prg_ram_enable1_ = 0x10;
 
 private:
 	MemoryMappedFile prg_ptr_;

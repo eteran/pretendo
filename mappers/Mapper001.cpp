@@ -8,10 +8,10 @@ SETUP_STATIC_INES_MAPPER_REGISTRAR(1)
 namespace {
 
 enum {
-	REG_8000_9FFF = 0x00,
-	REG_A000_BFFF = 0x01,
-	REG_C000_DFFF = 0x02,
-	REG_E000_FFFF = 0x03
+	Control  = 0x00,
+	ChrBank0 = 0x01,
+	ChrBank1 = 0x02,
+	PrgBank  = 0x03,
 };
 
 }
@@ -50,7 +50,7 @@ std::string Mapper1::name() const {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper1::read_6(uint16_t address) {
-	if (!(regs_[REG_E000_FFFF] & 0x10)) {
+	if (!(regs_[PrgBank] & 0b10000)) {
 		return prg_ptr_[address & 0x1fff];
 	}
 	return Mapper::read_6(address);
@@ -60,7 +60,7 @@ uint8_t Mapper1::read_6(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper1::read_7(uint16_t address) {
-	if (!(regs_[REG_E000_FFFF] & 0x10)) {
+	if (!(regs_[PrgBank] & 0b10000)) {
 		return prg_ptr_[address & 0x1fff];
 	}
 	return Mapper::read_7(address);
@@ -70,7 +70,7 @@ uint8_t Mapper1::read_7(uint16_t address) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper1::write_6(uint16_t address, uint8_t value) {
-	if (!(regs_[REG_E000_FFFF] & 0x10)) {
+	if (!(regs_[PrgBank] & 0b10000)) {
 		prg_ptr_[address & 0x1fff] = value;
 	} else {
 		Mapper::write_6(address, value);
@@ -81,7 +81,7 @@ void Mapper1::write_6(uint16_t address, uint8_t value) {
 // Name:
 //------------------------------------------------------------------------------
 void Mapper1::write_7(uint16_t address, uint8_t value) {
-	if (!(regs_[REG_E000_FFFF] & 0x10)) {
+	if (!(regs_[PrgBank] & 0b10000)) {
 		prg_ptr_[address & 0x1fff] = value;
 	} else {
 		Mapper::write_7(address, value);
@@ -158,7 +158,7 @@ void Mapper1::write_handler(uint16_t address, uint8_t value) {
 			// Reset latch_
 			latch_         = 0;
 			write_counter_ = 5;
-			regs_[REG_8000_9FFF] |= 0x0c;
+			regs_[Control] |= 0x0c;
 			bank = 0;
 		} else {
 			// Normal write
@@ -178,7 +178,7 @@ void Mapper1::write_handler(uint16_t address, uint8_t value) {
 			write_counter_ = 0;
 
 			// set mirroring
-			switch (regs_[REG_8000_9FFF] & 0x3) {
+			switch (regs_[Control] & 0x3) {
 			case 0:
 				set_mirroring(mirror_single_low);
 				break;
@@ -193,28 +193,41 @@ void Mapper1::write_handler(uint16_t address, uint8_t value) {
 				break;
 			}
 
-			// set CHR-ROM
 			if (nes::cart.has_chr_rom()) {
-				if (regs_[REG_8000_9FFF] & 0x10) {
-					set_chr_0000_0fff(regs_[REG_A000_BFFF]);
-					set_chr_1000_1fff(regs_[REG_C000_DFFF]);
+				// set CHR-ROM
+				if (regs_[Control] & 0x10) {
+					set_chr_0000_0fff(regs_[ChrBank0]);
+					set_chr_1000_1fff(regs_[ChrBank1]);
 				} else {
-					set_chr_0000_1fff(regs_[REG_A000_BFFF] >> 1);
+					set_chr_0000_1fff(regs_[ChrBank0] >> 1);
 				}
+			} else {
+				// NOTE(eteran): this is for SNROM, we may need iNES 2.0 to detect
+				// SOROM, SUROM and SXROM
+
+				// set CHR-RAM
+				if (regs_[Control] & 0x10) {
+					set_chr_0000_0fff_ram(chr_ram_, regs_[ChrBank0] & 1);
+					set_chr_1000_1fff_ram(chr_ram_, regs_[ChrBank1] & 1);
+				}
+
+				// PRG-RAM enable
+				prg_ram_enable0_ = regs_[ChrBank0] & 0x10;
+				prg_ram_enable1_ = regs_[ChrBank1] & 0x10;
 			}
 
 			// set PRG-ROM
-			switch ((regs_[REG_8000_9FFF] >> 2) & 0x03) {
+			switch ((regs_[Control] >> 2) & 0x03) {
 			case 0x00:
 			case 0x01:
-				set_prg_89abcdef((regs_[REG_E000_FFFF] & 0x0f) >> 1);
+				set_prg_89abcdef((regs_[PrgBank] & 0x0f) >> 1);
 				break;
 			case 0x02:
 				set_prg_89ab(0x00);
-				set_prg_cdef(regs_[REG_E000_FFFF] & 0x0f);
+				set_prg_cdef(regs_[PrgBank] & 0x0f);
 				break;
 			case 0x03:
-				set_prg_89ab(regs_[REG_E000_FFFF] & 0x0f);
+				set_prg_89ab(regs_[PrgBank] & 0x0f);
 				set_prg_cdef(0x0f);
 				break;
 			}

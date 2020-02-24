@@ -151,7 +151,7 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 		// make the ROM viewer default to the location of the run ROM
 		const QFileInfo info(rom);
 		if (info.isFile()) {
-			if(!nes::cart.load(rom.toStdString())) {
+			if (!nes::cart.load(rom.toStdString())) {
 				QTimer::singleShot(0, this, SLOT(close()));
 				std::cout << "[Pretendo] Failed to load ROM, exiting..." << std::endl;
 				return;
