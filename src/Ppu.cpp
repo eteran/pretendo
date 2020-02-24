@@ -134,6 +134,7 @@ Mask ppu_mask_                   = {0};
 uint8_t register_2007_buffer_    = 0;
 Status status_                   = {0};
 uint8_t tile_offset_             = 0; // loopy's "x"
+uint8_t monochrome_mask_         = 0xff;
 
 bool odd_frame_   = false;
 bool write_latch_ = false;
@@ -243,8 +244,8 @@ uint8_t select_pixel(uint16_t index) {
 				// is this sprite visible on this pixel?
 				if (x_offset < 8) {
 
-					const uint8_t &p0     = sprite.patterns[0];
-					const uint8_t &p1     = sprite.patterns[1];
+					const uint8_t &p0    = sprite.patterns[0];
+					const uint8_t &p1    = sprite.patterns[1];
 					const uint16_t shift = 7 - x_offset;
 
 					const uint8_t sprite_pixel =
@@ -617,9 +618,7 @@ void render_pixel(uint16_t *dest_buffer) {
 	const uint16_t index = hpos_ - 1;
 	const uint8_t pixel  = select_pixel(index);
 
-	constexpr uint8_t mask_table[2] = {0xff, 0x30};
-
-	dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00] & mask_table[ppu_mask_.monochrome];
+	dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00] & monochrome_mask_;
 
 	pattern_queue_[0] <<= 1;
 	pattern_queue_[1] <<= 1;
@@ -710,12 +709,12 @@ void increment_vram_address() {
 void clock_ppu(const scanline_prerender &) {
 
 	if (UNLIKELY(hpos_ == 0)) {
-		status_.sprite0 = 0;
+		status_.sprite0  = 0;
 		status_.overflow = 0;
 	} else if (UNLIKELY(hpos_ == 1)) {
 		// clear all the relevant status bits
 		status_.vblank = 0;
-		write_block_  = false;
+		write_block_   = false;
 	}
 
 	if (LIKELY(ppu_mask_.screen_enabled)) {
@@ -970,9 +969,8 @@ void clock_ppu(const scanline_render &target) {
 		if (UNLIKELY(hpos_ < 1)) {
 			// idle
 		} else if (LIKELY(hpos_ < 257)) {
-			const uint8_t pixel             = select_blank_pixel();
-			constexpr uint8_t mask_table[2] = {0xff, 0x30};
-			target.buffer[hpos_ - 1]        = palette_[pixel] & mask_table[ppu_mask_.monochrome];
+			const uint8_t pixel      = select_blank_pixel();
+			target.buffer[hpos_ - 1] = palette_[pixel] & monochrome_mask_;
 			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
 		} else {
 			// idle
@@ -1237,6 +1235,7 @@ void reset(Reset reset_type) {
 	vram_address_         = 0x0000;
 	write_latch_          = false;
 	write_block_          = true;
+	monochrome_mask_      = 0xff;
 
 	std::cout << "PPU reset complete" << std::endl;
 }
@@ -1278,6 +1277,8 @@ void write2001(uint8_t value) {
 	}
 
 	ppu_mask_.raw = value;
+
+	monochrome_mask_ = (ppu_mask_.monochrome) ? 0x30 : 0xff;
 }
 
 //------------------------------------------------------------------------------
