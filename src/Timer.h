@@ -10,7 +10,6 @@ namespace apu {
 class Timer {
 public:
 	void reset();
-	uint16_t value() const;
 
 public:
 	template <class Callback>

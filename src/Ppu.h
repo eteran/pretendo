@@ -22,38 +22,6 @@ struct scanline_render {
 namespace nes {
 namespace ppu {
 
-union Status {
-	uint8_t raw;
-
-	BitField<uint8_t, 5> overflow;
-	BitField<uint8_t, 6> sprite0;
-	BitField<uint8_t, 7> vblank;
-};
-
-union Control {
-	uint8_t raw;
-	BitField<uint8_t, 0, 2> nametable;
-	BitField<uint8_t, 2> address_increment;
-	BitField<uint8_t, 3> sprite_pattern_table;
-	BitField<uint8_t, 4> background_pattern_table;
-	BitField<uint8_t, 5> large_sprites;
-	BitField<uint8_t, 6> master;
-	BitField<uint8_t, 7> nmi_on_vblank;
-};
-
-union Mask {
-	uint8_t raw;
-	BitField<uint8_t, 0> monochrome;
-	BitField<uint8_t, 1> background_clipping;
-	BitField<uint8_t, 2> sprite_clipping;
-	BitField<uint8_t, 3> background_visible;
-	BitField<uint8_t, 4> sprites_visible;
-	BitField<uint8_t, 5, 3> intensity;
-
-	// meta-fields which don't occupy any space :-)
-	BitField<uint8_t, 3, 2> screen_enabled;
-};
-
 void reset(Reset reset_type);
 
 void write2000(uint8_t value);

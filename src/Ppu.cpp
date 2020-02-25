@@ -22,6 +22,37 @@ bool system_paused = false;
 
 namespace {
 
+union Status {
+	uint8_t raw;
+	BitField<uint8_t, 5> overflow;
+	BitField<uint8_t, 6> sprite0;
+	BitField<uint8_t, 7> vblank;
+};
+
+union Control {
+	uint8_t raw;
+	BitField<uint8_t, 0, 2> nametable;
+	BitField<uint8_t, 2> address_increment;
+	BitField<uint8_t, 3> sprite_pattern_table;
+	BitField<uint8_t, 4> background_pattern_table;
+	BitField<uint8_t, 5> large_sprites;
+	BitField<uint8_t, 6> master;
+	BitField<uint8_t, 7> nmi_on_vblank;
+};
+
+union Mask {
+	uint8_t raw;
+	BitField<uint8_t, 0> monochrome;
+	BitField<uint8_t, 1> background_clipping;
+	BitField<uint8_t, 2> sprite_clipping;
+	BitField<uint8_t, 3> background_visible;
+	BitField<uint8_t, 4> sprites_visible;
+	BitField<uint8_t, 5, 3> intensity;
+
+	// meta-fields which don't occupy any space :-)
+	BitField<uint8_t, 3, 2> screen_enabled;
+};
+
 constexpr auto CyclesPerScanline = 341u;
 constexpr auto CpuAlignment      = 0u;
 
@@ -186,10 +217,10 @@ constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
 }
 
 //------------------------------------------------------------------------------
-// Name: select_blank_pixel
+// Name: render_blank_pixel
 // Note: the screen is *always* disabled when this is called
 //------------------------------------------------------------------------------
-uint8_t select_blank_pixel() {
+uint8_t render_blank_pixel() {
 
 	if (UNLIKELY((vram_address_ & 0x3f00) == 0x3f00)) {
 		return palette_[vram_address_ & 0x1f] & monochrome_mask_;
@@ -969,7 +1000,7 @@ void clock_ppu(const scanline_render &target) {
 			// idle
 		} else if (LIKELY(hpos_ < 257)) {
 
-			target.buffer[hpos_ - 1] = select_blank_pixel();
+			target.buffer[hpos_ - 1] = render_blank_pixel();
 			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
 		} else {
 			// idle

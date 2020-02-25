@@ -82,14 +82,14 @@ uint8_t LengthCounter::value() const {
 //------------------------------------------------------------------------------
 void LengthCounter::clock() {
 
-	bool prevent_decrement     = false;
-	const uint64_t cycle_count = nes::apu::cycle_count();
+	bool prevent_decrement       = false;
+	const uint64_t current_cycle = nes::apu::cycle_count();
 
 	if (reload_) {
-		if (reload_cycle_ == cycle_count && value_ == 0) {
+		if (reload_cycle_ == current_cycle && value_ == 0) {
 			value_            = reload_value_;
 			prevent_decrement = true;
-		} else if (reload_cycle_ == cycle_count && value_ != 0) {
+		} else if (reload_cycle_ == current_cycle && value_ != 0) {
 			// no reload!
 		} else {
 			value_ = reload_value_;
@@ -100,7 +100,7 @@ void LengthCounter::clock() {
 		bool halted;
 
 		// delay the halt 1 cycle
-		if (halt_cycle_ == cycle_count) {
+		if (halt_cycle_ == current_cycle) {
 			halted = prev_halt_;
 		} else {
 			halted = halt_;
