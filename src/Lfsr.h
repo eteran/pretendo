@@ -7,9 +7,6 @@
 namespace nes {
 namespace apu {
 
-using std::uint16_t;
-using std::uint8_t;
-
 class LFSR {
 public:
 	//-------------------------------------------------------------------

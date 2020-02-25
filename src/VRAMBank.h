@@ -5,8 +5,6 @@
 #include <cstddef>
 #include <cstdint>
 
-using std::uint8_t;
-
 class VRAMBank {
 public:
 	enum Type {

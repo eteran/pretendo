@@ -99,11 +99,11 @@ constexpr uint16_t tile_address(uint16_t vram_address) {
 }
 
 struct SpritePatternData {
-	uint8_t patterns[2];
 	uint8_t x;
 	uint8_t y;
 	uint8_t index;
 	uint8_t attr;
+	uint8_t patterns[2];
 };
 
 // internal variables
@@ -192,9 +192,9 @@ constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
 uint8_t select_blank_pixel() {
 
 	if (UNLIKELY((vram_address_ & 0x3f00) == 0x3f00)) {
-		return vram_address_ & 0x1f;
+		return palette_[vram_address_ & 0x1f] & monochrome_mask_;
 	} else {
-		return 0x00;
+		return palette_[0x00] & monochrome_mask_;
 	}
 }
 
@@ -613,17 +613,16 @@ void read_sprite_pattern() {
 //------------------------------------------------------------------------------
 // Name: render_pixel
 //------------------------------------------------------------------------------
-void render_pixel(uint16_t *dest_buffer) {
+uint8_t render_pixel() {
 
-	const uint16_t index = hpos_ - 1;
-	const uint8_t pixel  = select_pixel(index);
-
-	dest_buffer[index] = palette_[(pixel & 0x03) ? pixel : 0x00] & monochrome_mask_;
+	const uint8_t pixel = select_pixel(hpos_ - 1);
 
 	pattern_queue_[0] <<= 1;
 	pattern_queue_[1] <<= 1;
 	attribute_queue_[0] <<= 1;
 	attribute_queue_[1] <<= 1;
+
+	return palette_[(pixel & 0x03) ? pixel : 0x00] & monochrome_mask_;
 }
 
 //------------------------------------------------------------------------------
@@ -969,8 +968,8 @@ void clock_ppu(const scanline_render &target) {
 		if (UNLIKELY(hpos_ < 1)) {
 			// idle
 		} else if (LIKELY(hpos_ < 257)) {
-			const uint8_t pixel      = select_blank_pixel();
-			target.buffer[hpos_ - 1] = palette_[pixel] & monochrome_mask_;
+
+			target.buffer[hpos_ - 1] = select_blank_pixel();
 			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
 		} else {
 			// idle
@@ -987,7 +986,7 @@ void clock_ppu(const scanline_render &target) {
 		} else if (LIKELY(hpos_ < 257)) {
 
 			// NOTE(eteran): on my machine, this code "costs" about 200 FPS
-			render_pixel(target.buffer);
+			target.buffer[hpos_ - 1] = render_pixel();
 			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
 
 			switch (hpos_ & 0x07) {

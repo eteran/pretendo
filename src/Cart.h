@@ -2,12 +2,11 @@
 #ifndef CART_20120303_H_
 #define CART_20120303_H_
 
+#include "Mapper.h"
 #include "iNES/Rom.h"
 #include <memory>
 #include <string>
 #include <vector>
-
-class Mapper;
 
 class Cart {
 public:
@@ -33,7 +32,7 @@ public:
 	uint8_t *prg() const;
 	uint8_t *chr() const;
 	Mirroring mirroring() const;
-	const std::shared_ptr<Mapper> &mapper() const { return mapper_; }
+	Mapper *mapper() const { return mapper_.get(); }
 	std::vector<uint8_t> raw_image() const;
 
 private:
@@ -44,7 +43,7 @@ private:
 	uint32_t chr_hash_   = 0;
 	uint32_t rom_hash_   = 0;
 	Mirroring mirroring_ = MIR_HORIZONTAL;
-	std::shared_ptr<Mapper> mapper_;
+	std::unique_ptr<Mapper> mapper_;
 	std::string filename_;
 };
 

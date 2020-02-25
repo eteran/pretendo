@@ -4,9 +4,6 @@
 
 #include <cstdint>
 
-using std::uint16_t;
-using std::uint8_t;
-
 struct rgb_color_t {
 	uint8_t r;
 	uint8_t g;

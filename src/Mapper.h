@@ -2,7 +2,6 @@
 #ifndef MAPPER_20080314_H_
 #define MAPPER_20080314_H_
 
-#include "Cart.h"
 #include "Cpu.h"
 #include "MemoryMappedFile.h"
 #include "VRAMBank.h"
@@ -84,7 +83,6 @@ public:
 	virtual void vram_change_hook(uint16_t vram_address);
 
 protected:
-	void write_memory(uint16_t address, uint8_t value);
 	uint8_t read_memory(uint16_t address);
 
 protected:
@@ -261,10 +259,10 @@ protected:
 	constexpr static uint8_t mirror_4screen     = 0xe4;
 
 private:
-	constexpr static unsigned int page_count = 32;
-	constexpr static unsigned int page_size  = 0x10000 / page_count;
-	constexpr static unsigned int page_mask  = page_size - 1;
-	constexpr static unsigned int page_shift = 11;
+	constexpr static unsigned int PageCount = 32;
+	constexpr static unsigned int PageSize  = 0x10000 / PageCount;
+	constexpr static unsigned int PageMask  = PageSize - 1;
+	constexpr static unsigned int PageShift = 11;
 
 private:
 	uint8_t nametables_[4 * 0x400] = {}; // nametable and attribute table data
@@ -276,7 +274,7 @@ private:
 										 // simplicity
 	VRAMBank vram_banks_[0x10] = {};
 
-	uint8_t *page_[page_count] = {};
+	uint8_t *page_[PageCount] = {};
 
 private:
 	// we use a function here to return a static object

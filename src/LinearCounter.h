@@ -7,8 +7,6 @@
 namespace nes {
 namespace apu {
 
-using std::uint8_t;
-
 class LinearCounter {
 public:
 	uint8_t value() const { return value_; }

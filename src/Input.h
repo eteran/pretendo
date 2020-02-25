@@ -10,8 +10,6 @@ class Controller;
 namespace nes {
 namespace input {
 
-using std::uint8_t;
-
 void reset();
 
 void write4016(uint8_t value);

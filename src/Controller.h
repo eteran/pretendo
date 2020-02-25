@@ -6,8 +6,6 @@
 #include <bitset>
 #include <cstdint>
 
-using std::uint8_t;
-
 class Controller {
 public:
 	uint8_t read();

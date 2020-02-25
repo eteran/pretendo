@@ -33,10 +33,7 @@ union APUFrameCounter {
 //------------------------------------------------------------------------------
 template <class T>
 constexpr T bound(T lower, T value, T upper) {
-	using std::max;
-	using std::min;
-
-	return max(lower, min(value, upper));
+	return std::max(lower, std::min(value, upper));
 }
 
 constexpr double CPUFrequency = 1789772.67; // 1.78977267Mhz

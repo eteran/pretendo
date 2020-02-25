@@ -326,7 +326,7 @@ void Pretendo::on_action_Pause_triggered() {
 		timer_->stop();
 		audio_->stop();
 	} else if (paused_) {
-		if (const std::shared_ptr<Mapper> mapper = nes::cart.mapper()) {
+		if (nes::cart.mapper()) {
 			timer_->start();
 			audio_->start();
 		}

@@ -15,10 +15,7 @@ namespace {
 //------------------------------------------------------------------------------
 template <class T>
 constexpr T bound(T lower, T value, T upper) {
-	using std::max;
-	using std::min;
-
-	return max(lower, min(value, upper));
+	return std::max(lower, std::min(value, upper));
 }
 
 //------------------------------------------------------------------------------
@@ -32,8 +29,7 @@ constexpr int wave(int p, int color) {
 // Name: gamma_fix
 //------------------------------------------------------------------------------
 constexpr float gamma_fix(float f, float gamma) {
-	using std::pow;
-	return f < 0.f ? 0.f : pow(f, 2.2f / gamma);
+	return f < 0.f ? 0.f : std::pow(f, 2.2f / gamma);
 }
 
 //------------------------------------------------------------------------------
@@ -47,8 +43,8 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 	//    http://wiki.nesdev.com/w/index.php/NTSC_video
 
 	// Decode the color index
-	const uint8_t color = (pixel & 0x0F);
-	const uint8_t level = color < 0xE ? (pixel >> 4) & 3 : 1;
+	const uint8_t color = (pixel & 0x0f);
+	const uint8_t level = color < 0x0e ? (pixel >> 4) & 3 : 1;
 
 	// Voltage levels, relative to synch voltage
 	static constexpr float black       = 0.518f;
@@ -61,8 +57,9 @@ rgb_color_t make_rgb_color(uint16_t pixel, float saturation, float hue, float co
 	};
 
 	const float lo_and_hi[2] = {
-		levels[level + 4 * (color == 0x0)],
-		levels[level + 4 * (color < 0xD)]};
+		levels[level + 4 * (color == 0x00)],
+		levels[level + 4 * (color < 0x0d)],
+	};
 
 	// Calculate the luma and chroma by emulating the relevant circuits:
 	float y = 0.f;

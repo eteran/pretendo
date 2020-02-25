@@ -7,8 +7,6 @@
 namespace nes {
 namespace apu {
 
-using std::uint16_t;
-
 class Timer {
 public:
 	void reset();
