@@ -13,7 +13,7 @@ private:
 	};
 
 public:
-	BitField &operator=(BitField &rhs) {
+	BitField &operator=(const BitField &rhs) {
 		value_ = (value_ & ~Mask) | (rhs.value_ & Mask);
 		return *this;
 	}

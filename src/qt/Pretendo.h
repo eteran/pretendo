@@ -4,7 +4,7 @@
 
 #include "Apu.h"
 #include <QMainWindow>
-#include <QTime>
+#include <chrono>
 
 #include "ui_Pretendo.h"
 
@@ -70,7 +70,6 @@ private:
 	QTimer *timer_                       = nullptr;
 	QLabel *fps_label_                   = nullptr;
 	Qt::Key player_1_[8];
-	QTime time_;
 	uint64_t framecount_     = 0;
 	uint64_t raw_framecount_ = 0;
 	bool paused_             = false;
@@ -82,6 +81,8 @@ private:
 	NullAudio *audio_;
 #endif
 	uint64_t frame_limit_ = 0;
+	
+	std::chrono::time_point<std::chrono::high_resolution_clock> elapsed_time_;
 };
 
 #endif

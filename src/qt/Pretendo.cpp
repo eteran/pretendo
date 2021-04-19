@@ -133,7 +133,7 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 												   Palette::default_brightness,
 												   Palette::default_gamma));
 
-	time_.start();
+	elapsed_time_ = std::chrono::high_resolution_clock::now();
 
 	// set the default player 1 controlls
 	player_1_[Controller::INDEX_A]      = Qt::Key_X;
@@ -212,9 +212,13 @@ void Pretendo::update() {
 	nes::apu::sample_buffer_.clear();
 
 	// FPS calculation
-	if (time_.elapsed() > 1000) {
+	auto now = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - elapsed_time_);
+	
+	
+	if (duration.count() > 1000) {
 		fps_label_->setText(tr("FPS: %1").arg(framecount_));
-		time_.restart();
+		elapsed_time_ = now;
 		framecount_ = 0;
 	}
 

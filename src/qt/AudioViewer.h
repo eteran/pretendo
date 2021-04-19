@@ -11,7 +11,7 @@ class AudioViewer final : public QDialog {
 	Q_OBJECT
 
 public:
-	AudioViewer(QWidget *parent = nullptr, Qt::WindowFlags f = nullptr);
+	AudioViewer(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
 protected Q_SLOTS:
 	bool eventFilter(QObject *watched, QEvent *event) override;
