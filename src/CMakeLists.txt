@@ -12,9 +12,9 @@ if(ENABLE_AUDIO)
 	set(SOURCE_FILES ${SOURCE_FILES}
 		qt/PulseAudio.cpp
 	)
-	
+
 	set(INCLUDES ${INCLUDES} ${PULSEAUDIO_INCLUDE_DIR})
-	set(LIBRARIES ${LIBRARIES} ${PULSEAUDIO_LIBRARY} -lpulse-simple)	
+	set(LIBRARIES ${LIBRARIES} ${PULSEAUDIO_LIBRARY} -lpulse-simple)
 else()
 	set(SOURCE_FILES ${SOURCE_FILES}
 		qt/NullAudio.cpp
@@ -22,10 +22,9 @@ else()
 endif()
 
 find_package(Qt5 5.4.0 REQUIRED Widgets OpenGL)
-find_package(Boost 1.35 COMPONENTS system filesystem REQUIRED)
 find_package(OpenGL REQUIRED)
 
-add_executable(pretendo 
+add_executable(pretendo
 	${SOURCE_FILES}
 
 	Apu.cpp
@@ -208,7 +207,6 @@ add_dependencies(pretendo mappers)
 
 target_include_directories(pretendo PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/qt
-	${Boost_INCLUDE_DIR}
 	${INCLUDES}
 )
 
@@ -216,13 +214,12 @@ target_link_libraries(pretendo LINK_PUBLIC
 	Qt5::Widgets
 	Qt5::OpenGL
 	OpenGL::GL
-	${Boost_LIBRARIES}
 	${LIBRARIES}
 	iNES2
 	-lpthread
 	$<TARGET_OBJECTS:mappers>
 )
 
-set_property(TARGET pretendo PROPERTY CXX_STANDARD 14)
+set_property(TARGET pretendo PROPERTY CXX_STANDARD 17)
 set_property(TARGET pretendo PROPERTY CXX_EXTENSIONS OFF)
 set_property(TARGET pretendo PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")

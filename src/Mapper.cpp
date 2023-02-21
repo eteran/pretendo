@@ -13,10 +13,9 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <iostream>
 #include <string>
-
-#include <boost/filesystem.hpp>
 
 //------------------------------------------------------------------------------
 // Name: Mapper
@@ -804,12 +803,12 @@ void Mapper::register_mapper(int num, create_func create_ptr) {
 //------------------------------------------------------------------------------
 MemoryMappedFile Mapper::open_sram(size_t size) {
 
-	const boost::filesystem::path cache_path = Settings::cacheDirectory();
-	boost::filesystem::create_directories(cache_path);
+	const std::filesystem::path cache_path = Settings::cacheDirectory();
+	std::filesystem::create_directories(cache_path);
 
 	char hex_buf[32];
 	snprintf(hex_buf, sizeof(hex_buf), "%08x", nes::cart.rom_hash());
-	boost::filesystem::path save_file = cache_path / (std::string(hex_buf) + ".sav");
+	std::filesystem::path save_file = cache_path / (std::string(hex_buf) + ".sav");
 
 	return MemoryMappedFile(save_file.string(), size);
 }
