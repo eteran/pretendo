@@ -146,6 +146,7 @@ uint8_t left_most_sprite_x_ = 0xff;
 uint8_t sprite_read_buffer_ = 0;
 uint8_t sprite_read_index_  = 0;
 bool current_is_sprite_0    = false;
+uint8_t visible_sprite_count_ = 0;
 
 enum SpriteEvalState {
     STATE_1_Y,
@@ -276,7 +277,7 @@ uint8_t select_pixel(uint16_t index) {
 		if ((ppu_mask_.sprite_clipping || index >= 8) && ppu_mask_.sprites_visible) {
 
 			// this will loop at most 8 times
-			for (uint8_t spr = 0; spr != sprite_data_index_; ++spr) {
+            for (uint8_t spr = 0; spr != visible_sprite_count_; ++spr) {
 
 				const SpritePatternData &sprite = sprite_patterns_[spr];
 
@@ -470,13 +471,15 @@ uint8_t &sprite_x(uint8_t index) {
 	return sprite_data_[index * 4 + 3];
 }
 
+#if 0
 //------------------------------------------------------------------------------
 // Name: evaluate_sprites
 //------------------------------------------------------------------------------
 void evaluate_sprites() {
-    sprite_data_index_ = 0;
 
     while (sprite_eval_state_ != STATE_4) {
+
+        sprite_read_buffer_ = sprite_ram_[sprite_read_index_];
 
         switch (sprite_eval_state_) {
         case STATE_1_Y:
@@ -487,11 +490,12 @@ void evaluate_sprites() {
 
                 // 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.                
-                if (sprite_in_range(sprite_ram_[sprite_read_index_])) {
+                if (sprite_in_range(sprite_read_buffer_)) {
 
                     // NOTE(eteran): we store the sprite line so make things simpler later
-                    sprite_y(sprite_data_index_)     = static_cast<uint8_t>((vpos_ - 1) - sprite_ram_[sprite_read_index_ + 0]); // y
+                    sprite_y(sprite_data_index_)     = static_cast<uint8_t>((vpos_ - 1) - sprite_read_buffer_); // y
                     sprite_eval_state_ = STATE_1_I;
+                    ++sprite_read_index_;
                     break;
                 } else {
                     // 2. Increment n
@@ -520,24 +524,27 @@ void evaluate_sprites() {
 
 
         case STATE_1_I:
-            sprite_index(sprite_data_index_) = sprite_ram_[sprite_read_index_ + 1]; // index
+            sprite_index(sprite_data_index_) = sprite_read_buffer_; // index
             sprite_eval_state_ = STATE_1_A;
+            ++sprite_read_index_;
             break;
         case STATE_1_A:
-            sprite_attr(sprite_data_index_) = sprite_ram_[sprite_read_index_ + 2] & 0xe3; // attributes
+            sprite_attr(sprite_data_index_) = sprite_read_buffer_ & 0xe3; // attributes
             // note that we found sprite 0
             if (current_is_sprite_0) {
                 sprite_attr(sprite_data_index_) |= OamZero;
             }
             sprite_eval_state_ = STATE_1_X;
+            ++sprite_read_index_;
             break;
         case STATE_1_X:
-            sprite_x(sprite_data_index_) = sprite_ram_[sprite_read_index_ + 3]; // x
+            sprite_x(sprite_data_index_) = sprite_read_buffer_; // x
             left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_x(sprite_data_index_));
             ++sprite_data_index_;
+            ++sprite_read_index_;
 
             // 2. Increment n
-            sprite_read_index_ += 4;
+            //sprite_read_index_ += 4;
             current_is_sprite_0 = false;
 
             // 2a. If n has overflowed back to zero (all 64 sprites evaluated), go to 4
@@ -561,7 +568,7 @@ void evaluate_sprites() {
 			// 3a. If the value is in range, set the sprite overflow flag in $2002 and read
 			//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
 			//     'n' when 'm' overflows); if m = 3, increment n
-            if (sprite_in_range(sprite_ram_[sprite_read_index_])) {
+            if (sprite_in_range(sprite_read_buffer_)) {
 				status_.overflow = true;
                 ++sprite_read_index_;
 			} else {
@@ -580,6 +587,7 @@ void evaluate_sprites() {
 		}
 	}
 }
+#endif
 
 //------------------------------------------------------------------------------
 // Name: evaluate_sprites_even
@@ -593,11 +601,122 @@ void evaluate_sprites_even() {
 			// reset some things
 			left_most_sprite_x_ = 0xff;
 		}
-
-	} else if (UNLIKELY(hpos_ == 256)) {
+#if 0
+    } else if (UNLIKELY(hpos_ <= 256)) {
 		// TODO: do this part incrementally during cycles 0-255 like the real thing
-		evaluate_sprites();
-	}
+        evaluate_sprites();
+#endif
+    } else if(hpos_ <= 256) {
+        switch (sprite_eval_state_) {
+        case STATE_1_Y:
+            // 1. Starting at n = 0, read a sprite's Y-coordinate (OAM[n][0], copying it to
+            //    the next open slot in secondary OAM (unless 8 sprites have been found, in
+            //    which case the write is ignored).
+            if (sprite_data_index_ < 8) {
+
+                // 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
+                //     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
+                if (sprite_in_range(sprite_read_buffer_)) {
+
+                    // NOTE(eteran): we store the sprite line so make things simpler later
+                    sprite_y(sprite_data_index_) = static_cast<uint8_t>((vpos_ - 1) - sprite_read_buffer_); // y
+                    sprite_eval_state_ = STATE_1_I;
+                    ++sprite_read_index_;
+                    break;
+                } else {
+                    // 2. Increment n
+                    sprite_read_index_ += 4;
+                    current_is_sprite_0 = false;
+
+                    // 2a. If n has overflowed back to zero (all 64 sprites evaluated), go to 4
+                    if ((sprite_read_index_ & 0xfc) == 0x00) {
+                        sprite_eval_state_ = STATE_4;
+                        break;
+                    }
+
+                    // 2b. If less than 8 sprites have been found, go to 1
+                    if (sprite_data_index_ < 8) {
+                        sprite_eval_state_ = STATE_1_Y;
+                        break;
+                    }
+
+                    // 2c. If exactly 8 sprites have been found, disable writes to secondary OAM.
+                    //     This causes sprites in back to drop out.
+                    sprite_eval_state_ = STATE_3;
+                    break;
+                }
+            }
+            break;
+
+
+        case STATE_1_I:
+            sprite_index(sprite_data_index_) = sprite_read_buffer_; // index
+            sprite_eval_state_ = STATE_1_A;
+            ++sprite_read_index_;
+            break;
+        case STATE_1_A:
+            sprite_attr(sprite_data_index_) = sprite_read_buffer_ & 0xe3; // attributes
+            // note that we found sprite 0
+            if (current_is_sprite_0) {
+                sprite_attr(sprite_data_index_) |= OamZero;
+            }
+            sprite_eval_state_ = STATE_1_X;
+            ++sprite_read_index_;
+            break;
+        case STATE_1_X:
+            sprite_x(sprite_data_index_) = sprite_read_buffer_; // x
+            left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_x(sprite_data_index_));
+            ++sprite_data_index_;
+            ++sprite_read_index_;
+
+            // 2. Increment n
+            // NOTE(eteran): no need to explicitly do this since we use a single variable for both
+            // m and n, so it'll naturally carry
+#if 0
+            // sprite_read_index_ += 4;
+#endif
+            current_is_sprite_0 = false;
+
+            // 2a. If n has overflowed back to zero (all 64 sprites evaluated), go to 4
+            if ((sprite_read_index_ & 0xfc) == 0x00) {
+                sprite_eval_state_ = STATE_4;
+                break;
+            }
+
+            // 2b. If less than 8 sprites have been found, go to 1
+            if (sprite_data_index_ < 8) {
+                sprite_eval_state_ = STATE_1_Y;
+                break;
+            }
+
+            // 2c. If exactly 8 sprites have been found, disable writes to secondary OAM.
+            //     This causes sprites in back to drop out.
+            sprite_eval_state_ = STATE_3;
+            break;
+        case STATE_3: {
+            // 3. Starting at m = 0, evaluate OAM[n][m] as a Y-coordinate.
+            // 3a. If the value is in range, set the sprite overflow flag in $2002 and read
+            //     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
+            //     'n' when 'm' overflows); if m = 3, increment n
+            if (sprite_in_range(sprite_read_buffer_)) {
+                status_.overflow = true;
+                ++sprite_read_index_;
+            } else {
+                // 3b. If the value is not in range, increment n AND m (without carry). If n overflows
+                //     to 0, go to 4; otherwise go to 3
+                sprite_read_index_ = (sprite_read_index_ & 0x03) | (((sprite_read_index_ & 0xfc) + 4) & 0xfc);
+                sprite_read_index_ = (sprite_read_index_ & 0xfc) | (((sprite_read_index_ & 0x03) + 1) & 0x03);
+            }
+
+            if ((sprite_read_index_ & 0xfc) == 0x00) {
+                sprite_eval_state_ = STATE_4;
+            }
+        } break;
+        case STATE_4:
+            visible_sprite_count_ = sprite_data_index_;
+            break;
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -610,6 +729,7 @@ void evaluate_sprites_odd() {
         sprite_read_index_ = sprite_address_;
         current_is_sprite_0 = true;
         sprite_eval_state_ = STATE_1_Y;
+        sprite_data_index_ = 0;
         sprite_read_buffer_ = sprite_ram_[sprite_read_index_];
     } else if(hpos_ < 256) {
         sprite_read_buffer_ = sprite_ram_[sprite_read_index_];
@@ -647,7 +767,7 @@ void open_sprite_pattern() {
 
 		// vertical flip
 		if (sprite.attr & OamVFlip) {
-			sprite.y ^= Size::flip_mask;
+            sprite.y ^= Size::flip_mask;
 		}
 
 		// fetch the actual sprite data
