@@ -1,4 +1,4 @@
-﻿
+
 #include "Ppu.h"
 #include "Apu.h"
 #include "Cart.h"
@@ -139,11 +139,13 @@ struct SpritePatternData {
 // internal variables
 SpritePatternData sprite_patterns_[8];
 uint8_t current_sprite_index_ = 0;
-uint8_t sprite_data_[32]      = {};
 uint8_t sprite_ram_[0x100]    = {};
-uint8_t left_most_sprite_x_   = 0xff;
-uint8_t sprite_address_       = 0;
-uint8_t sprite_data_index_    = 0;
+uint8_t sprite_address_       = 0; // OAMADDR
+
+uint8_t sprite_data_[32]    = {};
+uint8_t sprite_data_index_  = 0;
+uint8_t left_most_sprite_x_ = 0xff;
+uint8_t sprite_read_buffer_ = 0;
 
 uint8_t palette_[0x20];
 uint64_t ppu_cycle_              = 0;
@@ -424,11 +426,11 @@ void read_tile_index() {
 bool sprite_in_range(uint8_t y) {
 	const uint16_t sprite_line = (vpos_ - 1) - y;
 
-    if (ppu_control_.large_sprites) {
-        return sprite_line < 16;
-    } else {
-        return sprite_line < 8;
-    }
+	if (ppu_control_.large_sprites) {
+		return sprite_line < 16;
+	} else {
+		return sprite_line < 8;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -465,9 +467,7 @@ uint8_t &sprite_x(uint8_t index) {
 void evaluate_sprites() {
 	sprite_data_index_ = 0;
 
-	constexpr uint8_t start_address = 0x00; // sprite_address_
-
-	uint8_t index = start_address;
+	uint8_t index = sprite_address_;
 
 	enum State {
 		STATE_1,
@@ -486,7 +486,7 @@ void evaluate_sprites() {
 
 				// 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
-                if (sprite_in_range(sprite_ram_[index])) {
+				if (sprite_in_range(sprite_ram_[index])) {
 
 					const uint16_t sprite_line       = (vpos_ - 1) - sprite_ram_[index + 0];
 					sprite_y(sprite_data_index_)     = static_cast<uint8_t>(sprite_line); // y
@@ -495,7 +495,7 @@ void evaluate_sprites() {
 					sprite_x(sprite_data_index_)     = sprite_ram_[index + 3];            // x
 
 					// note that we found sprite 0
-					if (index == start_address) {
+					if (index == sprite_address_) {
 						sprite_attr(sprite_data_index_) |= OamZero;
 					}
 
@@ -536,7 +536,7 @@ void evaluate_sprites() {
 			// 3a. If the value is in range, set the sprite overflow flag in $2002 and read
 			//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
 			//     'n' when 'm' overflows); if m = 3, increment n
-            if (sprite_in_range(sprite_ram_[index])) {
+			if (sprite_in_range(sprite_ram_[index])) {
 				status_.overflow = true;
 				++index;
 			} else {
@@ -560,14 +560,17 @@ void evaluate_sprites() {
 //------------------------------------------------------------------------------
 void evaluate_sprites_even() {
 	// write cycle
-	if (hpos_ < 64) {
+	if (hpos_ <= 64) {
+		sprite_data_[(hpos_ >> 1) - 1] = sprite_read_buffer_;
+
 		if (UNLIKELY(hpos_ == 0)) {
-			std::fill_n(sprite_data_, sizeof(sprite_data_), 0xff);
+			// reset some things
+			left_most_sprite_x_ = 0xff;
 		}
 
 	} else if (UNLIKELY(hpos_ == 256)) {
 		// TODO: do this part incrementally during cycles 0-255 like the real thing
-        evaluate_sprites();
+		evaluate_sprites();
 	}
 }
 
@@ -575,6 +578,9 @@ void evaluate_sprites_even() {
 // Name: evaluate_sprites_odd
 //------------------------------------------------------------------------------
 void evaluate_sprites_odd() {
+	if (hpos_ < 64) {
+		sprite_read_buffer_ = 0xff;
+	}
 }
 
 //------------------------------------------------------------------------------
