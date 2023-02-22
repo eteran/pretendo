@@ -1,4 +1,4 @@
-
+﻿
 #include "Ppu.h"
 #include "Apu.h"
 #include "Cart.h"
@@ -6,7 +6,6 @@
 #include "Cpu.h"
 #include "Mapper.h"
 #include "Nes.h"
-#include "VRAMBank.h"
 
 #include <algorithm>
 #include <cstring>
