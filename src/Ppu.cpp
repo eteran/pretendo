@@ -524,11 +524,6 @@ void evaluate_sprites() {
 
             // 2c. If exactly 8 sprites have been found, disable writes to secondary OAM.
             //     This causes sprites in back to drop out.
-            if (sprite_data_index_ == 8) {
-                sprite_eval_state_ = STATE_3;
-                break;
-            }
-
             sprite_eval_state_ = STATE_3;
             break;
         case STATE_3: {
