@@ -76,12 +76,10 @@ struct pattern_1 {
 };
 
 struct size_8px {
-	static constexpr int value     = 8;
 	static constexpr int flip_mask = 0b00000111;
 };
 
 struct size_16px {
-	static constexpr int value     = 16;
 	static constexpr int flip_mask = 0b00001111;
 };
 
@@ -147,13 +145,16 @@ uint8_t sprite_data_index_  = 0;
 uint8_t left_most_sprite_x_ = 0xff;
 uint8_t sprite_read_buffer_ = 0;
 uint8_t sprite_read_index_  = 0;
+bool current_is_sprite_0    = false;
 
 enum SpriteEvalState {
-    STATE_1,
-    STATE_1a,
+    STATE_1_Y,
+    STATE_1_I,
+    STATE_1_A,
+    STATE_1_X,
     STATE_3,
     STATE_4
-} sprite_eval_state_ = STATE_1;
+} sprite_eval_state_ = STATE_1_Y;
 
 uint8_t palette_[0x20];
 uint64_t ppu_cycle_              = 0;
@@ -477,38 +478,67 @@ void evaluate_sprites() {
 
     while (sprite_eval_state_ != STATE_4) {
 
-        uint8_t sprite_read_buffer = sprite_ram_[sprite_read_index_];
-
         switch (sprite_eval_state_) {
-		case STATE_1:
+        case STATE_1_Y:
 			// 1. Starting at n = 0, read a sprite's Y-coordinate (OAM[n][0], copying it to
 			//    the next open slot in secondary OAM (unless 8 sprites have been found, in
 			//    which case the write is ignored).
 			if (sprite_data_index_ < 8) {
 
                 // 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
-				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
+				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.                
                 if (sprite_in_range(sprite_ram_[sprite_read_index_])) {
 
-                    // NOTE(eteran): we store the sprite line so make things simlper later
+                    // NOTE(eteran): we store the sprite line so make things simpler later
                     sprite_y(sprite_data_index_)     = static_cast<uint8_t>((vpos_ - 1) - sprite_ram_[sprite_read_index_ + 0]); // y
-                    sprite_index(sprite_data_index_) = sprite_ram_[sprite_read_index_ + 1];                                     // index
-                    sprite_attr(sprite_data_index_)  = sprite_ram_[sprite_read_index_ + 2] & 0xe3;                              // attributes
-                    sprite_x(sprite_data_index_)     = sprite_ram_[sprite_read_index_ + 3];                                     // x
+                    sprite_eval_state_ = STATE_1_I;
+                    break;
+                } else {
+                    // 2. Increment n
+                    sprite_read_index_ += 4;
+                    current_is_sprite_0 = false;
 
-					// note that we found sprite 0
-                    if (sprite_read_index_ == sprite_address_) {
-						sprite_attr(sprite_data_index_) |= OamZero;
-					}
+                    // 2a. If n has overflowed back to zero (all 64 sprites evaluated), go to 4
+                    if ((sprite_read_index_ & 0xfc) == 0x00) {
+                        sprite_eval_state_ = STATE_4;
+                        break;
+                    }
 
-					left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_x(sprite_data_index_));
+                    // 2b. If less than 8 sprites have been found, go to 1
+                    if (sprite_data_index_ < 8) {
+                        sprite_eval_state_ = STATE_1_Y;
+                        break;
+                    }
 
-                    ++sprite_data_index_;
+                    // 2c. If exactly 8 sprites have been found, disable writes to secondary OAM.
+                    //     This causes sprites in back to drop out.
+                    sprite_eval_state_ = STATE_3;
+                    break;
                 }
             }
+            break;
+
+
+        case STATE_1_I:
+            sprite_index(sprite_data_index_) = sprite_ram_[sprite_read_index_ + 1]; // index
+            sprite_eval_state_ = STATE_1_A;
+            break;
+        case STATE_1_A:
+            sprite_attr(sprite_data_index_) = sprite_ram_[sprite_read_index_ + 2] & 0xe3; // attributes
+            // note that we found sprite 0
+            if (current_is_sprite_0) {
+                sprite_attr(sprite_data_index_) |= OamZero;
+            }
+            sprite_eval_state_ = STATE_1_X;
+            break;
+        case STATE_1_X:
+            sprite_x(sprite_data_index_) = sprite_ram_[sprite_read_index_ + 3]; // x
+            left_most_sprite_x_ = std::min(left_most_sprite_x_, sprite_x(sprite_data_index_));
+            ++sprite_data_index_;
 
             // 2. Increment n
             sprite_read_index_ += 4;
+            current_is_sprite_0 = false;
 
             // 2a. If n has overflowed back to zero (all 64 sprites evaluated), go to 4
             if ((sprite_read_index_ & 0xfc) == 0x00) {
@@ -518,7 +548,7 @@ void evaluate_sprites() {
 
             // 2b. If less than 8 sprites have been found, go to 1
             if (sprite_data_index_ < 8) {
-                sprite_eval_state_ = STATE_1;
+                sprite_eval_state_ = STATE_1_Y;
                 break;
             }
 
@@ -578,10 +608,11 @@ void evaluate_sprites_odd() {
 		sprite_read_buffer_ = 0xff;
     } else if(hpos_ == 65) {
         sprite_read_index_ = sprite_address_;
-        sprite_eval_state_ = STATE_1;
-        // read the next sprite byte
+        current_is_sprite_0 = true;
+        sprite_eval_state_ = STATE_1_Y;
+        sprite_read_buffer_ = sprite_ram_[sprite_read_index_];
     } else if(hpos_ < 256) {
-        // read the next sprite byte
+        sprite_read_buffer_ = sprite_ram_[sprite_read_index_];
     }
 }
 
