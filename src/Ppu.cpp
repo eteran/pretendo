@@ -490,6 +490,7 @@ void evaluate_sprites() {
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
                 if (sprite_in_range(sprite_ram_[sprite_read_index_])) {
 
+                    // NOTE(eteran): we store the sprite line so make things simlper later
                     sprite_y(sprite_data_index_)     = static_cast<uint8_t>((vpos_ - 1) - sprite_ram_[sprite_read_index_ + 0]); // y
                     sprite_index(sprite_data_index_) = sprite_ram_[sprite_read_index_ + 1];                                     // index
                     sprite_attr(sprite_data_index_)  = sprite_ram_[sprite_read_index_ + 2] & 0xe3;                              // attributes
