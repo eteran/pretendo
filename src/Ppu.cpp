@@ -150,6 +150,7 @@ uint8_t sprite_read_index_  = 0;
 
 enum SpriteEvalState {
     STATE_1,
+    STATE_1a,
     STATE_3,
     STATE_4
 } sprite_eval_state_ = STATE_1;
@@ -485,25 +486,14 @@ void evaluate_sprites() {
 			//    which case the write is ignored).
 			if (sprite_data_index_ < 8) {
 
-                switch(sprite_read_index_ & 0x03) {
-                case 0x00: // Y
-                    break;
-                case 0x01: // I
-                    break;
-                case 0x02: // A
-                    break;
-                case 0x03: // T
-                    break;
-                }
-
-				// 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
+                // 1a. If Y-coordinate is in range, copy remaining bytes of sprite data
 				//     (OAM[n][1] thru OAM[n][3]) into secondary OAM.
                 if (sprite_in_range(sprite_ram_[sprite_read_index_])) {
 
                     sprite_y(sprite_data_index_)     = static_cast<uint8_t>((vpos_ - 1) - sprite_ram_[sprite_read_index_ + 0]); // y
-                    sprite_index(sprite_data_index_) = sprite_ram_[sprite_read_index_ + 1];            // index
-                    sprite_attr(sprite_data_index_)  = sprite_ram_[sprite_read_index_ + 2] & 0xe3;     // attributes
-                    sprite_x(sprite_data_index_)     = sprite_ram_[sprite_read_index_ + 3];            // x
+                    sprite_index(sprite_data_index_) = sprite_ram_[sprite_read_index_ + 1];                                     // index
+                    sprite_attr(sprite_data_index_)  = sprite_ram_[sprite_read_index_ + 2] & 0xe3;                              // attributes
+                    sprite_x(sprite_data_index_)     = sprite_ram_[sprite_read_index_ + 3];                                     // x
 
 					// note that we found sprite 0
                     if (sprite_read_index_ == sprite_address_) {
@@ -514,7 +504,7 @@ void evaluate_sprites() {
 
                     ++sprite_data_index_;
                 }
-			}
+            }
 
             // 2. Increment n
             sprite_read_index_ += 4;
@@ -540,7 +530,7 @@ void evaluate_sprites() {
 
             sprite_eval_state_ = STATE_3;
             break;
-		case STATE_3: {
+        case STATE_3: {
 			// 3. Starting at m = 0, evaluate OAM[n][m] as a Y-coordinate.
 			// 3a. If the value is in range, set the sprite overflow flag in $2002 and read
 			//     the next 3 entries of OAM (incrementing 'm' after each byte and incrementing
@@ -553,7 +543,7 @@ void evaluate_sprites() {
 				//     to 0, go to 4; otherwise go to 3
                 sprite_read_index_ = (sprite_read_index_ & 0x03) | (((sprite_read_index_ & 0xfc) + 4) & 0xfc);
                 sprite_read_index_ = (sprite_read_index_ & 0xfc) | (((sprite_read_index_ & 0x03) + 1) & 0x03);
-			}
+            }
 
             if ((sprite_read_index_ & 0xfc) == 0x00) {
                 sprite_eval_state_ = STATE_4;
