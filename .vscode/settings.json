@@ -67,9 +67,12 @@
     },
     "cSpell.words": [
         "nametable",
+        "nametables",
         "NTSC",
         "scanline",
         "scanlines",
-        "vblank"
+        "vblank",
+        "VRAM",
+        "WRAM"
     ]
 }
