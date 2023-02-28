@@ -25,7 +25,7 @@ MemoryMappedFile::MemoryMappedFile(const std::string &filename, size_t size) {
 				::munmap(ptr, size);
 			};
 		} else {
-			std::cerr << "Failed to map SRAM to file, using fallback implemention" << std::endl;
+			std::cerr << "Failed to map SRAM to file, using fallback implementation" << std::endl;
 
 			ptr_     = new uint8_t[size];
 			deleter_ = [](uint8_t *ptr) {
@@ -36,7 +36,7 @@ MemoryMappedFile::MemoryMappedFile(const std::string &filename, size_t size) {
 		::close(fd);
 	}
 #else
-	std::cerr << "Failed to map SRAM to file, using fallback implemention" << std::endl;
+	std::cerr << "Failed to map SRAM to file, using fallback implementation" << std::endl;
 
 	ptr_     = new uint8_t[size];
 	deleter_ = [](uint8_t *ptr) {

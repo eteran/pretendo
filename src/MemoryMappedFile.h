@@ -10,10 +10,10 @@
 class MemoryMappedFile {
 public:
 	MemoryMappedFile(const std::string &filename, size_t size);
-	MemoryMappedFile()                    = default;
-	MemoryMappedFile(MemoryMappedFile &&) = default;
-	MemoryMappedFile &operator=(MemoryMappedFile &&) = default;
-	MemoryMappedFile(const MemoryMappedFile &)       = delete;
+	MemoryMappedFile()                                    = default;
+	MemoryMappedFile(MemoryMappedFile &&)                 = default;
+	MemoryMappedFile &operator=(MemoryMappedFile &&)      = default;
+	MemoryMappedFile(const MemoryMappedFile &)            = delete;
 	MemoryMappedFile &operator=(const MemoryMappedFile &) = delete;
 	~MemoryMappedFile();
 
