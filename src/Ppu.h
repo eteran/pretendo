@@ -1,8 +1,7 @@
-
+﻿
 #ifndef PPU_20080314_H_
 #define PPU_20080314_H_
 
-#include "BitField.h"
 #include "Reset.h"
 #include <cstdint>
 
