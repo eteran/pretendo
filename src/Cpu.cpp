@@ -52,11 +52,6 @@ uint8_t P     = I_MASK | R_MASK;
 
 namespace {
 
-enum DMA_SOURCE {
-	SPR_DMA = 0,
-	DMC_DMA = 1
-};
-
 constexpr uint16_t NmiVectorAddress = 0xfffa;
 constexpr uint16_t RstVectorAddress = 0xfffc;
 constexpr uint16_t IrqVectorAddress = 0xfffe;

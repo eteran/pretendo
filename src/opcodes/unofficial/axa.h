@@ -10,7 +10,7 @@ struct opcode_axa {
 
 	using memory_access = operation_write;
 
-	static uint8_t execute(uint16_t address) {
+	static uint8_t execute(uint32_t address) {
 		(void)address;
 		X &= A;
 		X &= 7;
