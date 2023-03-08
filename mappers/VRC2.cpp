@@ -35,14 +35,14 @@ std::string VRC2::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t VRC2::read_6(uint16_t address) {
+uint8_t VRC2::read_6(uint32_t address) {
 	return (address >> 8) | latch_;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC2::write_6(uint16_t address, uint8_t value) {
+void VRC2::write_6(uint32_t address, uint8_t value) {
 	(void)address;
 	latch_ = (latch_ & 0xfe) | (value & 0x01);
 }
@@ -50,7 +50,7 @@ void VRC2::write_6(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC2::write_8(uint16_t address, uint8_t value) {
+void VRC2::write_8(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0x8000:
 	case 0x8001:
@@ -64,7 +64,7 @@ void VRC2::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC2::write_9(uint16_t address, uint8_t value) {
+void VRC2::write_9(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0x9000:
 	case 0x9001:
@@ -91,7 +91,7 @@ void VRC2::write_9(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC2::write_a(uint16_t address, uint8_t value) {
+void VRC2::write_a(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 	switch (address & 0xf003) {
@@ -107,7 +107,7 @@ void VRC2::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC2::write_b(uint16_t address, uint8_t value) {
+void VRC2::write_b(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0xb000:
 		chr_[0] = (chr_[0] & 0xf0) | ((value & 0x0f) << 0);
@@ -131,7 +131,7 @@ void VRC2::write_b(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC2::write_c(uint16_t address, uint8_t value) {
+void VRC2::write_c(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0xc000:
 		chr_[2] = (chr_[2] & 0xf0) | ((value & 0x0f) << 0);
@@ -155,7 +155,7 @@ void VRC2::write_c(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC2::write_d(uint16_t address, uint8_t value) {
+void VRC2::write_d(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0xd000:
 		chr_[4] = (chr_[4] & 0xf0) | ((value & 0x0f) << 0);
@@ -179,7 +179,7 @@ void VRC2::write_d(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC2::write_e(uint16_t address, uint8_t value) {
+void VRC2::write_e(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0xe000:
 		chr_[6] = (chr_[6] & 0xf0) | ((value & 0x0f) << 0);

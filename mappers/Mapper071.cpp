@@ -22,7 +22,7 @@ std::string Mapper71::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper71::write_8(uint16_t address, uint8_t value) {
+void Mapper71::write_8(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 #if 0
@@ -38,14 +38,14 @@ void Mapper71::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper71::write_9(uint16_t address, uint8_t value) {
+void Mapper71::write_9(uint32_t address, uint8_t value) {
 	write_8(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper71::write_c(uint16_t address, uint8_t value) {
+void Mapper71::write_c(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value & 0x0f);
 }
@@ -53,7 +53,7 @@ void Mapper71::write_c(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper71::write_d(uint16_t address, uint8_t value) {
+void Mapper71::write_d(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value & 0x0f);
 }
@@ -61,7 +61,7 @@ void Mapper71::write_d(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper71::write_e(uint16_t address, uint8_t value) {
+void Mapper71::write_e(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value & 0x0f);
 }
@@ -69,7 +69,7 @@ void Mapper71::write_e(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper71::write_f(uint16_t address, uint8_t value) {
+void Mapper71::write_f(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value & 0x0f);
 }

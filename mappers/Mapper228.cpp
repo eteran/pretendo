@@ -33,7 +33,7 @@ std::string Mapper228::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper228::read_4(uint16_t address) {
+uint8_t Mapper228::read_4(uint32_t address) {
 	if (address >= 0x4020) {
 		return ram_[address & 0x03];
 	}
@@ -43,89 +43,87 @@ uint8_t Mapper228::read_4(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper228::read_5(uint16_t address) {
+uint8_t Mapper228::read_5(uint32_t address) {
 	return ram_[address & 0x03];
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_4(uint16_t address, uint8_t value) {
+void Mapper228::write_4(uint32_t address, uint8_t value) {
 
 	if (address >= 0x4020) {
 		ram_[address & 0x03] = value & 0x03;
-	} else {
-		Mapper::write_4(address, value);
 	}
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_5(uint16_t address, uint8_t value) {
+void Mapper228::write_5(uint32_t address, uint8_t value) {
 	ram_[address & 0x03] = value & 0x03;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_8(uint16_t address, uint8_t value) {
+void Mapper228::write_8(uint32_t address, uint8_t value) {
 	write_hander(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_9(uint16_t address, uint8_t value) {
+void Mapper228::write_9(uint32_t address, uint8_t value) {
 	write_hander(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_a(uint16_t address, uint8_t value) {
+void Mapper228::write_a(uint32_t address, uint8_t value) {
 	write_hander(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_b(uint16_t address, uint8_t value) {
+void Mapper228::write_b(uint32_t address, uint8_t value) {
 	write_hander(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_c(uint16_t address, uint8_t value) {
+void Mapper228::write_c(uint32_t address, uint8_t value) {
 	write_hander(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_d(uint16_t address, uint8_t value) {
+void Mapper228::write_d(uint32_t address, uint8_t value) {
 	write_hander(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_e(uint16_t address, uint8_t value) {
+void Mapper228::write_e(uint32_t address, uint8_t value) {
 	write_hander(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_f(uint16_t address, uint8_t value) {
+void Mapper228::write_f(uint32_t address, uint8_t value) {
 	write_hander(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper228::write_hander(uint16_t address, uint8_t value) {
+void Mapper228::write_hander(uint32_t address, uint8_t value) {
 
 	if (address & 0x2000) {
 		set_mirroring(mirror_horizontal);
@@ -190,7 +188,7 @@ void Mapper228::write_hander(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper228::read_8(uint16_t address) {
+uint8_t Mapper228::read_8(uint32_t address) {
 	//return Mapper::read_8(address);
 
 	if (rom_[0]) {
@@ -203,7 +201,7 @@ uint8_t Mapper228::read_8(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper228::read_9(uint16_t address) {
+uint8_t Mapper228::read_9(uint32_t address) {
 	if (rom_[1]) {
 		return rom_[1][address & 0x0fff];
 	}
@@ -214,7 +212,7 @@ uint8_t Mapper228::read_9(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper228::read_a(uint16_t address) {
+uint8_t Mapper228::read_a(uint32_t address) {
 	if (rom_[2]) {
 		return rom_[2][address & 0x0fff];
 	}
@@ -225,7 +223,7 @@ uint8_t Mapper228::read_a(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper228::read_b(uint16_t address) {
+uint8_t Mapper228::read_b(uint32_t address) {
 	if (rom_[3]) {
 		return rom_[3][address & 0x0fff];
 	}
@@ -236,7 +234,7 @@ uint8_t Mapper228::read_b(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper228::read_c(uint16_t address) {
+uint8_t Mapper228::read_c(uint32_t address) {
 	if (rom_[4]) {
 		return rom_[4][address & 0x0fff];
 	}
@@ -247,7 +245,7 @@ uint8_t Mapper228::read_c(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper228::read_d(uint16_t address) {
+uint8_t Mapper228::read_d(uint32_t address) {
 	if (rom_[5]) {
 		return rom_[5][address & 0x0fff];
 	}
@@ -258,7 +256,7 @@ uint8_t Mapper228::read_d(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper228::read_e(uint16_t address) {
+uint8_t Mapper228::read_e(uint32_t address) {
 	if (rom_[6]) {
 		return rom_[6][address & 0x0fff];
 	}
@@ -269,7 +267,7 @@ uint8_t Mapper228::read_e(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper228::read_f(uint16_t address) {
+uint8_t Mapper228::read_f(uint32_t address) {
 	if (rom_[7]) {
 		return rom_[7][address & 0x0fff];
 	}

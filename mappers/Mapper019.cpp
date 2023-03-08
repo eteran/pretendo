@@ -34,7 +34,7 @@ std::string Mapper19::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper19::read_4(uint16_t address) {
+uint8_t Mapper19::read_4(uint32_t address) {
 	switch (address & 0xf800) {
 	case 0x4800:
 		return 0;
@@ -46,7 +46,7 @@ uint8_t Mapper19::read_4(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper19::read_5(uint16_t address) {
+uint8_t Mapper19::read_5(uint32_t address) {
 
 	switch (address & 0xf800) {
 	case 0x5000:
@@ -63,26 +63,25 @@ uint8_t Mapper19::read_5(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper19::read_6(uint16_t address) {
+uint8_t Mapper19::read_6(uint32_t address) {
 	return prg_ptr_[address & 0x1fff];
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper19::read_7(uint16_t address) {
+uint8_t Mapper19::read_7(uint32_t address) {
 	return prg_ptr_[address & 0x1fff];
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_4(uint16_t address, uint8_t value) {
+void Mapper19::write_4(uint32_t address, uint8_t value) {
 	switch (address & 0xf800) {
 	case 0x4800:
 		break;
 	default:
-		Mapper::write_4(address, value);
 		break;
 	}
 }
@@ -90,7 +89,7 @@ void Mapper19::write_4(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_5(uint16_t address, uint8_t value) {
+void Mapper19::write_5(uint32_t address, uint8_t value) {
 
 	switch (address & 0xf800) {
 	case 0x5000:
@@ -104,7 +103,6 @@ void Mapper19::write_5(uint16_t address, uint8_t value) {
 		nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 		break;
 	default:
-		Mapper::write_5(address, value);
 		break;
 	}
 }
@@ -112,21 +110,21 @@ void Mapper19::write_5(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_6(uint16_t address, uint8_t value) {
+void Mapper19::write_6(uint32_t address, uint8_t value) {
 	prg_ptr_[address & 0x1fff] = value;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_7(uint16_t address, uint8_t value) {
+void Mapper19::write_7(uint32_t address, uint8_t value) {
 	prg_ptr_[address & 0x1fff] = value;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_8(uint16_t address, uint8_t value) {
+void Mapper19::write_8(uint32_t address, uint8_t value) {
 	if (address & 0x0800) {
 		// Select 1K VROM bank at PPU $0400
 		set_chr_0400_07ff(value);
@@ -139,7 +137,7 @@ void Mapper19::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_9(uint16_t address, uint8_t value) {
+void Mapper19::write_9(uint32_t address, uint8_t value) {
 	if (address & 0x0800) {
 		// Select 1K VROM bank at PPU $0C00
 		set_chr_0c00_0fff(value);
@@ -152,7 +150,7 @@ void Mapper19::write_9(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_a(uint16_t address, uint8_t value) {
+void Mapper19::write_a(uint32_t address, uint8_t value) {
 	if (address & 0x0800) {
 		// Select 1K VROM bank at PPU $1400
 		set_chr_1400_17ff(value);
@@ -165,7 +163,7 @@ void Mapper19::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_b(uint16_t address, uint8_t value) {
+void Mapper19::write_b(uint32_t address, uint8_t value) {
 	if (address & 0x0800) {
 		// Select 1K VROM bank at PPU $1C00
 		set_chr_1c00_1fff(value);
@@ -178,7 +176,7 @@ void Mapper19::write_b(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_c(uint16_t address, uint8_t value) {
+void Mapper19::write_c(uint32_t address, uint8_t value) {
 	(void)value;
 	if (address & 0x0800) {
 		// Select 1K VROM bank at PPU $2400
@@ -198,7 +196,7 @@ void Mapper19::write_c(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_d(uint16_t address, uint8_t value) {
+void Mapper19::write_d(uint32_t address, uint8_t value) {
 	(void)value;
 	if (address & 0x0800) {
 		// Select 1K VROM bank at PPU $2c00
@@ -218,7 +216,7 @@ void Mapper19::write_d(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_e(uint16_t address, uint8_t value) {
+void Mapper19::write_e(uint32_t address, uint8_t value) {
 	if (address & 0x0800) {
 		set_prg_ab(value);
 	} else {
@@ -229,7 +227,7 @@ void Mapper19::write_e(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper19::write_f(uint16_t address, uint8_t value) {
+void Mapper19::write_f(uint32_t address, uint8_t value) {
 	if (!(address & 0x0800)) {
 		set_prg_cd(value);
 	}

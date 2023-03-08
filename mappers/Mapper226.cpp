@@ -23,63 +23,63 @@ std::string Mapper226::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper226::write_8(uint16_t address, uint8_t value) {
+void Mapper226::write_8(uint32_t address, uint8_t value) {
 	writer_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper226::write_9(uint16_t address, uint8_t value) {
+void Mapper226::write_9(uint32_t address, uint8_t value) {
 	writer_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper226::write_a(uint16_t address, uint8_t value) {
+void Mapper226::write_a(uint32_t address, uint8_t value) {
 	writer_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper226::write_b(uint16_t address, uint8_t value) {
+void Mapper226::write_b(uint32_t address, uint8_t value) {
 	writer_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper226::write_c(uint16_t address, uint8_t value) {
+void Mapper226::write_c(uint32_t address, uint8_t value) {
 	writer_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper226::write_d(uint16_t address, uint8_t value) {
+void Mapper226::write_d(uint32_t address, uint8_t value) {
 	writer_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper226::write_e(uint16_t address, uint8_t value) {
+void Mapper226::write_e(uint32_t address, uint8_t value) {
 	writer_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper226::write_f(uint16_t address, uint8_t value) {
+void Mapper226::write_f(uint32_t address, uint8_t value) {
 	writer_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper226::writer_handler(uint16_t address, uint8_t value) {
+void Mapper226::writer_handler(uint32_t address, uint8_t value) {
 
 	regs_[address & 0x0001] = value;
 

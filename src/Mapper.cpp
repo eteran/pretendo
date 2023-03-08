@@ -1,12 +1,8 @@
 
 #include "Mapper.h"
-#include "Apu.h"
 #include "Cart.h"
 #include "Compiler.h"
-#include "Cpu.h"
-#include "Input.h"
 #include "Nes.h"
-#include "Ppu.h"
 #include "Settings.h"
 
 #include <algorithm>
@@ -70,7 +66,7 @@ std::unique_ptr<Mapper> Mapper::create_mapper(int num) {
 //------------------------------------------------------------------------------
 // Name: read_memory
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_memory(uint16_t address) {
+uint8_t Mapper::read_memory(uint32_t address) {
 	if (LIKELY(page_[address >> PageShift])) {
 		return page_[address >> PageShift][address & PageMask];
 	}
@@ -82,7 +78,7 @@ uint8_t Mapper::read_memory(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name: write_0
 //------------------------------------------------------------------------------
-void Mapper::write_0(uint16_t address, uint8_t value) {
+void Mapper::write_0(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -90,7 +86,7 @@ void Mapper::write_0(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_1
 //------------------------------------------------------------------------------
-void Mapper::write_1(uint16_t address, uint8_t value) {
+void Mapper::write_1(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -98,7 +94,7 @@ void Mapper::write_1(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_2
 //------------------------------------------------------------------------------
-void Mapper::write_2(uint16_t address, uint8_t value) {
+void Mapper::write_2(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -106,7 +102,7 @@ void Mapper::write_2(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_3
 //------------------------------------------------------------------------------
-void Mapper::write_3(uint16_t address, uint8_t value) {
+void Mapper::write_3(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -114,7 +110,7 @@ void Mapper::write_3(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: Write4
 //------------------------------------------------------------------------------
-void Mapper::write_4(uint16_t address, uint8_t value) {
+void Mapper::write_4(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -122,7 +118,7 @@ void Mapper::write_4(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_5
 //------------------------------------------------------------------------------
-void Mapper::write_5(uint16_t address, uint8_t value) {
+void Mapper::write_5(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -130,7 +126,7 @@ void Mapper::write_5(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_6
 //------------------------------------------------------------------------------
-void Mapper::write_6(uint16_t address, uint8_t value) {
+void Mapper::write_6(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -138,7 +134,7 @@ void Mapper::write_6(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_7
 //------------------------------------------------------------------------------
-void Mapper::write_7(uint16_t address, uint8_t value) {
+void Mapper::write_7(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -146,7 +142,7 @@ void Mapper::write_7(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_8
 //------------------------------------------------------------------------------
-void Mapper::write_8(uint16_t address, uint8_t value) {
+void Mapper::write_8(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -154,7 +150,7 @@ void Mapper::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_9
 //------------------------------------------------------------------------------
-void Mapper::write_9(uint16_t address, uint8_t value) {
+void Mapper::write_9(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -162,7 +158,7 @@ void Mapper::write_9(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_a
 //------------------------------------------------------------------------------
-void Mapper::write_a(uint16_t address, uint8_t value) {
+void Mapper::write_a(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -170,7 +166,7 @@ void Mapper::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_b
 //------------------------------------------------------------------------------
-void Mapper::write_b(uint16_t address, uint8_t value) {
+void Mapper::write_b(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -178,7 +174,7 @@ void Mapper::write_b(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_c
 //------------------------------------------------------------------------------
-void Mapper::write_c(uint16_t address, uint8_t value) {
+void Mapper::write_c(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -186,7 +182,7 @@ void Mapper::write_c(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_d
 //------------------------------------------------------------------------------
-void Mapper::write_d(uint16_t address, uint8_t value) {
+void Mapper::write_d(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -194,7 +190,7 @@ void Mapper::write_d(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_e
 //------------------------------------------------------------------------------
-void Mapper::write_e(uint16_t address, uint8_t value) {
+void Mapper::write_e(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -202,7 +198,7 @@ void Mapper::write_e(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_f
 //------------------------------------------------------------------------------
-void Mapper::write_f(uint16_t address, uint8_t value) {
+void Mapper::write_f(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -210,119 +206,119 @@ void Mapper::write_f(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: read_0
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_0(uint16_t address) {
+uint8_t Mapper::read_0(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_1
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_1(uint16_t address) {
+uint8_t Mapper::read_1(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_2
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_2(uint16_t address) {
+uint8_t Mapper::read_2(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_3
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_3(uint16_t address) {
+uint8_t Mapper::read_3(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_4
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_4(uint16_t address) {
+uint8_t Mapper::read_4(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_5
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_5(uint16_t address) {
+uint8_t Mapper::read_5(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_6
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_6(uint16_t address) {
+uint8_t Mapper::read_6(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_7
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_7(uint16_t address) {
+uint8_t Mapper::read_7(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_8
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_8(uint16_t address) {
+uint8_t Mapper::read_8(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_9
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_9(uint16_t address) {
+uint8_t Mapper::read_9(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_a
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_a(uint16_t address) {
+uint8_t Mapper::read_a(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_b
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_b(uint16_t address) {
+uint8_t Mapper::read_b(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_c
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_c(uint16_t address) {
+uint8_t Mapper::read_c(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_d
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_d(uint16_t address) {
+uint8_t Mapper::read_d(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_e
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_e(uint16_t address) {
+uint8_t Mapper::read_e(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_f
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_f(uint16_t address) {
+uint8_t Mapper::read_f(uint32_t address) {
 	return read_memory(address);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper::write_vram(uint16_t address, uint8_t value) {
+void Mapper::write_vram(uint32_t address, uint8_t value) {
 	VRAMBank &bank = vram_banks_[(address >> 10) & 0x0f];
 	if (LIKELY(bank && bank.writeable())) {
 		bank[address & 0x03ff] = value;
@@ -332,7 +328,7 @@ void Mapper::write_vram(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper::read_vram(uint16_t address) {
+uint8_t Mapper::read_vram(uint32_t address) {
 	const VRAMBank &bank = vram_banks_[(address >> 10) & 0x0f];
 	if (LIKELY(bank)) {
 		return bank[address & 0x03ff];
@@ -785,7 +781,7 @@ void Mapper::ppu_end_frame() {
 //------------------------------------------------------------------------------
 // Name: vram_change_hook
 //------------------------------------------------------------------------------
-void Mapper::vram_change_hook(uint16_t vram_address) {
+void Mapper::vram_change_hook(uint32_t vram_address) {
 	(void)vram_address;
 	// default does nothing
 }

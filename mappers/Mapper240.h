@@ -12,11 +12,11 @@ public:
 	std::string name() const override;
 
 public:
-	void write_4(uint16_t address, uint8_t value) override;
-	void write_5(uint16_t address, uint8_t value) override;
+	void write_4(uint32_t address, uint8_t value) override;
+	void write_5(uint32_t address, uint8_t value) override;
 
 private:
-	void write_handler(uint16_t address, uint8_t value);
+	void write_handler(uint32_t address, uint8_t value);
 };
 
 #endif

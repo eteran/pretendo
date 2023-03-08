@@ -49,7 +49,7 @@ std::string Mapper90::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper90::read_5(uint16_t address) {
+uint8_t Mapper90::read_5(uint32_t address) {
 
 	switch (address) {
 	case 0x5000:
@@ -69,7 +69,7 @@ uint8_t Mapper90::read_5(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper90::write_5(uint16_t address, uint8_t value) {
+void Mapper90::write_5(uint32_t address, uint8_t value) {
 	switch (address) {
 	case 0x5800:
 		multiply_1_ = value;
@@ -81,7 +81,6 @@ void Mapper90::write_5(uint16_t address, uint8_t value) {
 		prg_ram_ = value;
 		break;
 	default:
-		Mapper::write_5(address, value);
 		break;
 	}
 }
@@ -89,7 +88,7 @@ void Mapper90::write_5(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper90::write_8(uint16_t address, uint8_t value) {
+void Mapper90::write_8(uint32_t address, uint8_t value) {
 
 	switch (address & 0x07) {
 	case 0x00:
@@ -110,7 +109,7 @@ void Mapper90::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper90::write_9(uint16_t address, uint8_t value) {
+void Mapper90::write_9(uint32_t address, uint8_t value) {
 
 	switch (address & 0x07) {
 	case 0x00:
@@ -131,7 +130,7 @@ void Mapper90::write_9(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper90::write_a(uint16_t address, uint8_t value) {
+void Mapper90::write_a(uint32_t address, uint8_t value) {
 
 	switch (address & 0x07) {
 	case 0x00:
@@ -152,7 +151,7 @@ void Mapper90::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper90::write_b(uint16_t address, uint8_t value) {
+void Mapper90::write_b(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -160,7 +159,7 @@ void Mapper90::write_b(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper90::write_c(uint16_t address, uint8_t value) {
+void Mapper90::write_c(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 	// TODO: IRQs!
@@ -169,7 +168,7 @@ void Mapper90::write_c(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper90::write_d(uint16_t address, uint8_t value) {
+void Mapper90::write_d(uint32_t address, uint8_t value) {
 
 	switch (address & 0x03) {
 	case 0x00:
@@ -324,7 +323,7 @@ void Mapper90::sync_chr() {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper90::read_vram(uint16_t address) {
+uint8_t Mapper90::read_vram(uint32_t address) {
 
 	if (chr_control_.disabled) {
 

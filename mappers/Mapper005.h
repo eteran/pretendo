@@ -20,48 +20,48 @@ public:
 	std::string name() const override;
 
 public:
-	void write_2(uint16_t address, uint8_t value) override;
-	void write_3(uint16_t address, uint8_t value) override;
-	void write_5(uint16_t address, uint8_t value) override;
-	void write_6(uint16_t address, uint8_t value) override;
-	void write_7(uint16_t address, uint8_t value) override;
-	void write_8(uint16_t address, uint8_t value) override;
-	void write_9(uint16_t address, uint8_t value) override;
-	void write_a(uint16_t address, uint8_t value) override;
-	void write_b(uint16_t address, uint8_t value) override;
-	void write_c(uint16_t address, uint8_t value) override;
-	void write_d(uint16_t address, uint8_t value) override;
+	void write_2(uint32_t address, uint8_t value) override;
+	void write_3(uint32_t address, uint8_t value) override;
+	void write_5(uint32_t address, uint8_t value) override;
+	void write_6(uint32_t address, uint8_t value) override;
+	void write_7(uint32_t address, uint8_t value) override;
+	void write_8(uint32_t address, uint8_t value) override;
+	void write_9(uint32_t address, uint8_t value) override;
+	void write_a(uint32_t address, uint8_t value) override;
+	void write_b(uint32_t address, uint8_t value) override;
+	void write_c(uint32_t address, uint8_t value) override;
+	void write_d(uint32_t address, uint8_t value) override;
 
 public:
-	uint8_t read_5(uint16_t address) override;
-	uint8_t read_6(uint16_t address) override;
-	uint8_t read_7(uint16_t address) override;
-	uint8_t read_8(uint16_t address) override;
-	uint8_t read_9(uint16_t address) override;
-	uint8_t read_a(uint16_t address) override;
-	uint8_t read_b(uint16_t address) override;
-	uint8_t read_c(uint16_t address) override;
-	uint8_t read_d(uint16_t address) override;
+	uint8_t read_5(uint32_t address) override;
+	uint8_t read_6(uint32_t address) override;
+	uint8_t read_7(uint32_t address) override;
+	uint8_t read_8(uint32_t address) override;
+	uint8_t read_9(uint32_t address) override;
+	uint8_t read_a(uint32_t address) override;
+	uint8_t read_b(uint32_t address) override;
+	uint8_t read_c(uint32_t address) override;
+	uint8_t read_d(uint32_t address) override;
 
 public:
-	uint8_t read_vram(uint16_t address) override;
-	void write_vram(uint16_t address, uint8_t value) override;
+	uint8_t read_vram(uint32_t address) override;
+	void write_vram(uint32_t address, uint8_t value) override;
 
 public:
-	void vram_change_hook(uint16_t vram_address) override;
+	void vram_change_hook(uint32_t vram_address) override;
 	void ppu_end_frame() override;
 
 private:
 	void clock_irq();
-	void write_handler(uint16_t address, uint8_t value);
-	uint8_t read_handler(uint16_t address);
+	void write_handler(uint32_t address, uint8_t value);
+	uint8_t read_handler(uint32_t address);
 
 private:
 	uint8_t prg_ram_[2][0x8000]    = {};
 	uint8_t exram_[0x400]          = {};
 	uint8_t bg_chr_banks_[8]       = {};
 	uint8_t sp_chr_banks_[8]       = {};
-	uint16_t prev_vram_address_[2] = {0xffff, 0xffff};
+	uint32_t prev_vram_address_[2] = {0xffff, 0xffff};
 	uint8_t *prg_ram_banks_[0x10]  = {};
 
 	bool irq_enabled_              = false;

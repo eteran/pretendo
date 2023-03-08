@@ -35,7 +35,7 @@ std::string Mapper5::name() const {
 //------------------------------------------------------------------------------
 // Name: write_5
 //------------------------------------------------------------------------------
-void Mapper5::write_5(uint16_t address, uint8_t value) {
+void Mapper5::write_5(uint32_t address, uint8_t value) {
 
 	switch (address) {
 	case 0x5100:
@@ -236,63 +236,63 @@ void Mapper5::write_5(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_6
 //------------------------------------------------------------------------------
-void Mapper5::write_6(uint16_t address, uint8_t value) {
+void Mapper5::write_6(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_7
 //------------------------------------------------------------------------------
-void Mapper5::write_7(uint16_t address, uint8_t value) {
+void Mapper5::write_7(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper5::write_8(uint16_t address, uint8_t value) {
+void Mapper5::write_8(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper5::write_9(uint16_t address, uint8_t value) {
+void Mapper5::write_9(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper5::write_a(uint16_t address, uint8_t value) {
+void Mapper5::write_a(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper5::write_b(uint16_t address, uint8_t value) {
+void Mapper5::write_b(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper5::write_c(uint16_t address, uint8_t value) {
+void Mapper5::write_c(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper5::write_d(uint16_t address, uint8_t value) {
+void Mapper5::write_d(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper5::write_handler(uint16_t address, uint8_t value) {
+void Mapper5::write_handler(uint32_t address, uint8_t value) {
 
 	const uint8_t bank = (address >> 12) & 0x0f;
 
@@ -304,7 +304,7 @@ void Mapper5::write_handler(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: read_5
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_5(uint16_t address) {
+uint8_t Mapper5::read_5(uint32_t address) {
 
 	uint8_t ret = (address >> 8);
 
@@ -348,63 +348,63 @@ uint8_t Mapper5::read_5(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name: read_6
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_6(uint16_t address) {
+uint8_t Mapper5::read_6(uint32_t address) {
 	return read_handler(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_7
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_7(uint16_t address) {
+uint8_t Mapper5::read_7(uint32_t address) {
 	return read_handler(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_8
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_8(uint16_t address) {
+uint8_t Mapper5::read_8(uint32_t address) {
 	return read_handler(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_9
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_9(uint16_t address) {
+uint8_t Mapper5::read_9(uint32_t address) {
 	return read_handler(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_a
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_a(uint16_t address) {
+uint8_t Mapper5::read_a(uint32_t address) {
 	return read_handler(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_b
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_b(uint16_t address) {
+uint8_t Mapper5::read_b(uint32_t address) {
 	return read_handler(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_c
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_c(uint16_t address) {
+uint8_t Mapper5::read_c(uint32_t address) {
 	return read_handler(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_d
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_d(uint16_t address) {
+uint8_t Mapper5::read_d(uint32_t address) {
 	return read_handler(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_handler
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_handler(uint16_t address) {
+uint8_t Mapper5::read_handler(uint32_t address) {
 
 	const uint8_t bank = (address >> 12) & 0x0f;
 
@@ -418,7 +418,7 @@ uint8_t Mapper5::read_handler(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name: read_vram
 //------------------------------------------------------------------------------
-uint8_t Mapper5::read_vram(uint16_t address) {
+uint8_t Mapper5::read_vram(uint32_t address) {
 
 	if (vertical_split_bank_ & VSPLIT_ENABLE) {
 		printf("VSPLIT\n");
@@ -570,7 +570,7 @@ uint8_t Mapper5::read_vram(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name: write_vram
 //------------------------------------------------------------------------------
-void Mapper5::write_vram(uint16_t address, uint8_t value) {
+void Mapper5::write_vram(uint32_t address, uint8_t value) {
 	switch ((address >> 10) & 0x0f) {
 	case 0x08:
 	case 0x0c:
@@ -658,7 +658,7 @@ void Mapper5::write_vram(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_2
 //------------------------------------------------------------------------------
-void Mapper5::write_2(uint16_t address, uint8_t value) {
+void Mapper5::write_2(uint32_t address, uint8_t value) {
 
 	switch (address & 0x07) {
 	case 0x00:
@@ -671,14 +671,12 @@ void Mapper5::write_2(uint16_t address, uint8_t value) {
 		}
 		break;
 	}
-
-	Mapper::write_2(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_3
 //------------------------------------------------------------------------------
-void Mapper5::write_3(uint16_t address, uint8_t value) {
+void Mapper5::write_3(uint32_t address, uint8_t value) {
 
 	switch (address & 0x07) {
 	case 0x00:
@@ -691,14 +689,12 @@ void Mapper5::write_3(uint16_t address, uint8_t value) {
 		}
 		break;
 	}
-
-	Mapper::write_3(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: vram_change_hook
 //------------------------------------------------------------------------------
-void Mapper5::vram_change_hook(uint16_t vram_address) {
+void Mapper5::vram_change_hook(uint32_t vram_address) {
 
 	// when this is > 128 (32 * 4), we are fetching sprites, not BG tiles
 	++fetch_count_;

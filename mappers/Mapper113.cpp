@@ -22,29 +22,25 @@ std::string Mapper113::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper113::write_4(uint16_t address, uint8_t value) {
+void Mapper113::write_4(uint32_t address, uint8_t value) {
 	if ((address & 0x4100) == 0x4100) {
 		write_handler(address, value);
-	} else {
-		Mapper::write_4(address, value);
 	}
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper113::write_5(uint16_t address, uint8_t value) {
+void Mapper113::write_5(uint32_t address, uint8_t value) {
 	if ((address & 0x4100) == 0x4100) {
 		write_handler(address, value);
-	} else {
-		Mapper::write_5(address, value);
 	}
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper113::write_handler(uint16_t address, uint8_t value) {
+void Mapper113::write_handler(uint32_t address, uint8_t value) {
 	assert((address & 0x4100) == 0x4100);
 
 	(void)address;

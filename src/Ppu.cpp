@@ -108,21 +108,21 @@ const uint8_t powerup_palette[32] = {
 //------------------------------------------------------------------------------
 // Name: attribute_bits
 //------------------------------------------------------------------------------
-constexpr uint8_t attribute_bits(uint16_t vram_address, uint8_t attr_byte) {
+constexpr uint8_t attribute_bits(uint32_t vram_address, uint8_t attr_byte) {
 	return (attr_byte >> (((vram_address & 0x40) >> 4) | (vram_address & 0x02))) & 0x03;
 }
 
 //------------------------------------------------------------------------------
 // Name: attribute_address
 //------------------------------------------------------------------------------
-constexpr uint16_t attribute_address(uint16_t vram_address) {
+constexpr uint32_t attribute_address(uint32_t vram_address) {
 	return 0x23c0 | (vram_address & 0x0c00) | ((vram_address >> 4) & 0x38) | ((vram_address >> 2) & 0x07);
 }
 
 //------------------------------------------------------------------------------
 // Name: tile_address
 //------------------------------------------------------------------------------
-constexpr uint16_t tile_address(uint16_t vram_address) {
+constexpr uint32_t tile_address(uint32_t vram_address) {
 	return 0x2000 | (vram_address & 0x0fff);
 }
 
@@ -166,8 +166,8 @@ uint16_t attribute_queue_[2]     = {};
 uint16_t pattern_queue_[2]       = {};
 uint16_t nametable_              = 0; // loopy's "t"
 uint16_t vram_address_           = 0; // loopy's "v"
-uint16_t hpos_                   = 0; // pixel counter
-uint16_t vpos_                   = 0; // scanline counter
+uint32_t hpos_                   = 0; // pixel counter
+uint32_t vpos_                   = 0; // scanline counter
 uint8_t next_pattern_[2]         = {};
 uint16_t latch_                  = 0;
 uint8_t next_attribute_          = 0;
@@ -187,7 +187,7 @@ bool write_block_ = false;
 // Name: sprite_pattern_table
 // Desc: returns 0x0000 or 0x1000 depending on bit 3 of ppu_control_
 //------------------------------------------------------------------------------
-uint16_t sprite_pattern_table() {
+uint32_t sprite_pattern_table() {
 	return ppu_control_.sprite_pattern_table ? 0x1000 : 0x0000;
 }
 
@@ -195,7 +195,7 @@ uint16_t sprite_pattern_table() {
 // Name: background_pattern_table
 // Desc: returns 0x0000 or 0x1000 depending on bit 4 of ppu_control_
 //------------------------------------------------------------------------------
-uint16_t background_pattern_table() {
+uint32_t background_pattern_table() {
 	return ppu_control_.background_pattern_table ? 0x1000 : 0x0000;
 }
 
@@ -204,7 +204,7 @@ uint16_t background_pattern_table() {
 // Desc:
 //------------------------------------------------------------------------------
 template <class Pattern>
-constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line, const size_8px &) {
+constexpr uint32_t sprite_pattern_address(uint8_t index, uint8_t sprite_line, const size_8px &) {
 	// 8x8
 	return (sprite_pattern_table() | (index << 4) | Pattern::offset | sprite_line) & 0xffff;
 }
@@ -214,7 +214,7 @@ constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line, co
 // Desc:
 //------------------------------------------------------------------------------
 template <class Pattern>
-constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line, const size_16px &) {
+constexpr uint32_t sprite_pattern_address(uint8_t index, uint8_t sprite_line, const size_16px &) {
 	// 8x16. even sprites use $0000, odd $1000
 	return (((index & 1) << 12) | ((index & 0xfe) << 4) | Pattern::offset | (sprite_line & 7) | ((sprite_line & 0x08) << 1)) & 0xffff;
 }
@@ -224,7 +224,7 @@ constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line, co
 // Desc:
 //------------------------------------------------------------------------------
 template <class Size, class Pattern>
-constexpr uint16_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
+constexpr uint32_t sprite_pattern_address(uint8_t index, uint8_t sprite_line) {
 	return sprite_pattern_address<Pattern>(index, sprite_line, Size());
 }
 
@@ -245,7 +245,7 @@ uint8_t render_blank_pixel() {
 // Name: select_bg_pixel
 // Note: the screen is *always* enabled when this is called
 //------------------------------------------------------------------------------
-uint8_t select_bg_pixel(uint16_t index) {
+uint8_t select_bg_pixel(uint32_t index) {
 
 	// first identify what the BG pixel would be
 	if ((ppu_mask_.background_clipping || index >= 8) && ppu_mask_.background_visible) {
@@ -266,7 +266,7 @@ uint8_t select_bg_pixel(uint16_t index) {
 // Name: select_pixel
 // Note: the screen is *always* enabled when this is called
 //------------------------------------------------------------------------------
-uint8_t select_pixel(uint16_t index) {
+uint8_t select_pixel(uint32_t index) {
 
 	// default to displaying the BG pixel
 	uint8_t pixel = select_bg_pixel(index);
@@ -435,7 +435,7 @@ void read_tile_index() {
 // Name:
 //------------------------------------------------------------------------------
 bool sprite_in_range(uint8_t y) {
-	const uint16_t sprite_line = (vpos_ - 1) - y;
+	const uint32_t sprite_line = (vpos_ - 1) - y;
 
 	if (ppu_control_.large_sprites) {
 		return sprite_line < 16;
@@ -1441,7 +1441,7 @@ void write2006(uint8_t value) {
 void write2007(uint8_t value) {
 	latch_ = value;
 
-	const uint16_t temp_address = vram_address_ & 0b0011111111111111;
+	const uint32_t temp_address = vram_address_ & 0b0011111111111111;
 
 	increment_vram_address();
 
@@ -1450,7 +1450,7 @@ void write2007(uint8_t value) {
 	// palette write
 	if ((temp_address & 0b0011111100000000) == 0b0011111100000000) {
 
-		const uint16_t palette_address = temp_address & 0x1f;
+		const uint32_t palette_address = temp_address & 0x1f;
 		palette_[palette_address]      = value & 0x3f;
 
 		if ((palette_address & 0x03) == 0x00) {
@@ -1529,7 +1529,7 @@ uint8_t read2007() {
 		return 0x00;
 	}
 
-	const uint16_t temp_address = vram_address_ & 0b0011111111111111;
+	const uint32_t temp_address = vram_address_ & 0b0011111111111111;
 
 	increment_vram_address();
 
@@ -1559,7 +1559,7 @@ void write4014(uint8_t value) {
 	// the procedure takes 513 CPU cycles (+1 on odd CPU cycles):
 	// first one (or two) idle cycles, and then 256 pairs of alternating
 	// read/write cycles.
-	const auto sprite_addr = static_cast<uint16_t>(value << 8);
+	const auto sprite_addr = static_cast<uint32_t>(value << 8);
 	cpu::schedule_spr_dma(write2004, sprite_addr, 256);
 }
 
@@ -1597,14 +1597,14 @@ uint64_t cycle_count() {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint16_t hpos() {
+uint32_t hpos() {
 	return hpos_;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint16_t vpos() {
+uint32_t vpos() {
 	return vpos_;
 }
 

@@ -23,7 +23,7 @@ std::string VRC6::name() const {
 //------------------------------------------------------------------------------
 // Name: write_8
 //------------------------------------------------------------------------------
-void VRC6::write_8(uint16_t address, uint8_t value) {
+void VRC6::write_8(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0x8000:
 	case 0x8001:
@@ -37,7 +37,7 @@ void VRC6::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_9
 //------------------------------------------------------------------------------
-void VRC6::write_9(uint16_t address, uint8_t value) {
+void VRC6::write_9(uint32_t address, uint8_t value) {
 
 	(void)value;
 
@@ -60,7 +60,7 @@ void VRC6::write_9(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_a
 //------------------------------------------------------------------------------
-void VRC6::write_a(uint16_t address, uint8_t value) {
+void VRC6::write_a(uint32_t address, uint8_t value) {
 
 	(void)value;
 
@@ -80,7 +80,7 @@ void VRC6::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_b
 //------------------------------------------------------------------------------
-void VRC6::write_b(uint16_t address, uint8_t value) {
+void VRC6::write_b(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0xb000:
 		// saw volume
@@ -113,7 +113,7 @@ void VRC6::write_b(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_c
 //------------------------------------------------------------------------------
-void VRC6::write_c(uint16_t address, uint8_t value) {
+void VRC6::write_c(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0xc000:
 	case 0xc001:
@@ -127,7 +127,7 @@ void VRC6::write_c(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_d
 //------------------------------------------------------------------------------
-void VRC6::write_d(uint16_t address, uint8_t value) {
+void VRC6::write_d(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0xd000:
 		set_chr_0000_03ff(value);
@@ -147,7 +147,7 @@ void VRC6::write_d(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_e
 //------------------------------------------------------------------------------
-void VRC6::write_e(uint16_t address, uint8_t value) {
+void VRC6::write_e(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0xe000:
 		set_chr_1000_13ff(value);
@@ -167,7 +167,7 @@ void VRC6::write_e(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_f
 //------------------------------------------------------------------------------
-void VRC6::write_f(uint16_t address, uint8_t value) {
+void VRC6::write_f(uint32_t address, uint8_t value) {
 	switch (address & 0xf003) {
 	case 0xf000:
 		irq_latch_ = value;

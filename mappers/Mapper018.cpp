@@ -30,7 +30,7 @@ std::string Mapper18::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper18::write_8(uint16_t address, uint8_t value) {
+void Mapper18::write_8(uint32_t address, uint8_t value) {
 
 	switch (address & 0x000f) {
 	case 0x0000:
@@ -48,7 +48,7 @@ void Mapper18::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper18::write_9(uint16_t address, uint8_t value) {
+void Mapper18::write_9(uint32_t address, uint8_t value) {
 
 	switch (address & 0x000f) {
 	case 0x0000:
@@ -63,7 +63,7 @@ void Mapper18::write_9(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper18::write_a(uint16_t address, uint8_t value) {
+void Mapper18::write_a(uint32_t address, uint8_t value) {
 	chr_[0x00 | (address & 0x03)] = value & 0x0f;
 	set_chr_0000_03ff(chr_[0x00] | (chr_[0x01] << 4));
 	set_chr_0400_07ff(chr_[0x02] | (chr_[0x03] << 4));
@@ -72,7 +72,7 @@ void Mapper18::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper18::write_b(uint16_t address, uint8_t value) {
+void Mapper18::write_b(uint32_t address, uint8_t value) {
 	chr_[0x04 | (address & 0x03)] = value & 0x0f;
 	set_chr_0800_0bff(chr_[0x04] | (chr_[0x05] << 4));
 	set_chr_0c00_0fff(chr_[0x06] | (chr_[0x07] << 4));
@@ -81,7 +81,7 @@ void Mapper18::write_b(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper18::write_c(uint16_t address, uint8_t value) {
+void Mapper18::write_c(uint32_t address, uint8_t value) {
 	chr_[0x08 | (address & 0x03)] = value & 0x0f;
 	set_chr_1000_13ff(chr_[0x08] | (chr_[0x09] << 4));
 	set_chr_1400_17ff(chr_[0x0a] | (chr_[0x0b] << 4));
@@ -90,7 +90,7 @@ void Mapper18::write_c(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper18::write_d(uint16_t address, uint8_t value) {
+void Mapper18::write_d(uint32_t address, uint8_t value) {
 	chr_[0x0C | (address & 0x03)] = value & 0x0f;
 	set_chr_1800_1bff(chr_[0x0c] | (chr_[0x0d] << 4));
 	set_chr_1c00_1fff(chr_[0x0e] | (chr_[0x0f] << 4));
@@ -99,7 +99,7 @@ void Mapper18::write_d(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper18::write_e(uint16_t address, uint8_t value) {
+void Mapper18::write_e(uint32_t address, uint8_t value) {
 	switch (address & 0x000f) {
 	case 0x0000:
 		irq_latch_.byte1 = (value & 0x0f);
@@ -119,7 +119,7 @@ void Mapper18::write_e(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper18::write_f(uint16_t address, uint8_t value) {
+void Mapper18::write_f(uint32_t address, uint8_t value) {
 	switch (address & 0x0fff) {
 	case 0x0000:
 		irq_counter_.raw = irq_latch_.raw;

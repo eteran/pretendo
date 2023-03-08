@@ -31,7 +31,7 @@ std::string Mapper163::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper163::read_5(uint16_t address) {
+uint8_t Mapper163::read_5(uint32_t address) {
 	switch (address & 0x7300) {
 	case 0x5100:
 		return security_;
@@ -50,21 +50,21 @@ uint8_t Mapper163::read_5(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper163::read_6(uint16_t address) {
+uint8_t Mapper163::read_6(uint32_t address) {
 	return prg_ptr_[address & 0x1fff];
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper163::read_7(uint16_t address) {
+uint8_t Mapper163::read_7(uint32_t address) {
 	return prg_ptr_[address & 0x1fff];
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper163::write_5(uint16_t address, uint8_t value) {
+void Mapper163::write_5(uint32_t address, uint8_t value) {
 
 	switch (address & 0x7300) {
 	case 0x5000:
@@ -101,13 +101,13 @@ void Mapper163::write_5(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper163::write_6(uint16_t address, uint8_t value) {
+void Mapper163::write_6(uint32_t address, uint8_t value) {
 	prg_ptr_[address & 0x1fff] = value;
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper163::write_7(uint16_t address, uint8_t value) {
+void Mapper163::write_7(uint32_t address, uint8_t value) {
 	prg_ptr_[address & 0x1fff] = value;
 }

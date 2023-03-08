@@ -22,7 +22,7 @@ std::string Mapper86::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper86::write_6(uint16_t address, uint8_t value) {
+void Mapper86::write_6(uint32_t address, uint8_t value) {
 	(void)address;
 	const uint8_t prg_select = (value & 0x30) >> 4;
 	const uint8_t chr_select = (value & 0x03) | ((value & 0x40) >> 4);
@@ -34,7 +34,7 @@ void Mapper86::write_6(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper86::write_7(uint16_t address, uint8_t value) {
+void Mapper86::write_7(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 	// TODO

@@ -12,8 +12,8 @@ public:
 	std::string name() const override;
 
 public:
-	uint8_t read_vram(uint16_t address) override;
-	void write_vram(uint16_t address, uint8_t value) override;
+	uint8_t read_vram(uint32_t address) override;
+	void write_vram(uint32_t address, uint8_t value) override;
 };
 
 #endif

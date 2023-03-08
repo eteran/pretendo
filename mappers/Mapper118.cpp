@@ -24,21 +24,21 @@ Mapper118::Mapper118() {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper118::write_8(uint16_t address, uint8_t value) {
+void Mapper118::write_8(uint32_t address, uint8_t value) {
 	MMC3::write_8(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper118::write_9(uint16_t address, uint8_t value) {
+void Mapper118::write_9(uint32_t address, uint8_t value) {
 	MMC3::write_9(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper118::write_a(uint16_t address, uint8_t value) {
+void Mapper118::write_a(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }
@@ -46,7 +46,7 @@ void Mapper118::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper118::write_b(uint16_t address, uint8_t value) {
+void Mapper118::write_b(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }

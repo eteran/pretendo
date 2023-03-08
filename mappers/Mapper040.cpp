@@ -27,7 +27,7 @@ std::string Mapper40::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper40::write_8(uint16_t address, uint8_t value) {
+void Mapper40::write_8(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 	irq_enabled_ = false;
@@ -38,7 +38,7 @@ void Mapper40::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper40::write_9(uint16_t address, uint8_t value) {
+void Mapper40::write_9(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 	irq_enabled_ = false;
@@ -49,7 +49,7 @@ void Mapper40::write_9(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper40::write_a(uint16_t address, uint8_t value) {
+void Mapper40::write_a(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 	irq_enabled_ = true;
@@ -58,7 +58,7 @@ void Mapper40::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper40::write_b(uint16_t address, uint8_t value) {
+void Mapper40::write_b(uint32_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 	irq_enabled_ = true;
@@ -67,7 +67,7 @@ void Mapper40::write_b(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper40::write_e(uint16_t address, uint8_t value) {
+void Mapper40::write_e(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_cd(value & 0x07);
 }
@@ -75,7 +75,7 @@ void Mapper40::write_e(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper40::write_f(uint16_t address, uint8_t value) {
+void Mapper40::write_f(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_cd(value & 0x07);
 }

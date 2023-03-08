@@ -25,26 +25,24 @@ std::string Mapper240::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper240::write_4(uint16_t address, uint8_t value) {
+void Mapper240::write_4(uint32_t address, uint8_t value) {
 
 	if (address > 0x4020) {
 		write_handler(address, value);
-	} else {
-		Mapper::write_4(address, value);
 	}
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper240::write_5(uint16_t address, uint8_t value) {
+void Mapper240::write_5(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper240::write_handler(uint16_t address, uint8_t value) {
+void Mapper240::write_handler(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_89abcdef(value >> 4);
 	set_chr_0000_1fff(value & 0x0f);

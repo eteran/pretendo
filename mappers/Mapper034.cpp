@@ -42,7 +42,7 @@ std::string Mapper34::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper34::write_7(uint16_t address, uint8_t value) {
+void Mapper34::write_7(uint32_t address, uint8_t value) {
 	if (mode_ == NINA_001) {
 		switch (address) {
 		case 0x7ffd:
@@ -55,7 +55,7 @@ void Mapper34::write_7(uint16_t address, uint8_t value) {
 			set_chr_1000_1fff(value);
 			break;
 		default:
-			Mapper::write_7(address, value);
+			break;
 		}
 	}
 }
@@ -63,63 +63,63 @@ void Mapper34::write_7(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper34::write_8(uint16_t address, uint8_t value) {
+void Mapper34::write_8(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper34::write_9(uint16_t address, uint8_t value) {
+void Mapper34::write_9(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper34::write_a(uint16_t address, uint8_t value) {
+void Mapper34::write_a(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper34::write_b(uint16_t address, uint8_t value) {
+void Mapper34::write_b(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper34::write_c(uint16_t address, uint8_t value) {
+void Mapper34::write_c(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper34::write_d(uint16_t address, uint8_t value) {
+void Mapper34::write_d(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper34::write_e(uint16_t address, uint8_t value) {
+void Mapper34::write_e(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper34::write_f(uint16_t address, uint8_t value) {
+void Mapper34::write_f(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper34::write_handler(uint16_t address, uint8_t value) {
+void Mapper34::write_handler(uint32_t address, uint8_t value) {
 	(void)address;
 	if (mode_ == BNROM) {
 		set_prg_89abcdef(value);

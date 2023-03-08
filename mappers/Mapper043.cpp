@@ -28,63 +28,63 @@ std::string Mapper43::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper43::write_8(uint16_t address, uint8_t value) {
+void Mapper43::write_8(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper43::write_9(uint16_t address, uint8_t value) {
+void Mapper43::write_9(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper43::write_a(uint16_t address, uint8_t value) {
+void Mapper43::write_a(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper43::write_b(uint16_t address, uint8_t value) {
+void Mapper43::write_b(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper43::write_c(uint16_t address, uint8_t value) {
+void Mapper43::write_c(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper43::write_d(uint16_t address, uint8_t value) {
+void Mapper43::write_d(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper43::write_e(uint16_t address, uint8_t value) {
+void Mapper43::write_e(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper43::write_f(uint16_t address, uint8_t value) {
+void Mapper43::write_f(uint32_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper43::write_handler(uint16_t address, uint8_t value) {
+void Mapper43::write_handler(uint32_t address, uint8_t value) {
 	(void)value;
 	set_prg_89abcdef(address & 0xff);
 	// incomplete

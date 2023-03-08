@@ -23,7 +23,7 @@ std::string Mapper180::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper180::write_8(uint16_t address, uint8_t value) {
+void Mapper180::write_8(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_cdef(value & 0x07);
 }
@@ -31,7 +31,7 @@ void Mapper180::write_8(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper180::write_9(uint16_t address, uint8_t value) {
+void Mapper180::write_9(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_cdef(value & 0x07);
 }
@@ -39,7 +39,7 @@ void Mapper180::write_9(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper180::write_a(uint16_t address, uint8_t value) {
+void Mapper180::write_a(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_cdef(value & 0x07);
 }
@@ -47,7 +47,7 @@ void Mapper180::write_a(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper180::write_b(uint16_t address, uint8_t value) {
+void Mapper180::write_b(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_cdef(value & 0x07);
 }
@@ -55,7 +55,7 @@ void Mapper180::write_b(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper180::write_c(uint16_t address, uint8_t value) {
+void Mapper180::write_c(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_cdef(value & 0x07);
 }
@@ -63,7 +63,7 @@ void Mapper180::write_c(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper180::write_d(uint16_t address, uint8_t value) {
+void Mapper180::write_d(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_cdef(value & 0x07);
 }
@@ -71,7 +71,7 @@ void Mapper180::write_d(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper180::write_e(uint16_t address, uint8_t value) {
+void Mapper180::write_e(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_cdef(value & 0x07);
 }
@@ -79,7 +79,7 @@ void Mapper180::write_e(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper180::write_f(uint16_t address, uint8_t value) {
+void Mapper180::write_f(uint32_t address, uint8_t value) {
 	(void)address;
 	set_prg_cdef(value & 0x07);
 }

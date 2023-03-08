@@ -19,23 +19,21 @@ uint8_t ram_[0x800];
 //------------------------------------------------------------------------------
 // Name: write_0
 //------------------------------------------------------------------------------
-void write_0(uint16_t address, uint8_t value) {
-	nes::cart.mapper()->write_0(address, value);
+void write_0(uint32_t address, uint8_t value) {
 	ram_[address & 0x7ff] = value;
 }
 
 //------------------------------------------------------------------------------
 // Name: write_1
 //------------------------------------------------------------------------------
-void write_1(uint16_t address, uint8_t value) {
-	nes::cart.mapper()->write_1(address, value);
+void write_1(uint32_t address, uint8_t value) {
 	ram_[address & 0x7ff] = value;
 }
 
 //------------------------------------------------------------------------------
 // Name: write_2
 //------------------------------------------------------------------------------
-void write_2(uint16_t address, uint8_t value) {
+void write_2(uint32_t address, uint8_t value) {
 
 	nes::cart.mapper()->write_2(address, value);
 	switch (address & 0x07) {
@@ -71,7 +69,7 @@ void write_2(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_3
 //------------------------------------------------------------------------------
-void write_3(uint16_t address, uint8_t value) {
+void write_3(uint32_t address, uint8_t value) {
 
 	nes::cart.mapper()->write_3(address, value);
 	switch (address & 0x07) {
@@ -107,7 +105,7 @@ void write_3(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: Write4
 //------------------------------------------------------------------------------
-void write_4(uint16_t address, uint8_t value) {
+void write_4(uint32_t address, uint8_t value) {
 
 	nes::cart.mapper()->write_4(address, value);
 	switch (address) {
@@ -183,98 +181,98 @@ void write_4(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_5
 //------------------------------------------------------------------------------
-void write_5(uint16_t address, uint8_t value) {
+void write_5(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_5(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_6
 //------------------------------------------------------------------------------
-void write_6(uint16_t address, uint8_t value) {
+void write_6(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_6(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_7
 //------------------------------------------------------------------------------
-void write_7(uint16_t address, uint8_t value) {
+void write_7(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_7(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_8
 //------------------------------------------------------------------------------
-void write_8(uint16_t address, uint8_t value) {
+void write_8(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_8(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_9
 //------------------------------------------------------------------------------
-void write_9(uint16_t address, uint8_t value) {
+void write_9(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_9(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_a
 //------------------------------------------------------------------------------
-void write_a(uint16_t address, uint8_t value) {
+void write_a(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_a(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_b
 //------------------------------------------------------------------------------
-void write_b(uint16_t address, uint8_t value) {
+void write_b(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_b(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_c
 //------------------------------------------------------------------------------
-void write_c(uint16_t address, uint8_t value) {
+void write_c(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_c(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_d
 //------------------------------------------------------------------------------
-void write_d(uint16_t address, uint8_t value) {
+void write_d(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_d(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_e
 //------------------------------------------------------------------------------
-void write_e(uint16_t address, uint8_t value) {
+void write_e(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_e(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_f
 //------------------------------------------------------------------------------
-void write_f(uint16_t address, uint8_t value) {
+void write_f(uint32_t address, uint8_t value) {
 	nes::cart.mapper()->write_f(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_0
 //------------------------------------------------------------------------------
-uint8_t read_0(uint16_t address) {
+uint8_t read_0(uint32_t address) {
 	return ram_[address & 0x7ff];
 }
 
 //------------------------------------------------------------------------------
 // Name: read_1
 //------------------------------------------------------------------------------
-uint8_t read_1(uint16_t address) {
+uint8_t read_1(uint32_t address) {
 	return ram_[address & 0x7ff];
 }
 
 //------------------------------------------------------------------------------
 // Name: read_2
 //------------------------------------------------------------------------------
-uint8_t read_2(uint16_t address) {
+uint8_t read_2(uint32_t address) {
 
 	switch (address & 0x07) {
 	case 0x02:
@@ -291,7 +289,7 @@ uint8_t read_2(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name: read_3
 //------------------------------------------------------------------------------
-uint8_t read_3(uint16_t address) {
+uint8_t read_3(uint32_t address) {
 	switch (address & 0x07) {
 	case 0x02:
 		return nes::ppu::read2002();
@@ -307,7 +305,7 @@ uint8_t read_3(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name: read_4
 //------------------------------------------------------------------------------
-uint8_t read_4(uint16_t address) {
+uint8_t read_4(uint32_t address) {
 
 	switch (address) {
 	case 0x4015:
@@ -324,86 +322,85 @@ uint8_t read_4(uint16_t address) {
 //------------------------------------------------------------------------------
 // Name: read_5
 //------------------------------------------------------------------------------
-uint8_t read_5(uint16_t address) {
+uint8_t read_5(uint32_t address) {
 	return nes::cart.mapper()->read_5(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_6
 //------------------------------------------------------------------------------
-uint8_t read_6(uint16_t address) {
+uint8_t read_6(uint32_t address) {
 	return nes::cart.mapper()->read_6(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_7
 //------------------------------------------------------------------------------
-uint8_t read_7(uint16_t address) {
+uint8_t read_7(uint32_t address) {
 	return nes::cart.mapper()->read_7(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_8
 //------------------------------------------------------------------------------
-uint8_t read_8(uint16_t address) {
+uint8_t read_8(uint32_t address) {
 	return nes::cart.mapper()->read_8(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_9
 //------------------------------------------------------------------------------
-uint8_t read_9(uint16_t address) {
+uint8_t read_9(uint32_t address) {
 	return nes::cart.mapper()->read_9(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_a
 //------------------------------------------------------------------------------
-uint8_t read_a(uint16_t address) {
+uint8_t read_a(uint32_t address) {
 	return nes::cart.mapper()->read_a(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_b
 //------------------------------------------------------------------------------
-uint8_t read_b(uint16_t address) {
+uint8_t read_b(uint32_t address) {
 	return nes::cart.mapper()->read_b(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_c
 //------------------------------------------------------------------------------
-uint8_t read_c(uint16_t address) {
+uint8_t read_c(uint32_t address) {
 	return nes::cart.mapper()->read_c(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_d
 //------------------------------------------------------------------------------
-uint8_t read_d(uint16_t address) {
+uint8_t read_d(uint32_t address) {
 	return nes::cart.mapper()->read_d(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_e
 //------------------------------------------------------------------------------
-uint8_t read_e(uint16_t address) {
+uint8_t read_e(uint32_t address) {
 	return nes::cart.mapper()->read_e(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_f
 //------------------------------------------------------------------------------
-uint8_t read_f(uint16_t address) {
+uint8_t read_f(uint32_t address) {
 	return nes::cart.mapper()->read_f(address);
 }
-
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void write_memory(uint16_t address, uint8_t value) {
+void write_memory(uint32_t address, uint8_t value) {
 	switch ((address >> 12) & 0xf) {
 	case 0x0000:
 		write_0(address, value);
@@ -461,7 +458,7 @@ void write_memory(uint16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t read_memory(uint16_t address) {
+uint8_t read_memory(uint32_t address) {
 	switch ((address >> 12) & 0xf) {
 	case 0x0000:
 		return read_0(address);
