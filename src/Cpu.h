@@ -30,9 +30,9 @@ enum : uint8_t {
 };
 
 union register16 {
-	uint16_t raw;
-	BitField<uint16_t, 0, 8> lo;
-	BitField<uint16_t, 8, 8> hi;
+	uint_least16_t raw;
+	BitField<uint_least16_t, 0, 8> lo;
+	BitField<uint_least16_t, 8, 8> hi;
 };
 
 // API

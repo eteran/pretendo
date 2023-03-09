@@ -122,7 +122,7 @@ private:
 			LAST_CYCLE;
 			// write to effective address
 			{
-				uint16_t address    = effective_address_.raw;
+				uint_least16_t address = effective_address_.raw;
 				const uint8_t value = Op::execute(address);
 				write_byte(address, value);
 			}

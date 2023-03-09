@@ -9,9 +9,9 @@ struct opcode_axs {
 	using memory_access = operation_read;
 
 	static void execute(uint8_t data) {
-		const uint16_t new_x = (X & A) - data;
-		const bool carry     = (new_x < 0x100);
-		X                    = new_x & 0xff;
+		const uint_least16_t new_x = (X & A) - data;
+		const bool carry           = (new_x < 0x100);
+		X                          = new_x & 0xff;
 		update_nz_flags(X);
 		set_flag_condition<C_MASK>(carry);
 	}

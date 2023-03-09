@@ -16,7 +16,7 @@ struct opcode_rra {
 		set_flag_condition<C_MASK>(data & 0x01);
 		data = ((data >> 1) & 0x7f) | bit;
 
-		const uint16_t temp16 = A + data + (P & C_MASK);
+		const uint_least16_t temp16 = A + data + (P & C_MASK);
 		const bool carry      = (temp16 > 0xff);
 		const bool overflow   = ((~(A ^ data)) & (A ^ temp16) & 0x80) != 0;
 		set_flag_condition<V_MASK>(overflow);

@@ -11,7 +11,7 @@
 #include <cstring>
 #include <iostream>
 
-//#define SPRITE_ZERO_HACK
+// #define SPRITE_ZERO_HACK
 
 namespace nes {
 namespace ppu {
@@ -159,8 +159,8 @@ enum SpriteEvalState {
 } sprite_eval_state_ = STATE_1_Y;
 
 uint8_t palette_[0x20];
-uint64_t ppu_cycle_              = 0;
-uint64_t ppu_read_2002_cycle_    = 0;
+uint64_t ppu_cycle_                    = 0;
+uint64_t ppu_read_2002_cycle_          = 0;
 uint_least16_t next_ppu_fetch_address_ = 0;
 uint_least16_t attribute_queue_[2]     = {};
 uint_least16_t pattern_queue_[2]       = {};
@@ -168,16 +168,16 @@ uint_least16_t nametable_              = 0; // loopy's "t"
 uint_least16_t vram_address_           = 0; // loopy's "v"
 uint_least16_t hpos_                   = 0; // pixel counter
 uint_least16_t vpos_                   = 0; // scanline counter
-uint8_t next_pattern_[2]         = {};
+uint8_t next_pattern_[2]               = {};
 uint_least16_t latch_                  = 0;
-uint8_t next_attribute_          = 0;
-uint8_t next_tile_index_         = 0;
-Control ppu_control_             = {0};
-Mask ppu_mask_                   = {0};
-uint8_t register_2007_buffer_    = 0;
-Status status_                   = {0};
-uint8_t tile_offset_             = 0; // loopy's "x"
-uint8_t monochrome_mask_         = 0xff;
+uint8_t next_attribute_                = 0;
+uint8_t next_tile_index_               = 0;
+Control ppu_control_                   = {0};
+Mask ppu_mask_                         = {0};
+uint8_t register_2007_buffer_          = 0;
+Status status_                         = {0};
+uint8_t tile_offset_                   = 0; // loopy's "x"
+uint8_t monochrome_mask_               = 0xff;
 
 bool odd_frame_   = false;
 bool write_latch_ = false;
@@ -1451,7 +1451,7 @@ void write2007(uint8_t value) {
 	if ((temp_address & 0b0011111100000000) == 0b0011111100000000) {
 
 		const uint_least8_t palette_address = temp_address & 0x1f;
-		palette_[palette_address]      = value & 0x3f;
+		palette_[palette_address]           = value & 0x3f;
 
 		if ((palette_address & 0x03) == 0x00) {
 			// $3F10/$3F14/$3F18/$3F1C are mirrors of $3F00/$3F04/$3F08/$3F0C.
