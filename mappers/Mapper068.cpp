@@ -24,7 +24,7 @@ std::string Mapper68::name() const {
 //------------------------------------------------------------------------------
 // Name: write_8
 //------------------------------------------------------------------------------
-void Mapper68::write_8(uint32_t address, uint8_t value) {
+void Mapper68::write_8(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_chr_0000_07ff(value);
 }
@@ -32,7 +32,7 @@ void Mapper68::write_8(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_9
 //------------------------------------------------------------------------------
-void Mapper68::write_9(uint32_t address, uint8_t value) {
+void Mapper68::write_9(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_chr_0800_0fff(value);
 }
@@ -40,7 +40,7 @@ void Mapper68::write_9(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_a
 //------------------------------------------------------------------------------
-void Mapper68::write_a(uint32_t address, uint8_t value) {
+void Mapper68::write_a(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_chr_1000_17ff(value);
 }
@@ -48,7 +48,7 @@ void Mapper68::write_a(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_b
 //------------------------------------------------------------------------------
-void Mapper68::write_b(uint32_t address, uint8_t value) {
+void Mapper68::write_b(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_chr_1800_1fff(value);
 }
@@ -56,7 +56,7 @@ void Mapper68::write_b(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_c
 //------------------------------------------------------------------------------
-void Mapper68::write_c(uint32_t address, uint8_t value) {
+void Mapper68::write_c(uint_least16_t address, uint8_t value) {
 	(void)address;
 	chr_rom_reg_[0] = ((value & 0x7f) | 0x80);
 }
@@ -64,7 +64,7 @@ void Mapper68::write_c(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_d
 //------------------------------------------------------------------------------
-void Mapper68::write_d(uint32_t address, uint8_t value) {
+void Mapper68::write_d(uint_least16_t address, uint8_t value) {
 	(void)address;
 	chr_rom_reg_[1] = ((value & 0x7f) | 0x80);
 }
@@ -72,7 +72,7 @@ void Mapper68::write_d(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_e
 //------------------------------------------------------------------------------
-void Mapper68::write_e(uint32_t address, uint8_t value) {
+void Mapper68::write_e(uint_least16_t address, uint8_t value) {
 	(void)address;
 
 	reg_e000_ = value;
@@ -90,7 +90,7 @@ void Mapper68::write_e(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper68::write_f(uint32_t address, uint8_t value) {
+void Mapper68::write_f(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -98,7 +98,7 @@ void Mapper68::write_f(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper68::read_vram(uint32_t address) {
+uint8_t Mapper68::read_vram(uint_least16_t address) {
 
 	if (reg_e000_ & 0x10) {
 		const uint8_t *const nt_chr_c000_ = nes::cart.chr() + ((chr_rom_reg_[0] * 0x400) & nes::cart.chr_mask());

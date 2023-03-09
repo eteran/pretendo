@@ -14,7 +14,7 @@ std::string Mapper26::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper26::write_8(uint32_t address, uint8_t value) {
+void Mapper26::write_8(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0003) {
 	case 0x0000:
 		VRC6::write_8(0x8000, value);
@@ -34,7 +34,7 @@ void Mapper26::write_8(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper26::write_9(uint32_t address, uint8_t value) {
+void Mapper26::write_9(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0003) {
 	case 0x0000:
 		VRC6::write_9(0x9000, value);
@@ -54,7 +54,7 @@ void Mapper26::write_9(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper26::write_a(uint32_t address, uint8_t value) {
+void Mapper26::write_a(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0003) {
 	case 0x0000:
 		VRC6::write_a(0xa000, value);
@@ -74,7 +74,7 @@ void Mapper26::write_a(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper26::write_b(uint32_t address, uint8_t value) {
+void Mapper26::write_b(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0003) {
 	case 0x0000:
 		VRC6::write_b(0xb000, value);
@@ -94,7 +94,7 @@ void Mapper26::write_b(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper26::write_c(uint32_t address, uint8_t value) {
+void Mapper26::write_c(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0003) {
 	case 0x0000:
 		VRC6::write_c(0xc000, value);
@@ -114,7 +114,7 @@ void Mapper26::write_c(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper26::write_d(uint32_t address, uint8_t value) {
+void Mapper26::write_d(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0003) {
 	case 0x0000:
 		VRC6::write_d(0xd000, value);
@@ -134,7 +134,7 @@ void Mapper26::write_d(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper26::write_e(uint32_t address, uint8_t value) {
+void Mapper26::write_e(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0003) {
 	case 0x0000:
 		VRC6::write_e(0xe000, value);
@@ -154,7 +154,7 @@ void Mapper26::write_e(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper26::write_f(uint32_t address, uint8_t value) {
+void Mapper26::write_f(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0003) {
 	case 0x0000:
 		VRC6::write_f(0xf000, value);

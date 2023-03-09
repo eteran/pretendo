@@ -11,15 +11,15 @@ public:
 public:
 	std::string name() const override;
 
-	void write_8(uint32_t address, uint8_t value) override;
-	void write_9(uint32_t address, uint8_t value) override;
-	void write_a(uint32_t address, uint8_t value) override;
-	void write_b(uint32_t address, uint8_t value) override;
-	void write_c(uint32_t address, uint8_t value) override;
-	void write_d(uint32_t address, uint8_t value) override;
-	void write_e(uint32_t address, uint8_t value) override;
-	void write_f(uint32_t address, uint8_t value) override;
-	void vram_change_hook(uint32_t vram_address) override;
+	void write_8(uint_least16_t address, uint8_t value) override;
+	void write_9(uint_least16_t address, uint8_t value) override;
+	void write_a(uint_least16_t address, uint8_t value) override;
+	void write_b(uint_least16_t address, uint8_t value) override;
+	void write_c(uint_least16_t address, uint8_t value) override;
+	void write_d(uint_least16_t address, uint8_t value) override;
+	void write_e(uint_least16_t address, uint8_t value) override;
+	void write_f(uint_least16_t address, uint8_t value) override;
+	void vram_change_hook(uint_least16_t vram_address) override;
 	void cpu_sync() override;
 
 private:
@@ -33,7 +33,7 @@ private:
 
 	uint64_t cpu_cycles_        = 0;
 	uint64_t prev_ppu_cycle_    = 0;
-	uint32_t prev_vram_address_ = 0xffff;
+	uint_least16_t prev_vram_address_ = 0xffff;
 	uint8_t command_            = 0;
 	uint8_t irq_latch_          = 0;
 	uint8_t irq_counter_        = 0;

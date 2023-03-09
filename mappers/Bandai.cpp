@@ -20,7 +20,7 @@ std::string Bandai::name() const {
 //------------------------------------------------------------------------------
 // Name: read_eeprom
 //------------------------------------------------------------------------------
-uint8_t Bandai::read_eeprom(uint32_t address) {
+uint8_t Bandai::read_eeprom(uint_least16_t address) {
 	(void)address;
 	return 0x00;
 }
@@ -28,91 +28,91 @@ uint8_t Bandai::read_eeprom(uint32_t address) {
 //------------------------------------------------------------------------------
 // Name: read_6
 //------------------------------------------------------------------------------
-uint8_t Bandai::read_6(uint32_t address) {
+uint8_t Bandai::read_6(uint_least16_t address) {
 	return read_eeprom(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: read_7
 //------------------------------------------------------------------------------
-uint8_t Bandai::read_7(uint32_t address) {
+uint8_t Bandai::read_7(uint_least16_t address) {
 	return read_eeprom(address);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_6
 //------------------------------------------------------------------------------
-void Bandai::write_6(uint32_t address, uint8_t value) {
+void Bandai::write_6(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_7
 //------------------------------------------------------------------------------
-void Bandai::write_7(uint32_t address, uint8_t value) {
+void Bandai::write_7(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_8
 //------------------------------------------------------------------------------
-void Bandai::write_8(uint32_t address, uint8_t value) {
+void Bandai::write_8(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_9
 //------------------------------------------------------------------------------
-void Bandai::write_9(uint32_t address, uint8_t value) {
+void Bandai::write_9(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_a
 //------------------------------------------------------------------------------
-void Bandai::write_a(uint32_t address, uint8_t value) {
+void Bandai::write_a(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_b
 //------------------------------------------------------------------------------
-void Bandai::write_b(uint32_t address, uint8_t value) {
+void Bandai::write_b(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_c
 //------------------------------------------------------------------------------
-void Bandai::write_c(uint32_t address, uint8_t value) {
+void Bandai::write_c(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_d
 //------------------------------------------------------------------------------
-void Bandai::write_d(uint32_t address, uint8_t value) {
+void Bandai::write_d(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_e
 //------------------------------------------------------------------------------
-void Bandai::write_e(uint32_t address, uint8_t value) {
+void Bandai::write_e(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_f
 //------------------------------------------------------------------------------
-void Bandai::write_f(uint32_t address, uint8_t value) {
+void Bandai::write_f(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_handler
 //------------------------------------------------------------------------------
-void Bandai::write_handler(uint32_t address, uint8_t value) {
+void Bandai::write_handler(uint_least16_t address, uint8_t value) {
 
 	switch (address & 0x000f) {
 	case 0x00:

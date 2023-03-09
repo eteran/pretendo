@@ -33,7 +33,7 @@ std::string Mapper69::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper69::read_6(uint32_t address) {
+uint8_t Mapper69::read_6(uint_least16_t address) {
 	switch (prg_mode_ & 0xc0) {
 	case 0x00:
 		return Mapper::read_6(address);
@@ -47,7 +47,7 @@ uint8_t Mapper69::read_6(uint32_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper69::read_7(uint32_t address) {
+uint8_t Mapper69::read_7(uint_least16_t address) {
 	switch (prg_mode_ & 0xc0) {
 	case 0x00:
 		return Mapper::read_7(address);
@@ -61,7 +61,7 @@ uint8_t Mapper69::read_7(uint32_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper69::write_6(uint32_t address, uint8_t value) {
+void Mapper69::write_6(uint_least16_t address, uint8_t value) {
 	switch (prg_mode_ & 0xc0) {
 	case 0x00:
 		break;
@@ -76,7 +76,7 @@ void Mapper69::write_6(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper69::write_7(uint32_t address, uint8_t value) {
+void Mapper69::write_7(uint_least16_t address, uint8_t value) {
 	switch (prg_mode_ & 0xc0) {
 	case 0x00:
 		break;
@@ -91,7 +91,7 @@ void Mapper69::write_7(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper69::write_8(uint32_t address, uint8_t value) {
+void Mapper69::write_8(uint_least16_t address, uint8_t value) {
 	(void)address;
 	command_8000_ = value;
 }
@@ -99,7 +99,7 @@ void Mapper69::write_8(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper69::write_a(uint32_t address, uint8_t value) {
+void Mapper69::write_a(uint_least16_t address, uint8_t value) {
 	(void)address;
 
 	switch (command_8000_ & 0x0f) {
@@ -177,7 +177,7 @@ void Mapper69::write_a(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper69::write_c(uint32_t address, uint8_t value) {
+void Mapper69::write_c(uint_least16_t address, uint8_t value) {
 	(void)address;
 	command_c000_ = value;
 }
@@ -185,7 +185,7 @@ void Mapper69::write_c(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper69::write_e(uint32_t address, uint8_t value) {
+void Mapper69::write_e(uint_least16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 }

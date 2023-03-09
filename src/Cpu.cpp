@@ -112,14 +112,14 @@ bool nmi_executing_ = false;
 bool rst_executing_ = true;
 
 dma_handler_t spr_dma_handler_   = nullptr;
-uint32_t spr_dma_source_address_ = 0;
-uint32_t spr_dma_count_          = 0;
+uint_least16_t spr_dma_source_address_ = 0;
+uint_least16_t spr_dma_count_          = 0;
 uint8_t spr_dma_byte_            = 0;
 uint8_t spr_dma_delay_           = 0;
 
 dma_handler_t dmc_dma_handler_   = nullptr;
-uint32_t dmc_dma_source_address_ = 0;
-uint32_t dmc_dma_count_          = 0;
+uint_least16_t dmc_dma_source_address_ = 0;
+uint_least16_t dmc_dma_count_          = 0;
 uint8_t dmc_dma_byte_            = 0;
 uint8_t dmc_dma_delay_           = 0;
 
@@ -672,7 +672,7 @@ void clear_irq(IrqSource source) {
  * @param source_address
  * @param count
  */
-void schedule_spr_dma(dma_handler_t dma_handler, uint32_t source_address, uint32_t count) {
+void schedule_spr_dma(dma_handler_t dma_handler, uint_least16_t source_address, uint_least16_t count) {
 	spr_dma_handler_        = dma_handler;
 	spr_dma_source_address_ = source_address;
 	spr_dma_count_          = count * 2;
@@ -685,7 +685,7 @@ void schedule_spr_dma(dma_handler_t dma_handler, uint32_t source_address, uint32
  * @param source_address
  * @param count
  */
-void schedule_dmc_dma(dma_handler_t dma_handler, uint32_t source_address, uint32_t count) {
+void schedule_dmc_dma(dma_handler_t dma_handler, uint_least16_t source_address, uint_least16_t count) {
 	dmc_dma_handler_        = dma_handler;
 	dmc_dma_source_address_ = source_address;
 	dmc_dma_count_          = count * 2;

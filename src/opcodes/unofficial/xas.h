@@ -11,7 +11,7 @@ struct opcode_xas {
 
 	using memory_access = operation_write;
 
-	static uint8_t execute(uint32_t address) {
+	static uint8_t execute(uint_least16_t address) {
 		S = X & A;
 		return S & (((address >> 8) + 1) & 0xff);
 	}

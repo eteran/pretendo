@@ -34,7 +34,7 @@ std::string VRC4::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC4::write_8(uint32_t address, uint8_t value) {
+void VRC4::write_8(uint_least16_t address, uint8_t value) {
 	switch (address & 0xf00c) {
 	case 0x8000:
 	case 0x8002:
@@ -55,7 +55,7 @@ void VRC4::write_8(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC4::write_9(uint32_t address, uint8_t value) {
+void VRC4::write_9(uint_least16_t address, uint8_t value) {
 	switch (address & 0xf00c) {
 	case 0x9004:
 	case 0x9006:
@@ -91,7 +91,7 @@ void VRC4::write_9(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC4::write_a(uint32_t address, uint8_t value) {
+void VRC4::write_a(uint_least16_t address, uint8_t value) {
 	switch (address & 0xf00c) {
 	case 0xa000:
 	case 0xa002:
@@ -106,7 +106,7 @@ void VRC4::write_a(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC4::write_b(uint32_t address, uint8_t value) {
+void VRC4::write_b(uint_least16_t address, uint8_t value) {
 	switch (address & 0xf00c) {
 	case 0xb000:
 		chr_[0] = (chr_[0] & 0xf0) | ((value & 0x0f) << 0);
@@ -130,7 +130,7 @@ void VRC4::write_b(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC4::write_c(uint32_t address, uint8_t value) {
+void VRC4::write_c(uint_least16_t address, uint8_t value) {
 	switch (address & 0xf00c) {
 	case 0xc000:
 		chr_[2] = (chr_[2] & 0xf0) | ((value & 0x0f) << 0);
@@ -154,7 +154,7 @@ void VRC4::write_c(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC4::write_d(uint32_t address, uint8_t value) {
+void VRC4::write_d(uint_least16_t address, uint8_t value) {
 	switch (address & 0xf00c) {
 	case 0xd000:
 		chr_[4] = (chr_[4] & 0xf0) | ((value & 0x0f) << 0);
@@ -178,7 +178,7 @@ void VRC4::write_d(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void VRC4::write_e(uint32_t address, uint8_t value) {
+void VRC4::write_e(uint_least16_t address, uint8_t value) {
 	switch (address & 0xf00c) {
 	case 0xe000:
 		chr_[6] = (chr_[6] & 0xf0) | ((value & 0x0f) << 0);
@@ -202,7 +202,7 @@ void VRC4::write_e(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_f
 //------------------------------------------------------------------------------
-void VRC4::write_f(uint32_t address, uint8_t value) {
+void VRC4::write_f(uint_least16_t address, uint8_t value) {
 	switch (address & 0xf00c) {
 	case 0xf000:
 		irq_latch_ = (irq_latch_ & 0xf0) | ((value & 0x0f) << 0);

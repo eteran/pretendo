@@ -23,7 +23,7 @@ std::string Mapper232::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper232::write_8(uint32_t address, uint8_t value) {
+void Mapper232::write_8(uint_least16_t address, uint8_t value) {
 	(void)address;
 	(void)value;
 #if 0
@@ -41,14 +41,14 @@ void Mapper232::write_8(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper232::write_9(uint32_t address, uint8_t value) {
+void Mapper232::write_9(uint_least16_t address, uint8_t value) {
 	write_8(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper232::write_c(uint32_t address, uint8_t value) {
+void Mapper232::write_c(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -56,7 +56,7 @@ void Mapper232::write_c(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper232::write_d(uint32_t address, uint8_t value) {
+void Mapper232::write_d(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -64,7 +64,7 @@ void Mapper232::write_d(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper232::write_e(uint32_t address, uint8_t value) {
+void Mapper232::write_e(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -72,7 +72,7 @@ void Mapper232::write_e(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper232::write_f(uint32_t address, uint8_t value) {
+void Mapper232::write_f(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }

@@ -12,7 +12,7 @@ public:
 	std::string name() const override;
 
 public:
-	void write_4(uint32_t address, uint8_t value) override;
+	void write_4(uint_least16_t address, uint8_t value) override;
 
 private:
 	uint8_t regs_[8] = {};

@@ -117,7 +117,7 @@ std::string Mapper64::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper64::write_8(uint32_t address, uint8_t value) {
+void Mapper64::write_8(uint_least16_t address, uint8_t value) {
 
 	switch (address & 0x0001) {
 	case 0x0000:
@@ -170,14 +170,14 @@ void Mapper64::write_8(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper64::write_9(uint32_t address, uint8_t value) {
+void Mapper64::write_9(uint_least16_t address, uint8_t value) {
 	write_8(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper64::write_a(uint32_t address, uint8_t value) {
+void Mapper64::write_a(uint_least16_t address, uint8_t value) {
 	switch (address & 1) {
 	case 0x0000:
 		if (value & 0x01) {
@@ -192,14 +192,14 @@ void Mapper64::write_a(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper64::write_b(uint32_t address, uint8_t value) {
+void Mapper64::write_b(uint_least16_t address, uint8_t value) {
 	write_a(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper64::write_c(uint32_t address, uint8_t value) {
+void Mapper64::write_c(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0001) {
 	case 0x0000:
 		irq_latch_ = value;
@@ -215,14 +215,14 @@ void Mapper64::write_c(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper64::write_d(uint32_t address, uint8_t value) {
+void Mapper64::write_d(uint_least16_t address, uint8_t value) {
 	write_c(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper64::write_e(uint32_t address, uint8_t value) {
+void Mapper64::write_e(uint_least16_t address, uint8_t value) {
 	(void)value;
 
 	switch (address & 0x0001) {
@@ -239,14 +239,14 @@ void Mapper64::write_e(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper64::write_f(uint32_t address, uint8_t value) {
+void Mapper64::write_f(uint_least16_t address, uint8_t value) {
 	write_e(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper64::vram_change_hook(uint32_t vram_address) {
+void Mapper64::vram_change_hook(uint_least16_t vram_address) {
 
 	if (!irq_mode_) {
 		if (vram_address & 0x1000 && !(prev_vram_address_ & 0x1000)) {

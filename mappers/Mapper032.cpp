@@ -40,7 +40,7 @@ void Mapper32::sync_prg() {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper32::write_8(uint32_t address, uint8_t value) {
+void Mapper32::write_8(uint_least16_t address, uint8_t value) {
 	(void)address;
 	prg_8000_ = value;
 	sync_prg();
@@ -49,7 +49,7 @@ void Mapper32::write_8(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper32::write_9(uint32_t address, uint8_t value) {
+void Mapper32::write_9(uint_least16_t address, uint8_t value) {
 	(void)address;
 	prg_mode_ = (value & 0x02) >> 1;
 
@@ -69,7 +69,7 @@ void Mapper32::write_9(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper32::write_a(uint32_t address, uint8_t value) {
+void Mapper32::write_a(uint_least16_t address, uint8_t value) {
 	(void)address;
 	prg_a000_ = value;
 	sync_prg();
@@ -78,7 +78,7 @@ void Mapper32::write_a(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper32::write_b(uint32_t address, uint8_t value) {
+void Mapper32::write_b(uint_least16_t address, uint8_t value) {
 	switch (address & 0xf007) {
 	case 0xb000:
 		set_chr_0000_03ff(value);

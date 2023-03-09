@@ -22,7 +22,7 @@ std::string Mapper218::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper218::read_vram(uint32_t address) {
+uint8_t Mapper218::read_vram(uint_least16_t address) {
 
 	// TODO: deal with mirroring somehow
 	// it's in the iNES header
@@ -53,7 +53,7 @@ uint8_t Mapper218::read_vram(uint32_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper218::write_vram(uint32_t address, uint8_t value) {
+void Mapper218::write_vram(uint_least16_t address, uint8_t value) {
 	switch ((address >> 10) & 0x0f) {
 	case 0x00:
 	case 0x01:

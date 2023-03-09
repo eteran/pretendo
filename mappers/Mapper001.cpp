@@ -49,7 +49,7 @@ std::string Mapper1::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper1::read_6(uint32_t address) {
+uint8_t Mapper1::read_6(uint_least16_t address) {
 	if (!(regs_[PrgBank] & 0b10000)) {
 		return prg_ptr_[address & 0x1fff];
 	}
@@ -59,7 +59,7 @@ uint8_t Mapper1::read_6(uint32_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t Mapper1::read_7(uint32_t address) {
+uint8_t Mapper1::read_7(uint_least16_t address) {
 	if (!(regs_[PrgBank] & 0b10000)) {
 		return prg_ptr_[address & 0x1fff];
 	}
@@ -69,7 +69,7 @@ uint8_t Mapper1::read_7(uint32_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper1::write_6(uint32_t address, uint8_t value) {
+void Mapper1::write_6(uint_least16_t address, uint8_t value) {
 	if (!(regs_[PrgBank] & 0b10000)) {
 		prg_ptr_[address & 0x1fff] = value;
 	}
@@ -78,7 +78,7 @@ void Mapper1::write_6(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper1::write_7(uint32_t address, uint8_t value) {
+void Mapper1::write_7(uint_least16_t address, uint8_t value) {
 	if (!(regs_[PrgBank] & 0b10000)) {
 		prg_ptr_[address & 0x1fff] = value;
 	}
@@ -87,63 +87,63 @@ void Mapper1::write_7(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_8
 //------------------------------------------------------------------------------
-void Mapper1::write_8(uint32_t address, uint8_t value) {
+void Mapper1::write_8(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_9
 //------------------------------------------------------------------------------
-void Mapper1::write_9(uint32_t address, uint8_t value) {
+void Mapper1::write_9(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_a
 //------------------------------------------------------------------------------
-void Mapper1::write_a(uint32_t address, uint8_t value) {
+void Mapper1::write_a(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_b
 //------------------------------------------------------------------------------
-void Mapper1::write_b(uint32_t address, uint8_t value) {
+void Mapper1::write_b(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_c
 //------------------------------------------------------------------------------
-void Mapper1::write_c(uint32_t address, uint8_t value) {
+void Mapper1::write_c(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_d
 //------------------------------------------------------------------------------
-void Mapper1::write_d(uint32_t address, uint8_t value) {
+void Mapper1::write_d(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_e
 //------------------------------------------------------------------------------
-void Mapper1::write_e(uint32_t address, uint8_t value) {
+void Mapper1::write_e(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_f
 //------------------------------------------------------------------------------
-void Mapper1::write_f(uint32_t address, uint8_t value) {
+void Mapper1::write_f(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name: write_handler
 //------------------------------------------------------------------------------
-void Mapper1::write_handler(uint32_t address, uint8_t value) {
+void Mapper1::write_handler(uint_least16_t address, uint8_t value) {
 
 	// ignore writes which are only 1 or 2 cycles appart
 	if (nes::cpu::cycle_count() - cpu_cycles_ > 1) {

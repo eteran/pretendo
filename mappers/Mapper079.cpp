@@ -22,7 +22,7 @@ std::string Mapper79::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper79::write_4(uint32_t address, uint8_t value) {
+void Mapper79::write_4(uint_least16_t address, uint8_t value) {
 	if ((address & 0x4100) == 0x4100) {
 		write_handler(address, value);
 	}
@@ -31,7 +31,7 @@ void Mapper79::write_4(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper79::write_5(uint32_t address, uint8_t value) {
+void Mapper79::write_5(uint_least16_t address, uint8_t value) {
 	if ((address & 0x4100) == 0x4100) {
 		write_handler(address, value);
 	}
@@ -40,7 +40,7 @@ void Mapper79::write_5(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper79::write_handler(uint32_t address, uint8_t value) {
+void Mapper79::write_handler(uint_least16_t address, uint8_t value) {
 	assert((address & 0x4100) == 0x4100);
 
 	(void)address;

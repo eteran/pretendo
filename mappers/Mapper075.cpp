@@ -22,7 +22,7 @@ std::string Mapper75::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper75::write_8(uint32_t address, uint8_t value) {
+void Mapper75::write_8(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89(value & 0x0f);
 }
@@ -30,7 +30,7 @@ void Mapper75::write_8(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper75::write_9(uint32_t address, uint8_t value) {
+void Mapper75::write_9(uint_least16_t address, uint8_t value) {
 	(void)address;
 	if (value & 0x01) {
 		set_mirroring(mirror_horizontal);
@@ -48,7 +48,7 @@ void Mapper75::write_9(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper75::write_a(uint32_t address, uint8_t value) {
+void Mapper75::write_a(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_ab(value & 0x0f);
 }
@@ -56,7 +56,7 @@ void Mapper75::write_a(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper75::write_c(uint32_t address, uint8_t value) {
+void Mapper75::write_c(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_cd(value & 0x0f);
 }
@@ -64,7 +64,7 @@ void Mapper75::write_c(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper75::write_e(uint32_t address, uint8_t value) {
+void Mapper75::write_e(uint_least16_t address, uint8_t value) {
 	(void)address;
 	chr_reg_[0] = (chr_reg_[0] & 0xf0) | (value & 0x0f);
 	set_chr_0000_0fff(chr_reg_[0]);
@@ -74,7 +74,7 @@ void Mapper75::write_e(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper75::write_f(uint32_t address, uint8_t value) {
+void Mapper75::write_f(uint_least16_t address, uint8_t value) {
 	(void)address;
 	chr_reg_[1] = (chr_reg_[1] & 0xf0) | (value & 0x0f);
 	set_chr_0000_0fff(chr_reg_[0]);

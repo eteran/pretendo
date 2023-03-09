@@ -12,14 +12,14 @@ public:
 	std::string name() const override;
 
 private:
-	uint8_t read_5(uint32_t address) override;
-	uint8_t read_6(uint32_t address) override;
-	uint8_t read_7(uint32_t address) override;
+	uint8_t read_5(uint_least16_t address) override;
+	uint8_t read_6(uint_least16_t address) override;
+	uint8_t read_7(uint_least16_t address) override;
 
 public:
-	void write_5(uint32_t address, uint8_t value) override;
-	void write_6(uint32_t address, uint8_t value) override;
-	void write_7(uint32_t address, uint8_t value) override;
+	void write_5(uint_least16_t address, uint8_t value) override;
+	void write_6(uint_least16_t address, uint8_t value) override;
+	void write_7(uint_least16_t address, uint8_t value) override;
 
 private:
 	uint8_t chr_ram_[0x2000] = {};

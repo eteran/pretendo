@@ -31,7 +31,7 @@ std::string Mapper243::name() const {
 //------------------------------------------------------------------------------
 // Name: write_4
 //------------------------------------------------------------------------------
-void Mapper243::write_4(uint32_t address, uint8_t value) {
+void Mapper243::write_4(uint_least16_t address, uint8_t value) {
 	if (address >= 0x4020) {
 
 		switch (address & 0x4101) {

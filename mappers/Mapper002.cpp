@@ -23,7 +23,7 @@ std::string Mapper2::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper2::write_8(uint32_t address, uint8_t value) {
+void Mapper2::write_8(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -31,7 +31,7 @@ void Mapper2::write_8(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper2::write_9(uint32_t address, uint8_t value) {
+void Mapper2::write_9(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -39,7 +39,7 @@ void Mapper2::write_9(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper2::write_a(uint32_t address, uint8_t value) {
+void Mapper2::write_a(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -47,7 +47,7 @@ void Mapper2::write_a(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper2::write_b(uint32_t address, uint8_t value) {
+void Mapper2::write_b(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -55,7 +55,7 @@ void Mapper2::write_b(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper2::write_c(uint32_t address, uint8_t value) {
+void Mapper2::write_c(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -63,7 +63,7 @@ void Mapper2::write_c(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper2::write_d(uint32_t address, uint8_t value) {
+void Mapper2::write_d(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -71,7 +71,7 @@ void Mapper2::write_d(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper2::write_e(uint32_t address, uint8_t value) {
+void Mapper2::write_e(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }
@@ -79,7 +79,7 @@ void Mapper2::write_e(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper2::write_f(uint32_t address, uint8_t value) {
+void Mapper2::write_f(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89ab(value);
 }

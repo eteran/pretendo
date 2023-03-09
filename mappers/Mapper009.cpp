@@ -31,7 +31,7 @@ std::string Mapper9::name() const {
 //------------------------------------------------------------------------------
 // Name: write_a
 //------------------------------------------------------------------------------
-void Mapper9::write_a(uint32_t address, uint8_t value) {
+void Mapper9::write_a(uint_least16_t address, uint8_t value) {
 	(void)address;
 	set_prg_89(value & 0x0f);
 }
@@ -39,7 +39,7 @@ void Mapper9::write_a(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_b
 //------------------------------------------------------------------------------
-void Mapper9::write_b(uint32_t address, uint8_t value) {
+void Mapper9::write_b(uint_least16_t address, uint8_t value) {
 	(void)address;
 	latch0_lo_ = value;
 
@@ -51,7 +51,7 @@ void Mapper9::write_b(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_c
 //------------------------------------------------------------------------------
-void Mapper9::write_c(uint32_t address, uint8_t value) {
+void Mapper9::write_c(uint_least16_t address, uint8_t value) {
 	(void)address;
 	latch0_hi_ = value;
 
@@ -63,7 +63,7 @@ void Mapper9::write_c(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_d
 //------------------------------------------------------------------------------
-void Mapper9::write_d(uint32_t address, uint8_t value) {
+void Mapper9::write_d(uint_least16_t address, uint8_t value) {
 	(void)address;
 	latch1_lo_ = value;
 
@@ -75,7 +75,7 @@ void Mapper9::write_d(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_e
 //------------------------------------------------------------------------------
-void Mapper9::write_e(uint32_t address, uint8_t value) {
+void Mapper9::write_e(uint_least16_t address, uint8_t value) {
 	(void)address;
 	latch1_hi_ = value;
 
@@ -87,7 +87,7 @@ void Mapper9::write_e(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: write_f
 //------------------------------------------------------------------------------
-void Mapper9::write_f(uint32_t address, uint8_t value) {
+void Mapper9::write_f(uint_least16_t address, uint8_t value) {
 	(void)address;
 	if (value & 0x01) {
 		set_mirroring(mirror_horizontal);
@@ -99,7 +99,7 @@ void Mapper9::write_f(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: read_vram
 //------------------------------------------------------------------------------
-uint8_t Mapper9::read_vram(uint32_t address) {
+uint8_t Mapper9::read_vram(uint_least16_t address) {
 
 	const uint8_t ret = Mapper::read_vram(address);
 

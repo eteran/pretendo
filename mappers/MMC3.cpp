@@ -66,7 +66,7 @@ std::string MMC3::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t MMC3::read_6(uint32_t address) {
+uint8_t MMC3::read_6(uint_least16_t address) {
 
 	if (save_ram_enabled_ && nes::cart.mirroring() != Cart::MIR_4SCREEN) {
 		return prg_ptr_[address & 0x1fff];
@@ -78,14 +78,14 @@ uint8_t MMC3::read_6(uint32_t address) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-uint8_t MMC3::read_7(uint32_t address) {
+uint8_t MMC3::read_7(uint_least16_t address) {
 	return read_6(address);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::write_6(uint32_t address, uint8_t value) {
+void MMC3::write_6(uint_least16_t address, uint8_t value) {
 
 	if (save_ram_enabled_ && save_ram_writable_ && nes::cart.mirroring() != Cart::MIR_4SCREEN) {
 		prg_ptr_[address & 0x1fff] = value;
@@ -95,14 +95,14 @@ void MMC3::write_6(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::write_7(uint32_t address, uint8_t value) {
+void MMC3::write_7(uint_least16_t address, uint8_t value) {
 	return write_6(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::write_8(uint32_t address, uint8_t value) {
+void MMC3::write_8(uint_least16_t address, uint8_t value) {
 
 	switch (address & 0x0001) {
 	case 0x0000:
@@ -171,14 +171,14 @@ void MMC3::write_8(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::write_9(uint32_t address, uint8_t value) {
+void MMC3::write_9(uint_least16_t address, uint8_t value) {
 	write_8(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::write_a(uint32_t address, uint8_t value) {
+void MMC3::write_a(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0001) {
 	case 0x0000:
 		if (nes::cart.mirroring() != Cart::MIR_4SCREEN) {
@@ -199,14 +199,14 @@ void MMC3::write_a(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::write_b(uint32_t address, uint8_t value) {
+void MMC3::write_b(uint_least16_t address, uint8_t value) {
 	write_a(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::write_c(uint32_t address, uint8_t value) {
+void MMC3::write_c(uint_least16_t address, uint8_t value) {
 	switch (address & 0x0001) {
 	case 0x0000:
 		irq_latch_ = value;
@@ -221,14 +221,14 @@ void MMC3::write_c(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::write_d(uint32_t address, uint8_t value) {
+void MMC3::write_d(uint_least16_t address, uint8_t value) {
 	write_c(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::write_e(uint32_t address, uint8_t value) {
+void MMC3::write_e(uint_least16_t address, uint8_t value) {
 
 	(void)value;
 
@@ -246,14 +246,14 @@ void MMC3::write_e(uint32_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::write_f(uint32_t address, uint8_t value) {
+void MMC3::write_f(uint_least16_t address, uint8_t value) {
 	write_e(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::vram_change_hook(uint32_t vram_address) {
+void MMC3::vram_change_hook(uint_least16_t vram_address) {
 
 	if (vram_address & 0x1000 && !(prev_vram_address_ & 0x1000)) {
 		if ((nes::ppu::cycle_count() - prev_ppu_cycle_) >= 16) {

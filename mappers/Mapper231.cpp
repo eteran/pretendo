@@ -30,63 +30,63 @@ std::string Mapper231::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper231::write_8(uint32_t address, uint8_t value) {
+void Mapper231::write_8(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper231::write_9(uint32_t address, uint8_t value) {
+void Mapper231::write_9(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper231::write_a(uint32_t address, uint8_t value) {
+void Mapper231::write_a(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper231::write_b(uint32_t address, uint8_t value) {
+void Mapper231::write_b(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper231::write_c(uint32_t address, uint8_t value) {
+void Mapper231::write_c(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper231::write_d(uint32_t address, uint8_t value) {
+void Mapper231::write_d(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper231::write_e(uint32_t address, uint8_t value) {
+void Mapper231::write_e(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper231::write_f(uint32_t address, uint8_t value) {
+void Mapper231::write_f(uint_least16_t address, uint8_t value) {
 	write_handler(address, value);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper231::write_handler(uint32_t address, uint8_t value) {
+void Mapper231::write_handler(uint_least16_t address, uint8_t value) {
 	(void)value;
 	if (address & 0x80) {
 		set_mirroring(mirror_horizontal);

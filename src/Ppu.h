@@ -42,8 +42,8 @@ template <class T>
 void execute_scanline(const T &target);
 
 uint64_t cycle_count();
-uint32_t hpos();
-uint32_t vpos();
+uint_least16_t hpos();
+uint_least16_t vpos();
 
 extern bool show_sprites;
 extern bool system_paused;

@@ -23,7 +23,7 @@ std::string Mapper88::name() const {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper88::write_8(uint32_t address, uint8_t value) {
+void Mapper88::write_8(uint_least16_t address, uint8_t value) {
 
 	switch (address & 0x000f) {
 	case 0x8000:
