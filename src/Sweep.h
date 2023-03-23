@@ -2,7 +2,6 @@
 #ifndef SWEEP_20130502_H_
 #define SWEEP_20130502_H_
 
-#include "Timer.h"
 #include <cstdint>
 
 namespace nes {
@@ -92,7 +91,7 @@ private:
 		const uint16_t delta = pulse_period_ >> shift();
 
 		if (negate()) {
-			if (Channel == 0) {
+			if constexpr (Channel == 0) {
 				return pulse_period_ - delta - 1;
 			} else {
 				return pulse_period_ - delta;

@@ -693,7 +693,11 @@ uint8_t render_pixel() {
 	attribute_queue_[0] <<= 1;
 	attribute_queue_[1] <<= 1;
 
-	return palette_[(pixel & 0x03) ? pixel : 0x00] & monochrome_mask_;
+	// mask = (pixel & 0x03) ? 0xff : 0x00
+	// but without branches
+	const uint8_t mask = ((pixel & 0x01) | ((pixel & 0x02) >> 1)) * 0xff;
+
+	return palette_[pixel & mask] & monochrome_mask_;
 }
 
 //------------------------------------------------------------------------------
@@ -726,7 +730,7 @@ void update_shift_registers_idle() {
 //------------------------------------------------------------------------------
 void update_x_scroll() {
 	// v:0000010000011111=t:0000010000011111
-	vram_address_ = (vram_address_ & ~0b0000010000011111) | (nametable_ & 0b0000010000011111);
+	vram_address_ = (vram_address_ & ~0b00000100'00011111) | (nametable_ & 0b00000100'00011111);
 }
 
 //------------------------------------------------------------------------------
@@ -744,11 +748,11 @@ void update_sprite_registers() {
 //------------------------------------------------------------------------------
 void update_vram_address() {
 	// v=t
-	vram_address_ = (vram_address_ & ~0b0111101111100000) | (nametable_ & 0b0111101111100000);
+	vram_address_ = (vram_address_ & ~0b01111011'11100000) | (nametable_ & 0b01111011'11100000);
 }
 
 //------------------------------------------------------------------------------
-// Name: write4014
+// Name: rendering
 //------------------------------------------------------------------------------
 bool rendering() {
 	return vpos_ <= 240;
@@ -1392,14 +1396,14 @@ void write2005(uint8_t value) {
 		// 2005 first write:
 		// t:0000000000011111=d:11111000
 		// x=d:00000111
-		nametable_ &= 0b111111111100000;
+		nametable_ &= 0b1111111'11100000;
 		nametable_ |= (value & 0b11111000) >> 3;
 		tile_offset_ = value & 0x07;
 	} else {
 		// 2005 second write:
 		// t:0000001111100000=d:11111000
 		// t:0111000000000000=d:00000111
-		nametable_ &= ~0b0111001111100000;
+		nametable_ &= ~0b01110011'11100000;
 		nametable_ |= (value & 0b11111000) << 2;
 		nametable_ |= (value & 0b00000111) << 12;
 	}
@@ -1421,13 +1425,13 @@ void write2006(uint8_t value) {
 		// 2006 first write:
 		// t:0011111100000000=d:00111111
 		// t:1100000000000000=0
-		nametable_ &= 0b0000000011111111;
+		nametable_ &= 0b00000000'11111111;
 		nametable_ |= (value & 0b00111111) << 8;
 	} else {
 		// 2006 second write:
 		// t:0000000011111111=d:11111111
 		// v=t
-		nametable_ &= 0b0111111100000000;
+		nametable_ &= 0b01111111'00000000;
 		nametable_ |= (value & 0b11111111);
 		vram_address_ = nametable_;
 
@@ -1441,14 +1445,14 @@ void write2006(uint8_t value) {
 void write2007(uint8_t value) {
 	latch_ = value;
 
-	const uint_least16_t temp_address = vram_address_ & 0b0011111111111111;
+	const uint_least16_t temp_address = vram_address_ & 0b00111111'11111111;
 
 	increment_vram_address();
 
 	cart.mapper()->vram_change_hook(vram_address_);
 
 	// palette write
-	if ((temp_address & 0b0011111100000000) == 0b0011111100000000) {
+	if ((temp_address & 0b00111111'00000000) == 0b00111111'00000000) {
 
 		const uint_least8_t palette_address = temp_address & 0x1f;
 		palette_[palette_address]           = value & 0x3f;
@@ -1529,7 +1533,7 @@ uint8_t read2007() {
 		return 0x00;
 	}
 
-	const uint_least16_t temp_address = vram_address_ & 0b0011111111111111;
+	const uint_least16_t temp_address = vram_address_ & 0b00111111'11111111;
 
 	increment_vram_address();
 
@@ -1540,7 +1544,7 @@ uint8_t read2007() {
 	latch_                = register_2007_buffer_;
 	register_2007_buffer_ = cart.mapper()->read_vram(temp_address);
 
-	if ((temp_address & 0b0011111100000000) == 0b0011111100000000) {
+	if ((temp_address & 0b00111111'00000000) == 0b00111111'00000000) {
 
 		latch_ = palette_[temp_address & 0x1f] | (decay_value & 0xc0);
 		if (UNLIKELY(ppu_mask_.monochrome)) {
