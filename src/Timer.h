@@ -4,8 +4,7 @@
 
 #include <cstdint>
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 class Timer {
 public:
@@ -28,6 +27,6 @@ private:
 };
 
 }
-}
+
 
 #endif

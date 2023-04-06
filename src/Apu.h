@@ -8,8 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 template <int Channel>
 class Square;
@@ -79,6 +78,6 @@ extern circular_buffer<uint8_t, buffer_size> sample_buffer_;
 extern APUStatus status;
 
 }
-}
+
 
 #endif

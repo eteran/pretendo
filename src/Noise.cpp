@@ -1,8 +1,7 @@
 
 #include "Noise.h"
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 namespace {
 
@@ -102,4 +101,4 @@ uint8_t Noise::output() const {
 }
 
 }
-}
+

@@ -1,8 +1,7 @@
 
 #include "LinearCounter.h"
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 //------------------------------------------------------------------------------
 // Name: clock
@@ -35,4 +34,4 @@ void LinearCounter::reload() {
 }
 
 }
-}
+

@@ -18,8 +18,7 @@ struct scanline_render {
 	uint16_t *const buffer;
 };
 
-namespace nes {
-namespace ppu {
+namespace nes::ppu {
 
 void reset(Reset reset_type);
 
@@ -48,7 +47,6 @@ uint_least16_t vpos();
 extern bool show_sprites;
 extern bool system_paused;
 
-}
 }
 
 #endif

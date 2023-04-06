@@ -4,8 +4,7 @@
 #include "Cpu.h"
 #include "Mapper.h"
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 namespace {
 
 // NTSC period table
@@ -253,4 +252,4 @@ bool DMC::loop() const {
 }
 
 }
-}
+

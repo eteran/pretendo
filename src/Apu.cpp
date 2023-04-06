@@ -8,8 +8,7 @@
 #include <algorithm>
 #include <iostream>
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 namespace {
 
 enum {
@@ -506,4 +505,4 @@ uint64_t cycle_count() {
 }
 
 }
-}
+

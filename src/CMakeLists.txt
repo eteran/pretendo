@@ -220,6 +220,8 @@ target_link_libraries(pretendo LINK_PUBLIC
 	$<TARGET_OBJECTS:mappers>
 )
 
-set_property(TARGET pretendo PROPERTY CXX_STANDARD 17)
-set_property(TARGET pretendo PROPERTY CXX_EXTENSIONS OFF)
-set_property(TARGET pretendo PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+set_target_properties(pretendo PROPERTIES
+    CXX_STANDARD 17
+    CXX_EXTENSIONS OFF
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)

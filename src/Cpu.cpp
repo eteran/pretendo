@@ -39,8 +39,7 @@
 		return;         \
 	} while (0)
 
-namespace nes {
-namespace cpu {
+namespace nes::cpu {
 
 // public registers
 register16 PC = {};
@@ -700,5 +699,4 @@ uint64_t cycle_count() {
 	return executed_cycles_;
 }
 
-}
 }

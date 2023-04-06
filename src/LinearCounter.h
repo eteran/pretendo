@@ -4,8 +4,7 @@
 
 #include <cstdint>
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 class LinearCounter {
 public:
@@ -21,6 +20,6 @@ private:
 };
 
 }
-}
+
 
 #endif

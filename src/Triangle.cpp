@@ -1,8 +1,7 @@
 
 #include "Triangle.h"
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 namespace {
 
 const uint8_t sequence[32] = {
@@ -107,4 +106,4 @@ uint8_t Triangle::output() const {
 }
 
 }
-}
+

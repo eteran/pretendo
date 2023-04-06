@@ -4,8 +4,7 @@
 
 #include <cstdint>
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 template <int Channel>
 class Square;
@@ -118,7 +117,6 @@ private:
 	bool silenced_         = false;
 };
 
-}
 }
 
 #endif

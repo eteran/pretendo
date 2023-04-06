@@ -8,8 +8,7 @@
 #include "Timer.h"
 #include <cstdint>
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 class Noise {
 public:
@@ -40,6 +39,6 @@ private:
 };
 
 }
-}
+
 
 #endif

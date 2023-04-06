@@ -6,8 +6,7 @@
 #include "Reset.h"
 #include <cstdint>
 
-namespace nes {
-namespace cpu {
+namespace nes::cpu {
 
 using dma_handler_t = void (*)(uint8_t);
 
@@ -63,7 +62,6 @@ void exec() {
 	}
 }
 
-}
 }
 
 #endif

@@ -1,8 +1,7 @@
 
 #include "Envelope.h"
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 //------------------------------------------------------------------------------
 // Name: volume
@@ -58,4 +57,4 @@ void Envelope::clock_divider() {
 }
 
 }
-}
+

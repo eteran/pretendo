@@ -8,8 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 class Triangle {
 public:
@@ -40,7 +39,6 @@ private:
 	Timer timer_;
 };
 
-}
 }
 
 #endif

@@ -13,8 +13,7 @@
 
 // #define SPRITE_ZERO_HACK
 
-namespace nes {
-namespace ppu {
+namespace nes::ppu {
 
 bool show_sprites  = true;
 bool system_paused = false;
@@ -1619,5 +1618,4 @@ template void execute_scanline<scanline_prerender>(const scanline_prerender &tar
 template void execute_scanline<scanline_postrender>(const scanline_postrender &target);
 template void execute_scanline<scanline_render>(const scanline_render &target);
 
-}
 }

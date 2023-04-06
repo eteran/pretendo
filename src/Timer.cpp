@@ -1,8 +1,7 @@
 
 #include "Timer.h"
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 //------------------------------------------------------------------------------
 // Name: reset
@@ -11,5 +10,4 @@ void Timer::reset() {
 	timer_ = frequency;
 }
 
-}
 }

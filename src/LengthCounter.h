@@ -4,8 +4,7 @@
 
 #include <cstdint>
 
-namespace nes {
-namespace apu {
+namespace nes::apu {
 
 class LengthCounter {
 public:
@@ -28,7 +27,6 @@ private:
 	mutable bool reload_   = false;
 };
 
-}
 }
 
 #endif
