@@ -10,8 +10,7 @@
 #include <algorithm>
 #include <cstdlib>
 
-namespace nes {
-namespace bus {
+namespace nes::bus {
 namespace {
 
 uint8_t ram_[0x800];
@@ -506,5 +505,4 @@ void trash_ram() {
 	std::fill_n(ram_, sizeof(ram_), 0);
 }
 
-}
 }

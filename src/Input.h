@@ -7,8 +7,7 @@
 
 class Controller;
 
-namespace nes {
-namespace input {
+namespace nes::input {
 
 void reset();
 
@@ -21,7 +20,6 @@ extern Controller controller2;
 extern Controller controller3;
 extern Controller controller4;
 
-}
 }
 
 #endif

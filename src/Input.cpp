@@ -4,8 +4,7 @@
 #include "Nes.h"
 #include <iostream>
 
-namespace nes {
-namespace input {
+namespace nes::input {
 namespace {
 
 uint8_t strobe_ = 0;
@@ -96,5 +95,4 @@ uint8_t read4017() {
 	return (controller2.read() & 0x1f) | 0x40;
 }
 
-}
 }

@@ -791,9 +791,9 @@ void clock_ppu(const scanline_prerender &) {
 	}
 
 	if (LIKELY(ppu_mask_.screen_enabled)) {
-		if (UNLIKELY(hpos_ < 1)) {
+		if (hpos_ < 1) {
 			// idle
-		} else if (LIKELY(hpos_ < 257)) {
+		} else if (hpos_ < 257) {
 			switch (hpos_ & 0x07) {
 			case 1:
 				evaluate_sprites_odd();
@@ -1039,9 +1039,9 @@ void clock_ppu(const scanline_render &target) {
 
 	if (UNLIKELY(!ppu_mask_.screen_enabled)) {
 
-		if (UNLIKELY(hpos_ < 1)) {
+		if (hpos_ < 1) {
 			// idle
-		} else if (LIKELY(hpos_ < 257)) {
+		} else if (hpos_ < 257) {
 
 			target.buffer[hpos_ - 1] = render_blank_pixel();
 			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
@@ -1050,14 +1050,14 @@ void clock_ppu(const scanline_render &target) {
 		}
 	} else {
 
-		if (UNLIKELY(hpos_ < 1)) {
+		if (hpos_ < 1) {
 			// the first clock is acts like the last clock of the pre-render if we skipped a cycle
 			if (UNLIKELY(vpos_ == 1 && odd_frame_)) {
 				read_tile_index();
 			} else {
 				// idle
 			}
-		} else if (LIKELY(hpos_ < 257)) {
+		} else if (hpos_ < 257) {
 
 			// NOTE(eteran): on my machine, this code "costs" about 200 FPS
 			target.buffer[hpos_ - 1] = render_pixel();
