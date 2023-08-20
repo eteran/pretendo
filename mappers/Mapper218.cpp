@@ -23,12 +23,19 @@ std::string Mapper218::name() const {
 // Name:
 //------------------------------------------------------------------------------
 uint8_t Mapper218::read_vram(uint_least16_t address) {
+    // TODO: deal with mirroring somehow
+    // it's in the iNES header
 
-	// TODO: deal with mirroring somehow
-	// it's in the iNES header
+    // TODO(eteran): I think this can just be:
+    // if ((address >> 13) & 1) {
+    //     return Mapper::read_vram(address);
+    // } else {
+    //     return Mapper::read_vram(address | 0x2000);
+    // }
+    // which of course can be made branch free
 
-	switch ((address >> 10) & 0x0f) {
-	case 0x00:
+    switch ((address >> 10) & 0x0f) {
+    case 0x00:
 	case 0x01:
 	case 0x02:
 	case 0x03:
@@ -47,7 +54,7 @@ uint8_t Mapper218::read_vram(uint_least16_t address) {
 	case 0x0f:
 	default:
 		return Mapper::read_vram(address);
-	}
+    }
 }
 
 //------------------------------------------------------------------------------

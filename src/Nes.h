@@ -68,8 +68,8 @@ void execute_scanline_21_260(Video *video) {
 	 */
 
 	// process the visible range
+	alignas(512) uint32_t buffer[256] = {};
 	for (int i = 0; i < 240; ++i) {
-		uint16_t buffer[256];
 		ppu::execute_scanline(scanline_render(buffer));
 		video->submit_scanline(i, buffer);
 	}

@@ -79,6 +79,10 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 
 	filesystem_model_ = new FilesystemModel(this);
 
+	// NOTE(eteran): this thread is actually a bad idea since it will randomly crash
+	// due to races with the widget trying to consume it
+	// Let's see if we can find a better/thread safe way to populate this widget
+	// asyncronously.
 	auto thread = QThread::create([this]() {
 		auto romdir = QString::fromStdString(Settings::romDirectory);
 		QFileInfo romdir_fi(romdir);

@@ -125,7 +125,7 @@ constexpr uint_least16_t tile_address(uint_least16_t vram_address) {
 	return 0x2000 | (vram_address & 0x0fff);
 }
 
-struct SpritePatternData {
+struct SpritePattern {
 	uint8_t x;
 	uint8_t y;
 	uint8_t index;
@@ -134,7 +134,7 @@ struct SpritePatternData {
 };
 
 // internal variables
-SpritePatternData sprite_patterns_[8];
+SpritePattern sprite_patterns_[8];
 uint8_t current_sprite_index_ = 0;
 uint8_t sprite_ram_[0x100]    = {};
 uint8_t sprite_address_       = 0; // OAMADDR
@@ -146,7 +146,6 @@ uint8_t sprite_read_buffer_         = 0;
 uint8_t sprite_read_index_          = 0;
 bool current_is_sprite_0            = false;
 uint8_t visible_sprite_count_       = 0;
-uint8_t visible_left_most_sprite_x_ = 0xff;
 
 enum SpriteEvalState {
 	STATE_1_Y,
@@ -161,8 +160,8 @@ uint8_t palette_[0x20];
 uint64_t ppu_cycle_                    = 0;
 uint64_t ppu_read_2002_cycle_          = 0;
 uint_least16_t next_ppu_fetch_address_ = 0;
-uint_least16_t attribute_queue_[2]     = {};
 uint_least16_t pattern_queue_[2]       = {};
+uint_least16_t attribute_queue_[2]     = {};
 uint_least16_t nametable_              = 0; // loopy's "t"
 uint_least16_t vram_address_           = 0; // loopy's "v"
 uint_least16_t hpos_                   = 0; // pixel counter
@@ -247,18 +246,17 @@ uint8_t render_blank_pixel() {
 uint8_t select_bg_pixel(uint_least16_t index) {
 
 	// first identify what the BG pixel would be
-	if ((ppu_mask_.background_clipping || index >= 8) && ppu_mask_.background_visible) {
-		const uint16_t mask = (0x8000 >> tile_offset_);
+	if (LIKELY(index >= 8 || ppu_mask_.background_clipping) && ppu_mask_.background_visible) {
+		const uint_least16_t mask = (0x8000 >> tile_offset_);
 
 		return (((pattern_queue_[0] & mask) >> (15 - tile_offset_)) |
 				((pattern_queue_[1] & mask) >> (14 - tile_offset_)) |
 				((attribute_queue_[0] & mask) >> (13 - tile_offset_)) |
 				((attribute_queue_[1] & mask) >> (12 - tile_offset_))) &
 			   0xff;
-
-	} else {
-		return 0x00;
 	}
+
+	return 0x00;
 }
 
 //------------------------------------------------------------------------------
@@ -268,52 +266,51 @@ uint8_t select_bg_pixel(uint_least16_t index) {
 uint8_t select_pixel(uint_least16_t index) {
 
 	// default to displaying the BG pixel
-	uint8_t pixel = select_bg_pixel(index);
+	const uint8_t pixel = select_bg_pixel(index);
 
-	// are ANY sprites possibly in range?
-	if (visible_left_most_sprite_x_ <= index) {
+	// then see if any of the sprites belong..
+	if (LIKELY(index >= 8 || ppu_mask_.sprite_clipping) && ppu_mask_.sprites_visible) {
 
-		// then see if any of the sprites belong..
-		if ((ppu_mask_.sprite_clipping || index >= 8) && ppu_mask_.sprites_visible) {
+		// this will loop at most 8 times
+		for (uint8_t spr = 0; spr != visible_sprite_count_; ++spr) {
 
-			// this will loop at most 8 times
-			for (uint8_t spr = 0; spr != visible_sprite_count_; ++spr) {
+			const SpritePattern &sprite = sprite_patterns_[spr];
 
-				const SpritePatternData &sprite = sprite_patterns_[spr];
+			const uint16_t x_offset = index - sprite.x;
 
-				const uint16_t x_offset = index - sprite.x;
-
-				// is this sprite visible on this pixel?
-				if (x_offset < 8) {
-
-					const uint8_t &p0    = sprite.patterns[0];
-					const uint8_t &p1    = sprite.patterns[1];
-					const uint16_t shift = 7 - x_offset;
-
-					const uint8_t sprite_pixel =
-						((p0 >> shift) & 0x01) | (((p1 >> shift) << 0x01) & 0x02);
-
-					// this pixel is visible..
-					if (LIKELY(sprite_pixel & 0x03)) {
-						// we rendered a sprite0 pixel which collided with a BG pixel
-						// NOTE: according to blargg's tests, a collision doesn't seem
-						//       possible to occur on the rightmost pixel
-#ifndef SPRITE_ZERO_HACK
-						if ((sprite.attr & OamZero) && (index < 255) && (pixel & 0x03)) {
-#else
-						if ((sprite.attr & OamZero) && (index < 255)) {
-#endif
-							status_.sprite0 = true;
-						}
-
-						if ((((sprite.attr & OamPriority) == 0) || ((pixel & 0x03) == 0x00)) && LIKELY(show_sprites)) {
-							pixel = (0x10 | sprite_pixel | ((sprite.attr & OamColor) << 2)) & 0xff;
-						}
-
-						return pixel;
-					}
-				}
+			// is this sprite visible on this pixel?
+			if (x_offset >= 8) {
+				continue;
 			}
+
+			const uint8_t p0     = sprite.patterns[0];
+			const uint8_t p1     = sprite.patterns[1];
+			const uint16_t shift = 7 - x_offset;
+
+			const uint8_t sprite_pixel =
+				((p0 >> shift) & 0x01) | (((p1 >> shift) << 0x01) & 0x02);
+
+			// is this pixel visible?
+			if ((sprite_pixel & 0x03) == 0) {
+				continue;
+			}
+
+			// we rendered a sprite0 pixel which collided with a BG pixel
+			// NOTE: according to blargg's tests, a collision doesn't seem
+			//       possible to occur on the rightmost pixel
+#ifndef SPRITE_ZERO_HACK
+			if ((sprite.attr & OamZero) && (index < 255) && (pixel & 0x03)) {
+#else
+			if ((sprite.attr & OamZero) && (index < 255)) {
+#endif
+				status_.sprite0 = true;
+			}
+
+			if ((((sprite.attr & OamPriority) == 0) || ((pixel & 0x03) == 0)) && LIKELY(show_sprites)) {
+				return (0x10 | sprite_pixel | ((sprite.attr & OamColor) << 2)) & 0xff;
+			}
+
+			return pixel;
 		}
 	}
 
@@ -596,7 +593,6 @@ void evaluate_sprites_even() {
 		// count
 		if (hpos_ == 256) {
 			visible_sprite_count_       = sprite_data_index_;
-			visible_left_most_sprite_x_ = left_most_sprite_x_;
 		}
 	}
 }
@@ -637,7 +633,7 @@ template <class Size, class Pattern>
 void open_sprite_pattern() {
 
 	current_sprite_index_     = ((hpos_ - 1) >> 3) & 0x07;
-	SpritePatternData &sprite = sprite_patterns_[current_sprite_index_];
+	SpritePattern &sprite     = sprite_patterns_[current_sprite_index_];
 
 	sprite.y = sprite_y(current_sprite_index_);
 
@@ -670,7 +666,7 @@ void read_sprite_pattern() {
 
 	uint8_t pattern = cart.mapper()->read_vram(next_ppu_fetch_address_);
 
-	SpritePatternData &sprite = sprite_patterns_[current_sprite_index_];
+	SpritePattern &sprite = sprite_patterns_[current_sprite_index_];
 
 	// horizontal flip
 	if (sprite.attr & OamHFlip) {
@@ -1504,16 +1500,13 @@ uint8_t read2004() {
 	if (!rendering() || !ppu_mask_.screen_enabled) {
 		switch (sprite_address_ & 0x03) {
 		case 0x00:
-			latch_ = sprite_ram_[sprite_address_] & 0xff;
-			break;
 		case 0x01:
-			latch_ = sprite_ram_[sprite_address_] & 0xff;
-			break;
-		case 0x02:
-			latch_ = sprite_ram_[sprite_address_] & 0xe3;
-			break;
 		case 0x03:
 			latch_ = sprite_ram_[sprite_address_] & 0xff;
+			break;
+
+		case 0x02:
+			latch_ = sprite_ram_[sprite_address_] & 0xe3;
 			break;
 		}
 

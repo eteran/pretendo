@@ -101,50 +101,31 @@ void QtVideo::initializeGL() {
 //------------------------------------------------------------------------------
 // Name: submit_scanline
 //------------------------------------------------------------------------------
-void QtVideo::submit_scanline(int scanline, const uint16_t *source) {
+void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 
-#if 1
-	uint64_t *s = reinterpret_cast<uint64_t *>(scanlines_[scanline]);
+#define AVX256
+
+#ifdef AVX512
+	auto s = reinterpret_cast<__m512i *>(scanlines_[scanline]);
+	for (int i = 0; i < Width; i += 16) {
+		auto ind = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(source));
+		auto vec = _mm512_i32gather_epi32(ind, reinterpret_cast<const __m512i *>(palette_), 4);
+		*s++     = vec;
+		source += 16;
+	}
+
+#elif defined(AVX256)
+	auto s = reinterpret_cast<__m256i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 8) {
-
-		const uint16_t pix0 = source[0];
-		const uint16_t pix1 = source[1];
-		const uint16_t pix2 = source[2];
-		const uint16_t pix3 = source[3];
-		const uint16_t pix4 = source[4];
-		const uint16_t pix5 = source[5];
-		const uint16_t pix6 = source[6];
-		const uint16_t pix7 = source[7];
-
-		// collect them into 256-bits of data (unfortunately, with some indirection)
-		uint64_t value0 =
-			(static_cast<uint64_t>(palette_[pix0]) << 0) |
-			(static_cast<uint64_t>(palette_[pix1]) << 32);
-
-		uint64_t value1 =
-			(static_cast<uint64_t>(palette_[pix2]) << 0) |
-			(static_cast<uint64_t>(palette_[pix3]) << 32);
-
-		uint64_t value2 =
-			(static_cast<uint64_t>(palette_[pix4]) << 0) |
-			(static_cast<uint64_t>(palette_[pix5]) << 32);
-
-		uint64_t value3 =
-			(static_cast<uint64_t>(palette_[pix6]) << 0) |
-			(static_cast<uint64_t>(palette_[pix7]) << 32);
-
-		// then write them, this will help the rendering be much more
-		// cache friendly
-		*s++ = value0;
-		*s++ = value1;
-		*s++ = value2;
-		*s++ = value3;
-
+		auto ind = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(source));
+		auto vec = _mm256_i32gather_epi32(reinterpret_cast<const int *>(palette_), ind, 4);
+		*s++     = vec;
 		source += 8;
 	}
+
 #else
 	uint32_t *const s = scanlines_[scanline];
-	std::transform(source, source + Width, s, [this](uint16_t index) {
+	std::transform(source, source + Width, s, [this](uint32_t index) {
 		return palette_[index];
 	});
 #endif

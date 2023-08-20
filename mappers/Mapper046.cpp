@@ -1,7 +1,5 @@
 
 #include "Mapper046.h"
-#include "Cart.h"
-#include "Nes.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(46)
 
@@ -82,7 +80,6 @@ void Mapper46::write_a(uint_least16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper46::write_b(uint_least16_t address, uint8_t value) {
 	write89ABCDEF(address, value);
-	;
 }
 
 //------------------------------------------------------------------------------

@@ -1,6 +1,5 @@
 
 #include "VRC2.h"
-#include "Cpu.h"
 
 // TODO(eteran): implement sub-mapper madness...
 

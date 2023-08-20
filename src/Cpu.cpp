@@ -110,17 +110,17 @@ bool irq_executing_ = false;
 bool nmi_executing_ = false;
 bool rst_executing_ = true;
 
-dma_handler_t spr_dma_handler_   = nullptr;
+dma_handler_t spr_dma_handler_         = nullptr;
 uint_least16_t spr_dma_source_address_ = 0;
 uint_least16_t spr_dma_count_          = 0;
-uint8_t spr_dma_byte_            = 0;
-uint8_t spr_dma_delay_           = 0;
+uint8_t spr_dma_byte_                  = 0;
+uint8_t spr_dma_delay_                 = 0;
 
-dma_handler_t dmc_dma_handler_   = nullptr;
+dma_handler_t dmc_dma_handler_         = nullptr;
 uint_least16_t dmc_dma_source_address_ = 0;
 uint_least16_t dmc_dma_count_          = 0;
-uint8_t dmc_dma_byte_            = 0;
-uint8_t dmc_dma_delay_           = 0;
+uint8_t dmc_dma_byte_                  = 0;
+uint8_t dmc_dma_delay_                 = 0;
 
 // stats
 uint64_t executed_cycles_ = 1; // NOTE(eteran): 1 instead of 0 makes 4.irq_and_dma.nes pass...

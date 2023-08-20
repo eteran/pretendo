@@ -3,7 +3,6 @@
 #include "Apu.h"
 #include "Dmc.h"
 #include "Noise.h"
-#include "Pretendo.h"
 #include "Square.h"
 #include "Triangle.h"
 #include <QPainter>

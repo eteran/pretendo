@@ -19,7 +19,7 @@ public:
 
 public:
 	// required functions
-	void submit_scanline(int scanline, const uint16_t *source);
+	void submit_scanline(int scanline, const uint32_t *source);
 	void set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal);
 	void end_frame();
 
@@ -37,7 +37,7 @@ Q_SIGNALS:
 private:
 	uint32_t *scanlines_[240];
 	uint32_t palette_[8 * 64];
-	std::array<uint32_t, Width * Height> buffer_;
+	alignas(512) std::array<uint32_t, Width * Height> buffer_;
 	GLuint texture_ = 0;
 };
 

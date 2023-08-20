@@ -1,7 +1,5 @@
 
 #include "Mapper057.h"
-#include "Cart.h"
-#include "Nes.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(57)
 

@@ -2,7 +2,6 @@
 #include "Mapper004.h"
 #include "Cart.h"
 #include "Nes.h"
-#include "Ppu.h"
 
 SETUP_STATIC_INES_MAPPER_REGISTRAR(4)
 
