@@ -1,13 +1,13 @@
 <RCC>
   <qresource prefix="/pretendo">
-    <file>../graphics/eject.png</file>
-    <file>../graphics/logo.bmp</file>
-    <file>../graphics/pause.png</file>
-    <file>../graphics/play.png</file>
-    <file>../graphics/pretendo.ico</file>
-    <file>../graphics/pretendo_32x32x8.png</file>
-    <file>../graphics/repeat.png</file>
-    <file>../graphics/stop.png</file>
-	<file>../graphics/controller.svg</file>
+    <file>./graphics/eject.png</file>
+    <file>./graphics/logo.bmp</file>
+    <file>./graphics/pause.png</file>
+    <file>./graphics/play.png</file>
+    <file>./graphics/pretendo.ico</file>
+    <file>./graphics/pretendo_32x32x8.png</file>
+    <file>./graphics/repeat.png</file>
+    <file>./graphics/stop.png</file>
+    <file>./graphics/controller.svg</file>
   </qresource>
 </RCC>
