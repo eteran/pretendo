@@ -75,14 +75,14 @@ void QtVideo::initializeGL() {
 
 #if 0
 	QGLShaderProgram program(context());
-	
+
 	program.addShaderFromSourceCode(QGLShader::Vertex,
 	"    void main(void) {\n"
 	"      gl_Position = ftransform();\n"
 	"      gl_TexCoord[0] = gl_MultiTexCoord0;\n"
 	"    }"
 	);
-	
+
 	program.addShaderFromSourceCode(QGLShader::Fragment,
     "    uniform sampler2D rubyTexture;\n"
 	"    void main(void) {   \n"
@@ -92,7 +92,7 @@ void QtVideo::initializeGL() {
 	"      gl_FragColor = intens;\n"
 	"    }"
 	);
-	
+
 	program.link();
 	program.bind();
 #endif
@@ -103,7 +103,9 @@ void QtVideo::initializeGL() {
 //------------------------------------------------------------------------------
 void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 
+#ifdef _WIN32
 #define AVX256
+#endif
 
 #ifdef AVX512
 	auto s = reinterpret_cast<__m512i *>(scanlines_[scanline]);

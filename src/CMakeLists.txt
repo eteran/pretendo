@@ -225,3 +225,5 @@ set_target_properties(pretendo PROPERTIES
     CXX_EXTENSIONS OFF
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
+
+add_subdirectory(mappers)

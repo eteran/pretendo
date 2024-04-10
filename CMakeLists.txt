@@ -60,5 +60,4 @@ if(ENABLE_LTO)
 endif()
 
 add_subdirectory(src)
-add_subdirectory(mappers)
 add_subdirectory(libines2/lib)
