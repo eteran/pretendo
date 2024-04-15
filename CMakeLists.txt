@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.15)
 project (pretendo CXX)
 
 if(NOT CMAKE_BUILD_TYPE)
