@@ -7,6 +7,7 @@
 #ifdef _WIN32
 #include "glext.h"
 #endif
+#include <immintrin.h>
 
 //------------------------------------------------------------------------------
 // Name: QtVideo
@@ -103,11 +104,16 @@ void QtVideo::initializeGL() {
 //------------------------------------------------------------------------------
 void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 
-#ifdef _WIN32
-#define AVX256
+// normalize the macros slightly
+#if !defined(__AVX512F__) && defined(__AVX2__)
+#define __AVX512F__
 #endif
 
-#ifdef AVX512
+#if !defined(__SSE2__) && ((defined(_M_AMD64) || defined(_M_X64)) || (_M_IX86_FP == 2))
+#define __SSE2__
+#endif
+
+#if defined(__AVX512F__)
 	auto s = reinterpret_cast<__m512i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 16) {
 		auto ind = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(source));
@@ -116,7 +122,7 @@ void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 		source += 16;
 	}
 
-#elif defined(AVX256)
+#elif defined(__AVX__)
 	auto s = reinterpret_cast<__m256i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 8) {
 		auto ind = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(source));
@@ -124,7 +130,14 @@ void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 		*s++     = vec;
 		source += 8;
 	}
-
+#elif defined(__SSE2__)
+	auto s = reinterpret_cast<__m128i *>(scanlines_[scanline]);
+	for (int i = 0; i < Width; i += 4) {
+		auto ind = _mm_loadu_si128(reinterpret_cast<const __m128i *>(source));
+		auto vec = _mm_i32gather_epi32(reinterpret_cast<const int *>(palette_), ind, 4);
+		*s++     = vec;
+		source += 4;
+	}
 #else
 	uint32_t *const s = scanlines_[scanline];
 	std::transform(source, source + Width, s, [this](uint32_t index) {
