@@ -79,36 +79,30 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 
 	filesystem_model_ = new FilesystemModel(this);
 
-	// NOTE(eteran): this thread is actually a bad idea since it will randomly crash
-	// due to races with the widget trying to consume it
-	// Let's see if we can find a better/thread safe way to populate this widget
-	// asyncronously.
-	auto thread = QThread::create([this]() {
-		auto romdir = QString::fromStdString(Settings::romDirectory);
-		QFileInfo romdir_fi(romdir);
-		romdir_fi.makeAbsolute();
+	// Populate the ROM list
+	// NOTE(eteran): might be slow for large lists
+	auto romdir = QString::fromStdString(Settings::romDirectory);
+	QFileInfo romdir_fi(romdir);
+	romdir_fi.makeAbsolute();
 
-		QString rom_basedir = romdir_fi.path();
-		if (!rom_basedir.endsWith('/')) {
-			rom_basedir.append('/');
+	QString rom_basedir = romdir_fi.path();
+	if (!rom_basedir.endsWith('/')) {
+		rom_basedir.append('/');
+	}
+
+	QDirIterator it(romdir, QStringList() << "*.nes", QDir::Files | QDir::Readable, QDirIterator::Subdirectories);
+	while (it.hasNext()) {
+		QString f = it.next();
+		QFileInfo fi(f);
+		fi.makeAbsolute();
+
+		QString path = fi.filePath();
+		if (path.startsWith(rom_basedir)) {
+			path = path.mid(rom_basedir.size());
 		}
 
-		QDirIterator it(romdir, QStringList() << "*.nes", QDir::Files | QDir::Readable, QDirIterator::Subdirectories);
-		while (it.hasNext()) {
-			QString f = it.next();
-			QFileInfo fi(f);
-			fi.makeAbsolute();
-
-			QString path = fi.filePath();
-			if (path.startsWith(rom_basedir)) {
-				path = path.mid(rom_basedir.size());
-			}
-
-			filesystem_model_->addFile(FilesystemModel::Item{path, f});
-		}
-	});
-
-	thread->start();
+		filesystem_model_->addFile(FilesystemModel::Item{path, f});
+	}
 
 	filter_model_ = new SortFilterProxyModel(this);
 	filter_model_->setFilterCaseSensitivity(Qt::CaseInsensitive);

@@ -24,8 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QString>
 #include <QVector>
 
-#include <memory>
-
 class IProcess;
 
 class FilesystemModel final : public QAbstractItemModel {
@@ -50,7 +48,7 @@ public:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
-public:
+public Q_SLOTS:
 	void addFile(const Item &item);
 	void clear();
 

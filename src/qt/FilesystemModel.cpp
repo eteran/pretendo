@@ -89,7 +89,6 @@ int FilesystemModel::rowCount(const QModelIndex &parent) const {
 
 void FilesystemModel::addFile(const Item &item) {
 	beginInsertRows(QModelIndex(), rowCount(), rowCount());
-
 	items_.push_back(item);
 	endInsertRows();
 }
