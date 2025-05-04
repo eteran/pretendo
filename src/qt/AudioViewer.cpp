@@ -59,18 +59,29 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 		const int noise_out    = nes::apu::noise.output();
 		const int dmc_out      = nes::apu::dmc.output();
 
-		QPixmap back_buffer(110, 256);
+		QPixmap back_buffer(110, 128);
 		QPainter painter;
+
+		float sample_width = float(nes::apu::sample_buffer_size) / 100.0;
+		QPointF prev;
+
 		if (painter.begin(&back_buffer)) {
 
 			// draw stuff...
 			painter.fillRect(back_buffer.rect(), Qt::black);
+			painter.setPen(Qt::white);
 
-			drawBar(&painter, 0, pulse1_out);
-			drawBar(&painter, 1, pulse2_out);
-			drawBar(&painter, 2, triangle_out);
-			drawBar(&painter, 3, noise_out);
-			drawBar(&painter, 4, dmc_out);
+			for (size_t i = 0; i < nes::apu::sample_buffer_size; ++i) {
+
+				QPointF curr(i * sample_width, nes::apu::sample_buffer[i]);
+
+				if (prev.isNull()) {
+					prev = curr;
+				}
+
+				painter.drawLine(prev, curr);
+				prev = curr;
+			}
 
 			painter.end();
 		}

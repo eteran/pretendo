@@ -56,7 +56,8 @@ Noise noise;
 DMC dmc;
 APUStatus status = {0};
 
-circular_buffer<uint8_t, buffer_size> sample_buffer_;
+uint8_t sample_buffer[buffer_size];
+size_t sample_buffer_size = 0;
 
 //------------------------------------------------------------------------------
 // Name: clock_linear
@@ -485,7 +486,7 @@ void tick() {
 	}
 
 	if ((apu_cycles_ % ClocksPerSample) == 0) {
-		sample_buffer_.push_back(mix_channels());
+		sample_buffer[sample_buffer_size++] = mix_channels();
 	}
 
 	dmc.tick();

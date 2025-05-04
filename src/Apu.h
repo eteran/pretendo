@@ -4,7 +4,6 @@
 
 #include "BitField.h"
 #include "Reset.h"
-#include "circular_buffer.h"
 #include <cstddef>
 #include <cstdint>
 
@@ -30,7 +29,7 @@ union APUStatus {
 	BitField<uint8_t, 6, 2> irq_firing;
 };
 
-constexpr int frequency   = 44100;
+constexpr int frequency   = 48000;
 constexpr int buffer_size = (frequency / 60) * 2;
 
 void reset(Reset reset_type);
@@ -73,7 +72,8 @@ extern Triangle triangle;
 extern Noise noise;
 extern DMC dmc;
 
-extern circular_buffer<uint8_t, buffer_size> sample_buffer_;
+extern uint8_t sample_buffer[buffer_size];
+extern size_t sample_buffer_size;
 
 extern APUStatus status;
 

@@ -194,21 +194,13 @@ void Pretendo::setFrameLimit(uint64_t limit) {
 void Pretendo::update() {
 
 	// idle processing loop (the emulation loop)
+
+	nes::apu::sample_buffer_size = 0;
+
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
-	const size_t audio_head     = nes::apu::sample_buffer_.head();
-	const size_t audio_tail     = nes::apu::sample_buffer_.tail();
-	const size_t audio_capacity = nes::apu::sample_buffer_.capacity();
-	const auto audio_buffer     = nes::apu::sample_buffer_.buffer();
-
-	if (audio_head >= audio_tail) {
-		audio_->write(&audio_buffer[audio_head], audio_capacity - audio_head);
-		audio_->write(&audio_buffer[0], audio_tail);
-	} else {
-		audio_->write(&audio_buffer[audio_head], audio_tail - audio_head);
-	}
-	nes::apu::sample_buffer_.clear();
+	audio_->write(&nes::apu::sample_buffer[0], nes::apu::sample_buffer_size);
 
 	// FPS calculation
 	auto now = std::chrono::high_resolution_clock::now();
