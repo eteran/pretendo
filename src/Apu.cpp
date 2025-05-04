@@ -56,8 +56,8 @@ Noise noise;
 DMC dmc;
 APUStatus status = {0};
 
-uint8_t sample_buffer[buffer_size];
-size_t sample_buffer_size = 0;
+uint8_t sample_buffer_[buffer_size];
+size_t sample_buffer_size_ = 0;
 
 //------------------------------------------------------------------------------
 // Name: clock_linear
@@ -486,8 +486,8 @@ void tick() {
 	}
 
 	if ((apu_cycles_ % ClocksPerSample) == 0) {
-		if (sample_buffer_size < sizeof(sample_buffer)) {
-			sample_buffer[sample_buffer_size++] = mix_channels();
+		if (sample_buffer_size_ < sizeof(sample_buffer_)) {
+			sample_buffer_[sample_buffer_size_++] = mix_channels();
 		}
 	}
 
@@ -507,5 +507,20 @@ uint64_t cycle_count() {
 	return apu_cycles_;
 }
 
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+size_t read_samples(uint8_t *buffer, size_t size) {
+	size_t read_size = std::min(sample_buffer_size_, size);
+	memcpy(buffer, sample_buffer_, read_size);
+	return read_size;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+void start_frame() {
+	sample_buffer_size_ = 0;
+}
 }
 

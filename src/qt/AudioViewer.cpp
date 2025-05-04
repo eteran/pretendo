@@ -53,30 +53,34 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 
 	if (watched == ui_.widget && event->type() == QEvent::Paint) {
 
-		const int pulse1_out   = nes::apu::square_0.output();
-		const int pulse2_out   = nes::apu::square_1.output();
-		const int triangle_out = nes::apu::triangle.output();
-		const int noise_out    = nes::apu::noise.output();
-		const int dmc_out      = nes::apu::dmc.output();
-
-		QPixmap back_buffer(110, 128);
+		QPixmap back_buffer(800, 128);
 		QPainter painter;
 
-		float sample_width = float(nes::apu::sample_buffer_size) / 100.0;
+		uint8_t samples[1024];
+		size_t count = nes::apu::read_samples(samples, sizeof(samples));
+
+		float sample_width = float(count) / 100.0;
 		QPointF prev;
 
 		if (painter.begin(&back_buffer)) {
 
 			// draw stuff...
 			painter.fillRect(back_buffer.rect(), Qt::black);
-			painter.setPen(Qt::white);
 
-			for (size_t i = 0; i < nes::apu::sample_buffer_size; ++i) {
+			for (size_t i = 0; i < count; ++i) {
 
-				QPointF curr(i * sample_width, nes::apu::sample_buffer[i]);
+				QPointF curr(i * sample_width, back_buffer.height() - samples[i]);
 
 				if (prev.isNull()) {
 					prev = curr;
+				}
+
+				if (curr.y() == prev.y()) {
+					painter.setPen(Qt::white);
+				} else if (curr.y() > prev.y()) {
+					painter.setPen(Qt::green);
+				} else {
+					painter.setPen(Qt::red);
 				}
 
 				painter.drawLine(prev, curr);

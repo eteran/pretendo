@@ -59,6 +59,9 @@ uint8_t read4015();
 uint64_t cycle_count();
 void tick();
 
+void start_frame();
+size_t read_samples(uint8_t *buffer, size_t size);
+
 template <int Cycles>
 void exec() {
 	for (int i = 0; i < Cycles; ++i) {
@@ -71,9 +74,6 @@ extern Square<1> square_1;
 extern Triangle triangle;
 extern Noise noise;
 extern DMC dmc;
-
-extern uint8_t sample_buffer[buffer_size];
-extern size_t sample_buffer_size;
 
 extern APUStatus status;
 

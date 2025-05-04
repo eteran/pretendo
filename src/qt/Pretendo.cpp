@@ -195,12 +195,12 @@ void Pretendo::update() {
 
 	// idle processing loop (the emulation loop)
 
-	nes::apu::sample_buffer_size = 0;
-
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
-	audio_->write(&nes::apu::sample_buffer[0], nes::apu::sample_buffer_size);
+	uint8_t samples[1024];
+	size_t count = nes::apu::read_samples(samples, sizeof(samples));
+	audio_->write(samples, count);
 
 	// FPS calculation
 	auto now = std::chrono::high_resolution_clock::now();
