@@ -486,7 +486,9 @@ void tick() {
 	}
 
 	if ((apu_cycles_ % ClocksPerSample) == 0) {
-		sample_buffer[sample_buffer_size++] = mix_channels();
+		if (sample_buffer_size < sizeof(sample_buffer)) {
+			sample_buffer[sample_buffer_size++] = mix_channels();
+		}
 	}
 
 	dmc.tick();
