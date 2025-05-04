@@ -6,7 +6,7 @@
 #include "Square.h"
 #include "Triangle.h"
 #include <QPainter>
-#include <cstring>
+#include <QTimer>
 
 namespace {
 
@@ -38,10 +38,12 @@ AudioViewer::AudioViewer(QWidget *parent, Qt::WindowFlags f)
 }
 
 //------------------------------------------------------------------------------
-// Name: update
+// Name: setupUpdateTimer
 //------------------------------------------------------------------------------
-void AudioViewer::update() {
-	Q_EMIT ui_.widget->repaint();
+void AudioViewer::setupUpdateTimer(QTimer *timer) {
+	connect(timer, &QTimer::timeout, this, [this]() {
+		ui_.widget->update();
+	});
 }
 
 //------------------------------------------------------------------------------

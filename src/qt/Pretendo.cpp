@@ -8,6 +8,7 @@
 #include "Input.h"
 #include "Mapper.h"
 #include "Nes.h"
+#include "PatternTableView.h"
 #include "Ppu.h"
 #include "Preferences.h"
 #include "Settings.h"
@@ -529,7 +530,20 @@ void Pretendo::on_action_Audio_Viewer_triggered() {
 	static AudioViewer *dialog = nullptr;
 	if (!dialog) {
 		dialog = new AudioViewer(this);
-		connect(timer_, &QTimer::timeout, dialog, &AudioViewer::update);
+		dialog->setupUpdateTimer(timer_);
+	}
+	dialog->show();
+}
+
+//------------------------------------------------------------------------------
+// Name:
+// Desc:
+//------------------------------------------------------------------------------
+void Pretendo::on_action_Pattern_Table_Viewer_triggered() {
+	static PatternTableView *dialog = nullptr;
+	if (!dialog) {
+		dialog = new PatternTableView(this);
+		dialog->setupUpdateTimer(timer_);
 	}
 	dialog->show();
 }

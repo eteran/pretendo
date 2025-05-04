@@ -173,7 +173,7 @@
      <x>0</x>
      <y>0</y>
      <width>274</width>
-     <height>23</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -223,6 +223,7 @@
     <addaction name="menuZoom"/>
     <addaction name="action_Audio_Viewer"/>
     <addaction name="action_Take_Screenshot"/>
+    <addaction name="action_Pattern_Table_Viewer"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_CPU"/>
@@ -415,6 +416,11 @@
   <action name="action_Take_Screenshot">
    <property name="text">
     <string>Take &amp;Screenshot</string>
+   </property>
+  </action>
+  <action name="action_Pattern_Table_Viewer">
+   <property name="text">
+    <string>&amp;Pattern Table Viewer</string>
    </property>
   </action>
  </widget>

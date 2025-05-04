@@ -54,6 +54,7 @@ private Q_SLOTS:
 	void on_action_About_triggered();
 	void on_action_Audio_Viewer_triggered();
 	void on_action_Take_Screenshot_triggered();
+	void on_action_Pattern_Table_Viewer_triggered();
 
 protected:
 	void keyPressEvent(QKeyEvent *event) override;

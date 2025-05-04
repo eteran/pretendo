@@ -201,6 +201,9 @@ add_executable(pretendo
 	qt/Preferences.ui
 	qt/About.ui
 	qt/AudioViewer.ui
+	qt/PatternTableView.cpp
+	qt/PatternTableView.h
+	qt/PatternTableView.ui
 )
 
 add_dependencies(pretendo mappers)
