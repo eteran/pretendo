@@ -1,30 +1,8 @@
 
 #include "AudioViewer.h"
 #include "Apu.h"
-#include "Dmc.h"
-#include "Noise.h"
-#include "Square.h"
-#include "Triangle.h"
 #include <QPainter>
 #include <QTimer>
-
-namespace {
-
-void drawBar(QPainter *painter, int index, int value) {
-
-	QRect rect;
-	rect.setLeft((index * 20) + 10);
-	rect.setBottom(256);
-	rect.setWidth(10);
-	rect.setTop(256 - value * 3);
-
-	QLinearGradient gradient(rect.topLeft(), rect.bottomRight()); // diagonal gradient from top-left to bottom-right
-	gradient.setColorAt(1, Qt::green);
-	gradient.setColorAt(0, Qt::red);
-	painter->fillRect(rect, gradient);
-}
-
-}
 
 //------------------------------------------------------------------------------
 // Name: AudioViewer
@@ -53,7 +31,7 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 
 	if (watched == ui_.widget && event->type() == QEvent::Paint) {
 
-		QPixmap back_buffer(800, 128);
+		QImage back_buffer(800, 128, QImage::Format_RGB32);
 		QPainter painter;
 
 		uint8_t samples[1024];
@@ -80,7 +58,7 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 				} else if (curr.y() > prev.y()) {
 					painter.setPen(Qt::green);
 				} else {
-					painter.setPen(Qt::red);
+					painter.setPen(Qt::blue);
 				}
 
 				painter.drawLine(prev, curr);
@@ -91,7 +69,8 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 		}
 
 		painter.begin(ui_.widget);
-		painter.drawPixmap(ui_.widget->rect(), back_buffer);
+		painter.drawImage(ui_.widget->rect(), back_buffer);
+		painter.end();
 		return true;
 	}
 	return false;
