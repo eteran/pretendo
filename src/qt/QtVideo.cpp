@@ -1,13 +1,18 @@
 
 #include "QtVideo.h"
-#include <QGLShader>
 #include <algorithm>
 #include <cassert>
 #include <iostream>
-#ifdef _WIN32
-#include "glext.h"
-#endif
 #include <immintrin.h>
+
+// normalize the macros slightly
+#if !defined(__AVX512F__) && defined(__AVX2__)
+#define __AVX512F__
+#endif
+
+#if !defined(__SSE2__) && ((defined(_M_AMD64) || defined(_M_X64)) || (_M_IX86_FP == 2))
+#define __SSE2__
+#endif
 
 //------------------------------------------------------------------------------
 // Name: QtVideo
@@ -19,34 +24,18 @@ QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags 
 		scanlines_[i] = &buffer_[i * Width];
 	}
 
-	setAutoBufferSwap(true);
 	setFormat(QGLFormat(QGL::DoubleBuffer));
 	setMouseTracking(false);
 	setBaseSize(Width, Height);
 
-	connect(this, &QtVideo::render_frame, this, &QtVideo::updateGL);
-
 	std::cout << "[QtVideo::QtVideo]" << std::endl;
-}
-
-QImage QtVideo::screenshot() {
-	QImage screen(Width, Height, QImage::Format_ARGB32);
-	for (int i = 0; i < Height; ++i) {
-
-		auto scanline = reinterpret_cast<QRgb *>(screen.scanLine(i));
-		std::transform(scanlines_[i], scanlines_[i] + Width, scanline, [](uint32_t value) {
-			return QRgb(value);
-		});
-	}
-	return screen;
 }
 
 //------------------------------------------------------------------------------
 // Name: resizeGL
 //------------------------------------------------------------------------------
 void QtVideo::resizeGL(int width, int height) {
-	Q_UNUSED(width)
-	Q_UNUSED(height)
+	glViewport(0, 0, width, height);
 }
 
 //------------------------------------------------------------------------------
@@ -73,46 +62,41 @@ void QtVideo::initializeGL() {
 
 	// link the texture with the buffer
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
+}
 
-#if 0
-	QGLShaderProgram program(context());
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+void QtVideo::paintGL() {
 
-	program.addShaderFromSourceCode(QGLShader::Vertex,
-	"    void main(void) {\n"
-	"      gl_Position = ftransform();\n"
-	"      gl_TexCoord[0] = gl_MultiTexCoord0;\n"
-	"    }"
-	);
+	const unsigned int w = width();
+	const unsigned int h = height();
 
-	program.addShaderFromSourceCode(QGLShader::Fragment,
-    "    uniform sampler2D rubyTexture;\n"
-	"    void main(void) {   \n"
-	"      vec4 rgb = texture2D(rubyTexture, gl_TexCoord[0].xy);\n"
-	"      vec4 intens = smoothstep(0.2, 0.8,rgb) + normalize(vec4(rgb.xyz, 1.0));\n"
-	"      if(fract(gl_FragCoord.y * 0.5) > 0.5) intens = rgb * 0.8;\n"
-	"      gl_FragColor = intens;\n"
-	"    }"
-	);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, w, 0, h, -1.0, 1.0);
 
-	program.link();
-	program.bind();
-#endif
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
+
+	glBegin(GL_TRIANGLE_STRIP);
+	/* clang-format off */
+	glTexCoord2f(0.0, 0.0);	glVertex2f(0, h);
+	glTexCoord2f(1.0, 0.0);	glVertex2f(w, h);
+	glTexCoord2f(0.0, 1.0);	glVertex2f(0, 0);
+	glTexCoord2f(1.0, 1.0);	glVertex2f(w, 0);
+	/* clang-format on */
+	glEnd();
 }
 
 //------------------------------------------------------------------------------
 // Name: submit_scanline
 //------------------------------------------------------------------------------
 void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
-
-// normalize the macros slightly
-#if !defined(__AVX512F__) && defined(__AVX2__)
-#define __AVX512F__
-#endif
-
-#if !defined(__SSE2__) && ((defined(_M_AMD64) || defined(_M_X64)) || (_M_IX86_FP == 2))
-#define __SSE2__
-#endif
-
 #if defined(__AVX512F__)
 	auto s = reinterpret_cast<__m512i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 16) {
@@ -171,42 +155,20 @@ void QtVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t *
 // Name: end_frame
 //------------------------------------------------------------------------------
 void QtVideo::end_frame() {
-	Q_EMIT render_frame();
+	update();
 }
 
 //------------------------------------------------------------------------------
-// Name:
+// Name: screenshot
 //------------------------------------------------------------------------------
-void QtVideo::paintGL() {
+QImage QtVideo::screenshot() {
+	QImage screen(Width, Height, QImage::Format_ARGB32);
+	for (int i = 0; i < Height; ++i) {
 
-	static const bool smooth_scaling = false;
-
-	// Some DPI awareness
-	const qreal ratio = devicePixelRatio();
-
-	const unsigned int output_width  = width() * ratio;
-	const unsigned int output_height = height() * ratio;
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, output_width, 0, output_height, -1.0, 1.0);
-	glViewport(0, 0, output_width, output_height);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, !smooth_scaling ? GL_NEAREST : GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, !smooth_scaling ? GL_NEAREST : GL_LINEAR);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
-
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0, 0.0);
-	glVertex3i(0, output_height, 0);
-	glTexCoord2f(1.0, 0.0);
-	glVertex3i(output_width, output_height, 0);
-	glTexCoord2f(0.0, 1.0);
-	glVertex3i(0, 0, 0);
-	glTexCoord2f(1.0, 1.0);
-	glVertex3i(output_width, 0, 0);
-	glEnd();
+		auto scanline = reinterpret_cast<QRgb *>(screen.scanLine(i));
+		std::transform(scanlines_[i], scanlines_[i] + Width, scanline, [](uint32_t value) {
+			return QRgb(value);
+		});
+	}
+	return screen;
 }
