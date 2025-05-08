@@ -146,7 +146,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QtVideo" name="video" native="true">
+         <widget class="QtVideo" name="video">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -427,9 +427,8 @@
  <customwidgets>
   <customwidget>
    <class>QtVideo</class>
-   <extends>QWidget</extends>
-   <header>QtVideo.h</header>
-   <container>1</container>
+   <extends>QOpenGLWidget</extends>
+   <header location="global">QtVideo.h</header>
   </customwidget>
  </customwidgets>
  <resources>
