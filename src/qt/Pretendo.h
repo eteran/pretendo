@@ -2,7 +2,6 @@
 #ifndef PRETENDO_20120301_H_
 #define PRETENDO_20120301_H_
 
-#include "Apu.h"
 #include <QMainWindow>
 #include <chrono>
 
@@ -14,6 +13,7 @@ class QLabel;
 class QSortFilterProxyModel;
 class QTimer;
 class Preferences;
+class Audio;
 
 #if defined(PULSE_AUDIO_SOUND)
 class PulseAudio;
@@ -79,7 +79,7 @@ private:
 #if defined(PULSE_AUDIO_SOUND)
 	PulseAudio *audio_;
 #else
-	NullAudio *audio_;
+	Audio *audio_;
 #endif
 	uint64_t frame_limit_ = 0;
 	

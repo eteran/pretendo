@@ -1,12 +1,13 @@
 
 #include "Pretendo.h"
 #include "About.h"
+#include "Apu.h"
+#include "Audio.h"
 #include "AudioViewer.h"
 #include "Cart.h"
 #include "Controller.h"
 #include "FilesystemModel.h"
 #include "Input.h"
-#include "Mapper.h"
 #include "Nes.h"
 #include "PatternTableView.h"
 #include "Ppu.h"
@@ -29,7 +30,6 @@
 #if defined(PULSE_AUDIO_SOUND)
 #include "PulseAudio.h"
 #else
-#include "NullAudio.h"
 #endif
 
 //------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 #if defined(PULSE_AUDIO_SOUND)
 	audio_ = new PulseAudio();
 #else
-	audio_ = new NullAudio();
+	audio_ = new Audio();
 #endif
 
 	// setup default palette

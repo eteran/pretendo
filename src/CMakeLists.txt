@@ -21,7 +21,7 @@ else()
 	)
 endif()
 
-find_package(Qt6 6.5.0 REQUIRED Widgets OpenGL OpenGLWidgets)
+find_package(Qt6 6.5.0 REQUIRED Widgets OpenGL OpenGLWidgets Multimedia)
 find_package(OpenGL REQUIRED)
 
 add_executable(pretendo
@@ -204,6 +204,7 @@ add_executable(pretendo
 	qt/PatternTableView.cpp
 	qt/PatternTableView.h
 	qt/PatternTableView.ui
+	qt/Audio.h qt/Audio.cpp
 )
 
 add_dependencies(pretendo mappers)
@@ -217,6 +218,7 @@ target_link_libraries(pretendo LINK_PUBLIC
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::OpenGL
     Qt${QT_VERSION_MAJOR}::OpenGLWidgets
+    Qt${QT_VERSION_MAJOR}::Multimedia
     OpenGL::GL
     ${LIBRARIES}
     iNES2
