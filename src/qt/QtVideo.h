@@ -3,18 +3,18 @@
 #define QGLVIDEO_20080314_H_
 
 #include "Palette.h"
-#include <QGLWidget>
 #include <QImage>
+#include <QOpenGLWidget>
 #include <array>
 
-class QtVideo final : public QGLWidget {
+class QtVideo final : public QOpenGLWidget {
 	Q_OBJECT
 private:
 	static constexpr int Width  = 256;
 	static constexpr int Height = 240;
 
 public:
-	QtVideo(QWidget *parent = nullptr, const QGLWidget *shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+	QtVideo(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 	~QtVideo() override = default;
 
 public:

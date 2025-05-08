@@ -14,6 +14,7 @@
 #include "Settings.h"
 #include "SortFilterProxyModel.h"
 
+#include <QActionGroup>
 #include <QDateTime>
 #include <QDirIterator>
 #include <QFileDialog>

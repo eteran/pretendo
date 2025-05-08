@@ -21,7 +21,7 @@ else()
 	)
 endif()
 
-find_package(Qt5 5.4.0 REQUIRED Widgets OpenGL)
+find_package(Qt6 6.5.0 REQUIRED Widgets OpenGL OpenGLWidgets)
 find_package(OpenGL REQUIRED)
 
 add_executable(pretendo
@@ -214,13 +214,14 @@ target_include_directories(pretendo PRIVATE
 )
 
 target_link_libraries(pretendo LINK_PUBLIC
-	Qt5::Widgets
-	Qt5::OpenGL
-	OpenGL::GL
-	${LIBRARIES}
-	iNES2
-	-lpthread
-	$<TARGET_OBJECTS:mappers>
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::OpenGL
+    Qt${QT_VERSION_MAJOR}::OpenGLWidgets
+    OpenGL::GL
+    ${LIBRARIES}
+    iNES2
+    -lpthread
+    $<TARGET_OBJECTS:mappers>
 )
 
 set_target_properties(pretendo PROPERTIES

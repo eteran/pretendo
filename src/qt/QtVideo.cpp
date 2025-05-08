@@ -1,9 +1,13 @@
 
 #include "QtVideo.h"
+#include <QOpenGLContext>
+#include <QOpenGLFunctions>
+#include <QOpenGLFunctions_2_1>
+#include <QOpenGLVersionFunctionsFactory>
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 #include <immintrin.h>
+#include <iostream>
 
 // normalize the macros slightly
 #if !defined(__AVX512F__) && defined(__AVX2__)
@@ -17,14 +21,18 @@
 //------------------------------------------------------------------------------
 // Name: QtVideo
 //------------------------------------------------------------------------------
-QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags f)
-	: QGLWidget(parent, shareWidget, f) {
+QtVideo::QtVideo(QWidget *parent, Qt::WindowFlags f)
+	: QOpenGLWidget(parent, f) {
 
 	for (int i = 0; i < Height; ++i) {
 		scanlines_[i] = &buffer_[i * Width];
 	}
 
-	setFormat(QGLFormat(QGL::DoubleBuffer));
+	QSurfaceFormat format;
+	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+	format.setVersion(2, 1);
+	setFormat(format);
+
 	setMouseTracking(false);
 	setBaseSize(Width, Height);
 
@@ -35,7 +43,10 @@ QtVideo::QtVideo(QWidget *parent, const QGLWidget *shareWidget, Qt::WindowFlags 
 // Name: resizeGL
 //------------------------------------------------------------------------------
 void QtVideo::resizeGL(int width, int height) {
-	glViewport(0, 0, width, height);
+	auto context = QOpenGLContext::currentContext();
+	auto f       = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
+
+	f->glViewport(0, 0, width, height);
 }
 
 //------------------------------------------------------------------------------
@@ -43,25 +54,33 @@ void QtVideo::resizeGL(int width, int height) {
 //------------------------------------------------------------------------------
 void QtVideo::initializeGL() {
 
-	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_POLYGON_SMOOTH);
-	glDisable(GL_STENCIL_TEST);
-	glEnable(GL_DITHER);
-	glEnable(GL_TEXTURE_2D);
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	auto context = QOpenGLContext::currentContext();
+	auto f       = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 
-	glGenTextures(1, &texture_);
-	glBindTexture(GL_TEXTURE_2D, texture_);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, Width);
+	f->initializeOpenGLFunctions();
+
+	f->glDisable(GL_ALPHA_TEST);
+	f->glDisable(GL_BLEND);
+	f->glDisable(GL_DEPTH_TEST);
+	f->glDisable(GL_POLYGON_SMOOTH);
+	f->glDisable(GL_STENCIL_TEST);
+	f->glEnable(GL_DITHER);
+	f->glEnable(GL_TEXTURE_2D);
+	f->glClearColor(0.0, 0.0, 0.0, 0.0);
+
+	f->glGenTextures(1, &texture_);
+	f->glBindTexture(GL_TEXTURE_2D, texture_);
+	f->glPixelStorei(GL_UNPACK_ROW_LENGTH, Width);
 
 	// clamp out of bounds texture coordinates
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 	// link the texture with the buffer
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
+	f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Width, Height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
 }
 
 //------------------------------------------------------------------------------
@@ -72,25 +91,27 @@ void QtVideo::paintGL() {
 	const unsigned int w = width();
 	const unsigned int h = height();
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, w, 0, h, -1.0, 1.0);
+	auto context = QOpenGLContext::currentContext();
+	auto f       = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	f->glMatrixMode(GL_PROJECTION);
+	f->glLoadIdentity();
+	f->glOrtho(0, w, 0, h, -1.0, 1.0);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
+	f->glMatrixMode(GL_MODELVIEW);
+	f->glLoadIdentity();
 
-	glBegin(GL_TRIANGLE_STRIP);
+	f->glBindTexture(GL_TEXTURE_2D, texture_);
+	f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
+
+	f->glBegin(GL_TRIANGLE_STRIP);
 	/* clang-format off */
-	glTexCoord2f(0.0, 0.0);	glVertex2f(0, h);
-	glTexCoord2f(1.0, 0.0);	glVertex2f(w, h);
-	glTexCoord2f(0.0, 1.0);	glVertex2f(0, 0);
-	glTexCoord2f(1.0, 1.0);	glVertex2f(w, 0);
+	f->glTexCoord2f(0.0, 0.0);	f->glVertex2f(0, h);
+	f->glTexCoord2f(1.0, 0.0);	f->glVertex2f(w, h);
+	f->glTexCoord2f(0.0, 1.0);	f->glVertex2f(0, 0);
+	f->glTexCoord2f(1.0, 1.0);	f->glVertex2f(w, 0);
 	/* clang-format on */
-	glEnd();
+	f->glEnd();
 }
 
 //------------------------------------------------------------------------------
