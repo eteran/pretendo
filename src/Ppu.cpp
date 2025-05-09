@@ -8,8 +8,8 @@
 #include "Nes.h"
 
 #include <algorithm>
-#include <cstring>
 #include <iostream>
+#include <cassert>
 
 // #define SPRITE_ZERO_HACK
 
@@ -161,7 +161,7 @@ uint64_t ppu_cycle_                    = 0;
 uint64_t ppu_read_2002_cycle_          = 0;
 uint_least16_t next_ppu_fetch_address_ = 0;
 uint32_t pattern_queue_                = 0;
-uint_least16_t attribute_queue_[2]     = {};
+uint32_t attribute_queue_              = 0;
 uint_least16_t nametable_              = 0; // loopy's "t"
 uint_least16_t vram_address_           = 0; // loopy's "v"
 uint_least16_t hpos_                   = 0; // pixel counter
@@ -234,9 +234,9 @@ uint8_t render_blank_pixel() {
 
 	if (UNLIKELY((vram_address_ & 0x3f00) == 0x3f00)) {
 		return palette_[vram_address_ & 0x1f] & monochrome_mask_;
-	} else {
-		return palette_[0x00] & monochrome_mask_;
-	}
+    }
+
+    return palette_[0x00] & monochrome_mask_;
 }
 
 //------------------------------------------------------------------------------
@@ -252,8 +252,8 @@ uint8_t select_bg_pixel(uint_least16_t index) {
 
         return (((pattern_queue_ & mask0) >> (15 - tile_offset_)) |
                 ((pattern_queue_ & mask1) >> (30 - tile_offset_)) |
-                ((attribute_queue_[0] & mask0) >> (13 - tile_offset_)) |
-                ((attribute_queue_[1] & mask0) >> (12 - tile_offset_))) &
+                ((attribute_queue_ & mask0) >> (13 - tile_offset_)) |
+                ((attribute_queue_ & mask1) >> (28 - tile_offset_))) &
 			   0xff;
 	}
 
@@ -265,6 +265,8 @@ uint8_t select_bg_pixel(uint_least16_t index) {
 // Note: the screen is *always* enabled when this is called
 //------------------------------------------------------------------------------
 uint8_t select_pixel(uint_least16_t index) {
+
+    assert(visible_sprite_count_ <= 8);
 
 	// default to displaying the BG pixel
     const uint8_t pixel = select_bg_pixel(index);
@@ -691,8 +693,7 @@ uint8_t render_pixel() {
     const uint8_t pixel = select_pixel(hpos_ - 1);
 
     pattern_queue_ = (pattern_queue_ << 1) & 0xfffefffe;
-	attribute_queue_[0] <<= 1;
-	attribute_queue_[1] <<= 1;
+    attribute_queue_ = (attribute_queue_ << 1) & 0xfffefffe;
 
 	// mask = (pixel & 0x03) ? 0xff : 0x00
 	// but without branches
@@ -708,8 +709,8 @@ void update_shift_registers_render() {
 
     pattern_queue_ |= next_pattern_[0];
     pattern_queue_ |= (next_pattern_[1] << 16);
-	attribute_queue_[0] |= ((next_attribute_ >> 0) & 0x01) * 0xff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
-	attribute_queue_[1] |= ((next_attribute_ >> 1) & 0x01) * 0xff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+    attribute_queue_ |= ((next_attribute_ >> 0) & 0x01) * 0x000000ff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+    attribute_queue_ |= ((next_attribute_ >> 1) & 0x01) * 0x00ff0000; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
 }
 
 //------------------------------------------------------------------------------
@@ -718,8 +719,7 @@ void update_shift_registers_render() {
 void update_shift_registers_idle() {
 
     pattern_queue_ = (pattern_queue_ << 8) & 0xff00ff00;
-	attribute_queue_[0] <<= 8;
-	attribute_queue_[1] <<= 8;
+    attribute_queue_ = (attribute_queue_ << 8) & 0xff00ff00;
 
 	update_shift_registers_render();
 }
@@ -1285,8 +1285,7 @@ void reset(Reset reset_type) {
 		}
 	}
 
-	attribute_queue_[0]   = 0;
-	attribute_queue_[1]   = 0;
+    attribute_queue_      = 0;
 	hpos_                 = 0;
 	latch_                = 0;
 	nametable_            = 0x0000;
@@ -1325,8 +1324,8 @@ void write2000(uint8_t value) {
 		return;
 	}
 
-	const Control prev_control = ppu_control_;
-	ppu_control_.raw           = value;
+    Control prev_control;
+    prev_control.raw = std::exchange(ppu_control_.raw, value);
 
 	// name table address
 	// t:0000110000000000=d:00000011
