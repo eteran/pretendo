@@ -160,7 +160,7 @@ uint8_t palette_[0x20];
 uint64_t ppu_cycle_                    = 0;
 uint64_t ppu_read_2002_cycle_          = 0;
 uint_least16_t next_ppu_fetch_address_ = 0;
-uint_least16_t pattern_queue_[2]       = {};
+uint32_t pattern_queue_                = 0;
 uint_least16_t attribute_queue_[2]     = {};
 uint_least16_t nametable_              = 0; // loopy's "t"
 uint_least16_t vram_address_           = 0; // loopy's "v"
@@ -247,12 +247,13 @@ uint8_t select_bg_pixel(uint_least16_t index) {
 
 	// first identify what the BG pixel would be
 	if (LIKELY(index >= 8 || ppu_mask_.background_clipping) && ppu_mask_.background_visible) {
-		const uint_least16_t mask = (0x8000 >> tile_offset_);
+        const uint32_t mask0 = (0x00008000 >> tile_offset_);
+        const uint32_t mask1 = (0x80000000 >> tile_offset_);
 
-		return (((pattern_queue_[0] & mask) >> (15 - tile_offset_)) |
-				((pattern_queue_[1] & mask) >> (14 - tile_offset_)) |
-				((attribute_queue_[0] & mask) >> (13 - tile_offset_)) |
-				((attribute_queue_[1] & mask) >> (12 - tile_offset_))) &
+        return (((pattern_queue_ & mask0) >> (15 - tile_offset_)) |
+                ((pattern_queue_ & mask1) >> (30 - tile_offset_)) |
+                ((attribute_queue_[0] & mask0) >> (13 - tile_offset_)) |
+                ((attribute_queue_[1] & mask0) >> (12 - tile_offset_))) &
 			   0xff;
 	}
 
@@ -689,8 +690,7 @@ uint8_t render_pixel() {
 
     const uint8_t pixel = select_pixel(hpos_ - 1);
 
-	pattern_queue_[0] <<= 1;
-	pattern_queue_[1] <<= 1;
+    pattern_queue_ = (pattern_queue_ << 1) & 0xfffefffe;
 	attribute_queue_[0] <<= 1;
 	attribute_queue_[1] <<= 1;
 
@@ -706,8 +706,8 @@ uint8_t render_pixel() {
 //------------------------------------------------------------------------------
 void update_shift_registers_render() {
 
-	pattern_queue_[0] |= next_pattern_[0];
-	pattern_queue_[1] |= next_pattern_[1];
+    pattern_queue_ |= next_pattern_[0];
+    pattern_queue_ |= (next_pattern_[1] << 16);
 	attribute_queue_[0] |= ((next_attribute_ >> 0) & 0x01) * 0xff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
 	attribute_queue_[1] |= ((next_attribute_ >> 1) & 0x01) * 0xff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
 }
@@ -717,8 +717,7 @@ void update_shift_registers_render() {
 //------------------------------------------------------------------------------
 void update_shift_registers_idle() {
 
-	pattern_queue_[0] <<= 8;
-	pattern_queue_[1] <<= 8;
+    pattern_queue_ = (pattern_queue_ << 8) & 0xff00ff00;
 	attribute_queue_[0] <<= 8;
 	attribute_queue_[1] <<= 8;
 
@@ -1292,12 +1291,11 @@ void reset(Reset reset_type) {
 	latch_                = 0;
 	nametable_            = 0x0000;
 	next_attribute_       = 0;
-	next_pattern_[0]      = 0;
-	next_pattern_[1]      = 0;
+    next_pattern_[0]      = 0;
+    next_pattern_[1]      = 0;
 	next_tile_index_      = 0;
 	odd_frame_            = false;
-	pattern_queue_[0]     = 0;
-	pattern_queue_[1]     = 0;
+    pattern_queue_        = 0;
 	ppu_cycle_            = 0;
 	ppu_control_.raw      = 0;
 	ppu_mask_.raw         = 0;
