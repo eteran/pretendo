@@ -31,7 +31,7 @@ bool AudioViewer::eventFilter(QObject *watched, QEvent *event) {
 
 	if (watched == ui_.widget && event->type() == QEvent::Paint) {
 
-		QImage back_buffer(800, 128, QImage::Format_RGB32);
+		QImage back_buffer(1024, 128, QImage::Format_RGB32);
 		QPainter painter;
 
 		uint8_t samples[1024];

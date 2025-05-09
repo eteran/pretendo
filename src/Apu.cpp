@@ -27,14 +27,6 @@ union APUFrameCounter {
 	BitField<uint8_t, 7> mode;
 };
 
-//------------------------------------------------------------------------------
-// Name: bound
-//------------------------------------------------------------------------------
-template <class T>
-constexpr T bound(T lower, T value, T upper) {
-	return std::max(lower, std::min(value, upper));
-}
-
 constexpr double CPUFrequency = 1789772.67; // 1.78977267Mhz
 // CPUFrequency / 44100Hz  = 40.5844142857 clocks per sample
 // CPUFrequency / 48000Hz  = 37.286930625  clocks per sample
@@ -57,7 +49,8 @@ DMC dmc;
 APUStatus status = {0};
 
 uint8_t sample_buffer_[buffer_size];
-size_t sample_buffer_size_ = 0;
+size_t sample_buffer_start = 0;
+size_t sample_buffer_end   = 0;
 
 //------------------------------------------------------------------------------
 // Name: clock_linear
@@ -197,7 +190,7 @@ uint8_t mix_channels() {
 						0);
 #endif
 
-	return bound(0, result, 255);
+	return std::clamp(result, 0, 255);
 }
 
 //------------------------------------------------------------------------------
@@ -486,9 +479,8 @@ void tick() {
 	}
 
 	if ((apu_cycles_ % ClocksPerSample) == 0) {
-		if (sample_buffer_size_ < sizeof(sample_buffer_)) {
-			sample_buffer_[sample_buffer_size_++] = mix_channels();
-		}
+		sample_buffer_[sample_buffer_end] = mix_channels();
+		sample_buffer_end                 = (sample_buffer_end + 1) % sizeof(sample_buffer_);
 	}
 
 	dmc.tick();
@@ -511,16 +503,32 @@ uint64_t cycle_count() {
 // Name:
 //------------------------------------------------------------------------------
 size_t read_samples(uint8_t *buffer, size_t size) {
-	size_t read_size = std::min(sample_buffer_size_, size);
-	memcpy(buffer, sample_buffer_, read_size);
-	return read_size;
+
+	auto out = buffer;
+
+	if (sample_buffer_end > sample_buffer_start) {
+		size_t sample_count = sample_buffer_end - sample_buffer_start;
+		size_t read_size    = std::min(sample_count, size);
+		std::copy_n(&sample_buffer_[sample_buffer_start], read_size, out);
+		return read_size;
+	} else {
+
+		size_t first_half   = sizeof(sample_buffer_) - sample_buffer_start;
+		size_t second_half  = sample_buffer_end - 0;
+		size_t sample_count = first_half + second_half;
+		size_t read_size    = std::min(sample_count, size);
+
+		out = std::copy_n(&sample_buffer_[sample_buffer_start], first_half, out);
+		std::copy_n(&sample_buffer_[0], second_half, out);
+		return read_size;
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 void start_frame() {
-	sample_buffer_size_ = 0;
+	sample_buffer_start = sample_buffer_end;
 }
 }
 
