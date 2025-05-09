@@ -178,7 +178,7 @@ Pretendo::~Pretendo() {
 void Pretendo::setFrameRate(int framerate) {
 	framerate_ = framerate;
 	if (timer_->isActive()) {
-		timer_->start(1000.0f / framerate_);
+        timer_->start((1.0f / framerate_) * 1000.0f);
 	}
 }
 
@@ -199,9 +199,10 @@ void Pretendo::update() {
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
+
 	uint8_t samples[1024];
 	size_t count = nes::apu::read_samples(samples, sizeof(samples));
-	audio_->write(samples, count);
+    audio_->write(samples, count);
 
 	// FPS calculation
 	auto now = std::chrono::high_resolution_clock::now();
@@ -291,7 +292,7 @@ void Pretendo::on_action_Run_triggered() {
 
 				raw_framecount_ = 0;
 
-				timer_->start(1000.0f / framerate_);
+                timer_->start((1.0f / framerate_) * 1000.0f);
 				audio_->start();
 				paused_ = false;
 

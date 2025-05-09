@@ -504,24 +504,14 @@ uint64_t cycle_count() {
 //------------------------------------------------------------------------------
 size_t read_samples(uint8_t *buffer, size_t size) {
 
-	auto out = buffer;
+    size_t index = sample_buffer_start;
+    size_t i = 0;
+    for(; i < size && index != sample_buffer_end; ++i) {
+        buffer[i] = sample_buffer_[index];
+        index = (index + 1) % buffer_size;
+    }
 
-	if (sample_buffer_end > sample_buffer_start) {
-		size_t sample_count = sample_buffer_end - sample_buffer_start;
-		size_t read_size    = std::min(sample_count, size);
-		std::copy_n(&sample_buffer_[sample_buffer_start], read_size, out);
-		return read_size;
-	} else {
-
-		size_t first_half   = sizeof(sample_buffer_) - sample_buffer_start;
-		size_t second_half  = sample_buffer_end - 0;
-		size_t sample_count = first_half + second_half;
-		size_t read_size    = std::min(sample_count, size);
-
-		out = std::copy_n(&sample_buffer_[sample_buffer_start], first_half, out);
-		std::copy_n(&sample_buffer_[0], second_half, out);
-		return read_size;
-	}
+    return i;
 }
 
 //------------------------------------------------------------------------------

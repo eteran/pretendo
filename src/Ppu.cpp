@@ -266,7 +266,7 @@ uint8_t select_bg_pixel(uint_least16_t index) {
 uint8_t select_pixel(uint_least16_t index) {
 
 	// default to displaying the BG pixel
-	const uint8_t pixel = select_bg_pixel(index);
+    const uint8_t pixel = select_bg_pixel(index);
 
 	// then see if any of the sprites belong..
 	if (LIKELY(index >= 8 || ppu_mask_.sprite_clipping) && ppu_mask_.sprites_visible) {
@@ -297,7 +297,7 @@ uint8_t select_pixel(uint_least16_t index) {
 
 			// we rendered a sprite0 pixel which collided with a BG pixel
 			// NOTE: according to blargg's tests, a collision doesn't seem
-			//       possible to occur on the rightmost pixel
+            //       possible to occur on the rightmost pixel
 #ifndef SPRITE_ZERO_HACK
 			if ((sprite.attr & OamZero) && (index < 255) && (pixel & 0x03)) {
 #else
@@ -306,7 +306,13 @@ uint8_t select_pixel(uint_least16_t index) {
 				status_.sprite0 = true;
 			}
 
-			if ((((sprite.attr & OamPriority) == 0) || ((pixel & 0x03) == 0)) && LIKELY(show_sprites)) {
+            // NOTE(eteran): this needs to be here (or later)
+            // because we still need to preserve sprite zero hit detection
+            if (UNLIKELY(!show_sprites)) {
+                return pixel;
+            }
+
+            if ((((sprite.attr & OamPriority) == 0) || ((pixel & 0x03) == 0))) {
 				return (0x10 | sprite_pixel | ((sprite.attr & OamColor) << 2)) & 0xff;
 			}
 
@@ -681,7 +687,7 @@ void read_sprite_pattern() {
 //------------------------------------------------------------------------------
 uint8_t render_pixel() {
 
-	const uint8_t pixel = select_pixel(hpos_ - 1);
+    const uint8_t pixel = select_pixel(hpos_ - 1);
 
 	pattern_queue_[0] <<= 1;
 	pattern_queue_[1] <<= 1;
@@ -1056,7 +1062,7 @@ void clock_ppu(const scanline_render &target) {
 		} else if (hpos_ < 257) {
 
 			// NOTE(eteran): on my machine, this code "costs" about 200 FPS
-			target.buffer[hpos_ - 1] = render_pixel();
+            target.buffer[hpos_ - 1] = render_pixel();
 			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
 
 			switch (hpos_ & 0x07) {

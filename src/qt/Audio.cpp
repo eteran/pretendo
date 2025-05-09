@@ -32,7 +32,7 @@ Audio::~Audio() {
 //------------------------------------------------------------------------------
 void Audio::write(const void *p, size_t n) {
 	if (outputDevice) {
-		outputDevice->write(static_cast<const char *>(p), n);
+        outputDevice->write(static_cast<const char *>(p), n);
 	}
 }
 
@@ -40,7 +40,7 @@ void Audio::write(const void *p, size_t n) {
 // Name: start
 //------------------------------------------------------------------------------
 void Audio::start() {
-	outputDevice = audioSink->start();
+    outputDevice = audioSink->start();
 }
 
 //------------------------------------------------------------------------------
