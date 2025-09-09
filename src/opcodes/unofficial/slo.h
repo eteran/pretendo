@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 // Name: opcode_slo
 // Desc: Shift left one bit in memory, then OR accumulator with memory.
+// Alias: ASO
 //------------------------------------------------------------------------------
 struct opcode_slo {
 

@@ -4,15 +4,21 @@
 class QIODevice;
 class QAudioSink;
 
-class Audio final {
+#include <QAudio>
+#include <QObject>
+
+class Audio final : public QObject {
 public:
-	Audio();
+	explicit Audio(QObject *parent = nullptr);
 	~Audio();
 
 public:
 	void write(const void *p, size_t n);
 	void start();
 	void stop();
+
+private:
+	void handleStateChanged(QAudio::State newState);
 
 private:
 	QIODevice *outputDevice;

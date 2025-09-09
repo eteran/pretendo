@@ -4,6 +4,7 @@
 //------------------------------------------------------------------------------
 // Name: opcode_axs
 // Desc: Transfer A to X
+// Alias: SAX, AAX
 //------------------------------------------------------------------------------
 struct opcode_axs {
 	using memory_access = operation_read;

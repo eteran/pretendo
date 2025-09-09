@@ -4,19 +4,11 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLFunctions_2_1>
 #include <QOpenGLVersionFunctionsFactory>
+#include <QtCompilerDetection>
 #include <algorithm>
 #include <cassert>
 #include <immintrin.h>
 #include <iostream>
-
-// normalize the macros slightly
-#if !defined(__AVX512F__) && defined(__AVX2__)
-#define __AVX512F__
-#endif
-
-#if !defined(__SSE2__) && ((defined(_M_AMD64) || defined(_M_X64)) || (_M_IX86_FP == 2))
-#define __SSE2__
-#endif
 
 //------------------------------------------------------------------------------
 // Name: QtVideo
@@ -118,7 +110,7 @@ void QtVideo::paintGL() {
 // Name: submit_scanline
 //------------------------------------------------------------------------------
 void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
-#if defined(__AVX512F__)
+#if defined(QT_COMPILER_SUPPORTS_AVX2)
 	auto s = reinterpret_cast<__m512i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 16) {
 		auto ind = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(source));
@@ -127,7 +119,7 @@ void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 		source += 16;
 	}
 
-#elif defined(__AVX__)
+#elif defined(QT_COMPILER_SUPPORTS_AVX)
 	auto s = reinterpret_cast<__m256i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 8) {
 		auto ind = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(source));
@@ -135,7 +127,7 @@ void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 		*s++     = vec;
 		source += 8;
 	}
-#elif defined(__SSE2__)
+#elif defined(QT_COMPILER_SUPPORTS_SSE2)
 	auto s = reinterpret_cast<__m128i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 4) {
 		auto ind = _mm_loadu_si128(reinterpret_cast<const __m128i *>(source));

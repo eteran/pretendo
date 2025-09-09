@@ -5,6 +5,7 @@
 // Name: opcode_sya
 // Desc: AND Y register with the high byte of the target address of the
 //       argument + 1. Store the result in memory.
+// Alias: SHY, A11, SAY
 //------------------------------------------------------------------------------
 struct opcode_sya {
 
@@ -12,10 +13,11 @@ struct opcode_sya {
 
 	static uint8_t execute(uint_least16_t &address) {
 
-		const uint8_t high_byte = ((address >> 8) & 0xff) + 1;
-		const uint8_t value     = (Y & high_byte);
-		address                 = (address & 0x00ff) | (value << 8);
-		return Y & high_byte;
+		// NOTE(eteran): we don't need an explicit +1, because
+		// it is automatically caused by the data fetch
+		const uint8_t value = (address >> 8) & Y;
+		address             = (address & 0x00ff) | (value << 8);
+		return value;
 	}
 };
 

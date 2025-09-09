@@ -1375,8 +1375,12 @@ void write2003(uint8_t value) {
 void write2004(uint8_t value) {
 	latch_ = value;
 
-	// sprite_address_ is an 8-bit type, so wrapping is implicit
-	sprite_ram_[sprite_address_++] = value;
+	if (rendering() && ppu_mask_.screen_enabled) {
+		sprite_address_ += 4;
+	} else {
+		// sprite_address_ is an 8-bit type, so wrapping is implicit
+		sprite_ram_[sprite_address_++] = value;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -1515,6 +1519,16 @@ uint8_t read2004() {
 		}
 
 		return latch_ & 0xff;
+	}
+
+	if (ppu_mask_.screen_enabled) {
+		if (hpos_ < 64) {
+			return 0xff;
+		} else if (hpos_ < 256) {
+			return sprite_address_;
+		} else {
+			return 0xff;
+		}
 	}
 
 	return 0x00;

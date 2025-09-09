@@ -199,8 +199,7 @@ void Pretendo::update() {
 	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
-
-	uint8_t samples[1024];
+	uint8_t samples[800];
 	size_t count = nes::apu::read_samples(samples, sizeof(samples));
     audio_->write(samples, count);
 
