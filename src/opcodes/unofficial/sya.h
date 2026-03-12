@@ -12,7 +12,6 @@ struct opcode_sya {
 	using memory_access = operation_write;
 
 	static uint8_t execute(uint_least16_t &address) {
-
 		// NOTE(eteran): we don't need an explicit +1, because
 		// it is automatically caused by the data fetch
 		const uint8_t value = (address >> 8) & Y;

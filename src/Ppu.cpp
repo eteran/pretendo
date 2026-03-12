@@ -51,6 +51,7 @@ union Mask {
 	BitField<uint8_t, 3, 2> screen_enabled;
 };
 
+constexpr uint64_t WriteBlockCycles = 82000;
 constexpr auto CyclesPerScanline = 341u;
 constexpr auto CpuAlignment      = 0u;
 
@@ -179,7 +180,17 @@ uint8_t monochrome_mask_               = 0xff;
 
 bool odd_frame_   = false;
 bool write_latch_ = false;
-bool write_block_ = false;
+
+//------------------------------------------------------------------------------
+// Name: block_writes
+// Desc: for the first 80,000 ish PPU cycles, writes to several registers
+// are blocked. This helps decide that. Interestingly, if we use the EXACT
+// number that is prescribed by nesdev, that breaks at least one demo ROM.
+// So the cycle count we've chosen undershoots that number, ever so slightly...
+//------------------------------------------------------------------------------
+inline bool block_writes() {
+	return ppu_cycle_ < WriteBlockCycles;
+}
 
 //------------------------------------------------------------------------------
 // Name: sprite_pattern_table
@@ -614,6 +625,13 @@ void evaluate_sprites_odd() {
 		sprite_read_buffer_ = 0xff;
 	} else if (hpos_ == 65) {
 		sprite_read_index_  = sprite_address_;
+
+		// Weird bug in the PPU, only "Huge Insect" is known to be affected by this
+		// outside of artificial tests
+		if (sprite_address_ > 8) {
+			memcpy(&sprite_ram_[0], &sprite_ram_[sprite_address_ & 0xf8], 8);
+		}
+
 		current_is_sprite_0 = true;
 		sprite_eval_state_  = STATE_1_Y;
 		sprite_data_index_  = 0;
@@ -788,7 +806,6 @@ void clock_ppu(const scanline_prerender &) {
 	} else if (UNLIKELY(hpos_ == 1)) {
 		// clear all the relevant status bits
 		status_.vblank = 0;
-		write_block_   = false;
 	}
 
 	if (LIKELY(ppu_mask_.screen_enabled)) {
@@ -1307,7 +1324,6 @@ void reset(Reset reset_type) {
 	vpos_                 = 0;
 	vram_address_         = 0x0000;
 	write_latch_          = false;
-	write_block_          = true;
 	monochrome_mask_      = 0xff;
 
 	std::cout << "PPU reset complete" << std::endl;
@@ -1320,12 +1336,12 @@ void write2000(uint8_t value) {
 
 	latch_ = value;
 
-	if (write_block_) {
+	if (block_writes()) {
 		return;
 	}
 
-    Control prev_control;
-    prev_control.raw = std::exchange(ppu_control_.raw, value);
+	Control prev_control;
+	prev_control.raw = std::exchange(ppu_control_.raw, value);
 
 	// name table address
 	// t:0000110000000000=d:00000011
@@ -1345,7 +1361,7 @@ void write2000(uint8_t value) {
 void write2001(uint8_t value) {
 	latch_ = value;
 
-	if (write_block_) {
+	if (block_writes()) {
 		return;
 	}
 
@@ -1389,7 +1405,7 @@ void write2004(uint8_t value) {
 void write2005(uint8_t value) {
 	latch_ = value;
 
-	if (write_block_) {
+	if (block_writes()) {
 		return;
 	}
 
@@ -1418,7 +1434,7 @@ void write2005(uint8_t value) {
 void write2006(uint8_t value) {
 	latch_ = value;
 
-	if (write_block_) {
+	if (block_writes()) {
 		return;
 	}
 
@@ -1522,10 +1538,19 @@ uint8_t read2004() {
 	}
 
 	if (ppu_mask_.screen_enabled) {
-		if (hpos_ < 64) {
-			return 0xff;
-		} else if (hpos_ < 256) {
-			return sprite_address_;
+		if (hpos_ >= 64 && hpos_ < 256) {
+			switch (sprite_read_index_ & 0x03) {
+			case 0x00:
+			case 0x01:
+			case 0x03:
+				latch_ = sprite_ram_[sprite_read_index_] & 0xff;
+				break;
+
+			case 0x02:
+				latch_ = sprite_ram_[sprite_read_index_] & 0xe3;
+				break;
+			}
+			return latch_;
 		} else {
 			return 0xff;
 		}
@@ -1538,10 +1563,6 @@ uint8_t read2004() {
 // Name: read2007
 //------------------------------------------------------------------------------
 uint8_t read2007() {
-
-	if (write_block_) {
-		return 0x00;
-	}
 
 	const uint_least16_t temp_address = vram_address_ & 0b00111111'11111111;
 
