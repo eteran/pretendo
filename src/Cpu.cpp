@@ -599,6 +599,10 @@ void reset() {
 		irq_asserted_    = false;
 		nmi_asserted_    = false;
 		executed_cycles_ = 1;
+		spr_dma_count_   = 0;
+		spr_dma_delay_   = 0;
+		dmc_dma_count_   = 0;
+		dmc_dma_delay_   = 0;
 	}
 }
 
@@ -621,6 +625,7 @@ void stop() {
 	P = I_MASK | R_MASK;
 
 	executed_cycles_ = 1;
+	irq_sources_     = 0;
 	irq_asserted_    = false;
 	nmi_asserted_    = false;
 	rst_asserted_    = false;

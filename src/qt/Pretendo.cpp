@@ -537,27 +537,48 @@ void Pretendo::on_actionShow_Sprites_toggled(bool value) {
 // Name: on_action_Hard_Reset_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Hard_Reset_triggered() {
+	if (!running_) {
+		return;
+	}
 
 	if (paused_) {
-		on_action_Pause_triggered();
+		nes::reset(nes::Reset::Hard);
+		return;
 	}
 
-	if (running_ && !paused_) {
-		nes::reset(nes::Reset::Hard);
-	}
+	emulation_thread_->stopLoop();
+	viewer_timer_->stop();
+	audio_->stop();
+
+	nes::reset(nes::Reset::Hard);
+
+	emulation_thread_->startLoop();
+	viewer_timer_->start();
+	audio_->start();
 }
 
 //------------------------------------------------------------------------------
 // Name: on_actionReset_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_actionReset_triggered() {
-	if (paused_) {
-		on_action_Pause_triggered();
+	if (!running_) {
+		return;
 	}
 
-	if (running_ && !paused_) {
+	if (paused_) {
 		nes::reset(nes::Reset::Soft);
+		return;
 	}
+
+	emulation_thread_->stopLoop();
+	viewer_timer_->stop();
+	audio_->stop();
+
+	nes::reset(nes::Reset::Soft);
+
+	emulation_thread_->startLoop();
+	viewer_timer_->start();
+	audio_->start();
 }
 
 //------------------------------------------------------------------------------

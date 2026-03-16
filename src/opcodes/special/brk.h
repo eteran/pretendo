@@ -39,8 +39,9 @@ public:
 			PC.lo = read_byte(effective_address_.raw + 0);
 			break;
 		case 6:
-			// NOTE: are we supposed to check for interrupts here?
-			//       I only pass the tests if I don't.
+			// NOTE(eteran): are we supposed to check for interrupts here?
+			// I only pass the tests if I don't.
+
 			//LAST_CYCLE;
 
 			// fetch PCH
