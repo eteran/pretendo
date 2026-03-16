@@ -187,6 +187,7 @@ Mapper *mapper_                        = nullptr;
 
 bool odd_frame_   = false;
 bool write_latch_ = false;
+bool odd_skip_armed_ = false;
 
 //------------------------------------------------------------------------------
 // Name: block_writes
@@ -816,6 +817,7 @@ void increment_vram_address() {
 void clock_ppu(const scanline_prerender &) {
 
 	if (UNLIKELY(hpos_ == 0)) {
+		odd_skip_armed_ = false;
 		status_.sprite0  = 0;
 		status_.overflow = 0;
 	} else if (UNLIKELY(hpos_ == 1)) {
@@ -1047,14 +1049,15 @@ void clock_ppu(const scanline_prerender &) {
 				open_tile_index();
 				break;
 			case 338:
+				odd_skip_armed_ = ppu_mask_.screen_enabled;
+				if (odd_frame_ && odd_skip_armed_) {
+					++hpos_;
+				}
 				read_tile_index();
 				break;
 			case 339:
 				open_tile_index();
-				if (odd_frame_) {
-					++hpos_;
-				}
-				break; // skip one clock if the first visible line on odd frames
+				break;
 			case 340:
 				read_tile_index();
 				break;
@@ -1327,6 +1330,7 @@ void reset(Reset reset_type) {
     next_pattern_[1]      = 0;
 	next_tile_index_      = 0;
 	odd_frame_            = false;
+	odd_skip_armed_       = false;
     pattern_queue_        = 0;
 	ppu_cycle_            = 0;
 	ppu_control_.raw      = 0;
