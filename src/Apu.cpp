@@ -452,13 +452,13 @@ void write4017(uint8_t value) {
 			cpu::clear_irq(cpu::APU_IRQ);
 		}
 	}
-
-	next_clock_ = apu_cycles_ + (apu_cycles_ & 1) + 1;
-
 	clock_step_ = 0;
 
-	if (!frame_counter_.mode) {
-		next_clock_ += 7458;
+	if (frame_counter_.mode) {
+		// In mode 1, first quarter+half clock occurs one CPU cycle after $4017 write.
+		next_clock_ = apu_cycles_ + 1;
+	} else {
+		next_clock_ = apu_cycles_ + (apu_cycles_ & 1) + 1 + 7458;
 	}
 }
 
