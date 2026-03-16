@@ -12,8 +12,10 @@ class FilesystemModel;
 class QLabel;
 class QSortFilterProxyModel;
 class QTimer;
+class QByteArray;
 class Preferences;
 class Audio;
+class EmulationThread;
 
 #if defined(ENABLE_SOUND)
 class Audio;
@@ -36,7 +38,7 @@ public:
 
 private Q_SLOTS:
 	void picked(const QModelIndex &index);
-	void update();
+	void onFrameCompleted(const QByteArray &samples);
 	void on_action_Load_ROM_triggered();
 	void on_action_Free_ROM_triggered();
 	void on_action_Run_triggered();
@@ -68,11 +70,13 @@ private:
 	Preferences *preferences_            = nullptr;
 	FilesystemModel *filesystem_model_   = nullptr;
 	QSortFilterProxyModel *filter_model_ = nullptr;
-	QTimer *timer_                       = nullptr;
+	QTimer *viewer_timer_                = nullptr;
+	EmulationThread *emulation_thread_   = nullptr;
 	QLabel *fps_label_                   = nullptr;
 	Qt::Key player_1_[8];
 	uint64_t framecount_     = 0;
 	uint64_t raw_framecount_ = 0;
+	bool running_            = false;
 	bool paused_             = false;
 	int framerate_           = 60;
 

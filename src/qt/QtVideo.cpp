@@ -5,6 +5,7 @@
 #include <QOpenGLFunctions_2_1>
 #include <QOpenGLVersionFunctionsFactory>
 #include <QtCompilerDetection>
+#include <QMutexLocker>
 #include <algorithm>
 #include <cassert>
 #include <immintrin.h>
@@ -94,7 +95,10 @@ void QtVideo::paintGL() {
 	f->glLoadIdentity();
 
 	f->glBindTexture(GL_TEXTURE_2D, texture_);
-	f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
+	{
+		QMutexLocker lock(&buffer_mutex_);
+		f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
+	}
 
 	f->glBegin(GL_TRIANGLE_STRIP);
 	/* clang-format off */
@@ -110,6 +114,8 @@ void QtVideo::paintGL() {
 // Name: submit_scanline
 //------------------------------------------------------------------------------
 void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
+	QMutexLocker lock(&buffer_mutex_);
+
 #if defined(QT_COMPILER_SUPPORTS_AVX2)
 	auto s = reinterpret_cast<__m512i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 16) {
@@ -147,6 +153,8 @@ void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 // Name: set_palette
 //------------------------------------------------------------------------------
 void QtVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal) {
+	QMutexLocker lock(&buffer_mutex_);
+
 	assert(pal);
 	assert(intensity);
 
@@ -175,6 +183,8 @@ void QtVideo::end_frame() {
 // Name: screenshot
 //------------------------------------------------------------------------------
 QImage QtVideo::screenshot() {
+	QMutexLocker lock(&buffer_mutex_);
+
 	QImage screen(Width, Height, QImage::Format_ARGB32);
 	for (int i = 0; i < Height; ++i) {
 

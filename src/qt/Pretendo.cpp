@@ -15,15 +15,21 @@
 #include "SortFilterProxyModel.h"
 
 #include <QActionGroup>
+#include <QByteArray>
 #include <QDateTime>
 #include <QDirIterator>
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QMessageBox>
+#include <QMetaObject>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QThread>
 #include <QTimer>
+#include <QWaitCondition>
 
+#include <algorithm>
 #include <iostream>
 
 #if defined(ENABLE_SOUND)
@@ -31,6 +37,119 @@
 #else
 #include "NullAudio.h"
 #endif
+
+class EmulationThread final : public QThread {
+public:
+	EmulationThread(QtVideo *video, QObject *owner)
+		: video_(video), owner_(owner) {
+	}
+
+	~EmulationThread() override {
+		stopLoop();
+	}
+
+	void setFrameRate(int framerate) {
+		QMutexLocker lock(&state_mutex_);
+		frame_rate_ = std::max(1, framerate);
+	}
+
+	void startLoop() {
+		QMutexLocker lock(&state_mutex_);
+		if (running_) {
+			paused_ = false;
+			state_changed_.wakeAll();
+			return;
+		}
+
+		running_ = true;
+		paused_  = false;
+		start();
+	}
+
+	void stopLoop() {
+		{
+			QMutexLocker lock(&state_mutex_);
+			running_ = false;
+			paused_  = false;
+			state_changed_.wakeAll();
+		}
+		wait();
+	}
+
+	void setPaused(bool value) {
+		QMutexLocker lock(&state_mutex_);
+		paused_ = value;
+		if (!paused_) {
+			state_changed_.wakeAll();
+		}
+	}
+
+protected:
+	void run() override {
+		using Clock = std::chrono::steady_clock;
+		auto next_frame_deadline = Clock::now();
+
+		for (;;) {
+			{
+				QMutexLocker lock(&state_mutex_);
+				while (running_ && paused_) {
+					state_changed_.wait(&state_mutex_);
+				}
+
+				if (!running_) {
+					break;
+				}
+			}
+
+			int frame_rate = 60;
+			{
+				QMutexLocker lock(&state_mutex_);
+				frame_rate = std::max(1, frame_rate_);
+			}
+
+			const auto frame_duration = std::chrono::microseconds(1'000'000 / frame_rate);
+			next_frame_deadline += frame_duration;
+
+			nes::run_frame(video_);
+
+			uint8_t samples[800];
+			size_t count = nes::apu::read_samples(samples, sizeof(samples));
+			QByteArray audio_data(reinterpret_cast<const char *>(samples), static_cast<int>(count));
+
+			QMetaObject::invokeMethod(owner_, "onFrameCompleted", Qt::QueuedConnection, Q_ARG(QByteArray, audio_data));
+
+			const auto frame_end = Clock::now();
+			if (frame_end > next_frame_deadline) {
+				// If we missed the deadline, resync to now to prevent drift accumulation.
+				next_frame_deadline = frame_end;
+				continue;
+			}
+
+			for (;;) {
+				const auto now = Clock::now();
+				if (now >= next_frame_deadline) {
+					break;
+				}
+
+				const auto remaining = std::chrono::duration_cast<std::chrono::microseconds>(next_frame_deadline - now);
+				if (remaining > std::chrono::microseconds(2000)) {
+					QThread::usleep(static_cast<unsigned long>((remaining - std::chrono::microseconds(1000)).count()));
+				} else {
+					QThread::yieldCurrentThread();
+				}
+			}
+		}
+	}
+
+private:
+	QtVideo *video_ = nullptr;
+	QObject *owner_ = nullptr;
+	QMutex state_mutex_;
+	QWaitCondition state_changed_;
+	bool running_   = false;
+	bool paused_    = false;
+	int frame_rate_ = 60;
+};
 
 //------------------------------------------------------------------------------
 // Name: Pretendo
@@ -116,8 +235,11 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 	connect(ui_.listView, &QListView::activated, this, &Pretendo::picked);
 	connect(ui_.lineEdit, &QLineEdit::textChanged, filter_model_, &QSortFilterProxyModel::setFilterFixedString);
 
-	timer_ = new QTimer(this);
-	connect(timer_, &QTimer::timeout, this, &Pretendo::update);
+	viewer_timer_ = new QTimer(this);
+	viewer_timer_->setInterval(std::max(1, static_cast<int>((1.0f / framerate_) * 1000.0f)));
+
+	emulation_thread_ = new EmulationThread(ui_.video, this);
+	emulation_thread_->setFrameRate(framerate_);
 
 #if defined(ENABLE_SOUND)
 	audio_ = new Audio();
@@ -165,8 +287,8 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 // Name: ~Pretendo
 //------------------------------------------------------------------------------
 Pretendo::~Pretendo() {
-	on_action_Stop_triggered();
 	on_action_Free_ROM_triggered();
+	delete emulation_thread_;
 	delete audio_;
 
 	Settings::save();
@@ -176,10 +298,9 @@ Pretendo::~Pretendo() {
 // Name: setFrameRate
 //------------------------------------------------------------------------------
 void Pretendo::setFrameRate(int framerate) {
-	framerate_ = framerate;
-	if (timer_->isActive()) {
-        timer_->start((1.0f / framerate_) * 1000.0f);
-	}
+	framerate_ = std::max(1, framerate);
+	viewer_timer_->setInterval(std::max(1, static_cast<int>((1.0f / framerate_) * 1000.0f)));
+	emulation_thread_->setFrameRate(framerate_);
 }
 
 //------------------------------------------------------------------------------
@@ -190,34 +311,30 @@ void Pretendo::setFrameLimit(uint64_t limit) {
 }
 
 //------------------------------------------------------------------------------
-// Name: update
+// Name: onFrameCompleted
 //------------------------------------------------------------------------------
-void Pretendo::update() {
+void Pretendo::onFrameCompleted(const QByteArray &samples) {
+	if (!running_ || paused_) {
+		return;
+	}
 
-	// idle processing loop (the emulation loop)
-
-	nes::run_frame(ui_.video);
 	ui_.video->end_frame();
 
-	uint8_t samples[800];
-	size_t count = nes::apu::read_samples(samples, sizeof(samples));
-    audio_->write(samples, count);
+	audio_->write(samples.constData(), static_cast<size_t>(samples.size()));
 
 	// FPS calculation
-	auto now = std::chrono::high_resolution_clock::now();
+	auto now      = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - elapsed_time_);
-	
-	
 	if (duration.count() > 1000) {
 		fps_label_->setText(tr("FPS: %1").arg(framecount_));
 		elapsed_time_ = now;
-		framecount_ = 0;
+		framecount_   = 0;
 	}
 
 	++framecount_;
 
 	++raw_framecount_;
-	if (raw_framecount_ == frame_limit_) {
+	if (frame_limit_ != 0 && raw_framecount_ >= frame_limit_) {
 		on_action_Take_Screenshot_triggered();
 		on_action_Stop_triggered();
 		on_action_Free_ROM_triggered();
@@ -280,7 +397,7 @@ void Pretendo::on_action_Run_triggered() {
 		on_action_Pause_triggered();
 	} else {
 
-		if (!timer_->isActive()) {
+		if (!running_) {
 
 			// we test mapper, it's a good metric for "did we load the cart correctly"
 			if (nes::cart.mapper()) {
@@ -290,10 +407,14 @@ void Pretendo::on_action_Run_triggered() {
 				nes::reset(nes::Reset::Hard);
 
 				raw_framecount_ = 0;
+				framecount_     = 0;
+				elapsed_time_   = std::chrono::high_resolution_clock::now();
 
-                timer_->start((1.0f / framerate_) * 1000.0f);
+				emulation_thread_->startLoop();
+				viewer_timer_->start();
 				audio_->start();
-				paused_ = false;
+				running_ = true;
+				paused_  = false;
 
 				ui_.action_Pause->setEnabled(true);
 			}
@@ -306,9 +427,13 @@ void Pretendo::on_action_Run_triggered() {
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Stop_triggered() {
 	ui_.action_Pause->setEnabled(false);
-	timer_->stop();
+	emulation_thread_->stopLoop();
+	viewer_timer_->stop();
 	audio_->stop();
-	paused_ = false;
+	running_        = false;
+	paused_         = false;
+	framecount_     = 0;
+	raw_framecount_ = 0;
 	ui_.stackedWidget->setCurrentIndex(0);
 	fps_label_->setText(tr("FPS: 0"));
 }
@@ -317,18 +442,23 @@ void Pretendo::on_action_Stop_triggered() {
 // Name: on_action_Pause_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Pause_triggered() {
-
-	if (timer_->isActive()) {
-		timer_->stop();
-		audio_->stop();
-	} else if (paused_) {
-		if (nes::cart.mapper()) {
-			timer_->start();
-			audio_->start();
-		}
+	if (!running_) {
+		return;
 	}
 
-	paused_ = !timer_->isActive();
+	if (!paused_) {
+		emulation_thread_->setPaused(true);
+		viewer_timer_->stop();
+		audio_->stop();
+		paused_ = true;
+	} else {
+		if (nes::cart.mapper()) {
+			emulation_thread_->setPaused(false);
+			viewer_timer_->start();
+			audio_->start();
+			paused_ = false;
+		}
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -412,7 +542,7 @@ void Pretendo::on_action_Hard_Reset_triggered() {
 		on_action_Pause_triggered();
 	}
 
-	if (timer_->isActive()) {
+	if (running_ && !paused_) {
 		nes::reset(nes::Reset::Hard);
 	}
 }
@@ -425,7 +555,7 @@ void Pretendo::on_actionReset_triggered() {
 		on_action_Pause_triggered();
 	}
 
-	if (timer_->isActive()) {
+	if (running_ && !paused_) {
 		nes::reset(nes::Reset::Soft);
 	}
 }
@@ -479,16 +609,15 @@ void Pretendo::on_action4x_triggered() {
 // Name: on_action_Preferences_triggered
 //------------------------------------------------------------------------------
 void Pretendo::on_action_Preferences_triggered() {
+	const bool was_running = running_ && !paused_;
 
-	if (timer_->isActive()) {
-		timer_->stop();
-		audio_->stop();
+	if (was_running) {
+		on_action_Pause_triggered();
 	}
-	paused_ = !timer_->isActive();
 
 	preferences_->exec();
 
-	if (paused_) {
+	if (was_running) {
 		on_action_Pause_triggered();
 	}
 }
@@ -523,7 +652,7 @@ void Pretendo::on_action_Audio_Viewer_triggered() {
 	static AudioViewer *dialog = nullptr;
 	if (!dialog) {
 		dialog = new AudioViewer(this);
-		dialog->setupUpdateTimer(timer_);
+		dialog->setupUpdateTimer(viewer_timer_);
 	}
 	dialog->show();
 }
@@ -536,7 +665,7 @@ void Pretendo::on_action_Pattern_Table_Viewer_triggered() {
 	static PatternTableView *dialog = nullptr;
 	if (!dialog) {
 		dialog = new PatternTableView(this);
-		dialog->setupUpdateTimer(timer_);
+		dialog->setupUpdateTimer(viewer_timer_);
 	}
 	dialog->show();
 }
