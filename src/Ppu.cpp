@@ -781,11 +781,8 @@ bool rendering() {
 //------------------------------------------------------------------------------
 void increment_vram_address() {
 	if (rendering() && ppu_mask_.screen_enabled) {
-		if (ppu_control_.address_increment) {
-			clock_y();
-		} else {
-			clock_x();
-		}
+		clock_x();
+		clock_y();
 	} else {
 		if (ppu_control_.address_increment) {
 			vram_address_ += 32;
@@ -894,7 +891,7 @@ void clock_ppu(const scanline_prerender &) {
 					open_sprite_pattern<size_8px, pattern_1>();
 				}
 				break;
-			case 8:
+			case 0:
 				if (ppu_control_.large_sprites) {
 					read_sprite_pattern<size_16px, pattern_1>();
 				} else {
@@ -1570,17 +1567,21 @@ uint8_t read2007() {
 
 	cart.mapper()->vram_change_hook(vram_address_);
 
-	const auto decay_value = static_cast<uint8_t>(latch_);
+	const uint8_t decay_value = static_cast<uint8_t>(latch_);
+	const uint8_t old_buffer  = register_2007_buffer_;
+	const bool is_palette     = (temp_address & 0b00111111'00000000) == 0b00111111'00000000;
 
-	latch_                = register_2007_buffer_;
-	register_2007_buffer_ = cart.mapper()->read_vram(temp_address);
+	const uint_least16_t buffer_address = is_palette ? ((temp_address - 0x1000) & 0x3fff) : temp_address;
+	register_2007_buffer_               = cart.mapper()->read_vram(buffer_address);
 
-	if ((temp_address & 0b00111111'00000000) == 0b00111111'00000000) {
+	if (is_palette) {
 
 		latch_ = palette_[temp_address & 0x1f] | (decay_value & 0xc0);
 		if (UNLIKELY(ppu_mask_.monochrome)) {
 			latch_ &= 0xf0;
 		}
+	} else {
+		latch_ = old_buffer;
 	}
 
 	return latch_ & 0xff;
