@@ -177,6 +177,13 @@ uint8_t register_2007_buffer_          = 0;
 Status status_                         = {0};
 uint8_t tile_offset_                   = 0; // loopy's "x"
 uint8_t monochrome_mask_               = 0xff;
+uint32_t bg_mask0_                     = 0x00008000;
+uint32_t bg_mask1_                     = 0x80000000;
+uint8_t bg_shift0_                     = 15;
+uint8_t bg_shift1_                     = 30;
+uint8_t attr_shift0_                   = 13;
+uint8_t attr_shift1_                   = 28;
+Mapper *mapper_                        = nullptr;
 
 bool odd_frame_   = false;
 bool write_latch_ = false;
@@ -238,6 +245,18 @@ constexpr uint_least16_t sprite_pattern_address(uint8_t index, uint8_t sprite_li
 }
 
 //------------------------------------------------------------------------------
+// Name: update_bg_extract_constants
+//------------------------------------------------------------------------------
+void update_bg_extract_constants() {
+	bg_mask0_    = 0x00008000u >> tile_offset_;
+	bg_mask1_    = 0x80000000u >> tile_offset_;
+	bg_shift0_   = static_cast<uint8_t>(15 - tile_offset_);
+	bg_shift1_   = static_cast<uint8_t>(30 - tile_offset_);
+	attr_shift0_ = static_cast<uint8_t>(13 - tile_offset_);
+	attr_shift1_ = static_cast<uint8_t>(28 - tile_offset_);
+}
+
+//------------------------------------------------------------------------------
 // Name: render_blank_pixel
 // Note: the screen is *always* disabled when this is called
 //------------------------------------------------------------------------------
@@ -258,13 +277,10 @@ uint8_t select_bg_pixel(uint_least16_t index) {
 
 	// first identify what the BG pixel would be
 	if (LIKELY(index >= 8 || ppu_mask_.background_clipping) && ppu_mask_.background_visible) {
-        const uint32_t mask0 = (0x00008000 >> tile_offset_);
-        const uint32_t mask1 = (0x80000000 >> tile_offset_);
-
-        return (((pattern_queue_ & mask0) >> (15 - tile_offset_)) |
-                ((pattern_queue_ & mask1) >> (30 - tile_offset_)) |
-                ((attribute_queue_ & mask0) >> (13 - tile_offset_)) |
-                ((attribute_queue_ & mask1) >> (28 - tile_offset_))) &
+		return (((pattern_queue_ & bg_mask0_) >> bg_shift0_) |
+				((pattern_queue_ & bg_mask1_) >> bg_shift1_) |
+				((attribute_queue_ & bg_mask0_) >> attr_shift0_) |
+				((attribute_queue_ & bg_mask1_) >> attr_shift1_)) &
 			   0xff;
 	}
 
@@ -277,13 +293,15 @@ uint8_t select_bg_pixel(uint_least16_t index) {
 //------------------------------------------------------------------------------
 uint8_t select_pixel(uint_least16_t index) {
 
-    assert(visible_sprite_count_ <= 8);
+	assert(visible_sprite_count_ <= 8);
 
 	// default to displaying the BG pixel
     const uint8_t pixel = select_bg_pixel(index);
+	const bool bg_opaque = (pixel & 0x03) != 0;
 
 	// then see if any of the sprites belong..
 	if (LIKELY(index >= 8 || ppu_mask_.sprite_clipping) && ppu_mask_.sprites_visible) {
+		const bool render_sprites = show_sprites;
 
 		// this will loop at most 8 times
 		for (uint8_t spr = 0; spr != visible_sprite_count_; ++spr) {
@@ -313,7 +331,7 @@ uint8_t select_pixel(uint_least16_t index) {
 			// NOTE: according to blargg's tests, a collision doesn't seem
             //       possible to occur on the rightmost pixel
 #ifndef SPRITE_ZERO_HACK
-			if ((sprite.attr & OamZero) && (index < 255) && (pixel & 0x03)) {
+			if ((sprite.attr & OamZero) && (index < 255) && bg_opaque) {
 #else
 			if ((sprite.attr & OamZero) && (index < 255)) {
 #endif
@@ -322,11 +340,11 @@ uint8_t select_pixel(uint_least16_t index) {
 
             // NOTE(eteran): this needs to be here (or later)
             // because we still need to preserve sprite zero hit detection
-            if (UNLIKELY(!show_sprites)) {
+			if (UNLIKELY(!render_sprites)) {
                 return pixel;
             }
 
-            if ((((sprite.attr & OamPriority) == 0) || ((pixel & 0x03) == 0))) {
+			if ((((sprite.attr & OamPriority) == 0) || !bg_opaque)) {
 				return (0x10 | sprite_pixel | ((sprite.attr & OamColor) << 2)) & 0xff;
 			}
 
@@ -400,7 +418,7 @@ void open_background_pattern() {
 
 	const uint8_t tile_line = (vram_address_ & 0x7000) >> 12;
 	next_ppu_fetch_address_ = (background_pattern_table() | (next_tile_index_ << 4) | Pattern::offset | tile_line) & 0xffff;
-	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
+	mapper_->vram_change_hook(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
@@ -409,7 +427,7 @@ void open_background_pattern() {
 template <class Pattern>
 void read_background_pattern() {
 
-	next_pattern_[Pattern::index] = cart.mapper()->read_vram(next_ppu_fetch_address_);
+	next_pattern_[Pattern::index] = mapper_->read_vram(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
@@ -417,7 +435,7 @@ void read_background_pattern() {
 //------------------------------------------------------------------------------
 void open_background_attribute() {
 	next_ppu_fetch_address_ = attribute_address(vram_address_);
-	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
+	mapper_->vram_change_hook(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
@@ -426,7 +444,7 @@ void open_background_attribute() {
 void read_background_attribute() {
 
 	// fetch the attribute byte
-	const uint8_t attr_byte = cart.mapper()->read_vram(next_ppu_fetch_address_);
+	const uint8_t attr_byte = mapper_->read_vram(next_ppu_fetch_address_);
 
 	// get the attribute bits relevant for this tile
 	next_attribute_ = attribute_bits(vram_address_, attr_byte);
@@ -437,14 +455,14 @@ void read_background_attribute() {
 //------------------------------------------------------------------------------
 void open_tile_index() {
 	next_ppu_fetch_address_ = tile_address(vram_address_);
-	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
+	mapper_->vram_change_hook(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 void read_tile_index() {
-	next_tile_index_ = cart.mapper()->read_vram(next_ppu_fetch_address_);
+	next_tile_index_ = mapper_->read_vram(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
@@ -682,7 +700,7 @@ void open_sprite_pattern() {
 		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(0xff, 0xff);
 	}
 
-	cart.mapper()->vram_change_hook(next_ppu_fetch_address_);
+	mapper_->vram_change_hook(next_ppu_fetch_address_);
 }
 
 //------------------------------------------------------------------------------
@@ -691,7 +709,7 @@ void open_sprite_pattern() {
 template <class Size, class Pattern>
 void read_sprite_pattern() {
 
-	uint8_t pattern = cart.mapper()->read_vram(next_ppu_fetch_address_);
+	uint8_t pattern = mapper_->read_vram(next_ppu_fetch_address_);
 
 	SpritePattern &sprite = sprite_patterns_[current_sprite_index_];
 
@@ -1283,6 +1301,7 @@ void end_frame() {
 // Name: reset
 //------------------------------------------------------------------------------
 void reset(Reset reset_type) {
+	mapper_ = cart.mapper();
 
 	if (reset_type == Reset::Hard) {
 		std::fill_n(sprite_ram_, 0x0100, 0);
@@ -1322,6 +1341,7 @@ void reset(Reset reset_type) {
 	vram_address_         = 0x0000;
 	write_latch_          = false;
 	monochrome_mask_      = 0xff;
+	update_bg_extract_constants();
 
 	std::cout << "PPU reset complete" << std::endl;
 }
@@ -1415,6 +1435,7 @@ void write2005(uint8_t value) {
 		nametable_ &= 0b1111111'11100000;
 		nametable_ |= (value & 0b11111000) >> 3;
 		tile_offset_ = value & 0x07;
+		update_bg_extract_constants();
 	} else {
 		// 2005 second write:
 		// t:0000001111100000=d:11111000
@@ -1451,7 +1472,7 @@ void write2006(uint8_t value) {
 		nametable_ |= (value & 0b11111111);
 		vram_address_ = nametable_;
 
-		cart.mapper()->vram_change_hook(vram_address_);
+		mapper_->vram_change_hook(vram_address_);
 	}
 }
 
@@ -1465,7 +1486,7 @@ void write2007(uint8_t value) {
 
 	increment_vram_address();
 
-	cart.mapper()->vram_change_hook(vram_address_);
+	mapper_->vram_change_hook(vram_address_);
 
 	// palette write
 	if ((temp_address & 0b00111111'00000000) == 0b00111111'00000000) {
@@ -1479,7 +1500,7 @@ void write2007(uint8_t value) {
 		}
 
 	} else {
-		cart.mapper()->write_vram(temp_address, value);
+		mapper_->write_vram(temp_address, value);
 	}
 }
 
@@ -1565,14 +1586,14 @@ uint8_t read2007() {
 
 	increment_vram_address();
 
-	cart.mapper()->vram_change_hook(vram_address_);
+	mapper_->vram_change_hook(vram_address_);
 
 	const uint8_t decay_value = static_cast<uint8_t>(latch_);
 	const uint8_t old_buffer  = register_2007_buffer_;
 	const bool is_palette     = (temp_address & 0b00111111'00000000) == 0b00111111'00000000;
 
 	const uint_least16_t buffer_address = is_palette ? ((temp_address - 0x1000) & 0x3fff) : temp_address;
-	register_2007_buffer_               = cart.mapper()->read_vram(buffer_address);
+	register_2007_buffer_               = mapper_->read_vram(buffer_address);
 
 	if (is_palette) {
 
@@ -1604,6 +1625,7 @@ void write4014(uint8_t value) {
 //------------------------------------------------------------------------------
 template <class T>
 void execute_scanline(const T &target) {
+	mapper_ = cart.mapper();
 
 	if (UNLIKELY(vpos_ == 262)) {
 		start_frame();
