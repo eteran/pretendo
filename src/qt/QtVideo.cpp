@@ -4,19 +4,12 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLFunctions_2_1>
 #include <QOpenGLVersionFunctionsFactory>
+#include <QtCompilerDetection>
+#include <QMutexLocker>
 #include <algorithm>
 #include <cassert>
 #include <immintrin.h>
 #include <iostream>
-
-// normalize the macros slightly
-#if !defined(__AVX512F__) && defined(__AVX2__)
-#define __AVX512F__
-#endif
-
-#if !defined(__SSE2__) && ((defined(_M_AMD64) || defined(_M_X64)) || (_M_IX86_FP == 2))
-#define __SSE2__
-#endif
 
 //------------------------------------------------------------------------------
 // Name: QtVideo
@@ -102,7 +95,10 @@ void QtVideo::paintGL() {
 	f->glLoadIdentity();
 
 	f->glBindTexture(GL_TEXTURE_2D, texture_);
-	f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
+	{
+		QMutexLocker lock(&buffer_mutex_);
+		f->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Width, Height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &buffer_[0]);
+	}
 
 	f->glBegin(GL_TRIANGLE_STRIP);
 	/* clang-format off */
@@ -118,7 +114,9 @@ void QtVideo::paintGL() {
 // Name: submit_scanline
 //------------------------------------------------------------------------------
 void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
-#if defined(__AVX512F__)
+	QMutexLocker lock(&buffer_mutex_);
+
+#if defined(QT_COMPILER_SUPPORTS_AVX2)
 	auto s = reinterpret_cast<__m512i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 16) {
 		auto ind = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(source));
@@ -127,7 +125,7 @@ void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 		source += 16;
 	}
 
-#elif defined(__AVX__)
+#elif defined(QT_COMPILER_SUPPORTS_AVX)
 	auto s = reinterpret_cast<__m256i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 8) {
 		auto ind = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(source));
@@ -135,7 +133,7 @@ void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 		*s++     = vec;
 		source += 8;
 	}
-#elif defined(__SSE2__)
+#elif defined(QT_COMPILER_SUPPORTS_SSE2)
 	auto s = reinterpret_cast<__m128i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 4) {
 		auto ind = _mm_loadu_si128(reinterpret_cast<const __m128i *>(source));
@@ -155,6 +153,8 @@ void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 // Name: set_palette
 //------------------------------------------------------------------------------
 void QtVideo::set_palette(const color_emphasis_t *intensity, const rgb_color_t *pal) {
+	QMutexLocker lock(&buffer_mutex_);
+
 	assert(pal);
 	assert(intensity);
 
@@ -183,6 +183,8 @@ void QtVideo::end_frame() {
 // Name: screenshot
 //------------------------------------------------------------------------------
 QImage QtVideo::screenshot() {
+	QMutexLocker lock(&buffer_mutex_);
+
 	QImage screen(Width, Height, QImage::Format_ARGB32);
 	for (int i = 0; i < Height; ++i) {
 

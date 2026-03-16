@@ -11,9 +11,13 @@ struct opcode_xas {
 
 	using memory_access = operation_write;
 
-	static uint8_t execute(uint_least16_t address) {
+	static uint8_t execute(uint_least16_t &address) {
 		S = X & A;
-		return S & (((address >> 8) + 1) & 0xff);
+		// NOTE(eteran): we don't need an explicit +1, because
+		// it is automatically caused by the data fetch
+		const uint8_t value = (address >> 8) & X & A;
+		address             = (address & 0x00ff) | (value << 8);
+		return value;
 	}
 };
 

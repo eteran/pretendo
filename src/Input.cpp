@@ -59,7 +59,7 @@ void write4016(uint8_t value) {
 
 	value &= 0x1;
 
-	if (!value && strobe_) {
+	if (value && !strobe_) {
 		controller1.poll();
 		controller2.poll();
 		controller3.poll();

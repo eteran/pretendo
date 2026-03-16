@@ -19,7 +19,7 @@ inline uint8_t read_byte_zp(uint8_t address) {
 }
 
 //------------------------------------------------------------------------------
-// Name: write_byte
+// Name: write_byteF
 // Desc: writes a value to memory including mapper and I/O
 //------------------------------------------------------------------------------
 inline void write_byte(uint_least16_t address, uint8_t value) {

@@ -213,6 +213,7 @@ void execute_opcode() {
 	using fptr_t = void (*)();
 
 	static const fptr_t table[] = {
+		// 0x00
 		opcode_brk::execute,
 		indexed_indirect<opcode_ora>::execute,
 		opcode_jam::execute,
@@ -229,6 +230,7 @@ void execute_opcode() {
 		absolute<opcode_ora>::execute,
 		absolute<opcode_asl>::execute,
 		absolute<opcode_slo>::execute,
+		// 0x10
 		relative<opcode_bpl>::execute,
 		indirect_indexed<opcode_ora>::execute,
 		opcode_jam::execute,
@@ -245,6 +247,7 @@ void execute_opcode() {
 		absolute_x<opcode_ora>::execute,
 		absolute_x<opcode_asl>::execute,
 		absolute_x<opcode_slo>::execute,
+		// 0x20
 		opcode_jsr::execute,
 		indexed_indirect<opcode_and>::execute,
 		opcode_jam::execute,
@@ -261,6 +264,7 @@ void execute_opcode() {
 		absolute<opcode_and>::execute,
 		absolute<opcode_rol>::execute,
 		absolute<opcode_rla>::execute,
+		// 0x30
 		relative<opcode_bmi>::execute,
 		indirect_indexed<opcode_and>::execute,
 		opcode_jam::execute,
@@ -277,6 +281,7 @@ void execute_opcode() {
 		absolute_x<opcode_and>::execute,
 		absolute_x<opcode_rol>::execute,
 		absolute_x<opcode_rla>::execute,
+		// 0x40
 		opcode_rti::execute,
 		indexed_indirect<opcode_eor>::execute,
 		opcode_jam::execute,
@@ -293,6 +298,7 @@ void execute_opcode() {
 		absolute<opcode_eor>::execute,
 		absolute<opcode_lsr>::execute,
 		absolute<opcode_sre>::execute,
+		// 0x50
 		relative<opcode_bvc>::execute,
 		indirect_indexed<opcode_eor>::execute,
 		opcode_jam::execute,
@@ -309,6 +315,7 @@ void execute_opcode() {
 		absolute_x<opcode_eor>::execute,
 		absolute_x<opcode_lsr>::execute,
 		absolute_x<opcode_sre>::execute,
+		// 0x60
 		opcode_rts::execute,
 		indexed_indirect<opcode_adc>::execute,
 		opcode_jam::execute,
@@ -325,6 +332,7 @@ void execute_opcode() {
 		absolute<opcode_adc>::execute,
 		absolute<opcode_ror>::execute,
 		absolute<opcode_rra>::execute,
+		// 0x70
 		relative<opcode_bvs>::execute,
 		indirect_indexed<opcode_adc>::execute,
 		opcode_jam::execute,
@@ -341,6 +349,7 @@ void execute_opcode() {
 		absolute_x<opcode_adc>::execute,
 		absolute_x<opcode_ror>::execute,
 		absolute_x<opcode_rra>::execute,
+		// 0x80
 		immediate<opcode_nop>::execute,
 		indexed_indirect<opcode_sta>::execute,
 		immediate<opcode_nop>::execute,
@@ -357,6 +366,7 @@ void execute_opcode() {
 		absolute<opcode_sta>::execute,
 		absolute<opcode_stx>::execute,
 		absolute<opcode_aax>::execute,
+		// 0x90
 		relative<opcode_bcc>::execute,
 		indirect_indexed<opcode_sta>::execute,
 		opcode_jam::execute,
@@ -373,6 +383,7 @@ void execute_opcode() {
 		absolute_x<opcode_sta>::execute,
 		absolute_y<opcode_sxa>::execute,
 		absolute_y<opcode_axa>::execute,
+		// 0xa0
 		immediate<opcode_ldy>::execute,
 		indexed_indirect<opcode_lda>::execute,
 		immediate<opcode_ldx>::execute,
@@ -389,6 +400,7 @@ void execute_opcode() {
 		absolute<opcode_lda>::execute,
 		absolute<opcode_ldx>::execute,
 		absolute<opcode_lax>::execute,
+		// 0xb0
 		relative<opcode_bcs>::execute,
 		indirect_indexed<opcode_lda>::execute,
 		opcode_jam::execute,
@@ -405,6 +417,7 @@ void execute_opcode() {
 		absolute_x<opcode_lda>::execute,
 		absolute_y<opcode_ldx>::execute,
 		absolute_y<opcode_lax>::execute,
+		// 0xc0
 		immediate<opcode_cpy>::execute,
 		indexed_indirect<opcode_cmp>::execute,
 		immediate<opcode_nop>::execute,
@@ -421,6 +434,7 @@ void execute_opcode() {
 		absolute<opcode_cmp>::execute,
 		absolute<opcode_dec>::execute,
 		absolute<opcode_dcp>::execute,
+		// 0xd0
 		relative<opcode_bne>::execute,
 		indirect_indexed<opcode_cmp>::execute,
 		opcode_jam::execute,
@@ -437,6 +451,7 @@ void execute_opcode() {
 		absolute_x<opcode_cmp>::execute,
 		absolute_x<opcode_dec>::execute,
 		absolute_x<opcode_dcp>::execute,
+		// 0xe0
 		immediate<opcode_cpx>::execute,
 		indexed_indirect<opcode_sbc>::execute,
 		immediate<opcode_nop>::execute,
@@ -453,6 +468,7 @@ void execute_opcode() {
 		absolute<opcode_sbc>::execute,
 		absolute<opcode_inc>::execute,
 		absolute<opcode_isc>::execute,
+		// 0xf0
 		relative<opcode_beq>::execute,
 		indirect_indexed<opcode_sbc>::execute,
 		opcode_jam::execute,
@@ -469,7 +485,7 @@ void execute_opcode() {
 		absolute_x<opcode_sbc>::execute,
 		absolute_x<opcode_inc>::execute,
 		absolute_x<opcode_isc>::execute,
-
+		// meta-opcodes
 		opcode_rst::execute,
 		opcode_nmi::execute,
 		opcode_irq::execute,
@@ -583,6 +599,10 @@ void reset() {
 		irq_asserted_    = false;
 		nmi_asserted_    = false;
 		executed_cycles_ = 1;
+		spr_dma_count_   = 0;
+		spr_dma_delay_   = 0;
+		dmc_dma_count_   = 0;
+		dmc_dma_delay_   = 0;
 	}
 }
 
@@ -605,6 +625,7 @@ void stop() {
 	P = I_MASK | R_MASK;
 
 	executed_cycles_ = 1;
+	irq_sources_     = 0;
 	irq_asserted_    = false;
 	nmi_asserted_    = false;
 	rst_asserted_    = false;

@@ -9,8 +9,7 @@ struct opcode_aax {
 
 	using memory_access = operation_write;
 
-	static uint8_t execute(uint_least16_t address) {
-		(void)address;
+	static uint8_t execute([[maybe_unused]] uint_least16_t address) {
 		return A & X;
 	}
 };

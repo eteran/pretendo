@@ -47,9 +47,8 @@ private:
 			LAST_CYCLE;
 			// write to effective address
 			{
-				const uint_least16_t address = effective_address_.lo;
-				const uint8_t value    = Op::execute(address);
-				write_byte_zp(address, value);
+				const uint8_t value = Op::execute(effective_address_.raw);
+				write_byte_zp(effective_address_.raw, value);
 			}
 			OPCODE_COMPLETE;
 		default:

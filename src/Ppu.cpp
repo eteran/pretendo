@@ -8,8 +8,8 @@
 #include "Nes.h"
 
 #include <algorithm>
-#include <cstring>
 #include <iostream>
+#include <cassert>
 
 // #define SPRITE_ZERO_HACK
 
@@ -51,6 +51,7 @@ union Mask {
 	BitField<uint8_t, 3, 2> screen_enabled;
 };
 
+constexpr uint64_t WriteBlockCycles = 82000;
 constexpr auto CyclesPerScanline = 341u;
 constexpr auto CpuAlignment      = 0u;
 
@@ -160,8 +161,8 @@ uint8_t palette_[0x20];
 uint64_t ppu_cycle_                    = 0;
 uint64_t ppu_read_2002_cycle_          = 0;
 uint_least16_t next_ppu_fetch_address_ = 0;
-uint_least16_t pattern_queue_[2]       = {};
-uint_least16_t attribute_queue_[2]     = {};
+uint32_t pattern_queue_                = 0;
+uint32_t attribute_queue_              = 0;
 uint_least16_t nametable_              = 0; // loopy's "t"
 uint_least16_t vram_address_           = 0; // loopy's "v"
 uint_least16_t hpos_                   = 0; // pixel counter
@@ -179,7 +180,17 @@ uint8_t monochrome_mask_               = 0xff;
 
 bool odd_frame_   = false;
 bool write_latch_ = false;
-bool write_block_ = false;
+
+//------------------------------------------------------------------------------
+// Name: block_writes
+// Desc: for the first 80,000 ish PPU cycles, writes to several registers
+// are blocked. This helps decide that. Interestingly, if we use the EXACT
+// number that is prescribed by nesdev, that breaks at least one demo ROM.
+// So the cycle count we've chosen undershoots that number, ever so slightly...
+//------------------------------------------------------------------------------
+inline bool block_writes() {
+	return ppu_cycle_ < WriteBlockCycles;
+}
 
 //------------------------------------------------------------------------------
 // Name: sprite_pattern_table
@@ -234,9 +245,9 @@ uint8_t render_blank_pixel() {
 
 	if (UNLIKELY((vram_address_ & 0x3f00) == 0x3f00)) {
 		return palette_[vram_address_ & 0x1f] & monochrome_mask_;
-	} else {
-		return palette_[0x00] & monochrome_mask_;
-	}
+    }
+
+    return palette_[0x00] & monochrome_mask_;
 }
 
 //------------------------------------------------------------------------------
@@ -247,12 +258,13 @@ uint8_t select_bg_pixel(uint_least16_t index) {
 
 	// first identify what the BG pixel would be
 	if (LIKELY(index >= 8 || ppu_mask_.background_clipping) && ppu_mask_.background_visible) {
-		const uint_least16_t mask = (0x8000 >> tile_offset_);
+        const uint32_t mask0 = (0x00008000 >> tile_offset_);
+        const uint32_t mask1 = (0x80000000 >> tile_offset_);
 
-		return (((pattern_queue_[0] & mask) >> (15 - tile_offset_)) |
-				((pattern_queue_[1] & mask) >> (14 - tile_offset_)) |
-				((attribute_queue_[0] & mask) >> (13 - tile_offset_)) |
-				((attribute_queue_[1] & mask) >> (12 - tile_offset_))) &
+        return (((pattern_queue_ & mask0) >> (15 - tile_offset_)) |
+                ((pattern_queue_ & mask1) >> (30 - tile_offset_)) |
+                ((attribute_queue_ & mask0) >> (13 - tile_offset_)) |
+                ((attribute_queue_ & mask1) >> (28 - tile_offset_))) &
 			   0xff;
 	}
 
@@ -264,6 +276,8 @@ uint8_t select_bg_pixel(uint_least16_t index) {
 // Note: the screen is *always* enabled when this is called
 //------------------------------------------------------------------------------
 uint8_t select_pixel(uint_least16_t index) {
+
+    assert(visible_sprite_count_ <= 8);
 
 	// default to displaying the BG pixel
     const uint8_t pixel = select_bg_pixel(index);
@@ -611,6 +625,13 @@ void evaluate_sprites_odd() {
 		sprite_read_buffer_ = 0xff;
 	} else if (hpos_ == 65) {
 		sprite_read_index_  = sprite_address_;
+
+		// Weird bug in the PPU, only "Huge Insect" is known to be affected by this
+		// outside of artificial tests
+		if (sprite_address_ > 8) {
+			memcpy(&sprite_ram_[0], &sprite_ram_[sprite_address_ & 0xf8], 8);
+		}
+
 		current_is_sprite_0 = true;
 		sprite_eval_state_  = STATE_1_Y;
 		sprite_data_index_  = 0;
@@ -689,10 +710,8 @@ uint8_t render_pixel() {
 
     const uint8_t pixel = select_pixel(hpos_ - 1);
 
-	pattern_queue_[0] <<= 1;
-	pattern_queue_[1] <<= 1;
-	attribute_queue_[0] <<= 1;
-	attribute_queue_[1] <<= 1;
+    pattern_queue_ = (pattern_queue_ << 1) & 0xfffefffe;
+    attribute_queue_ = (attribute_queue_ << 1) & 0xfffefffe;
 
 	// mask = (pixel & 0x03) ? 0xff : 0x00
 	// but without branches
@@ -706,10 +725,10 @@ uint8_t render_pixel() {
 //------------------------------------------------------------------------------
 void update_shift_registers_render() {
 
-	pattern_queue_[0] |= next_pattern_[0];
-	pattern_queue_[1] |= next_pattern_[1];
-	attribute_queue_[0] |= ((next_attribute_ >> 0) & 0x01) * 0xff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
-	attribute_queue_[1] |= ((next_attribute_ >> 1) & 0x01) * 0xff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+    pattern_queue_ |= next_pattern_[0];
+    pattern_queue_ |= (next_pattern_[1] << 16);
+    attribute_queue_ |= ((next_attribute_ >> 0) & 0x01) * 0x000000ff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+    attribute_queue_ |= ((next_attribute_ >> 1) & 0x01) * 0x00ff0000; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
 }
 
 //------------------------------------------------------------------------------
@@ -717,10 +736,8 @@ void update_shift_registers_render() {
 //------------------------------------------------------------------------------
 void update_shift_registers_idle() {
 
-	pattern_queue_[0] <<= 8;
-	pattern_queue_[1] <<= 8;
-	attribute_queue_[0] <<= 8;
-	attribute_queue_[1] <<= 8;
+    pattern_queue_ = (pattern_queue_ << 8) & 0xff00ff00;
+    attribute_queue_ = (attribute_queue_ << 8) & 0xff00ff00;
 
 	update_shift_registers_render();
 }
@@ -764,11 +781,8 @@ bool rendering() {
 //------------------------------------------------------------------------------
 void increment_vram_address() {
 	if (rendering() && ppu_mask_.screen_enabled) {
-		if (ppu_control_.address_increment) {
-			clock_y();
-		} else {
-			clock_x();
-		}
+		clock_x();
+		clock_y();
 	} else {
 		if (ppu_control_.address_increment) {
 			vram_address_ += 32;
@@ -789,7 +803,6 @@ void clock_ppu(const scanline_prerender &) {
 	} else if (UNLIKELY(hpos_ == 1)) {
 		// clear all the relevant status bits
 		status_.vblank = 0;
-		write_block_   = false;
 	}
 
 	if (LIKELY(ppu_mask_.screen_enabled)) {
@@ -878,7 +891,7 @@ void clock_ppu(const scanline_prerender &) {
 					open_sprite_pattern<size_8px, pattern_1>();
 				}
 				break;
-			case 8:
+			case 0:
 				if (ppu_control_.large_sprites) {
 					read_sprite_pattern<size_16px, pattern_1>();
 				} else {
@@ -1286,18 +1299,16 @@ void reset(Reset reset_type) {
 		}
 	}
 
-	attribute_queue_[0]   = 0;
-	attribute_queue_[1]   = 0;
+    attribute_queue_      = 0;
 	hpos_                 = 0;
 	latch_                = 0;
 	nametable_            = 0x0000;
 	next_attribute_       = 0;
-	next_pattern_[0]      = 0;
-	next_pattern_[1]      = 0;
+    next_pattern_[0]      = 0;
+    next_pattern_[1]      = 0;
 	next_tile_index_      = 0;
 	odd_frame_            = false;
-	pattern_queue_[0]     = 0;
-	pattern_queue_[1]     = 0;
+    pattern_queue_        = 0;
 	ppu_cycle_            = 0;
 	ppu_control_.raw      = 0;
 	ppu_mask_.raw         = 0;
@@ -1310,7 +1321,6 @@ void reset(Reset reset_type) {
 	vpos_                 = 0;
 	vram_address_         = 0x0000;
 	write_latch_          = false;
-	write_block_          = true;
 	monochrome_mask_      = 0xff;
 
 	std::cout << "PPU reset complete" << std::endl;
@@ -1323,12 +1333,12 @@ void write2000(uint8_t value) {
 
 	latch_ = value;
 
-	if (write_block_) {
+	if (block_writes()) {
 		return;
 	}
 
-	const Control prev_control = ppu_control_;
-	ppu_control_.raw           = value;
+	Control prev_control;
+	prev_control.raw = std::exchange(ppu_control_.raw, value);
 
 	// name table address
 	// t:0000110000000000=d:00000011
@@ -1348,7 +1358,7 @@ void write2000(uint8_t value) {
 void write2001(uint8_t value) {
 	latch_ = value;
 
-	if (write_block_) {
+	if (block_writes()) {
 		return;
 	}
 
@@ -1378,8 +1388,12 @@ void write2003(uint8_t value) {
 void write2004(uint8_t value) {
 	latch_ = value;
 
-	// sprite_address_ is an 8-bit type, so wrapping is implicit
-	sprite_ram_[sprite_address_++] = value;
+	if (rendering() && ppu_mask_.screen_enabled) {
+		sprite_address_ += 4;
+	} else {
+		// sprite_address_ is an 8-bit type, so wrapping is implicit
+		sprite_ram_[sprite_address_++] = value;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -1388,7 +1402,7 @@ void write2004(uint8_t value) {
 void write2005(uint8_t value) {
 	latch_ = value;
 
-	if (write_block_) {
+	if (block_writes()) {
 		return;
 	}
 
@@ -1417,7 +1431,7 @@ void write2005(uint8_t value) {
 void write2006(uint8_t value) {
 	latch_ = value;
 
-	if (write_block_) {
+	if (block_writes()) {
 		return;
 	}
 
@@ -1520,6 +1534,25 @@ uint8_t read2004() {
 		return latch_ & 0xff;
 	}
 
+	if (ppu_mask_.screen_enabled) {
+		if (hpos_ >= 64 && hpos_ < 256) {
+			switch (sprite_read_index_ & 0x03) {
+			case 0x00:
+			case 0x01:
+			case 0x03:
+				latch_ = sprite_ram_[sprite_read_index_] & 0xff;
+				break;
+
+			case 0x02:
+				latch_ = sprite_ram_[sprite_read_index_] & 0xe3;
+				break;
+			}
+			return latch_;
+		} else {
+			return 0xff;
+		}
+	}
+
 	return 0x00;
 }
 
@@ -1528,27 +1561,27 @@ uint8_t read2004() {
 //------------------------------------------------------------------------------
 uint8_t read2007() {
 
-	if (write_block_) {
-		return 0x00;
-	}
-
 	const uint_least16_t temp_address = vram_address_ & 0b00111111'11111111;
 
 	increment_vram_address();
 
 	cart.mapper()->vram_change_hook(vram_address_);
 
-	const auto decay_value = static_cast<uint8_t>(latch_);
+	const uint8_t decay_value = static_cast<uint8_t>(latch_);
+	const uint8_t old_buffer  = register_2007_buffer_;
+	const bool is_palette     = (temp_address & 0b00111111'00000000) == 0b00111111'00000000;
 
-	latch_                = register_2007_buffer_;
-	register_2007_buffer_ = cart.mapper()->read_vram(temp_address);
+	const uint_least16_t buffer_address = is_palette ? ((temp_address - 0x1000) & 0x3fff) : temp_address;
+	register_2007_buffer_               = cart.mapper()->read_vram(buffer_address);
 
-	if ((temp_address & 0b00111111'00000000) == 0b00111111'00000000) {
+	if (is_palette) {
 
 		latch_ = palette_[temp_address & 0x1f] | (decay_value & 0xc0);
 		if (UNLIKELY(ppu_mask_.monochrome)) {
 			latch_ &= 0xf0;
 		}
+	} else {
+		latch_ = old_buffer;
 	}
 
 	return latch_ & 0xff;
