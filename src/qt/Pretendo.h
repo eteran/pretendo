@@ -4,6 +4,7 @@
 
 #include <QMainWindow>
 #include <chrono>
+#include <vector>
 
 #include "ui_Pretendo.h"
 
@@ -35,6 +36,7 @@ public:
 public:
 	void setFrameRate(int framerate);
 	void setFrameLimit(uint64_t limit);
+	bool configureRegressionTests(const QString &config_path);
 
 private Q_SLOTS:
 	void picked(const QModelIndex &index);
@@ -64,8 +66,17 @@ protected:
 
 private:
 	void zoom(int scale);
+	void startNextRegressionTest();
+	void finishRegressionRun();
+	bool saveScreenshot(const QString &path);
 
 private:
+	struct RegressionTest {
+		QString test_rom;
+		QString screenshot;
+		uint64_t frame_count = 0;
+	};
+
 	Ui::Pretendo ui_;
 	Preferences *preferences_            = nullptr;
 	FilesystemModel *filesystem_model_   = nullptr;
@@ -87,6 +98,12 @@ private:
 #endif
 
 	uint64_t frame_limit_ = 0;
+
+	std::vector<RegressionTest> regression_tests_;
+	QString regression_expected_dir_;
+	size_t regression_current_test_ = 0;
+	bool regression_mode_           = false;
+	bool regression_had_failures_   = false;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> elapsed_time_;
 };

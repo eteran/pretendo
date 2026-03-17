@@ -16,9 +16,17 @@
 
 #include <QActionGroup>
 #include <QByteArray>
+#include <QCoreApplication>
 #include <QDateTime>
+#include <QDir>
 #include <QDirIterator>
+#include <QFile>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QMessageBox>
@@ -37,6 +45,46 @@
 #else
 #include "NullAudio.h"
 #endif
+
+namespace {
+
+QString resolve_path(const QString &config_path, const QString &candidate) {
+	if (candidate.isEmpty()) {
+		return candidate;
+	}
+
+	QFileInfo fi(candidate);
+	if (fi.isAbsolute()) {
+		return fi.absoluteFilePath();
+	}
+
+	const QFileInfo config_info(config_path);
+	return QDir(config_info.absoluteDir()).absoluteFilePath(candidate);
+}
+
+bool files_equal(const QString &lhs_path, const QString &rhs_path) {
+	QFile lhs(lhs_path);
+	QFile rhs(rhs_path);
+
+	if (!lhs.open(QIODevice::ReadOnly) || !rhs.open(QIODevice::ReadOnly)) {
+		return false;
+	}
+
+	if (lhs.size() != rhs.size()) {
+		return false;
+	}
+
+	constexpr qint64 k_chunk_size = 64 * 1024;
+	while (!lhs.atEnd()) {
+		if (lhs.read(k_chunk_size) != rhs.read(k_chunk_size)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+}
 
 class EmulationThread final : public QThread {
 public:
@@ -311,6 +359,148 @@ void Pretendo::setFrameLimit(uint64_t limit) {
 }
 
 //------------------------------------------------------------------------------
+// Name: configureRegressionTests
+//------------------------------------------------------------------------------
+bool Pretendo::configureRegressionTests(const QString &config_path) {
+	QFile file(config_path);
+	if (!file.open(QIODevice::ReadOnly)) {
+		std::cerr << "[Pretendo] Failed to open regression config: " << config_path.toStdString() << std::endl;
+		return false;
+	}
+
+	QJsonParseError parse_error;
+	const QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parse_error);
+	if (parse_error.error != QJsonParseError::NoError || !doc.isObject()) {
+		std::cerr << "[Pretendo] Invalid regression JSON: " << parse_error.errorString().toStdString() << std::endl;
+		return false;
+	}
+
+	const QJsonObject root = doc.object();
+	const QString expected_dir = resolve_path(config_path, root.value("expected_dir").toString());
+	if (expected_dir.isEmpty()) {
+		std::cerr << "[Pretendo] Missing expected_dir in regression config" << std::endl;
+		return false;
+	}
+
+	const QJsonArray tests = root.value("tests").toArray();
+	if (tests.isEmpty()) {
+		std::cerr << "[Pretendo] No tests found in regression config" << std::endl;
+		return false;
+	}
+
+	std::vector<RegressionTest> parsed_tests;
+	parsed_tests.reserve(static_cast<size_t>(tests.size()));
+
+	for (qsizetype i = 0; i < tests.size(); ++i) {
+		if (!tests[i].isObject()) {
+			std::cerr << "[Pretendo] tests[" << i << "] is not an object" << std::endl;
+			return false;
+		}
+
+		const QJsonObject test = tests[i].toObject();
+
+		bool ok = false;
+		const qint64 frame_count_i64 = test.value("frame_count").toVariant().toLongLong(&ok);
+		if (!ok || frame_count_i64 <= 0) {
+			std::cerr << "[Pretendo] tests[" << i << "] has invalid frame_count" << std::endl;
+			return false;
+		}
+
+		const QString rom = resolve_path(config_path, test.value("test_rom").toString());
+		const QString screenshot = resolve_path(config_path, test.value("screenshot").toString());
+		if (rom.isEmpty() || screenshot.isEmpty()) {
+			std::cerr << "[Pretendo] tests[" << i << "] is missing test_rom or screenshot" << std::endl;
+			return false;
+		}
+
+		RegressionTest parsed_test;
+		parsed_test.test_rom = rom;
+		parsed_test.screenshot = screenshot;
+		parsed_test.frame_count = static_cast<uint64_t>(frame_count_i64);
+		parsed_tests.push_back(std::move(parsed_test));
+	}
+
+	regression_mode_         = true;
+	regression_had_failures_ = false;
+	regression_current_test_ = 0;
+	regression_expected_dir_ = expected_dir;
+	regression_tests_        = std::move(parsed_tests);
+
+	std::cout << "[Pretendo] Loaded " << regression_tests_.size() << " regression tests" << std::endl;
+
+	QTimer::singleShot(0, this, [this]() { startNextRegressionTest(); });
+	return true;
+}
+
+//------------------------------------------------------------------------------
+// Name: startNextRegressionTest
+//------------------------------------------------------------------------------
+void Pretendo::startNextRegressionTest() {
+	if (!regression_mode_) {
+		return;
+	}
+
+	if (regression_current_test_ >= regression_tests_.size()) {
+		finishRegressionRun();
+		return;
+	}
+
+	const RegressionTest &test = regression_tests_[regression_current_test_];
+
+	on_action_Stop_triggered();
+	on_action_Free_ROM_triggered();
+
+	std::cout << "[Pretendo] Running test " << (regression_current_test_ + 1) << "/" << regression_tests_.size() << ": "
+			  << test.test_rom.toStdString() << " for " << test.frame_count << " frames" << std::endl;
+
+	if (!nes::cart.load(test.test_rom.toStdString())) {
+		std::cerr << "[Pretendo] Failed to load ROM: " << test.test_rom.toStdString() << std::endl;
+		regression_had_failures_ = true;
+		++regression_current_test_;
+		QTimer::singleShot(0, this, [this]() { startNextRegressionTest(); });
+		return;
+	}
+
+	setFrameLimit(test.frame_count);
+	on_action_Run_triggered();
+}
+
+//------------------------------------------------------------------------------
+// Name: finishRegressionRun
+//------------------------------------------------------------------------------
+void Pretendo::finishRegressionRun() {
+	on_action_Stop_triggered();
+	on_action_Free_ROM_triggered();
+
+	const int exit_code = regression_had_failures_ ? 1 : 0;
+	if (exit_code == 0) {
+		std::cout << "[Pretendo] Regression run complete: all compared screenshots matched" << std::endl;
+	} else {
+		std::cout << "[Pretendo] Regression run complete: mismatches detected" << std::endl;
+	}
+
+	QTimer::singleShot(0, this, [this, exit_code]() {
+		close();
+		QCoreApplication::exit(exit_code);
+	});
+}
+
+//------------------------------------------------------------------------------
+// Name: saveScreenshot
+//------------------------------------------------------------------------------
+bool Pretendo::saveScreenshot(const QString &path) {
+	if (!nes::cart.mapper()) {
+		return false;
+	}
+
+	const QFileInfo screenshot_info(path);
+	QDir().mkpath(screenshot_info.absolutePath());
+
+	QImage screenshot = ui_.video->screenshot();
+	return screenshot.save(path);
+}
+
+//------------------------------------------------------------------------------
 // Name: onFrameCompleted
 //------------------------------------------------------------------------------
 void Pretendo::onFrameCompleted(const QByteArray &samples) {
@@ -335,10 +525,38 @@ void Pretendo::onFrameCompleted(const QByteArray &samples) {
 
 	++raw_framecount_;
 	if (frame_limit_ != 0 && raw_framecount_ >= frame_limit_) {
-		on_action_Take_Screenshot_triggered();
-		on_action_Stop_triggered();
-		on_action_Free_ROM_triggered();
-		qApp->quit();
+		if (regression_mode_ && regression_current_test_ < regression_tests_.size()) {
+			const RegressionTest test = regression_tests_[regression_current_test_];
+			if (!saveScreenshot(test.screenshot)) {
+				std::cerr << "[Pretendo] Failed to save screenshot: " << test.screenshot.toStdString() << std::endl;
+				regression_had_failures_ = true;
+			} else {
+				const QString expected = QDir(regression_expected_dir_).filePath(QFileInfo(test.screenshot).fileName());
+				if (QFileInfo::exists(expected)) {
+					const bool matches = files_equal(test.screenshot, expected);
+					if (!matches) {
+						std::cerr << "[Pretendo] MISMATCH: " << test.screenshot.toStdString() << " != " << expected.toStdString() << std::endl;
+						regression_had_failures_ = true;
+					} else {
+						std::cout << "[Pretendo] MATCH: " << QFileInfo(test.screenshot).fileName().toStdString() << std::endl;
+					}
+				} else {
+					std::cout << "[Pretendo] SKIP (no expected image): " << expected.toStdString() << std::endl;
+				}
+			}
+
+			on_action_Stop_triggered();
+			on_action_Free_ROM_triggered();
+			setFrameLimit(0);
+
+			++regression_current_test_;
+			QTimer::singleShot(0, this, [this]() { startNextRegressionTest(); });
+		} else {
+			on_action_Take_Screenshot_triggered();
+			on_action_Stop_triggered();
+			on_action_Free_ROM_triggered();
+			qApp->quit();
+		}
 	}
 }
 
@@ -702,12 +920,11 @@ void Pretendo::on_action_Take_Screenshot_triggered() {
 		return;
 	}
 
-	QImage screenshot = ui_.video->screenshot();
-	auto pix          = QPixmap::fromImage(screenshot);
-
 	QString filename = QString::fromStdString(nes::cart.filename());
 
 	QFileInfo fi(filename);
-
-	pix.save(QString("pretendo-%1-%2.png").arg(nes::cart.rom_hash(), 8, 16, QLatin1Char('0')).arg(fi.baseName()));
+	const QString output = QString("pretendo-%1-%2.png").arg(nes::cart.rom_hash(), 8, 16, QLatin1Char('0')).arg(fi.baseName());
+	if (!saveScreenshot(output)) {
+		QMessageBox::critical(this, tr("Error Taking Snapshot"), tr("Failed to write screenshot"));
+	}
 }

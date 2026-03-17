@@ -13,6 +13,7 @@ namespace {
 	std::cout << "OPTIONS:\n";
 	std::cout << "\t--fps <NUM>\n";
 	std::cout << "\t--test-frames <NUM>\n";
+	std::cout << "\t--test-config <FILE>\n";
 	std::cout << "\t--help" << std::endl;
 	exit(0);
 }
@@ -25,6 +26,7 @@ int main(int argc, char *argv[]) {
 
 	int fps              = 60;
 	uint64_t test_cycles = 0;
+	QString test_config;
 	QString rom;
 
 	int i = 1;
@@ -49,6 +51,16 @@ int main(int argc, char *argv[]) {
 				std::cerr << "ERROR: Invalid test cycles" << std::endl;
 				usage(argv[0]);
 			}
+		} else if (strcmp(argv[i], "--test-config") == 0) {
+			if (i + 1 == argc) {
+				usage(argv[0]);
+			}
+			++i;
+			test_config = argv[i];
+			if (test_config.isEmpty()) {
+				std::cerr << "ERROR: Invalid test config file" << std::endl;
+				usage(argv[0]);
+			}
 		} else if (strcmp(argv[i], "--help") == 0) {
 			usage(argv[0]);
 		} else {
@@ -61,13 +73,24 @@ int main(int argc, char *argv[]) {
 		usage(argv[0]);
 	}
 
+	if (!test_config.isEmpty() && test_cycles != 0) {
+		std::cerr << "ERROR: --test-frames and --test-config cannot be used together" << std::endl;
+		usage(argv[0]);
+	}
+
 	QSurfaceFormat format;
 	format.setSwapInterval(0); // Disable VSync
 	QSurfaceFormat::setDefaultFormat(format);
 
 	Pretendo w(rom);
 	w.setFrameRate(fps);
-	w.setFrameLimit(test_cycles);
+	if (!test_config.isEmpty()) {
+		if (!w.configureRegressionTests(test_config)) {
+			return 1;
+		}
+	} else {
+		w.setFrameLimit(test_cycles);
+	}
 	w.show();
 
 	return app.exec();
