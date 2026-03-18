@@ -301,8 +301,16 @@ uint8_t select_pixel(uint_least16_t index) {
 	const uint8_t pixel  = select_bg_pixel(index);
 	const bool bg_opaque = (pixel & 0x03) != 0;
 
+	if (UNLIKELY(visible_sprite_count_ == 0)) {
+		return pixel;
+	}
+
 	// then see if any of the sprites belong..
 	if (LIKELY(index >= 8 || ppu_mask_.sprite_clipping) && ppu_mask_.sprites_visible) {
+		if (LIKELY(index < left_most_sprite_x_)) {
+			return pixel;
+		}
+
 		const bool render_sprites = show_sprites;
 
 		// this will loop at most 8 times
