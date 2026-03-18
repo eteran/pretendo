@@ -2,7 +2,7 @@
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
 #define LIKELY(expr) __builtin_expect(!!(expr), 1)
 #define UNLIKELY(expr) __builtin_expect(!!(expr), 0)
 #else

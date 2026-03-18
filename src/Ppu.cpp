@@ -340,10 +340,12 @@ uint8_t select_pixel(uint_least16_t index) {
 			// we rendered a sprite0 pixel which collided with a BG pixel
 			// NOTE: according to blargg's tests, a collision doesn't seem
 			//       possible to occur on the rightmost pixel
+			const bool is_sprite0 = (sprite.attr & OamZero) != 0;
+			const bool hit_window = (index < 255) && bg_opaque;
 #ifndef SPRITE_ZERO_HACK
-			if ((sprite.attr & OamZero) && (index < 255) && bg_opaque) {
+			if (is_sprite0 && hit_window) {
 #else
-			if ((sprite.attr & OamZero) && (index < 255)) {
+			if (is_sprite0 && (index < 255)) {
 #endif
 				status_.sprite0 = true;
 			}
@@ -354,7 +356,8 @@ uint8_t select_pixel(uint_least16_t index) {
 				return pixel;
 			}
 
-			if ((((sprite.attr & OamPriority) == 0) || !bg_opaque)) {
+			const bool sprite_in_front = (sprite.attr & OamPriority) == 0;
+			if (sprite_in_front || !bg_opaque) {
 				return (0x10 | sprite_pixel | ((sprite.attr & OamColor) << 2)) & 0xff;
 			}
 
