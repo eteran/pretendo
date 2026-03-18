@@ -79,7 +79,7 @@ void Mapper7::write_f(uint_least16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 void Mapper7::write_handler(uint_least16_t address, uint8_t value) {
 	(void)address;
-	set_prg_89abcdef(value & 0x07);
+	set_prg_89abcdef(value);
 
 	if (value & 0x10) {
 		set_mirroring(mirror_single_high);

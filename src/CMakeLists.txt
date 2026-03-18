@@ -118,7 +118,7 @@ add_executable(pretendo
 	opcodes/inx.h
 	opcodes/iny.h
 	opcodes/jmp.h
-	opcodes/jsr.h
+
 	opcodes/lda.h
 	opcodes/ldx.h
 	opcodes/ldy.h

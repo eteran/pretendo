@@ -4,37 +4,89 @@
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/AccuracyCoin.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/AccuracyCoin.png",
-            "frame_count": 600
+            "frame_count": 6000,
+            "input": [
+                {
+                    "120": [
+                        "START"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/apu_reset/4015_cleared.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/apu_reset/4015_cleared.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "RESET"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/apu_reset/4017_timing.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/apu_reset/4017_timing.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "RESET"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/apu_reset/4017_written.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/apu_reset/4017_written.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "RESET"
+                    ],
+                    "240": [
+                        "RESET"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/apu_reset/irq_flag_cleared.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/apu_reset/irq_flag_cleared.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "RESET"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/apu_reset/len_ctrs_enabled.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/apu_reset/len_ctrs_enabled.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "RESET"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/apu_reset/works_immediately.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/apu_reset/works_immediately.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "RESET"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/apu_test/apu_test.nes",
@@ -259,12 +311,26 @@
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/cpu_reset/ram_after_reset.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/cpu_reset/ram_after_reset.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "RESET"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/cpu_reset/registers.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/cpu_reset/registers.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "300": [
+                        "RESET"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/cpu_timing_test/cpu_timing_test.nes",
@@ -454,7 +520,14 @@
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/mmc3bigchrram-0.01/mmc3bigchrram.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/mmc3bigchrram-0.01/mmc3bigchrram.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "START"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/mmc3_irq_tests/1.Clocking.nes",
@@ -519,7 +592,29 @@
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/nestest.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/nestest.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "START"
+                    ]
+                }
+            ]
+        },
+        {
+            "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/nestest.nes",
+            "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/nestest-invalid-ops.png",
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "SELECT"
+                    ],
+                    "240": [
+                        "START"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/nmi_sync/demo_ntsc.nes",
@@ -649,7 +744,7 @@
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/ppu_vbl_nmi/ppu_vbl_nmi.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/ppu_vbl_nmi/ppu_vbl_nmi.png",
-            "frame_count": 900
+            "frame_count": 1200
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/ppu_vbl_nmi/rom_singles/01-vbl_basics.nes",
@@ -869,7 +964,14 @@
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/tvpassfail/tv.nes",
             "screenshot": "C:/Users/evant/Documents/Projects/pretendo/test_results/tvpassfail/tv.png",
-            "frame_count": 600
+            "frame_count": 600,
+            "input": [
+                {
+                    "120": [
+                        "START"
+                    ]
+                }
+            ]
         },
         {
             "test_rom": "C:/Users/evant/Documents/Projects/pretendo/nes-test-roms/vbl_nmi_timing/1.frame_basics.nes",

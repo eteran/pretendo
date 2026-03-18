@@ -414,9 +414,32 @@ bool Pretendo::configureRegressionTests(const QString &config_path) {
 		}
 
 		RegressionTest parsed_test;
-		parsed_test.test_rom = rom;
-		parsed_test.screenshot = screenshot;
+		parsed_test.test_rom    = rom;
+		parsed_test.screenshot  = screenshot;
 		parsed_test.frame_count = static_cast<uint64_t>(frame_count_i64);
+
+		const QJsonArray input_array = test.value("input").toArray();
+		for (const QJsonValue &entry : input_array) {
+			if (!entry.isObject()) {
+				std::cerr << "[Pretendo] tests[" << i << "] input entry is not an object" << std::endl;
+				return false;
+			}
+			const QJsonObject obj = entry.toObject();
+			for (auto it = obj.begin(); it != obj.end(); ++it) {
+				bool frame_ok            = false;
+				const uint64_t frame_num = it.key().toULongLong(&frame_ok);
+				if (!frame_ok) {
+					std::cerr << "[Pretendo] tests[" << i << "] has invalid input frame number: " << it.key().toStdString() << std::endl;
+					return false;
+				}
+				std::vector<QString> buttons;
+				for (const QJsonValue &btn : it.value().toArray()) {
+					buttons.push_back(btn.toString());
+				}
+				parsed_test.input_events[frame_num] = std::move(buttons);
+			}
+		}
+
 		parsed_tests.push_back(std::move(parsed_test));
 	}
 
@@ -524,6 +547,54 @@ void Pretendo::onFrameCompleted(const QByteArray &samples) {
 	++framecount_;
 
 	++raw_framecount_;
+
+	// Apply scheduled controller inputs for regression tests
+	if (regression_mode_ && regression_current_test_ < regression_tests_.size()) {
+		const RegressionTest &cur_test = regression_tests_[regression_current_test_];
+
+		// Clear all automation inputs each frame so buttons don't stay pressed
+		nes::input::controller1.keystate_.reset();
+
+		const auto it = cur_test.input_events.find(raw_framecount_);
+		if (it != cur_test.input_events.end()) {
+			bool do_reset = false;
+			for (const QString &btn : it->second) {
+				if (btn.compare(QLatin1String("RESET"), Qt::CaseInsensitive) == 0) {
+					do_reset = true;
+				} else if (btn.compare(QLatin1String("A"), Qt::CaseInsensitive) == 0) {
+					nes::input::controller1.keystate_[Controller::INDEX_A] = true;
+				} else if (btn.compare(QLatin1String("B"), Qt::CaseInsensitive) == 0) {
+					nes::input::controller1.keystate_[Controller::INDEX_B] = true;
+				} else if (btn.compare(QLatin1String("SELECT"), Qt::CaseInsensitive) == 0) {
+					nes::input::controller1.keystate_[Controller::INDEX_SELECT] = true;
+				} else if (btn.compare(QLatin1String("START"), Qt::CaseInsensitive) == 0) {
+					nes::input::controller1.keystate_[Controller::INDEX_START] = true;
+				} else if (btn.compare(QLatin1String("UP"), Qt::CaseInsensitive) == 0) {
+					nes::input::controller1.keystate_[Controller::INDEX_UP] = true;
+				} else if (btn.compare(QLatin1String("DOWN"), Qt::CaseInsensitive) == 0) {
+					nes::input::controller1.keystate_[Controller::INDEX_DOWN] = true;
+				} else if (btn.compare(QLatin1String("LEFT"), Qt::CaseInsensitive) == 0) {
+					nes::input::controller1.keystate_[Controller::INDEX_LEFT] = true;
+				} else if (btn.compare(QLatin1String("RIGHT"), Qt::CaseInsensitive) == 0) {
+					nes::input::controller1.keystate_[Controller::INDEX_RIGHT] = true;
+				} else {
+					std::cerr << "[Pretendo] Unknown input button: " << btn.toStdString() << std::endl;
+				}
+			}
+
+			if (do_reset) {
+				emulation_thread_->stopLoop();
+				viewer_timer_->stop();
+				audio_->stop();
+				nes::reset(nes::Reset::Soft);
+				emulation_thread_->startLoop();
+				viewer_timer_->start();
+				audio_->start();
+				return;
+			}
+		}
+	}
+
 	if (frame_limit_ != 0 && raw_framecount_ >= frame_limit_) {
 		if (regression_mode_ && regression_current_test_ < regression_tests_.size()) {
 			const RegressionTest test = regression_tests_[regression_current_test_];

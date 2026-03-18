@@ -668,9 +668,13 @@ void irq(IrqSource source) {
 
 	irq_sources_ |= source;
 
+#if 0
 	if (irq_sources_) {
 		irq_asserted_ = true;
 	}
+#else
+	irq_asserted_ = irq_sources_ != 0;
+#endif
 }
 
 /**
@@ -680,10 +684,13 @@ void irq(IrqSource source) {
 void clear_irq(IrqSource source) {
 
 	irq_sources_ &= ~source;
-
+#if 0
 	if (!irq_sources_) {
 		irq_asserted_ = false;
 	}
+#else
+	irq_asserted_ = irq_sources_ != 0;
+#endif
 }
 
 /**

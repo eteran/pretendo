@@ -38,7 +38,6 @@ struct operation_branch {};
 #include "opcodes/inx.h"
 #include "opcodes/iny.h"
 #include "opcodes/jmp.h"
-#include "opcodes/jsr.h"
 #include "opcodes/lda.h"
 #include "opcodes/ldx.h"
 #include "opcodes/ldy.h"

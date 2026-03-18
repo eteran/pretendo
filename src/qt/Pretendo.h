@@ -4,6 +4,7 @@
 
 #include <QMainWindow>
 #include <chrono>
+#include <map>
 #include <vector>
 
 #include "ui_Pretendo.h"
@@ -75,6 +76,7 @@ private:
 		QString test_rom;
 		QString screenshot;
 		uint64_t frame_count = 0;
+		std::map<uint64_t, std::vector<QString>> input_events;
 	};
 
 	Ui::Pretendo ui_;

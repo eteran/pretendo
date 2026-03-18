@@ -1414,6 +1414,7 @@ void write2004(uint8_t value) {
 
 	if (rendering() && ppu_mask_.screen_enabled) {
 		sprite_address_ += 4;
+		sprite_address_ &= 0xfc;
 	} else {
 		// sprite_address_ is an 8-bit type, so wrapping is implicit
 		sprite_ram_[sprite_address_++] = value;
@@ -1526,6 +1527,8 @@ uint8_t read2002() {
 		((status_.raw & (StatusOverflow | StatusSprite0 | StatusVBlank)) |
 		 (latch_ & ~(StatusOverflow | StatusSprite0 | StatusVBlank))) &
 		0xff;
+
+	latch_ = ret;
 
 	// reset scroll/write latch
 	write_latch_ = false;
