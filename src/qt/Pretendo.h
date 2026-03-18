@@ -9,7 +9,6 @@
 
 #include "ui_Pretendo.h"
 
-class QAudioOutput;
 class FilesystemModel;
 class QLabel;
 class QSortFilterProxyModel;

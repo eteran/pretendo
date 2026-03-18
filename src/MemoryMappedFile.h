@@ -24,6 +24,8 @@ public:
 private:
 	uint8_t *ptr_ = nullptr;
 	std::function<void(uint8_t *)> deleter_;
+	void *file_handle_ = nullptr;       // Windows HANDLE
+	void *mapping_handle_ = nullptr;    // Windows HANDLE
 };
 
 #endif
