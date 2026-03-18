@@ -8,8 +8,8 @@
 #include "Nes.h"
 
 #include <algorithm>
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
 // #define SPRITE_ZERO_HACK
 
@@ -52,8 +52,8 @@ union Mask {
 };
 
 constexpr uint64_t WriteBlockCycles = 82000;
-constexpr auto CyclesPerScanline = 341u;
-constexpr auto CpuAlignment      = 0u;
+constexpr auto CyclesPerScanline    = 341u;
+constexpr auto CpuAlignment         = 0u;
 
 constexpr uint8_t StatusOverflow = 0b00100000;
 constexpr uint8_t StatusSprite0  = 0b01000000;
@@ -140,13 +140,13 @@ uint8_t current_sprite_index_ = 0;
 uint8_t sprite_ram_[0x100]    = {};
 uint8_t sprite_address_       = 0; // OAMADDR
 
-uint8_t sprite_data_[32]            = {};
-uint8_t sprite_data_index_          = 0;
-uint8_t left_most_sprite_x_         = 0xff;
-uint8_t sprite_read_buffer_         = 0;
-uint8_t sprite_read_index_          = 0;
-bool current_is_sprite_0            = false;
-uint8_t visible_sprite_count_       = 0;
+uint8_t sprite_data_[32]      = {};
+uint8_t sprite_data_index_    = 0;
+uint8_t left_most_sprite_x_   = 0xff;
+uint8_t sprite_read_buffer_   = 0;
+uint8_t sprite_read_index_    = 0;
+bool current_is_sprite_0      = false;
+uint8_t visible_sprite_count_ = 0;
 
 enum SpriteEvalState {
 	STATE_1_Y,
@@ -155,7 +155,9 @@ enum SpriteEvalState {
 	STATE_1_X,
 	STATE_3,
 	STATE_4
-} sprite_eval_state_ = STATE_1_Y;
+};
+
+SpriteEvalState sprite_eval_state_ = STATE_1_Y;
 
 uint8_t palette_[0x20];
 uint64_t ppu_cycle_                    = 0;
@@ -185,8 +187,8 @@ uint8_t attr_shift0_                   = 13;
 uint8_t attr_shift1_                   = 28;
 Mapper *mapper_                        = nullptr;
 
-bool odd_frame_   = false;
-bool write_latch_ = false;
+bool odd_frame_      = false;
+bool write_latch_    = false;
 bool odd_skip_armed_ = false;
 
 //------------------------------------------------------------------------------
@@ -265,9 +267,9 @@ uint8_t render_blank_pixel() {
 
 	if (UNLIKELY((vram_address_ & 0x3f00) == 0x3f00)) {
 		return palette_[vram_address_ & 0x1f] & monochrome_mask_;
-    }
+	}
 
-    return palette_[0x00] & monochrome_mask_;
+	return palette_[0x00] & monochrome_mask_;
 }
 
 //------------------------------------------------------------------------------
@@ -276,16 +278,15 @@ uint8_t render_blank_pixel() {
 //------------------------------------------------------------------------------
 uint8_t select_bg_pixel(uint_least16_t index) {
 
-	// first identify what the BG pixel would be
-	if (LIKELY(index >= 8 || ppu_mask_.background_clipping) && ppu_mask_.background_visible) {
-		return (((pattern_queue_ & bg_mask0_) >> bg_shift0_) |
-				((pattern_queue_ & bg_mask1_) >> bg_shift1_) |
-				((attribute_queue_ & bg_mask0_) >> attr_shift0_) |
-				((attribute_queue_ & bg_mask1_) >> attr_shift1_)) &
-			   0xff;
-	}
+	uint8_t bg_enable_mask = (LIKELY(index >= 8 || ppu_mask_.background_clipping) && ppu_mask_.background_visible) * 0xff;
 
-	return 0x00;
+	// first identify what the BG pixel would be
+
+	return (((pattern_queue_ & bg_mask0_) >> bg_shift0_) |
+			((pattern_queue_ & bg_mask1_) >> bg_shift1_) |
+			((attribute_queue_ & bg_mask0_) >> attr_shift0_) |
+			((attribute_queue_ & bg_mask1_) >> attr_shift1_)) &
+		   bg_enable_mask;
 }
 
 //------------------------------------------------------------------------------
@@ -297,7 +298,7 @@ uint8_t select_pixel(uint_least16_t index) {
 	assert(visible_sprite_count_ <= 8);
 
 	// default to displaying the BG pixel
-    const uint8_t pixel = select_bg_pixel(index);
+	const uint8_t pixel  = select_bg_pixel(index);
 	const bool bg_opaque = (pixel & 0x03) != 0;
 
 	// then see if any of the sprites belong..
@@ -330,7 +331,7 @@ uint8_t select_pixel(uint_least16_t index) {
 
 			// we rendered a sprite0 pixel which collided with a BG pixel
 			// NOTE: according to blargg's tests, a collision doesn't seem
-            //       possible to occur on the rightmost pixel
+			//       possible to occur on the rightmost pixel
 #ifndef SPRITE_ZERO_HACK
 			if ((sprite.attr & OamZero) && (index < 255) && bg_opaque) {
 #else
@@ -339,11 +340,11 @@ uint8_t select_pixel(uint_least16_t index) {
 				status_.sprite0 = true;
 			}
 
-            // NOTE(eteran): this needs to be here (or later)
-            // because we still need to preserve sprite zero hit detection
+			// NOTE(eteran): this needs to be here (or later)
+			// because we still need to preserve sprite zero hit detection
 			if (UNLIKELY(!render_sprites)) {
-                return pixel;
-            }
+				return pixel;
+			}
 
 			if ((((sprite.attr & OamPriority) == 0) || !bg_opaque)) {
 				return (0x10 | sprite_pixel | ((sprite.attr & OamColor) << 2)) & 0xff;
@@ -631,7 +632,7 @@ void evaluate_sprites_even() {
 		// one way or another, we're done evaluating the sprites, so copy over the
 		// count
 		if (hpos_ == 256) {
-			visible_sprite_count_       = sprite_data_index_;
+			visible_sprite_count_ = sprite_data_index_;
 		}
 	}
 }
@@ -643,7 +644,7 @@ void evaluate_sprites_odd() {
 	if (hpos_ < 64) {
 		sprite_read_buffer_ = 0xff;
 	} else if (hpos_ == 65) {
-		sprite_read_index_  = sprite_address_;
+		sprite_read_index_ = sprite_address_;
 
 		// Weird bug in the PPU, only "Huge Insect" is known to be affected by this
 		// outside of artificial tests
@@ -678,8 +679,8 @@ void enter_vblank() {
 template <class Size, class Pattern>
 void open_sprite_pattern() {
 
-	current_sprite_index_     = ((hpos_ - 1) >> 3) & 0x07;
-	SpritePattern &sprite     = sprite_patterns_[current_sprite_index_];
+	current_sprite_index_ = ((hpos_ - 1) >> 3) & 0x07;
+	SpritePattern &sprite = sprite_patterns_[current_sprite_index_];
 
 	sprite.y = sprite_y(current_sprite_index_);
 
@@ -727,10 +728,10 @@ void read_sprite_pattern() {
 //------------------------------------------------------------------------------
 uint8_t render_pixel() {
 
-    const uint8_t pixel = select_pixel(hpos_ - 1);
+	const uint8_t pixel = select_pixel(hpos_ - 1);
 
-    pattern_queue_ = (pattern_queue_ << 1) & 0xfffefffe;
-    attribute_queue_ = (attribute_queue_ << 1) & 0xfffefffe;
+	pattern_queue_   = (pattern_queue_ << 1) & 0xfffefffe;
+	attribute_queue_ = (attribute_queue_ << 1) & 0xfffefffe;
 
 	// mask = (pixel & 0x03) ? 0xff : 0x00
 	// but without branches
@@ -744,10 +745,10 @@ uint8_t render_pixel() {
 //------------------------------------------------------------------------------
 void update_shift_registers_render() {
 
-    pattern_queue_ |= next_pattern_[0];
-    pattern_queue_ |= (next_pattern_[1] << 16);
-    attribute_queue_ |= ((next_attribute_ >> 0) & 0x01) * 0x000000ff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
-    attribute_queue_ |= ((next_attribute_ >> 1) & 0x01) * 0x00ff0000; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+	pattern_queue_ |= next_pattern_[0];
+	pattern_queue_ |= (next_pattern_[1] << 16);
+	attribute_queue_ |= ((next_attribute_ >> 0) & 0x01) * 0x000000ff; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
+	attribute_queue_ |= ((next_attribute_ >> 1) & 0x01) * 0x00ff0000; // we multiply here to "replicate" this bit 8 times (it is used for a whole tile)
 }
 
 //------------------------------------------------------------------------------
@@ -755,8 +756,8 @@ void update_shift_registers_render() {
 //------------------------------------------------------------------------------
 void update_shift_registers_idle() {
 
-    pattern_queue_ = (pattern_queue_ << 8) & 0xff00ff00;
-    attribute_queue_ = (attribute_queue_ << 8) & 0xff00ff00;
+	pattern_queue_   = (pattern_queue_ << 8) & 0xff00ff00;
+	attribute_queue_ = (attribute_queue_ << 8) & 0xff00ff00;
 
 	update_shift_registers_render();
 }
@@ -817,7 +818,7 @@ void increment_vram_address() {
 void clock_ppu(const scanline_prerender &) {
 
 	if (UNLIKELY(hpos_ == 0)) {
-		odd_skip_armed_ = false;
+		odd_skip_armed_  = false;
 		status_.sprite0  = 0;
 		status_.overflow = 0;
 	} else if (UNLIKELY(hpos_ == 1)) {
@@ -1096,7 +1097,7 @@ void clock_ppu(const scanline_render &target) {
 		} else if (hpos_ < 257) {
 
 			// NOTE(eteran): on my machine, this code "costs" about 200 FPS
-            target.buffer[hpos_ - 1] = render_pixel();
+			target.buffer[hpos_ - 1] = render_pixel();
 			target.buffer[hpos_ - 1] |= (ppu_mask_.intensity << 6);
 
 			switch (hpos_ & 0x07) {
@@ -1321,17 +1322,17 @@ void reset(Reset reset_type) {
 		}
 	}
 
-    attribute_queue_      = 0;
+	attribute_queue_      = 0;
 	hpos_                 = 0;
 	latch_                = 0;
 	nametable_            = 0x0000;
 	next_attribute_       = 0;
-    next_pattern_[0]      = 0;
-    next_pattern_[1]      = 0;
+	next_pattern_[0]      = 0;
+	next_pattern_[1]      = 0;
 	next_tile_index_      = 0;
 	odd_frame_            = false;
 	odd_skip_armed_       = false;
-    pattern_queue_        = 0;
+	pattern_queue_        = 0;
 	ppu_cycle_            = 0;
 	ppu_control_.raw      = 0;
 	ppu_mask_.raw         = 0;
