@@ -33,6 +33,17 @@ std::string Mapper5::name() const {
 }
 
 //------------------------------------------------------------------------------
+// Name: write_4
+//------------------------------------------------------------------------------
+void Mapper5::write_4(uint_least16_t address, uint8_t value) {
+	if (address == 0x4014) {
+		clear_in_frame();
+	}
+
+	Mapper::write_4(address, value);
+}
+
+//------------------------------------------------------------------------------
 // Name: write_5
 //------------------------------------------------------------------------------
 void Mapper5::write_5(uint_least16_t address, uint8_t value) {
@@ -216,6 +227,11 @@ void Mapper5::write_5(uint_least16_t address, uint8_t value) {
 
 	case 0x5204:
 		irq_enabled_ = (value & 0x80);
+		if (irq_enabled_ && irq_status_.pending) {
+			nes::cpu::irq(nes::cpu::MAPPER_IRQ);
+		} else if (!irq_enabled_) {
+			nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
+		}
 		break;
 
 	case 0x5205:
@@ -399,6 +415,17 @@ uint8_t Mapper5::read_c(uint_least16_t address) {
 //------------------------------------------------------------------------------
 uint8_t Mapper5::read_d(uint_least16_t address) {
 	return read_handler(address);
+}
+
+//------------------------------------------------------------------------------
+// Name: read_f
+//------------------------------------------------------------------------------
+uint8_t Mapper5::read_f(uint_least16_t address) {
+	if (address == 0xfffa || address == 0xfffb) {
+		clear_in_frame();
+	}
+
+	return Mapper::read_f(address);
 }
 
 //------------------------------------------------------------------------------
@@ -667,7 +694,7 @@ void Mapper5::write_2(uint_least16_t address, uint8_t value) {
 	case 0x01:
 		// sprites and background disabled
 		if (!(value & 0x18)) {
-			irq_status_.in_frame = false;
+			clear_in_frame();
 		}
 		break;
 	}
@@ -685,7 +712,7 @@ void Mapper5::write_3(uint_least16_t address, uint8_t value) {
 	case 0x01:
 		// sprites and background disabled
 		if (!(value & 0x18)) {
-			irq_status_.in_frame = false;
+			clear_in_frame();
 		}
 		break;
 	}
@@ -694,20 +721,75 @@ void Mapper5::write_3(uint_least16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name: vram_change_hook
 //------------------------------------------------------------------------------
-void Mapper5::vram_change_hook(uint_least16_t vram_address) {
+void Mapper5::vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access) {
+	if (access == PpuMemoryAccess::RenderRead || access == PpuMemoryAccess::CpuRead) {
+		saw_ppu_read_ = true;
+	}
+
+	if (access != PpuMemoryAccess::RenderRead) {
+		return;
+	}
 
 	// when this is > 128 (32 * 4), we are fetching sprites, not BG tiles
 	++fetch_count_;
 
-	// 3 consecutive reads!
-	if (vram_address == prev_vram_address_[0] && vram_address == prev_vram_address_[1] && (vram_address & 0x2000)) {
+	if (scanline_pending_) {
 		clock_irq();
 		fetch_count_ = 0;
+		scanline_pending_ = false;
+	}
+
+	const bool is_nametable_read = (vram_address & 0x3000) == 0x2000;
+
+	// 3 consecutive nametable reads arm the scanline detector. The MMC5 clocks
+	// on the following PPU read, which is normally the attribute fetch.
+	if (is_nametable_read && vram_address == prev_vram_address_[0] && vram_address == prev_vram_address_[1]) {
+		scanline_pending_ = true;
 	}
 
 	// shift things down
 	prev_vram_address_[1] = prev_vram_address_[0];
 	prev_vram_address_[0] = vram_address;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+void Mapper5::cpu_sync() {
+	if (saw_ppu_read_) {
+		ppu_read_idle_cycles_ = 0;
+	} else if (ppu_read_idle_cycles_ < 3) {
+		++ppu_read_idle_cycles_;
+	}
+
+	if (ppu_read_idle_cycles_ >= 3 && irq_status_.in_frame) {
+		clear_in_frame();
+	}
+
+	saw_ppu_read_ = false;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+void Mapper5::clear_in_frame() {
+	irq_status_.in_frame = false;
+	irq_status_.pending  = false;
+	irq_counter_         = 0;
+	nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
+	reset_scanline_detector();
+	ppu_read_idle_cycles_ = 0;
+}
+
+//------------------------------------------------------------------------------
+// Name:
+//------------------------------------------------------------------------------
+void Mapper5::reset_scanline_detector() {
+	prev_vram_address_[0] = 0xffff;
+	prev_vram_address_[1] = 0xffff;
+	scanline_pending_     = false;
+	fetch_count_          = 0;
+	saw_ppu_read_         = false;
 }
 
 //------------------------------------------------------------------------------
@@ -742,5 +824,5 @@ void Mapper5::clock_irq() {
 void Mapper5::ppu_end_frame() {
 	// since we have no idea how MMC5 detects the end of the frame,
 	// we use this hook for now
-	irq_status_.in_frame = false;
+	clear_in_frame();
 }

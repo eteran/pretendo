@@ -20,6 +20,7 @@ public:
 	std::string name() const override;
 
 public:
+	void write_4(uint_least16_t address, uint8_t value) override;
 	void write_2(uint_least16_t address, uint8_t value) override;
 	void write_3(uint_least16_t address, uint8_t value) override;
 	void write_5(uint_least16_t address, uint8_t value) override;
@@ -42,17 +43,21 @@ public:
 	uint8_t read_b(uint_least16_t address) override;
 	uint8_t read_c(uint_least16_t address) override;
 	uint8_t read_d(uint_least16_t address) override;
+	uint8_t read_f(uint_least16_t address) override;
 
 public:
 	uint8_t read_vram(uint_least16_t address) override;
 	void write_vram(uint_least16_t address, uint8_t value) override;
+	void cpu_sync() override;
 
 public:
-	void vram_change_hook(uint_least16_t vram_address) override;
+	void vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access) override;
 	void ppu_end_frame() override;
 
 private:
 	void clock_irq();
+	void clear_in_frame();
+	void reset_scanline_detector();
 	void write_handler(uint_least16_t address, uint8_t value);
 	uint8_t read_handler(uint_least16_t address);
 
@@ -66,6 +71,8 @@ private:
 
 	bool irq_enabled_              = false;
 	bool large_sprites_            = false;
+	bool saw_ppu_read_             = false;
+	bool scanline_pending_         = false;
 	uint16_t bg_char_upper_        = 0x00;
 	uint16_t fetch_count_          = 0;
 	uint8_t chr_mode_              = 0;
@@ -78,6 +85,7 @@ private:
 	uint8_t mirroring_mode_        = 0;
 	uint8_t multiplier_1_          = 0;
 	uint8_t multiplier_2_          = 0;
+	uint8_t ppu_read_idle_cycles_  = 0;
 	uint8_t prg_mode_              = 0x03;
 	uint8_t prg_ram_protect1_      = 0;
 	uint8_t prg_ram_protect2_      = 0;

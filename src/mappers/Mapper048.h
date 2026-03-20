@@ -20,7 +20,7 @@ public:
 	void write_e(uint_least16_t address, uint8_t value) override;
 	void write_f(uint_least16_t address, uint8_t value) override;
 
-	void vram_change_hook(uint_least16_t vram_address) override;
+	void vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access) override;
 
 private:
 	void write_handler(uint_least16_t address, uint8_t value);

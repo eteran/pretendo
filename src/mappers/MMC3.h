@@ -28,7 +28,7 @@ public:
 	void write_f(uint_least16_t address, uint8_t value) override;
 
 public:
-	void vram_change_hook(uint_least16_t vram_address) override;
+	void vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access) override;
 
 private:
 	int prg_bank(int bank) const;

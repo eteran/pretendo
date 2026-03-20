@@ -246,7 +246,11 @@ void Mapper64::write_f(uint_least16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void Mapper64::vram_change_hook(uint_least16_t vram_address) {
+void Mapper64::vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access) {
+
+	if (access != PpuMemoryAccess::Address) {
+		return;
+	}
 
 	if (!irq_mode_) {
 		if (vram_address & 0x1000 && !(prev_vram_address_ & 0x1000)) {

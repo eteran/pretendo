@@ -253,7 +253,11 @@ void MMC3::write_f(uint_least16_t address, uint8_t value) {
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
-void MMC3::vram_change_hook(uint_least16_t vram_address) {
+void MMC3::vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access) {
+
+	if (access != PpuMemoryAccess::Address) {
+		return;
+	}
 
 	if (vram_address & 0x1000 && !(prev_vram_address_ & 0x1000)) {
 		if ((nes::ppu::cycle_count() - prev_ppu_cycle_) >= 16) {

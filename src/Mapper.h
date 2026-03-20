@@ -17,6 +17,13 @@ using create_func = std::function<std::unique_ptr<Mapper>()>;
 
 class Mapper {
 public:
+	enum class PpuMemoryAccess {
+		Address,
+		RenderRead,
+		CpuRead,
+		CpuWrite,
+	};
+
 	static std::unique_ptr<Mapper> create_mapper(int num);
 	static void register_mapper(int num, create_func create_ptr);
 
@@ -76,7 +83,7 @@ public:
 
 	virtual void cpu_sync();
 	virtual void ppu_end_frame();
-	virtual void vram_change_hook(uint_least16_t vram_address);
+	virtual void vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access);
 
 protected:
 	uint8_t read_memory(uint_least16_t address);

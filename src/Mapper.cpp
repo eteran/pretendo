@@ -751,8 +751,9 @@ void Mapper::ppu_end_frame() {
 //------------------------------------------------------------------------------
 // Name: vram_change_hook
 //------------------------------------------------------------------------------
-void Mapper::vram_change_hook(uint_least16_t vram_address) {
+void Mapper::vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access) {
 	(void)vram_address;
+	(void)access;
 	// default does nothing
 }
 

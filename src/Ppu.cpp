@@ -265,7 +265,7 @@ void update_bg_extract_constants() {
 //------------------------------------------------------------------------------
 uint8_t render_blank_pixel() {
 
-	if (UNLIKELY((vram_address_ & 0x3f00) == 0x3f00)) {
+	if ((vram_address_ & 0x3f00) == 0x3f00) [[unlikely]] {
 		return palette_[vram_address_ & 0x1f] & monochrome_mask_;
 	}
 
@@ -301,13 +301,13 @@ uint8_t select_pixel(uint_least16_t index) {
 	const uint8_t pixel  = select_bg_pixel(index);
 	const bool bg_opaque = (pixel & 0x03) != 0;
 
-	if (UNLIKELY(visible_sprite_count_ == 0)) {
+	if (visible_sprite_count_ == 0) [[unlikely]] {
 		return pixel;
 	}
 
 	// then see if any of the sprites belong..
 	if (LIKELY(index >= 8 || ppu_mask_.sprite_clipping) && ppu_mask_.sprites_visible) {
-		if (LIKELY(index < left_most_sprite_x_)) {
+		if (index < left_most_sprite_x_) [[likely]] {
 			return pixel;
 		}
 
@@ -352,7 +352,7 @@ uint8_t select_pixel(uint_least16_t index) {
 
 			// NOTE(eteran): this needs to be here (or later)
 			// because we still need to preserve sprite zero hit detection
-			if (UNLIKELY(!render_sprites)) {
+			if (!render_sprites) [[unlikely]] {
 				return pixel;
 			}
 
@@ -373,7 +373,7 @@ uint8_t select_pixel(uint_least16_t index) {
 //------------------------------------------------------------------------------
 void clock_x() {
 	// wrap X at 31 and flip bit 10, or just increment
-	if (UNLIKELY((vram_address_ & 0x1f) == 0x1f)) {
+	if ((vram_address_ & 0x1f) == 0x1f) [[unlikely]] {
 		vram_address_ ^= 0x41f;
 	} else {
 		++vram_address_;
@@ -393,7 +393,7 @@ void clock_y() {
 	//    switched when it's incremented from _29_.
 	//
 	//    Y scroll still wraps from 31, but without flipping bit 11
-	if (UNLIKELY((vram_address_ & 0x7000) == 0x7000)) {
+	if ((vram_address_ & 0x7000) == 0x7000) [[unlikely]] {
 
 		// tile Y wraps from 7 -> 0
 		vram_address_ &= 0x0fff;
@@ -431,7 +431,7 @@ void open_background_pattern() {
 
 	const uint8_t tile_line = (vram_address_ & 0x7000) >> 12;
 	next_ppu_fetch_address_ = (background_pattern_table() | (next_tile_index_ << 4) | Pattern::offset | tile_line) & 0xffff;
-	mapper_->vram_change_hook(next_ppu_fetch_address_);
+	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::Address);
 }
 
 //------------------------------------------------------------------------------
@@ -440,6 +440,7 @@ void open_background_pattern() {
 template <class Pattern>
 void read_background_pattern() {
 
+	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::RenderRead);
 	next_pattern_[Pattern::index] = mapper_->read_vram(next_ppu_fetch_address_);
 }
 
@@ -448,13 +449,14 @@ void read_background_pattern() {
 //------------------------------------------------------------------------------
 void open_background_attribute() {
 	next_ppu_fetch_address_ = attribute_address(vram_address_);
-	mapper_->vram_change_hook(next_ppu_fetch_address_);
+	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::Address);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 void read_background_attribute() {
+	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::RenderRead);
 
 	// fetch the attribute byte
 	const uint8_t attr_byte = mapper_->read_vram(next_ppu_fetch_address_);
@@ -468,13 +470,14 @@ void read_background_attribute() {
 //------------------------------------------------------------------------------
 void open_tile_index() {
 	next_ppu_fetch_address_ = tile_address(vram_address_);
-	mapper_->vram_change_hook(next_ppu_fetch_address_);
+	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::Address);
 }
 
 //------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 void read_tile_index() {
+	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::RenderRead);
 	next_tile_index_ = mapper_->read_vram(next_ppu_fetch_address_);
 }
 
@@ -527,7 +530,7 @@ void evaluate_sprites_even() {
 	if (hpos_ <= 64) {
 		sprite_data_[(hpos_ >> 1) - 1] = sprite_read_buffer_;
 
-		if (UNLIKELY(hpos_ == 0)) {
+		if (hpos_ == 0) [[unlikely]] {
 			// reset some things
 			left_most_sprite_x_ = 0xff;
 		}
@@ -679,7 +682,7 @@ void enter_vblank() {
 
 	// Reading one PPU clock before reads it as clear and never sets the flag
 	// or generates NMI for that frame.
-	if (UNLIKELY(ppu_cycle_ != (ppu_read_2002_cycle_ + 1))) {
+	if (ppu_cycle_ != (ppu_read_2002_cycle_ + 1)) [[likely]] {
 		status_.vblank = true;
 	}
 }
@@ -713,7 +716,7 @@ void open_sprite_pattern() {
 		next_ppu_fetch_address_ = sprite_pattern_address<Size, Pattern>(0xff, 0xff);
 	}
 
-	mapper_->vram_change_hook(next_ppu_fetch_address_);
+	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::Address);
 }
 
 //------------------------------------------------------------------------------
@@ -722,6 +725,7 @@ void open_sprite_pattern() {
 template <class Size, class Pattern>
 void read_sprite_pattern() {
 
+	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::RenderRead);
 	uint8_t pattern = mapper_->read_vram(next_ppu_fetch_address_);
 
 	SpritePattern &sprite = sprite_patterns_[current_sprite_index_];
@@ -828,16 +832,16 @@ void increment_vram_address() {
 //------------------------------------------------------------------------------
 void clock_ppu(const scanline_prerender &) {
 
-	if (UNLIKELY(hpos_ == 0)) {
+	if (hpos_ == 0) [[unlikely]] {
 		odd_skip_armed_  = false;
 		status_.sprite0  = 0;
 		status_.overflow = 0;
-	} else if (UNLIKELY(hpos_ == 1)) {
+	} else if (hpos_ == 1) [[unlikely]] {
 		// clear all the relevant status bits
 		status_.vblank = 0;
 	}
 
-	if (LIKELY(ppu_mask_.screen_enabled)) {
+	if (ppu_mask_.screen_enabled) [[likely]] {
 		if (hpos_ < 1) {
 			// idle
 		} else if (hpos_ < 257) {
@@ -878,12 +882,12 @@ void clock_ppu(const scanline_prerender &) {
 				break;
 			}
 
-			if (UNLIKELY(hpos_ == 256)) {
+			if (hpos_ == 256) [[unlikely]] {
 				clock_y();
 			}
 		} else if (hpos_ < 281) {
 
-			if (UNLIKELY(hpos_ == 257)) {
+			if (hpos_ == 257) [[unlikely]] {
 				update_x_scroll();
 			}
 
@@ -1085,7 +1089,7 @@ void clock_ppu(const scanline_prerender &) {
 //------------------------------------------------------------------------------
 void clock_ppu(const scanline_render &target) {
 
-	if (UNLIKELY(!ppu_mask_.screen_enabled)) {
+	if (!ppu_mask_.screen_enabled) [[unlikely]] {
 
 		if (hpos_ < 1) {
 			// idle
@@ -1100,7 +1104,7 @@ void clock_ppu(const scanline_render &target) {
 
 		if (hpos_ < 1) {
 			// the first clock is acts like the last clock of the pre-render if we skipped a cycle
-			if (UNLIKELY(vpos_ == 1 && odd_frame_)) {
+			if (vpos_ == 1 && odd_frame_) [[unlikely]] {
 				read_tile_index();
 			} else {
 				// idle
@@ -1148,12 +1152,12 @@ void clock_ppu(const scanline_render &target) {
 				break;
 			}
 
-			if (UNLIKELY(hpos_ == 256)) {
+			if (hpos_ == 256) [[unlikely]] {
 				clock_y();
 			}
 		} else if (hpos_ < 321) {
 
-			if (UNLIKELY(hpos_ == 257)) {
+			if (hpos_ == 257) [[unlikely]] {
 				update_x_scroll();
 			}
 
@@ -1271,7 +1275,7 @@ void clock_ppu(const scanline_vblank &target) {
 
 	// I know this should be 241 in theory, but we consider the pre-rendering
 	// scanline to be #0 for now
-	if (UNLIKELY(vpos_ == 242)) {
+	if (vpos_ == 242) [[unlikely]] {
 		switch (hpos_) {
 		case 1:
 			enter_vblank();
@@ -1489,7 +1493,7 @@ void write2006(uint8_t value) {
 		nametable_ |= (value & 0b11111111);
 		vram_address_ = nametable_;
 
-		mapper_->vram_change_hook(vram_address_);
+		mapper_->vram_change_hook(vram_address_, Mapper::PpuMemoryAccess::Address);
 	}
 }
 
@@ -1500,10 +1504,9 @@ void write2007(uint8_t value) {
 	latch_ = value;
 
 	const uint_least16_t temp_address = vram_address_ & 0b00111111'11111111;
+	mapper_->vram_change_hook(temp_address, Mapper::PpuMemoryAccess::CpuWrite);
 
 	increment_vram_address();
-
-	mapper_->vram_change_hook(vram_address_);
 
 	// palette write
 	if ((temp_address & 0b00111111'00000000) == 0b00111111'00000000) {
@@ -1602,10 +1605,9 @@ uint8_t read2004() {
 uint8_t read2007() {
 
 	const uint_least16_t temp_address = vram_address_ & 0b00111111'11111111;
+	mapper_->vram_change_hook(temp_address, Mapper::PpuMemoryAccess::CpuRead);
 
 	increment_vram_address();
-
-	mapper_->vram_change_hook(vram_address_);
 
 	const uint8_t decay_value = static_cast<uint8_t>(latch_);
 	const uint8_t old_buffer  = register_2007_buffer_;
@@ -1617,7 +1619,7 @@ uint8_t read2007() {
 	if (is_palette) {
 
 		latch_ = palette_[temp_address & 0x1f] | (decay_value & 0xc0);
-		if (UNLIKELY(ppu_mask_.monochrome)) {
+		if (ppu_mask_.monochrome) [[unlikely]] {
 			latch_ &= 0xf0;
 		}
 	} else {
@@ -1646,13 +1648,13 @@ template <class T>
 void execute_scanline(const T &target) {
 	mapper_ = cart.mapper();
 
-	if (UNLIKELY(vpos_ == 262)) {
+	if (vpos_ == 262) [[unlikely]] {
 		start_frame();
-	} else if (UNLIKELY(vpos_ == 241)) {
+	} else if (vpos_ == 241) [[unlikely]] {
 		end_frame();
 	}
 
-	if (LIKELY(!system_paused)) {
+	if (!system_paused) [[likely]] {
 		for (hpos_ = 0; hpos_ < CyclesPerScanline; ++hpos_, ++ppu_cycle_) {
 			clock_ppu(target);
 			if ((ppu_cycle_ % 3) == CpuAlignment) {
