@@ -500,7 +500,7 @@ void execute_opcode() {
  */
 void clock() {
 
-	if (dmc_dma_count_) [[unlikely]] {
+	if UNLIKELY (dmc_dma_count_) {
 
 		if (dmc_dma_delay_ != 0) {
 			read_byte(dmc_dma_source_address_);
@@ -527,7 +527,7 @@ void clock() {
 
 		--dmc_dma_count_;
 
-	} else if (spr_dma_count_) [[unlikely]] {
+	} else if UNLIKELY (spr_dma_count_) {
 
 		if (spr_dma_delay_ != 0) {
 			read_byte(spr_dma_source_address_);

@@ -71,6 +71,7 @@ private:
 
 	bool irq_enabled_              = false;
 	bool large_sprites_            = false;
+	bool frame_seeded_             = false;
 	bool saw_ppu_read_             = false;
 	bool scanline_pending_         = false;
 	uint16_t bg_char_upper_        = 0x00;

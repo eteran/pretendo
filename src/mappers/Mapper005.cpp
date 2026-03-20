@@ -730,6 +730,26 @@ void Mapper5::vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess acce
 		return;
 	}
 
+	const uint_least16_t vpos = nes::ppu::vpos();
+	if (vpos > 240) {
+		reset_scanline_detector();
+		return;
+	}
+
+	// Ignore prerender fetches for scanline detection to avoid odd/even jitter.
+	if (vpos == 0) {
+		return;
+	}
+
+	// Seed in-frame state at the first visible scanline so targets line up as if
+	// scanline 0 had been detected, without depending on prerender-tail reads.
+	if (!irq_status_.in_frame && !frame_seeded_ && vpos == 1) {
+		irq_status_.in_frame = true;
+		irq_status_.pending  = false;
+		irq_counter_         = 0;
+		frame_seeded_        = true;
+	}
+
 	// when this is > 128 (32 * 4), we are fetching sprites, not BG tiles
 	++fetch_count_;
 
@@ -776,6 +796,7 @@ void Mapper5::clear_in_frame() {
 	irq_status_.in_frame = false;
 	irq_status_.pending  = false;
 	irq_counter_         = 0;
+	frame_seeded_        = false;
 	nes::cpu::clear_irq(nes::cpu::MAPPER_IRQ);
 	reset_scanline_detector();
 	ppu_read_idle_cycles_ = 0;
