@@ -447,6 +447,46 @@ uint8_t Mapper5::read_handler(uint_least16_t address) {
 //------------------------------------------------------------------------------
 uint8_t Mapper5::read_vram(uint_least16_t address) {
 
+	saw_ppu_read_ = true;
+
+	// Intentionally treat every read_vram access as bus-visible for MMC5 IRQ
+	// detection, including CPU-driven PPUDATA buffering reads.
+	const uint_least16_t vpos = nes::ppu::vpos();
+	if (vpos > 240) {
+		reset_scanline_detector();
+	} else if (vpos != 0) {
+
+		// Seed in-frame state at the first visible scanline so targets line up
+		// as if scanline 0 had been detected, without depending on prerender-tail reads.
+		if (!irq_status_.in_frame && !frame_seeded_ && vpos == 1) {
+			irq_status_.in_frame = true;
+			irq_status_.pending  = false;
+			irq_counter_         = 0;
+			frame_seeded_        = true;
+		}
+
+		// when this is > 128 (32 * 4), we are fetching sprites, not BG tiles
+		++fetch_count_;
+
+		if (scanline_pending_) {
+			clock_irq();
+			fetch_count_      = 0;
+			scanline_pending_ = false;
+		}
+
+		const bool is_nametable_read = (address & 0x3000) == 0x2000;
+
+		// 3 consecutive nametable reads arm the scanline detector. The MMC5 clocks
+		// on the following PPU read, which is normally the attribute fetch.
+		if (is_nametable_read && address == prev_vram_address_[0] && address == prev_vram_address_[1]) {
+			scanline_pending_ = true;
+		}
+
+		// shift things down
+		prev_vram_address_[1] = prev_vram_address_[0];
+		prev_vram_address_[0] = address;
+	}
+
 	if (vertical_split_bank_ & VSPLIT_ENABLE) {
 		printf("VSPLIT\n");
 	}
@@ -602,7 +642,7 @@ void Mapper5::write_vram(uint_least16_t address, uint8_t value) {
 	case 0x08:
 	case 0x0c:
 		// $2000
-		switch ((mirroring_mode_)&0x03) {
+		switch ((mirroring_mode_) & 0x03) {
 		case 0x00:
 			Mapper::write_vram(address, value);
 			break;
@@ -719,60 +759,6 @@ void Mapper5::write_3(uint_least16_t address, uint8_t value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: vram_change_hook
-//------------------------------------------------------------------------------
-void Mapper5::vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access) {
-	if (access == PpuMemoryAccess::RenderRead || access == PpuMemoryAccess::CpuRead) {
-		saw_ppu_read_ = true;
-	}
-
-	if (access != PpuMemoryAccess::RenderRead) {
-		return;
-	}
-
-	const uint_least16_t vpos = nes::ppu::vpos();
-	if (vpos > 240) {
-		reset_scanline_detector();
-		return;
-	}
-
-	// Ignore prerender fetches for scanline detection to avoid odd/even jitter.
-	if (vpos == 0) {
-		return;
-	}
-
-	// Seed in-frame state at the first visible scanline so targets line up as if
-	// scanline 0 had been detected, without depending on prerender-tail reads.
-	if (!irq_status_.in_frame && !frame_seeded_ && vpos == 1) {
-		irq_status_.in_frame = true;
-		irq_status_.pending  = false;
-		irq_counter_         = 0;
-		frame_seeded_        = true;
-	}
-
-	// when this is > 128 (32 * 4), we are fetching sprites, not BG tiles
-	++fetch_count_;
-
-	if (scanline_pending_) {
-		clock_irq();
-		fetch_count_ = 0;
-		scanline_pending_ = false;
-	}
-
-	const bool is_nametable_read = (vram_address & 0x3000) == 0x2000;
-
-	// 3 consecutive nametable reads arm the scanline detector. The MMC5 clocks
-	// on the following PPU read, which is normally the attribute fetch.
-	if (is_nametable_read && vram_address == prev_vram_address_[0] && vram_address == prev_vram_address_[1]) {
-		scanline_pending_ = true;
-	}
-
-	// shift things down
-	prev_vram_address_[1] = prev_vram_address_[0];
-	prev_vram_address_[0] = vram_address;
-}
-
-//------------------------------------------------------------------------------
 // Name:
 //------------------------------------------------------------------------------
 void Mapper5::cpu_sync() {
@@ -839,11 +825,3 @@ void Mapper5::clock_irq() {
 	}
 }
 
-//------------------------------------------------------------------------------
-// Name: clock_irq
-//------------------------------------------------------------------------------
-void Mapper5::ppu_end_frame() {
-	// since we have no idea how MMC5 detects the end of the frame,
-	// we use this hook for now
-	clear_in_frame();
-}

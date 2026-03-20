@@ -50,10 +50,6 @@ public:
 	void write_vram(uint_least16_t address, uint8_t value) override;
 	void cpu_sync() override;
 
-public:
-	void vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access) override;
-	void ppu_end_frame() override;
-
 private:
 	void clock_irq();
 	void clear_in_frame();
@@ -62,12 +58,12 @@ private:
 	uint8_t read_handler(uint_least16_t address);
 
 private:
-	uint8_t prg_ram_[2][0x8000]    = {};
-	uint8_t exram_[0x400]          = {};
-	uint8_t bg_chr_banks_[8]       = {};
-	uint8_t sp_chr_banks_[8]       = {};
+	uint8_t prg_ram_[2][0x8000]          = {};
+	uint8_t exram_[0x400]                = {};
+	uint8_t bg_chr_banks_[8]             = {};
+	uint8_t sp_chr_banks_[8]             = {};
 	uint_least16_t prev_vram_address_[2] = {0xffff, 0xffff};
-	uint8_t *prg_ram_banks_[0x10]  = {};
+	uint8_t *prg_ram_banks_[0x10]        = {};
 
 	bool irq_enabled_              = false;
 	bool large_sprites_            = false;

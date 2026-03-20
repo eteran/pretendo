@@ -742,18 +742,9 @@ void Mapper::cpu_sync() {
 }
 
 //------------------------------------------------------------------------------
-// Name: ppu_end_frame
-//------------------------------------------------------------------------------
-void Mapper::ppu_end_frame() {
-	// default does nothing
-}
-
-//------------------------------------------------------------------------------
 // Name: vram_change_hook
 //------------------------------------------------------------------------------
-void Mapper::vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access) {
-	(void)vram_address;
-	(void)access;
+void Mapper::vram_change_hook([[maybe_unused]] uint_least16_t vram_address, [[maybe_unused]] PpuMemoryAccess access) {
 	// default does nothing
 }
 

@@ -19,9 +19,6 @@ class Mapper {
 public:
 	enum class PpuMemoryAccess {
 		Address,
-		RenderRead,
-		CpuRead,
-		CpuWrite,
 	};
 
 	static std::unique_ptr<Mapper> create_mapper(int num);
@@ -38,7 +35,7 @@ public:
 
 protected:
 	Mapper();
-	Mapper(const Mapper &) = delete;
+	Mapper(const Mapper &)            = delete;
 	Mapper &operator=(const Mapper &) = delete;
 
 public:
@@ -82,7 +79,6 @@ public:
 	virtual uint8_t read_vram(uint_least16_t address);
 
 	virtual void cpu_sync();
-	virtual void ppu_end_frame();
 	virtual void vram_change_hook(uint_least16_t vram_address, PpuMemoryAccess access);
 
 protected:
@@ -161,69 +157,65 @@ protected:
 		page_[0x0d] = ptr + 0x0800;
 		page_[0x0e] = ptr + 0x1000;
 		page_[0x0f] = ptr + 0x1800;
-    }
+	}
 
-    void swap_89(uint8_t *ptr)
-    {
-        page_[0x10] = ptr + 0x0000;
+	void swap_89(uint8_t *ptr) {
+		page_[0x10] = ptr + 0x0000;
 		page_[0x11] = ptr + 0x0800;
 		page_[0x12] = ptr + 0x1000;
 		page_[0x13] = ptr + 0x1800;
-    }
+	}
 
-    void swap_ab(uint8_t *ptr)
-    {
-        page_[0x14] = ptr + 0x0000;
+	void swap_ab(uint8_t *ptr) {
+		page_[0x14] = ptr + 0x0000;
 		page_[0x15] = ptr + 0x0800;
 		page_[0x16] = ptr + 0x1000;
 		page_[0x17] = ptr + 0x1800;
-    }
+	}
 
-    void swap_cd(uint8_t *ptr)
-    {
-        page_[0x18] = ptr + 0x0000;
+	void swap_cd(uint8_t *ptr) {
+		page_[0x18] = ptr + 0x0000;
 		page_[0x19] = ptr + 0x0800;
 		page_[0x1a] = ptr + 0x1000;
 		page_[0x1b] = ptr + 0x1800;
-    }
+	}
 
-    void swap_ef(uint8_t *ptr)
-    {
-        page_[0x1c] = ptr + 0x0000;
+	void swap_ef(uint8_t *ptr) {
+		page_[0x1c] = ptr + 0x0000;
 		page_[0x1d] = ptr + 0x0800;
 		page_[0x1e] = ptr + 0x1000;
 		page_[0x1f] = ptr + 0x1800;
-    }
+	}
 
-    void unmap_67() {
+	void unmap_67() {
 		page_[0x0c] = nullptr;
 		page_[0x0d] = nullptr;
 		page_[0x0e] = nullptr;
 		page_[0x0f] = nullptr;
 	}
 
-    void unmap_89() {
+	void unmap_89() {
 		page_[0x10] = nullptr;
 		page_[0x11] = nullptr;
 		page_[0x12] = nullptr;
 		page_[0x13] = nullptr;
 	}
 
-    void unmap_ab() {
+	void unmap_ab() {
 		page_[0x14] = nullptr;
 		page_[0x15] = nullptr;
 		page_[0x16] = nullptr;
 		page_[0x17] = nullptr;
 	}
 
-    void unmap_cd() {
+	void unmap_cd() {
 		page_[0x18] = nullptr;
 		page_[0x19] = nullptr;
 		page_[0x1a] = nullptr;
 		page_[0x1b] = nullptr;
 	}
 
-    void unmap_ef() {
+	void unmap_ef() {
 		page_[0x1c] = nullptr;
 		page_[0x1d] = nullptr;
 		page_[0x1e] = nullptr;

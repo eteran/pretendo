@@ -439,8 +439,6 @@ void open_background_pattern() {
 //------------------------------------------------------------------------------
 template <class Pattern>
 void read_background_pattern() {
-
-	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::RenderRead);
 	next_pattern_[Pattern::index] = mapper_->read_vram(next_ppu_fetch_address_);
 }
 
@@ -456,8 +454,6 @@ void open_background_attribute() {
 // Name:
 //------------------------------------------------------------------------------
 void read_background_attribute() {
-	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::RenderRead);
-
 	// fetch the attribute byte
 	const uint8_t attr_byte = mapper_->read_vram(next_ppu_fetch_address_);
 
@@ -477,7 +473,6 @@ void open_tile_index() {
 // Name:
 //------------------------------------------------------------------------------
 void read_tile_index() {
-	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::RenderRead);
 	next_tile_index_ = mapper_->read_vram(next_ppu_fetch_address_);
 }
 
@@ -724,8 +719,6 @@ void open_sprite_pattern() {
 //------------------------------------------------------------------------------
 template <class Size, class Pattern>
 void read_sprite_pattern() {
-
-	mapper_->vram_change_hook(next_ppu_fetch_address_, Mapper::PpuMemoryAccess::RenderRead);
 	uint8_t pattern = mapper_->read_vram(next_ppu_fetch_address_);
 
 	SpritePattern &sprite = sprite_patterns_[current_sprite_index_];
@@ -1313,8 +1306,6 @@ void end_frame() {
 	if (latch_ > 0x3c00) {
 		latch_ = 0;
 	}
-
-	cart.mapper()->ppu_end_frame();
 }
 
 }
@@ -1507,7 +1498,6 @@ void write2007(uint8_t value) {
 	latch_ = value;
 
 	const uint_least16_t temp_address = vram_address_ & 0b00111111'11111111;
-	mapper_->vram_change_hook(temp_address, Mapper::PpuMemoryAccess::CpuWrite);
 
 	increment_vram_address();
 
@@ -1521,10 +1511,10 @@ void write2007(uint8_t value) {
 			// $3F10/$3F14/$3F18/$3F1C are mirrors of $3F00/$3F04/$3F08/$3F0C.
 			palette_[palette_address ^ 0x10] = value & 0x3f;
 		}
-
-	} else {
-		mapper_->write_vram(temp_address, value);
+		return;
 	}
+
+	mapper_->write_vram(temp_address, value);
 }
 
 //------------------------------------------------------------------------------
@@ -1608,7 +1598,6 @@ uint8_t read2004() {
 uint8_t read2007() {
 
 	const uint_least16_t temp_address = vram_address_ & 0b00111111'11111111;
-	mapper_->vram_change_hook(temp_address, Mapper::PpuMemoryAccess::CpuRead);
 
 	increment_vram_address();
 
