@@ -37,6 +37,12 @@ Controller controller4;
 //------------------------------------------------------------------------------
 void reset() {
 	strobe_ = 0;
+
+	// otherwise a button held across the reset stays latched forever
+	controller1.clear_buttons();
+	controller2.clear_buttons();
+	controller3.clear_buttons();
+	controller4.clear_buttons();
 }
 
 //------------------------------------------------------------------------------
