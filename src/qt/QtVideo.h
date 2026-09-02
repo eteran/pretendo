@@ -37,8 +37,8 @@ Q_SIGNALS:
 
 private:
 	uint32_t *scanlines_[240];
-	uint32_t palette_[8 * 64];
-	alignas(512) std::array<uint32_t, Width * Height> buffer_;
+	uint32_t palette_[8 * 64]                                 = {};
+	alignas(512) std::array<uint32_t, Width * Height> buffer_ = {};
 	mutable QMutex buffer_mutex_;
 	GLuint texture_ = 0;
 };
