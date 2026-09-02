@@ -5,114 +5,203 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifdef __linux__
+#if defined(_WIN32)
+#include <windows.h>
+#else
 #include <sys/mman.h>
 #include <unistd.h>
 #endif
-#ifdef _WIN32
-#include <windows.h>
-#endif
 
-MemoryMappedFile::MemoryMappedFile(const std::string &filename, size_t size) {
+namespace {
 
-#ifdef __linux__
-	int fd = ::open(filename.c_str(), O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-	if (fd != -1) {
-		::ftruncate(fd, size);
+struct Mapping {
+	uint8_t *ptr          = nullptr;
+	void *file_handle     = nullptr; // Windows HANDLE
+	void *mapping_handle  = nullptr; // Windows HANDLE
+};
 
-		auto p = static_cast<uint8_t *>(mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
-		if (p != MAP_FAILED) {
+#if defined(_WIN32)
 
-			ptr_     = p;
-			deleter_ = [size](uint8_t *ptr) {
-				::munmap(ptr, size);
-			};
-		} else {
-			std::cerr << "Failed to map SRAM to file, using fallback implementation" << std::endl;
+//------------------------------------------------------------------------------
+// Name: try_map
+// Desc: maps filename into memory, returning an empty Mapping on any failure.
+//       The file is opened with OPEN_ALWAYS so that an existing save is kept;
+//       SetEndOfFile then grows it to size, zero filling as needed.
+//------------------------------------------------------------------------------
+Mapping try_map(const std::string &filename, size_t size) {
 
-			ptr_     = new uint8_t[size];
-			deleter_ = [](uint8_t *ptr) {
-				delete[] ptr;
-			};
-		}
+	Mapping result;
 
-		::close(fd);
-	}
-#elif _WIN32
-	// Windows memory mapping
-	HANDLE hFile = CreateFileA(
+	HANDLE file = CreateFileA(
 		filename.c_str(),
 		GENERIC_READ | GENERIC_WRITE,
-		0,                          // no sharing
+		0, // no sharing
 		nullptr,
-		CREATE_ALWAYS,
+		OPEN_ALWAYS,
 		FILE_ATTRIBUTE_NORMAL,
-		nullptr
-	);
+		nullptr);
 
-	if (hFile != INVALID_HANDLE_VALUE) {
-		// Set file size
-		LARGE_INTEGER file_size;
-		file_size.QuadPart = size;
-		if (SetFilePointerEx(hFile, file_size, nullptr, FILE_BEGIN) &&
-			SetEndOfFile(hFile)) {
-
-			HANDLE hMapping = CreateFileMapping(
-				hFile,
-				nullptr,
-				PAGE_READWRITE,
-				(size >> 32) & 0xFFFFFFFF,  // high 32 bits of size
-				size & 0xFFFFFFFF,           // low 32 bits of size
-				nullptr
-			);
-
-			if (hMapping != nullptr && hMapping != INVALID_HANDLE_VALUE) {
-				auto p = static_cast<uint8_t *>(
-					MapViewOfFile(hMapping, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, size)
-				);
-
-				if (p != nullptr) {
-					ptr_           = p;
-					file_handle_   = hFile;
-					mapping_handle_ = hMapping;
-
-					deleter_ = [this](uint8_t *ptr) {
-						if (ptr && mapping_handle_) {
-							UnmapViewOfFile(ptr);
-							CloseHandle(static_cast<HANDLE>(mapping_handle_));
-							CloseHandle(static_cast<HANDLE>(file_handle_));
-						}
-					};
-					return;
-				}
-			}
-			if (hMapping != nullptr && hMapping != INVALID_HANDLE_VALUE) {
-				CloseHandle(hMapping);
-			}
-		}
-		CloseHandle(hFile);
+	if (file == INVALID_HANDLE_VALUE) {
+		return result;
 	}
 
-	std::cerr << "Failed to map SRAM to file, using fallback implementation" << std::endl;
+	LARGE_INTEGER file_size;
+	file_size.QuadPart = static_cast<LONGLONG>(size);
 
-	ptr_     = new uint8_t[size];
-	deleter_ = [](uint8_t *ptr) {
-		delete[] ptr;
-	};
-#else
-	std::cerr << "Failed to map SRAM to file, using fallback implementation" << std::endl;
+	if (SetFilePointerEx(file, file_size, nullptr, FILE_BEGIN) && SetEndOfFile(file)) {
 
-	ptr_     = new uint8_t[size];
-	deleter_ = [](uint8_t *ptr) {
-		delete[] ptr;
-	};
-#endif
+		const auto size64 = static_cast<uint64_t>(size);
+
+		HANDLE mapping = CreateFileMapping(
+			file,
+			nullptr,
+			PAGE_READWRITE,
+			static_cast<DWORD>((size64 >> 32) & 0xffffffff),
+			static_cast<DWORD>(size64 & 0xffffffff),
+			nullptr);
+
+		if (mapping != nullptr && mapping != INVALID_HANDLE_VALUE) {
+			auto p = static_cast<uint8_t *>(MapViewOfFile(mapping, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, size));
+			if (p != nullptr) {
+				result.ptr            = p;
+				result.file_handle    = file;
+				result.mapping_handle = mapping;
+				return result;
+			}
+
+			CloseHandle(mapping);
+		}
+	}
+
+	CloseHandle(file);
+	return result;
 }
 
-MemoryMappedFile::~MemoryMappedFile() {
-	if (deleter_) {
-		deleter_(ptr_);
+#else
+
+//------------------------------------------------------------------------------
+// Name: try_map
+// Desc: maps filename into memory, returning an empty Mapping on any failure.
+//       Plain POSIX, so this covers Linux, macOS and the BSDs alike.
+//------------------------------------------------------------------------------
+Mapping try_map(const std::string &filename, size_t size) {
+
+	Mapping result;
+
+	const int fd = ::open(filename.c_str(), O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	if (fd == -1) {
+		return result;
 	}
+
+	if (::ftruncate(fd, static_cast<off_t>(size)) == 0) {
+		auto p = static_cast<uint8_t *>(::mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
+		if (p != MAP_FAILED) {
+			result.ptr = p;
+		}
+	}
+
+	::close(fd);
+	return result;
+}
+
+#endif
+
+}
+
+//------------------------------------------------------------------------------
+// Name: MemoryMappedFile
+//------------------------------------------------------------------------------
+MemoryMappedFile::MemoryMappedFile(const std::string &filename, size_t size)
+	: size_(size) {
+
+	const Mapping mapping = try_map(filename, size);
+	if (mapping.ptr) {
+		ptr_            = mapping.ptr;
+		kind_           = Kind::Mapped;
+		file_handle_    = mapping.file_handle;
+		mapping_handle_ = mapping.mapping_handle;
+		return;
+	}
+
+	// the contents are the cartridge's battery backed RAM, so they must start
+	// zeroed the way a freshly sized save file would
+	std::cerr << "Failed to map SRAM to file, using fallback implementation" << std::endl;
+
+	ptr_  = new uint8_t[size]();
+	kind_ = Kind::Heap;
+}
+
+//------------------------------------------------------------------------------
+// Name: MemoryMappedFile
+//------------------------------------------------------------------------------
+MemoryMappedFile::MemoryMappedFile(MemoryMappedFile &&other) noexcept
+	: ptr_(other.ptr_), size_(other.size_), kind_(other.kind_), file_handle_(other.file_handle_), mapping_handle_(other.mapping_handle_) {
+
+	other.ptr_            = nullptr;
+	other.size_           = 0;
+	other.file_handle_    = nullptr;
+	other.mapping_handle_ = nullptr;
+}
+
+//------------------------------------------------------------------------------
+// Name: operator=
+//------------------------------------------------------------------------------
+MemoryMappedFile &MemoryMappedFile::operator=(MemoryMappedFile &&rhs) noexcept {
+
+	if (this != &rhs) {
+		release();
+
+		ptr_            = rhs.ptr_;
+		size_           = rhs.size_;
+		kind_           = rhs.kind_;
+		file_handle_    = rhs.file_handle_;
+		mapping_handle_ = rhs.mapping_handle_;
+
+		rhs.ptr_            = nullptr;
+		rhs.size_           = 0;
+		rhs.file_handle_    = nullptr;
+		rhs.mapping_handle_ = nullptr;
+	}
+
+	return *this;
+}
+
+//------------------------------------------------------------------------------
+// Name: ~MemoryMappedFile
+//------------------------------------------------------------------------------
+MemoryMappedFile::~MemoryMappedFile() {
+	release();
+}
+
+//------------------------------------------------------------------------------
+// Name: release
+// Desc: frees whatever ptr_ owns and leaves the object empty
+//------------------------------------------------------------------------------
+void MemoryMappedFile::release() {
+
+	if (!ptr_) {
+		return;
+	}
+
+	switch (kind_) {
+	case Kind::Mapped:
+#if defined(_WIN32)
+		UnmapViewOfFile(ptr_);
+		CloseHandle(static_cast<HANDLE>(mapping_handle_));
+		CloseHandle(static_cast<HANDLE>(file_handle_));
+#else
+		::munmap(ptr_, size_);
+#endif
+		break;
+	case Kind::Heap:
+		delete[] ptr_;
+		break;
+	}
+
+	ptr_            = nullptr;
+	size_           = 0;
+	file_handle_    = nullptr;
+	mapping_handle_ = nullptr;
 }
 
 uint8_t MemoryMappedFile::operator[](size_t index) const {
