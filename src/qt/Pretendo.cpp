@@ -248,30 +248,18 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 
 	filesystem_model_ = new FilesystemModel(this);
 
-	// Populate the ROM list
-	// NOTE(eteran): might be slow for large lists
-	auto romdir = QString::fromStdString(Settings::romDirectory);
-	QFileInfo romdir_fi(romdir);
-	romdir_fi.makeAbsolute();
-
-	QString rom_basedir = romdir_fi.path();
-	if (!rom_basedir.endsWith('/')) {
-		rom_basedir.append('/');
-	}
-
-	QDirIterator it(romdir, QStringList() << "*.nes", QDir::Files | QDir::Readable, QDirIterator::Subdirectories);
-	while (it.hasNext()) {
-		QString f = it.next();
-		QFileInfo fi(f);
-		fi.makeAbsolute();
-
-		QString path = fi.filePath();
-		if (path.startsWith(rom_basedir)) {
-			path = path.mid(rom_basedir.size());
+	// The ROM list shares a QStackedWidget with the video output, so it is only
+	// worth scanning for once the browser page is on screen. The fill is queued
+	// rather than run inline because stopping a ROM also returns to this page:
+	// when that happens on the way to quitting, the event loop exits first and
+	// the scan is skipped entirely.
+	connect(ui_.stackedWidget, &QStackedWidget::currentChanged, this, [this](int index) {
+		if (index == 0) {
+			QTimer::singleShot(0, this, [this]() {
+				populateRomList();
+			});
 		}
-
-		filesystem_model_->addFile(FilesystemModel::Item{path, f});
-	}
+	});
 
 	filter_model_ = new SortFilterProxyModel(this);
 	filter_model_->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -328,6 +316,15 @@ Pretendo::Pretendo(const QString &filename, QWidget *parent, Qt::WindowFlags fla
 			}
 			on_action_Run_triggered();
 		}
+	}
+
+	// currentChanged does not fire for the page the stack already shows, so the
+	// first fill needs its own trigger. Deferring it until the event loop runs
+	// lets the window appear before the scan starts.
+	if (ui_.stackedWidget->currentIndex() == 0) {
+		QTimer::singleShot(0, this, [this]() {
+			populateRomList();
+		});
 	}
 }
 
@@ -868,6 +865,47 @@ void Pretendo::on_actionReset_triggered() {
 	emulation_thread_->startLoop();
 	viewer_timer_->start();
 	audio_->start();
+}
+
+//------------------------------------------------------------------------------
+// Name: populateRomList
+// Desc: fills the ROM browser from Settings::romDirectory, at most once
+//------------------------------------------------------------------------------
+void Pretendo::populateRomList() {
+
+	// Regression runs drive ROMs from a config file and never use the browser.
+	// Otherwise: this comes from a queued call, so the stack may have moved on
+	// since it was scheduled, because stopping one ROM and starting the next
+	// passes through the browser page without ever showing it.
+	if (rom_list_populated_ || regression_mode_ || ui_.stackedWidget->currentIndex() != 0) {
+		return;
+	}
+
+	rom_list_populated_ = true;
+
+	// NOTE(eteran): might be slow for large lists
+	auto romdir = QString::fromStdString(Settings::romDirectory);
+	QFileInfo romdir_fi(romdir);
+	romdir_fi.makeAbsolute();
+
+	QString rom_basedir = romdir_fi.path();
+	if (!rom_basedir.endsWith('/')) {
+		rom_basedir.append('/');
+	}
+
+	QDirIterator it(romdir, QStringList() << "*.nes", QDir::Files | QDir::Readable, QDirIterator::Subdirectories);
+	while (it.hasNext()) {
+		QString f = it.next();
+		QFileInfo fi(f);
+		fi.makeAbsolute();
+
+		QString path = fi.filePath();
+		if (path.startsWith(rom_basedir)) {
+			path = path.mid(rom_basedir.size());
+		}
+
+		filesystem_model_->addFile(FilesystemModel::Item{path, f});
+	}
 }
 
 //------------------------------------------------------------------------------

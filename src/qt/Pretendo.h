@@ -66,6 +66,7 @@ protected:
 
 private:
 	void zoom(int scale);
+	void populateRomList();
 	void startNextRegressionTest();
 	void finishRegressionRun();
 	bool saveScreenshot(const QString &path);
@@ -90,6 +91,7 @@ private:
 	uint64_t raw_framecount_ = 0;
 	bool running_            = false;
 	bool paused_             = false;
+	bool rom_list_populated_ = false;
 	int framerate_           = 60;
 
 #if defined(ENABLE_SOUND)
