@@ -1,6 +1,5 @@
 
 #include "Audio.h"
-#include <QApplication>
 #include <QAudioFormat>
 #include <QAudioSink>
 #include <QIODevice>
@@ -59,14 +58,6 @@ void Audio::handleStateChanged(QAudio::State newState) {
 //------------------------------------------------------------------------------
 void Audio::write(const void *p, size_t n) {
 	if (outputDevice) {
-#if 0
-		auto state = audioSink->state();
-		while (state != QtAudio::IdleState) {
-
-			QApplication::processEvents();
-			state = audioSink->state();
-		}
-#endif
 		outputDevice->write(static_cast<const char *>(p), n);
 	}
 }
@@ -75,12 +66,18 @@ void Audio::write(const void *p, size_t n) {
 // Name: start
 //------------------------------------------------------------------------------
 void Audio::start() {
-    outputDevice = audioSink->start();
+	// starting a sink that is already running would strand the previous
+	// QIODevice, which the sink owns and we would never hear from again
+	if (audioSink->state() == QtAudio::StoppedState) {
+		outputDevice = audioSink->start();
+	}
 }
 
 //------------------------------------------------------------------------------
 // Name: stop
 //------------------------------------------------------------------------------
 void Audio::stop() {
+	// the sink owns outputDevice and invalidates it here
 	audioSink->stop();
+	outputDevice = nullptr;
 }
