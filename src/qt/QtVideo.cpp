@@ -39,8 +39,7 @@ QtVideo::QtVideo(QWidget *parent, Qt::WindowFlags f)
 // Name: resizeGL
 //------------------------------------------------------------------------------
 void QtVideo::resizeGL(int width, int height) {
-	auto context = QOpenGLContext::currentContext();
-	auto f       = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
+	auto f = gl_functions();
 
 	f->glViewport(0, 0, width, height);
 }
@@ -50,8 +49,7 @@ void QtVideo::resizeGL(int width, int height) {
 //------------------------------------------------------------------------------
 void QtVideo::initializeGL() {
 
-	auto context = QOpenGLContext::currentContext();
-	auto f       = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
+	auto f = gl_functions();
 
 	f->initializeOpenGLFunctions();
 
@@ -87,8 +85,7 @@ void QtVideo::paintGL() {
 	const unsigned int w = width();
 	const unsigned int h = height();
 
-	auto context = QOpenGLContext::currentContext();
-	auto f       = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
+	auto f = gl_functions();
 
 	f->glMatrixMode(GL_PROJECTION);
 	f->glLoadIdentity();

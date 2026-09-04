@@ -6,6 +6,7 @@ class QAudioSink;
 
 #include <QAudio>
 #include <QObject>
+#include <cstddef>
 
 class Audio final : public QObject {
 public:
@@ -21,8 +22,8 @@ private:
 	void handleStateChanged(QAudio::State newState);
 
 private:
-	QIODevice *outputDevice;
-	QAudioSink *audioSink;
+	QIODevice *outputDevice = nullptr;
+	QAudioSink *audioSink   = nullptr;
 };
 
 #endif // AUDIO_H
