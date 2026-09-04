@@ -4,33 +4,13 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLFunctions_2_1>
 #include <QOpenGLVersionFunctionsFactory>
-#include <QtCompilerDetection>
 #include <QMutexLocker>
 #include <algorithm>
 #include <cassert>
 #include <iostream>
-#if defined(__i386__) || defined(__x86_64__)
+#if defined(__AVX512F__) || defined(__AVX2__)
 #include <immintrin.h>
 #endif
-
-namespace {
-
-//------------------------------------------------------------------------------
-// Name: gl_functions
-// Desc: the 2.1 function table for the current context, aborting if the context
-//       cannot supply one (a core profile, or a context that failed to create)
-//------------------------------------------------------------------------------
-QOpenGLFunctions_2_1 *gl_functions() {
-
-	auto f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(QOpenGLContext::currentContext());
-	if (!f) {
-		qFatal("Pretendo requires an OpenGL 2.1 compatibility context");
-	}
-
-	return f;
-}
-
-}
 
 //------------------------------------------------------------------------------
 // Name: QtVideo
@@ -42,7 +22,9 @@ QtVideo::QtVideo(QWidget *parent, Qt::WindowFlags f)
 		scanlines_[i] = &buffer_[i * Width];
 	}
 
-	QSurfaceFormat format;
+	// start from the application default so settings established there, such as
+	// main()'s setSwapInterval(0), are not silently dropped
+	QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 	format.setVersion(2, 1);
 	setFormat(format);
@@ -134,7 +116,11 @@ void QtVideo::paintGL() {
 void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 	QMutexLocker lock(&buffer_mutex_);
 
-#if defined(QT_COMPILER_SUPPORTS_AVX2)
+	// these are gated on the ISA macros the compiler defines only when the
+	// build actually targets that instruction set (-mavx2, /arch:AVX2), not on
+	// QT_COMPILER_SUPPORTS_*, which merely says the compiler is capable of
+	// emitting it and would need a runtime qCpuHasFeature() check to be safe
+#if defined(__AVX512F__)
 	auto s = reinterpret_cast<__m512i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 16) {
 		auto ind = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(source));
@@ -142,22 +128,13 @@ void QtVideo::submit_scanline(int scanline, const uint32_t *source) {
 		*s++     = vec;
 		source += 16;
 	}
-
-#elif defined(QT_COMPILER_SUPPORTS_AVX)
+#elif defined(__AVX2__)
 	auto s = reinterpret_cast<__m256i *>(scanlines_[scanline]);
 	for (int i = 0; i < Width; i += 8) {
 		auto ind = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(source));
 		auto vec = _mm256_i32gather_epi32(reinterpret_cast<const int *>(palette_), ind, 4);
 		*s++     = vec;
 		source += 8;
-	}
-#elif defined(QT_COMPILER_SUPPORTS_SSE2)
-	auto s = reinterpret_cast<__m128i *>(scanlines_[scanline]);
-	for (int i = 0; i < Width; i += 4) {
-		auto ind = _mm_loadu_si128(reinterpret_cast<const __m128i *>(source));
-		auto vec = _mm_i32gather_epi32(reinterpret_cast<const int *>(palette_), ind, 4);
-		*s++     = vec;
-		source += 4;
 	}
 #else
 	uint32_t *const s = scanlines_[scanline];
