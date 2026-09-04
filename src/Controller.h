@@ -3,7 +3,7 @@
 #define CONTROLLER_20080314_H_
 
 #include "ShiftRegister.h"
-#include <bitset>
+#include <atomic>
 #include <cstdint>
 
 class Controller {
@@ -24,9 +24,14 @@ public:
 	};
 
 public:
-	std::bitset<8> keystate_;
+	void set_button(int index, bool pressed);
+	void clear_buttons();
 
 private:
+	// written by the UI thread and read by the emulation thread, so it is a
+	// single atomic word rather than a bitset: poll() latches the whole pad at
+	// once, and per-button atomics would still allow a torn snapshot
+	std::atomic<uint8_t> keystate_{0};
 	ShiftRegister<uint8_t> data_{0};
 	uint8_t read_index_ = 0;
 	bool connected_     = true;

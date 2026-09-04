@@ -553,7 +553,7 @@ void Pretendo::onFrameCompleted(const QByteArray &samples) {
 		const RegressionTest &cur_test = regression_tests_[regression_current_test_];
 
 		// Clear all automation inputs each frame so buttons don't stay pressed
-		nes::input::controller1.keystate_.reset();
+		nes::input::controller1.clear_buttons();
 
 		const auto it = cur_test.input_events.find(raw_framecount_);
 		if (it != cur_test.input_events.end()) {
@@ -562,21 +562,21 @@ void Pretendo::onFrameCompleted(const QByteArray &samples) {
 				if (btn.compare(QLatin1String("RESET"), Qt::CaseInsensitive) == 0) {
 					do_reset = true;
 				} else if (btn.compare(QLatin1String("A"), Qt::CaseInsensitive) == 0) {
-					nes::input::controller1.keystate_[Controller::INDEX_A] = true;
+					nes::input::controller1.set_button(Controller::INDEX_A, true);
 				} else if (btn.compare(QLatin1String("B"), Qt::CaseInsensitive) == 0) {
-					nes::input::controller1.keystate_[Controller::INDEX_B] = true;
+					nes::input::controller1.set_button(Controller::INDEX_B, true);
 				} else if (btn.compare(QLatin1String("SELECT"), Qt::CaseInsensitive) == 0) {
-					nes::input::controller1.keystate_[Controller::INDEX_SELECT] = true;
+					nes::input::controller1.set_button(Controller::INDEX_SELECT, true);
 				} else if (btn.compare(QLatin1String("START"), Qt::CaseInsensitive) == 0) {
-					nes::input::controller1.keystate_[Controller::INDEX_START] = true;
+					nes::input::controller1.set_button(Controller::INDEX_START, true);
 				} else if (btn.compare(QLatin1String("UP"), Qt::CaseInsensitive) == 0) {
-					nes::input::controller1.keystate_[Controller::INDEX_UP] = true;
+					nes::input::controller1.set_button(Controller::INDEX_UP, true);
 				} else if (btn.compare(QLatin1String("DOWN"), Qt::CaseInsensitive) == 0) {
-					nes::input::controller1.keystate_[Controller::INDEX_DOWN] = true;
+					nes::input::controller1.set_button(Controller::INDEX_DOWN, true);
 				} else if (btn.compare(QLatin1String("LEFT"), Qt::CaseInsensitive) == 0) {
-					nes::input::controller1.keystate_[Controller::INDEX_LEFT] = true;
+					nes::input::controller1.set_button(Controller::INDEX_LEFT, true);
 				} else if (btn.compare(QLatin1String("RIGHT"), Qt::CaseInsensitive) == 0) {
-					nes::input::controller1.keystate_[Controller::INDEX_RIGHT] = true;
+					nes::input::controller1.set_button(Controller::INDEX_RIGHT, true);
 				} else {
 					std::cerr << "[Pretendo] Unknown input button: " << btn.toStdString() << std::endl;
 				}
@@ -762,21 +762,21 @@ void Pretendo::keyPressEvent(QKeyEvent *event) {
 	const int key = event->key();
 
 	if (key == player_1_[Controller::INDEX_A]) {
-		nes::input::controller1.keystate_[Controller::INDEX_A] = true;
+		nes::input::controller1.set_button(Controller::INDEX_A, true);
 	} else if (key == player_1_[Controller::INDEX_B]) {
-		nes::input::controller1.keystate_[Controller::INDEX_B] = true;
+		nes::input::controller1.set_button(Controller::INDEX_B, true);
 	} else if (key == player_1_[Controller::INDEX_SELECT]) {
-		nes::input::controller1.keystate_[Controller::INDEX_SELECT] = true;
+		nes::input::controller1.set_button(Controller::INDEX_SELECT, true);
 	} else if (key == player_1_[Controller::INDEX_START]) {
-		nes::input::controller1.keystate_[Controller::INDEX_START] = true;
+		nes::input::controller1.set_button(Controller::INDEX_START, true);
 	} else if (key == player_1_[Controller::INDEX_UP]) {
-		nes::input::controller1.keystate_[Controller::INDEX_UP] = true;
+		nes::input::controller1.set_button(Controller::INDEX_UP, true);
 	} else if (key == player_1_[Controller::INDEX_DOWN]) {
-		nes::input::controller1.keystate_[Controller::INDEX_DOWN] = true;
+		nes::input::controller1.set_button(Controller::INDEX_DOWN, true);
 	} else if (key == player_1_[Controller::INDEX_LEFT]) {
-		nes::input::controller1.keystate_[Controller::INDEX_LEFT] = true;
+		nes::input::controller1.set_button(Controller::INDEX_LEFT, true);
 	} else if (key == player_1_[Controller::INDEX_RIGHT]) {
-		nes::input::controller1.keystate_[Controller::INDEX_RIGHT] = true;
+		nes::input::controller1.set_button(Controller::INDEX_RIGHT, true);
 	} else {
 		event->ignore();
 	}
@@ -794,21 +794,21 @@ void Pretendo::keyReleaseEvent(QKeyEvent *event) {
 	}
 
 	if (key == player_1_[Controller::INDEX_A]) {
-		nes::input::controller1.keystate_[Controller::INDEX_A] = false;
+		nes::input::controller1.set_button(Controller::INDEX_A, false);
 	} else if (key == player_1_[Controller::INDEX_B]) {
-		nes::input::controller1.keystate_[Controller::INDEX_B] = false;
+		nes::input::controller1.set_button(Controller::INDEX_B, false);
 	} else if (key == player_1_[Controller::INDEX_SELECT]) {
-		nes::input::controller1.keystate_[Controller::INDEX_SELECT] = false;
+		nes::input::controller1.set_button(Controller::INDEX_SELECT, false);
 	} else if (key == player_1_[Controller::INDEX_START]) {
-		nes::input::controller1.keystate_[Controller::INDEX_START] = false;
+		nes::input::controller1.set_button(Controller::INDEX_START, false);
 	} else if (key == player_1_[Controller::INDEX_UP]) {
-		nes::input::controller1.keystate_[Controller::INDEX_UP] = false;
+		nes::input::controller1.set_button(Controller::INDEX_UP, false);
 	} else if (key == player_1_[Controller::INDEX_DOWN]) {
-		nes::input::controller1.keystate_[Controller::INDEX_DOWN] = false;
+		nes::input::controller1.set_button(Controller::INDEX_DOWN, false);
 	} else if (key == player_1_[Controller::INDEX_LEFT]) {
-		nes::input::controller1.keystate_[Controller::INDEX_LEFT] = false;
+		nes::input::controller1.set_button(Controller::INDEX_LEFT, false);
 	} else if (key == player_1_[Controller::INDEX_RIGHT]) {
-		nes::input::controller1.keystate_[Controller::INDEX_RIGHT] = false;
+		nes::input::controller1.set_button(Controller::INDEX_RIGHT, false);
 	} else {
 		event->ignore();
 	}
